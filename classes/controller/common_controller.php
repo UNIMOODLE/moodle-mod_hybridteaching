@@ -1,0 +1,89 @@
+<?php
+
+// This file is part of Moodle - https://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+
+/**
+ * Display information about all the mod_hybridteaching modules in the requested course.
+ *
+ * @package     mod_hybridteaching
+ * @copyright   2023 isyc <isyc@example.com>
+ * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
+defined('MOODLE_INTERNAL') || die();
+
+class common_controller {
+    const OPERATOR_GREATER_THAN = ">";
+    const OPERATOR_LESS_THAN = "<";    
+    public $hybridobject;
+    public $table;
+
+    /**
+     * Constructs a new instance of the class.
+     *
+     * @param stdClass|null $hybridobject The hybrid object to be used
+     * @param string|null $table The table to be used
+     */
+    public function __construct(stdClass $hybridobject = null, string $table = null) {
+        $this->hybridobject = $hybridobject;
+        $this->table = $table;
+    }
+
+    /**
+     * Returns the number of enabled records in the table.
+     *
+     * @global moodle_database $DB Moodle database global object.
+     * @return int The number of enabled records in the table.
+     */
+    public function get_enabled_data() {
+        global $DB;
+        $countenabled = $DB->count_records($this->table, ['visible' => 1]);
+        return $countenabled;
+    }
+
+    /**
+     * Updates the visibility and timestamp of a data object in the database.
+     *
+     * @param mixed $id unique identifier of the data object
+     * @param bool $visible determines whether the data object is visible or not
+     * @throws Exception if the database update fails
+     */
+    public function enable_data($id, $visible) {
+        global $DB, $USER;
+        $object = new stdClass();
+        $object->id = $id;
+        $object->visible = $visible;
+        $object->timemodified = time();
+        $object->modifiedby = $USER->id;
+        $DB->update_record($this->table, $object);
+    }
+
+    /**
+     * Updates the sort order of a data entry.
+     *
+     * @param int $id The ID of the entry to update.
+     * @param int $sortorder The new sort order for the entry.
+     * @throws Exception If the database update fails.
+     * @return void
+     */
+    public function update_data_sortorder($id, $sortorder) {
+        global $DB;
+        $object = new stdClass();
+        $object->id = $id;
+        $object->sortorder = $sortorder;
+        $DB->update_record($this->table, $object);
+    }
+}

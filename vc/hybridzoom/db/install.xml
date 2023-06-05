@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<XMLDB PATH="mod/hybridteaching/vc/hybridzoom/db" VERSION="20230504" COMMENT="XMLDB file for Moodle mod/hybridteaching/vc/hybridzoom"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="../../../../../lib/xmldb/xmldb.xsd"
+>
+  <TABLES>
+    <TABLE NAME="hybridteaching_zoom" COMMENT="Info about zoom vc">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="11" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="hybridteachingid" TYPE="int" LENGTH="11" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="name" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" COMMENT="The name of the session"/>
+        <FIELD NAME="meetingid" TYPE="int" LENGTH="11" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="hostemail" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="starturl" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="joinurl" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="password" TYPE="char" LENGTH="11" NOTNULL="false" SEQUENCE="false" COMMENT="Meeting password. Password may only contain the following characters: [a-zA-Z0-9@-_*]. Max of 10 characters"/>
+        <FIELD NAME="hostid" TYPE="char" LENGTH="30" NOTNULL="true" SEQUENCE="false" COMMENT="Meeting host user ID. Can be any user under this account. Cannot be updated after creation."/>
+        <FIELD NAME="groupid" TYPE="int" LENGTH="11" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="description" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="optionhostvideo" TYPE="int" LENGTH="1" NOTNULL="false" DEFAULT="1" SEQUENCE="false" COMMENT="Start video when host joins meeting."/>
+        <FIELD NAME="optionparticipantsvideo" TYPE="int" LENGTH="1" NOTNULL="false" DEFAULT="1" SEQUENCE="false" COMMENT="Start video when participants join meeting."/>
+        <FIELD NAME="existsonzoom" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="1" SEQUENCE="false" COMMENT="Whether the meeting can be found on Zoom servers. Usually should be true, should only be false if API call returned that meeting can't be found."/>
+        <FIELD NAME="starttime" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Inicio de sesión."/>
+        <FIELD NAME="duration" TYPE="int" LENGTH="6" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Duración."/>
+        <FIELD NAME="sessionfiles" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="visible" TYPE="int" LENGTH="1" NOTNULL="false" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="11" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="11" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="createdby" TYPE="int" LENGTH="11" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="modifiedby" TYPE="int" LENGTH="11" NOTNULL="false" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id" COMMENT="The unique id for this zoom vc."/>
+      </KEYS>
+    </TABLE>
+
+    <TABLE NAME="hybrid_zoom_instances" COMMENT="Zoom instances">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="11" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="accountid" TYPE="char" LENGTH="60" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="clientid" TYPE="char" LENGTH="60" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="clientsecret" TYPE="char" LENGTH="60" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="emaillicense" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false" COMMENT="El email que corresponde a la licencia zoom"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id" COMMENT="The unique id for this instances zoom."/>
+      </KEYS>
+    </TABLE>
+
+  </TABLES>
+</XMLDB>

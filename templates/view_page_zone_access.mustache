@@ -1,0 +1,34 @@
+<div id="zonemessage">
+	----------------
+	<BR>
+	ZONA DE MENSAJES
+	<BR>
+	Obtener aquí la fecha y hora de la reunión próxima (si hay), o el cierre de la última.
+	<BR>
+	{{#isaccess}}
+		La siguiente sesión comenzará el:  {{starttime}} <br>
+		Duración estimada: xxx h xx min <br>
+		Cierre de acceso : xx min tras inicio <br>
+		Estado: {{estado}} // comprobar estados: (en progreso / comenzará en / ha finalizado)
+	<BR>
+	{{/isaccess}}
+	----------------
+</div>
+
+{{#isaccess}}
+	<div id="zoneaccess">		
+	<!-- Aqui enviar solo una url encriptada o algo así, y nada mas, para llegar y pulsar.
+	Del loadmeeting quitar casi todo, solo enviar la url, el course, y ya. -->
+		<form action="http://marian.moodle41.com/mod/hybridteaching/loadmeeting.php"
+		target="_blank">
+			<button type="submit" class="btn btn-success">Comenzar reunión</button>
+			<input type="hidden" name="id" value="{{id}}">
+			<input type="hidden" name="url" value="{{url}}">
+				
+		</form>
+	</div>
+{{/isaccess}}	
+{{^isaccess}}	
+	En esta actividad no hay próxima reunión (no sacar botón), poner aquí mensaje de no hay próxima reunión.
+	<br>
+{{/isaccess}}
