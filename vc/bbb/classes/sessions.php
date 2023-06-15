@@ -45,7 +45,7 @@ class sessions extends sessions_controller {
      * @throws 
      * @return mixed the response from the create_meeting function
      */
-    public function create_session_extended($data) {
+    public function create_unique_session_extended($data) {
         global $DB, $USER;
 
         // As it is a new activity, assign passwords. 
