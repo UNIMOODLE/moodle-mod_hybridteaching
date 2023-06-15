@@ -126,7 +126,7 @@ class hybridteaching_admin_plugins_instances extends admin_setting {
             $instancename = $instance['instancename'];
             $instanceversion = $instance['version'];
             $instancetype = $instance['type'];
-            $instancetypealias = get_string($instance['type'].'alias', 'hybridteachingvc_'.$instance['type']);
+            $instancetypealias = get_string('alias', 'hybridteachvc_'.$instance['type']);
 
             // Up/down link (only if enrol is enabled).
             $updown = '';
@@ -182,7 +182,7 @@ class hybridteaching_admin_plugins_instances extends admin_setting {
         foreach ($subplugins as $subplugin) {
             $url = new moodle_url('/mod/hybridteaching/vc/'.$subplugin->name.'/editinstance.php?type='.$subplugin->name);
             $link = $url->out();
-            $subplugincommonname = get_string($subplugin->name.'alias', 'hybridteachingvc_'.$subplugin->name);
+            $subplugincommonname = get_string('alias', 'hybridteachvc_'.$subplugin->name);
             $subpluginsarray[$link] = $subplugincommonname;
         }
         $selectsubplugins = new url_select($subpluginsarray);

@@ -9,10 +9,27 @@ class addsessions_form extends moodleform {
 
         $course = $this->_customdata['course'];
         $cm = $this->_customdata['cm'];
+        $session = $this->_customdata['session'];
+        $typevc = $this->_customdata['typevc'];
         
         $mform->addElement('header', 'general', get_string('addsession', 'hybridteaching'));
 
+        $mform->addElement('text', 'name', get_string('sessionname', 'hybridteaching'),);
+        $mform->setType('name', PARAM_TEXT);
+        $mform->addRule('name', null, 'required', null, 'client');
+
         $modcontext = context_module::instance($cm->id);
+        $mform->addElement('hidden', 'id');
+        $mform->setType('id', PARAM_INT);
+        $mform->setDefault('id', $cm->id);
+        if (!empty($session)) {
+            $mform->addElement('hidden', 's');
+            $mform->setType('s', PARAM_INT);
+            $mform->setDefault('s', $session->sessionid);
+        }
+
+        $mform->addElement('hidden', 'typevc', $typevc);
+        $mform->setType('typevc', PARAM_ALPHA);
         
         $groupmode = groups_get_activity_groupmode($cm);
         $selectgroups = array();
@@ -26,6 +43,9 @@ class addsessions_form extends moodleform {
             if ($groups) {
                 foreach ($groups as $group) {
                     $selectgroups[$group->id] = $group->name;
+                }
+                if ($groupmode == SEPARATEGROUPS) {
+                    array_shift($selectgroups);
                 }
                 $mform->addElement('select', 'groupid', get_string('sessionfor', 'hybridteaching'), $selectgroups);
             } else {
@@ -52,6 +72,7 @@ class addsessions_form extends moodleform {
         $duration[] = &$mform->createElement('select', 'timetype', '', $options);
         $mform->setType('timetype', PARAM_INT);
         $mform->addGroup($duration, 'durationgroup', get_string('duration', 'hybridteaching'), array(' '), false);
+        $mform->addRule('durationgroup', null, 'required', null, 'client');
         
         $mform->addElement('editor', 'description', get_string('description'), array('rows' => 1, 'columns' => 80),
                             array('maxfiles' => EDITOR_UNLIMITED_FILES, 'noclean' => true, 'context' => $modcontext));
@@ -99,7 +120,11 @@ class addsessions_form extends moodleform {
         $mform->addElement('checkbox', 'replicatedoc', '', get_string('replicatedoc', 'hybridteaching'));
         $mform->addElement('checkbox', 'caleneventpersession', '', get_string('caleneventpersession', 'hybridteaching'));
 
-        $this->add_action_buttons(true, get_string('add'));
-    
+        if (empty($session)) {
+            $this->add_action_buttons(true, get_string('add'));
+        } else {
+            $this->add_action_buttons(true, get_string('savechanges'));
+        }
+        $this->set_data($session);
     }
 }

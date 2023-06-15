@@ -13,7 +13,8 @@ $nexturl=base64_decode($url);
 
 global $DB;
 $course=$DB->get_record_sql("SELECT ht.course FROM {hybridteaching} AS ht
-        INNER JOIN {hybridteaching_zoom} AS zoom ON ht.id=zoom.hybridteachingid
+        INNER JOIN {hybridteaching_session} AS hs ON hs.hybridteachingid=ht.id
+        INNER JOIN {hybridteachvc_zoom} AS zoom ON zoom.htsession=hs.id
         WHERE zoom.id=:id"
         ,array('id'=>$id));   
 

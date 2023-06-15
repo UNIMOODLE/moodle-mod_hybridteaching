@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB PATH="mod/hybridteaching/db" VERSION="20230504" COMMENT="XMLDB file for Moodle mod_hybridteaching"
+<XMLDB PATH="mod/hybridteaching/db" VERSION="20230612" COMMENT="XMLDB file for Moodle mod_hybridteaching"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd"
 >
@@ -11,7 +11,6 @@
         <FIELD NAME="name" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" COMMENT="The name of the activity module instance"/>
         <FIELD NAME="intro" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Activity description."/>
         <FIELD NAME="introformat" TYPE="int" LENGTH="4" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="The format of the intro field."/>
-
         <FIELD NAME="useattendance" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Usar registro de asistencia de estudiantes."/>
         <FIELD NAME="usevideoconference" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Usar acceso por videoconferencia."/>
         <FIELD NAME="userecordvc" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Permitir grabaciones de videoconferencia."/>
@@ -22,14 +21,12 @@
         <FIELD NAME="starttime" TYPE="int" LENGTH="11" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Inicio de sesión."/>
         <FIELD NAME="duration" TYPE="int" LENGTH="6" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Duración."/>
         <FIELD NAME="timezone" TYPE="char" LENGTH="50" NOTNULL="false" SEQUENCE="false" COMMENT="Timezone to format start_time, like &quot;America/Los_Angeles&quot;. For scheduled meeting only."/>
-
         <FIELD NAME="waitmoderator" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Esperar al moderador."/>
         <FIELD NAME="advanceentrycount" TYPE="int" LENGTH="6" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Antelación de la entrada."/>
         <FIELD NAME="advanceentryunit" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Unidades de antelación de la entrada (0:horas, 1:min, 2: seg)."/>
         <FIELD NAME="closedoorscount" TYPE="int" LENGTH="6" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Cierre de puertas"/>
         <FIELD NAME="closedoorsunit" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Unidades de cierre de puertas (0:horas, 1:min, 2: seg)."/>
         <FIELD NAME="userslimit" TYPE="int" LENGTH="6" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Límite de usuarios."/>
-
         <FIELD NAME="disablecam" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Desactivar las cámaras web."/>
         <FIELD NAME="disablemic" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Desactivar los micrófonos."/>
         <FIELD NAME="disableprivatechat" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Desactivar el chat privado."/>
@@ -38,22 +35,16 @@
         <FIELD NAME="hideuserlist" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Ocultar la lista de usuarios."/>
         <FIELD NAME="blockroomdesign" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Bloquear el diseño de la sala."/>
         <FIELD NAME="ignorelocksettings" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Ignorar los ajustes de bloqueo."/>
-
         <FIELD NAME="recordallfromstart" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Grabar todo desde el inicio."/>
         <FIELD NAME="recordhidebutton" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Ocultar botón de grabación."/>
         <FIELD NAME="showpreviewrecord" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Mostrar vista previa de grabación."/>
         <FIELD NAME="downloadrecords" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Estudiantes pueden descargar grabaciones."/>
-
         <FIELD NAME="validateattendance" TYPE="int" LENGTH="6" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Permanencia para validar asistencia."/>
         <FIELD NAME="attendanceunit" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Unidad de tiempo para validar asistencia."/>
-
         <FIELD NAME="completionattendance" TYPE="int" LENGTH="5" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Condición de finalización El usuario debe asistir a num. sesiones."/>
-
         <FIELD NAME="usercreator" TYPE="int" LENGTH="11" NOTNULL="false" SEQUENCE="false" COMMENT="User creator"/>
         <FIELD NAME="timecreated" TYPE="int" LENGTH="11" NOTNULL="false" SEQUENCE="false" COMMENT="Datetime created"/>
         <FIELD NAME="timemodified" TYPE="int" LENGTH="11" NOTNULL="false" SEQUENCE="false" COMMENT="Datetime modified"/>
-        
-
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
@@ -76,7 +67,32 @@
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
-        <KEY NAME="subplugininstanceid_zoom" TYPE="foreign" FIELDS="subplugininstanceid" REFTABLE="hybrid_zoom_instances" REFFIELDS="id" COMMENT="Foreign key for zoom subplugin"/>
+      </KEYS>
+    </TABLE>
+    <TABLE NAME="hybridteaching_session" COMMENT="Hybridteaching sessions">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="11" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="hybridteachingid" TYPE="int" LENGTH="11" NOTNULL="true" SEQUENCE="false" COMMENT="Hybridteaching id"/>
+        <FIELD NAME="name" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" COMMENT="Session name"/>
+        <FIELD NAME="description" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Session description"/>
+        <FIELD NAME="groupid" TYPE="int" LENGTH="11" NOTNULL="false" DEFAULT="0" SEQUENCE="false" COMMENT="Group that can access the session"/>
+        <FIELD NAME="starttime" TYPE="int" LENGTH="11" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="duration" TYPE="int" LENGTH="11" NOTNULL="false" SEQUENCE="false" COMMENT="Session duration"/>
+        <FIELD NAME="sessionfiles" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Session files"/>
+        <FIELD NAME="typevc" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" COMMENT="The type of videoconference plugin"/>
+        <FIELD NAME="typestorage" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false" COMMENT="Storage plugin type"/>
+        <FIELD NAME="userecordvc" TYPE="int" LENGTH="11" NOTNULL="false" SEQUENCE="false" COMMENT="Allow recordings"/>
+        <FIELD NAME="processedrecording" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Session recording"/>
+        <FIELD NAME="storagereference" TYPE="int" LENGTH="11" NOTNULL="false" SEQUENCE="false" COMMENT="Recording reference"/>
+        <FIELD NAME="visible" TYPE="int" LENGTH="1" NOTNULL="false" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="11" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="11" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="createdby" TYPE="int" LENGTH="11" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="modifiedby" TYPE="int" LENGTH="11" NOTNULL="false" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="hybridteachingid" TYPE="foreign" FIELDS="hybridteachingid" REFTABLE="hybridteaching" REFFIELDS="id"/>
       </KEYS>
     </TABLE>
   </TABLES>

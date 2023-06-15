@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<XMLDB PATH="mod/hybridteaching/vc/zoom/db" VERSION="20230504" COMMENT="XMLDB file for Moodle mod/hybridteaching/vc/zoom"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="../../../../../lib/xmldb/xmldb.xsd"
+>
+  <TABLES>
+    <TABLE NAME="hybridteachvc_zoom" COMMENT="Info about zoom vc">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="11" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="htsession" TYPE="int" LENGTH="11" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Hybridteaching session id"/>
+        <FIELD NAME="meetingid" TYPE="int" LENGTH="11" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="hostemail" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="starturl" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="joinurl" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="password" TYPE="char" LENGTH="11" NOTNULL="false" SEQUENCE="false" COMMENT="Meeting password. Password may only contain the following characters: [a-zA-Z0-9@-_*]. Max of 10 characters"/>
+        <FIELD NAME="hostid" TYPE="char" LENGTH="30" NOTNULL="true" SEQUENCE="false" COMMENT="Meeting host user ID. Can be any user under this account. Cannot be updated after creation."/>
+        <FIELD NAME="optionhostvideo" TYPE="int" LENGTH="1" NOTNULL="false" DEFAULT="1" SEQUENCE="false" COMMENT="Start video when host joins meeting."/>
+        <FIELD NAME="optionparticipantsvideo" TYPE="int" LENGTH="1" NOTNULL="false" DEFAULT="1" SEQUENCE="false" COMMENT="Start video when participants join meeting."/>
+        <FIELD NAME="existsonzoom" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="1" SEQUENCE="false" COMMENT="Whether the meeting can be found on Zoom servers. Usually should be true, should only be false if API call returned that meeting can't be found."/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id" COMMENT="The unique id for this zoom vc."/>
+      </KEYS>
+    </TABLE>
+
+    <TABLE NAME="hybridteachvc_zoom_instance" COMMENT="Zoom instances">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="11" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="accountid" TYPE="char" LENGTH="60" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="clientid" TYPE="char" LENGTH="60" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="clientsecret" TYPE="char" LENGTH="60" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="emaillicense" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false" COMMENT="El email que corresponde a la licencia zoom"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id" COMMENT="The unique id for this instances zoom."/>
+      </KEYS>
+    </TABLE>
+
+  </TABLES>
+</XMLDB>

@@ -58,42 +58,26 @@ function hybridteaching_supports($feature) {
  */
 function hybridteaching_add_instance($moduleinstance, $mform = null) {
     global $CFG, $DB;
-
-    //dividir el select typevc en instance y typevc
+   
     $moduleinstance->timecreated = time();
-    $divide = explode('-', $moduleinstance->typevc, 2);
-    $moduleinstance->instance = $divide[0];
-    $moduleinstance->typevc = $divide[1];
-
-    
-
-    // CASOS:
-    // 1. SI OPCIÓN MARCADA DE "USAR PROGRAMACION DE SESIONES" => crear dentro las vc, no aquí
-    // 2. SI OPCIÓN "USAR PROGRAMACION DE SESIONES" NO MARCADA 
-    //     Y OPCION "PERMITR ACCESO EN CUALQUIER MOMENTO" NO MARCADA   => crear aqui la vc con una fecha asignada ya
-    //
-    //    pero si OPCIÓN "PERMITIR ACCESO EN CUALQUIER MOMENTO" SÍ MARCADA => crear aqui la vc sin fecha, como reunión recurrente
-
-    $moduleinstance->hybridteachingid = $DB->insert_record('hybridteaching', $moduleinstance);
-    
-    //opción "Usar acceso por videoconferencia"
-    if ($moduleinstance->usevideoconference){
-        //opción "Usar programación de sesiones" está sin marcar  
-        if (!$moduleinstance->sessionscheduling) {
-            if ($moduleinstance->typevc != ''){
-                require_once($CFG->dirroot.'/mod/hybridteaching/vc/'.$moduleinstance->typevc.'/classes/sessions.php');      
-
-                $sessions = new sessions();
-                $result = $sessions->create_session($moduleinstance);
-            }
+    if ($moduleinstance->usevideoconference == 1) {
+        if (isset($moduleinstance->typevc)) {
+            $divide = explode('-', $moduleinstance->typevc, 2);
+            $moduleinstance->instance = $divide[0];
+            $moduleinstance->typevc = $divide[1];
         }
+    } else {
+        $moduleinstance->instance = 0;
+        $moduleinstance->typevc = 0;
     }
-    $moduleinstance->id=$moduleinstance->hybridteachingid;
 
-    //TO-DO: repasar estas funciones para ver cómo incluirlas
-    //hybridteaching_calendar_item_update($hybridteaching);
-    //hybridteaching_grade_item_update($moduleinstance);
-
+    $moduleinstance->id = $DB->insert_record('hybridteaching', $moduleinstance);
+    if (!$moduleinstance->sessionscheduling && !empty($moduleinstance->id)) {
+        require_once($CFG->dirroot.'/mod/hybridteaching/classes/controller/sessions_controller.php');
+        $sessions = new sessions_controller($moduleinstance);
+        $result = $sessions->create_session($moduleinstance);
+    }
+    
     return $moduleinstance->id;
 }
 
@@ -113,12 +97,18 @@ function hybridteaching_update_instance($moduleinstance, $mform = null) {
     $moduleinstance->timemodified = time();
     $moduleinstance->id = $moduleinstance->instance;
 
-//TO-DO: repasar estas funciones para ver cómo incluirlas
-    //hybridteaching_calendar_item_update($hybridteaching);
-    //hybridteaching_grade_item_update($moduleinstance);
+    if ($moduleinstance->usevideoconference == 1) {
+        if (isset($moduleinstance->typevc)) {
+            $divide = explode('-', $moduleinstance->typevc, 2);
+            $moduleinstance->instance = $divide[0];
+            $moduleinstance->typevc = $divide[1];
+        }
+    } else {
+        $moduleinstance->instance = 0;
+        $moduleinstance->typevc = 0;
+    }
 
     return $DB->update_record('hybridteaching', $moduleinstance);
-    //llamar aqui al subplugin si hubiera que actualizar algo del subplugin(fecha, horario,...)
 }
 
 /**
@@ -137,8 +127,8 @@ function hybridteaching_delete_instance($id) {
     
     //opción "Usar programación de sesiones" está sin marcar
     if (!$existshybrid->sessionscheduling && $existshybrid->typevc != ''){
-        require_once($CFG->dirroot.'/mod/hybridteaching/vc/hybrid'.$existshybrid->typevc.'/classes/sessions.php');    
-        $sessions = new sessions();
+        require_once($CFG->dirroot.'/mod/hybridteaching/classes/controller/sessions_controller.php');    
+        $sessions = new sessions_controller();
         $sessions->delete_all_sessions($existshybrid);
     }
 
@@ -414,7 +404,7 @@ function hybridteaching_extend_settings_navigation(settings_navigation $settings
 
     $hassessionsscheduling=$DB->get_field('hybridteaching','sessionscheduling',array('id' => $cm->instance));
     if (has_capability('mod/hybridteaching:sessions', $context)) {
-        $nodes[] = ['url' => new moodle_url('/mod/hybridteaching/sessions.php', ['id' => $cm->id, 'h' => $cm->instance]),
+        $nodes[] = ['url' => new moodle_url('/mod/hybridteaching/sessions.php', ['id' => $cm->id]),
                     'title' => get_string('sessions', 'hybridteaching')];
     }
 
@@ -428,7 +418,7 @@ function hybridteaching_extend_settings_navigation(settings_navigation $settings
         //mostrar solo pestaña de "Programación de sesiones" solo si esta VC tiene marcada la opción de "usar programación de sesiones"
         $hassessionsscheduling=$DB->get_field('hybridteaching','sessionscheduling',array('id' => $cm->instance));
         if ($hassessionsscheduling){
-            $nodes[] = ['url' => new moodle_url('/mod/hybridteaching/programschedule.php', ['id' => $cm->id, 'h' => $cm->instance]),
+            $nodes[] = ['url' => new moodle_url('/mod/hybridteaching/programschedule.php', ['id' => $cm->id]),
                         'title' => get_string('programschedule', 'hybridteaching')];
         }
     }

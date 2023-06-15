@@ -30,7 +30,8 @@ require_once('../controller/sessions_controller.php');
 $action = required_param('action', PARAM_ALPHANUMEXT);
 $moduleid = optional_param('id', 0, PARAM_INT);
 $sesionid = optional_param('sid', 0, PARAM_INT);
-$hybridteachingid = optional_param('h', 0, PARAM_INT);
+$hybridteachingid = required_param('h', PARAM_INT);
+$return = optional_param('returnurl', '', PARAM_URL);
 
 $PAGE->set_url('/mod/hybridteaching/classes/action/session_action.php');
 $PAGE->set_context(context_system::instance());
@@ -39,12 +40,8 @@ require_admin();
 require_sesskey();
 
 $hybridteaching = $DB->get_record('hybridteaching', array('id' => $hybridteachingid), '*', MUST_EXIST);
-$type = $hybridteaching->typevc;
-$typealias = get_string($type.'alias', 'hybridteachingvc_'.$type);
-$table = 'hybridteaching_'.lcfirst($typealias);
-$sessioncontroller = new sessions_controller($hybridteaching, $table);
+$sessioncontroller = new sessions_controller($hybridteaching, 'hybridteaching_session');
 $sessionslist = $sessioncontroller->load_sessions();
-$return = new moodle_url('/mod/hybridteaching/sessions.php?id='.$moduleid.'&h='.$hybridteachingid);
 
 if (!array_key_exists($sesionid, $sessionslist)) {
     redirect($return);
@@ -58,7 +55,7 @@ switch ($action) {
         $sessioncontroller->enable_data($sesionid, true);
         break;
     case 'delete':
-        $sessioncontroller->delete_session($sesionid);
+        $sessioncontroller->delete_session($sesionid, $hybridteachingid);
         break;
 }
 

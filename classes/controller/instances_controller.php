@@ -129,13 +129,17 @@ class instances_controller extends common_controller {
 
         //comprobar aquí, además, que la instancia pertenece a la categoría del curso: 
         //parámetro que se recibe del $courseid
+        $conditions = '';
+        if (isset($params['visible'])) {
+            $conditions = ' AND hi.visible = ' . $params['visible'];
+        }
 
         [$insql, $inparams] = $DB->get_in_or_equal($subtypes);
 
         $sql = "SELECT * 
                   FROM {hybridteaching_instances} hi 
-                 WHERE hi.type $insql AND hi.visible = 1 
-              ORDER BY sortorder, id";
+                 WHERE hi.type $insql $conditions
+              ORDER BY visible DESC, sortorder, id";
         $instances = $DB->get_records_sql($sql, $inparams);
         $instancesarray = json_decode(json_encode($instances), true);
 
@@ -148,7 +152,7 @@ class instances_controller extends common_controller {
      * @return array the instance select list
      */
     public static function hybridteaching_get_instances_select() {    
-        $instances = self::hybridteaching_get_instances();
+        $instances = self::hybridteaching_get_instances(['visible' => 1]);
         $instanceselect = [];
         foreach ($instances as $instance) {
             $instanceselect[$instance['id']."-".$instance['type']] = $instance['instancename']." (".$instance['type'].")";

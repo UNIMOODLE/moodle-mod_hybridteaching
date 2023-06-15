@@ -88,7 +88,7 @@ class mod_hybridteaching_mod_form extends moodleform_mod {
         //esto dependerá de la videoconferencia seleccionada (zoom, meet, bbb...)
         
         //comprobar aqui si existe la funcion antes de llamarla y comprobar tb con plugin manager
-        //component_callback("hybridteachingvc_hybridzoom", 'addform',[$mform]);
+        //component_callback("hybridteachvc_zoom", 'addform',[$mform]);
     
         
         // NUEVAS SECCIONES PERSONALIZADAS:
@@ -103,9 +103,18 @@ class mod_hybridteaching_mod_form extends moodleform_mod {
 
         $mform->addElement('date_time_selector', 'starttime', get_string('starttime', 'hybridteaching'),array('optional'=>true));
 
-        $mform->addElement('duration', 'duration', get_string('duration', 'hybridteaching'), array('optional' => false));
-        $mform->setDefault('duration', array('number' => 1, 'timeunit' => 3600));
+        /*$mform->addElement('duration', 'duration', get_string('duration', 'hybridteaching'), array('optional' => false));
+        $mform->setDefault('duration', array('number' => 1, 'timeunit' => 3600));*/
+        $duration[] = &$mform->createElement('text', 'duration', get_string('duration', 'hybridteaching'));
+        $mform->setType('duration', PARAM_INT);
 
+        $options = array(
+            '1' => get_string('minutes'),
+            '2' => get_string('hours')
+        );
+        $duration[] = &$mform->createElement('select', 'timetype', '', $options);
+        $mform->setType('timetype', PARAM_INT);
+        $mform->addGroup($duration, 'durationgroup', get_string('duration', 'hybridteaching'), array(' '), false);
 
         $mform->addElement('header', 'sectionaudience', get_string('sectionaudience','hybridteaching'));
 // TO-DO ISYC: AÑADIR AQUÍ ELEMENTOS DE AUDIENCIA: TOMAR EJEMPLO DE BBB    

@@ -1,5 +1,5 @@
 {
     "plugintypes": {
-        "hybridteachingvc": "mod/hybridteaching/vc"
+        "hybridteachvc": "mod/hybridteaching/vc"
     }
 }

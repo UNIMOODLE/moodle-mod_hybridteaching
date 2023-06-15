@@ -87,20 +87,25 @@ class hybridteaching_sessions_render extends \table_sql implements dynamic_table
         $table->data = array();
 
         $type = $this->hybridteaching->typevc;
-        $typealias = get_string($type.'alias', 'hybridteachingvc_'.$type);
+        $typealias = '';
+        if (!empty($type)) {
+            $typealias = get_string('alias', 'hybridteachvc_'.$type);
+        }
         $url = new moodle_url('/mod/hybridteaching/classes/action/session_action.php', array('sesskey' => sesskey()));
-        $sessioncontroller = new sessions_controller($this->hybridteaching, 'hybridteaching_'.lcfirst($typealias));
+        $sessioncontroller = new sessions_controller($this->hybridteaching);
         $params = [];
         if ($this->hybridteaching->sessionscheduling) {
             $params = ['starttime' => time()];
         }
         $sessionslist = $sessioncontroller->load_sessions($page, $perpage, $params, sessions_controller::OPERATOR_LESS_THAN);
         $sessionscount = $sessioncontroller->count_sessions($params);
+        $cm = get_coursemodule_from_instance('hybridteaching', $this->hybridteaching->id);
+        $returnurl = new moodle_url('/mod/hybridteaching/sessions.php?id='.$cm->id.'&h='.$this->hybridteaching->id);
         foreach ($sessionslist as $session) {
             // Hide/show links.
             $class = '';
             $sessionid = $session['id'];
-            $group = "Grupo A";
+            $group = $session['groupid'] == 0 ? get_string('commonsession', 'hybridteaching') : groups_get_group($session['groupid']);
             $name = $session['name'];
             $date = $session['starttime'];
             $date = date('l, j \d\e F \d\e Y, H:i', $date);
@@ -118,7 +123,8 @@ class hybridteaching_sessions_render extends \table_sql implements dynamic_table
             ]);
 
             $options = '';
-            $params = array('sid' => $sessionid, 'h' => $hybridteachingid, 'id' => $id);
+            $hybridteachingid = empty($hybridteaching) ? $cm->instance : $hybridteachingid;
+            $params = array('sid' => $sessionid, 'h' => $hybridteachingid, 'id' => $id, 'returnurl' => $returnurl);
             if ($enabled) {
                 $options .= html_writer::link(new moodle_url($url, array_merge($params, array('action' => 'disable'))),
                     $OUTPUT->pix_icon('t/hide', $strdisable, 'moodle', array('class' => 'iconsmall')));
@@ -176,7 +182,7 @@ class hybridteaching_sessions_render extends \table_sql implements dynamic_table
 
 
     public function print_sessions_programming_table() {
-        global $OUTPUT, $DB, $PAGE;
+        global $OUTPUT, $DB, $PAGE, $COURSE;
 
         $id = required_param('id', PARAM_INT);
         $hybridteachingid = optional_param('h', 0, PARAM_INT);    
@@ -215,19 +221,22 @@ class hybridteaching_sessions_render extends \table_sql implements dynamic_table
         $table->attributes['class'] = 'sessionstable generaltable';
         $table->data = array();
 
-        $type = $this->hybridteaching->typevc;
-        $typealias = get_string($type.'alias', 'hybridteachingvc_'.$type);
         $url = new moodle_url('/mod/hybridteaching/classes/action/session_action.php', array('sesskey' => sesskey()));
-        $sessioncontroller = new sessions_controller($this->hybridteaching, 'hybridteaching_'.lcfirst($typealias));
+        $sessioncontroller = new sessions_controller($this->hybridteaching);
         $params = ['starttime' => time()];
         $sessionslist = $sessioncontroller->load_sessions($page, $perpage, $params);
         $sessionscount = $sessioncontroller->count_sessions($params);
+        $cm = get_coursemodule_from_instance('hybridteaching', $this->hybridteaching->id);
+        $returnurl = new moodle_url('/mod/hybridteaching/programschedule.php?id='.$cm->id);
         foreach ($sessionslist as $session) {
             // Hide/show links.
             $class = '';
             $sessionid = $session['id'];
-            $group = "Grupo A";
+            $group = $session['groupid'] == 0 ? get_string('commonsession', 'hybridteaching') : groups_get_group($session['groupid']);
             $name = $session['name'];
+            /*$description = file_rewrite_pluginfile_urls($session['description'],
+                'pluginfile.php', $this->hybridteaching->context->id, 'mod_hybridteaching', 'session', $sessionid);*/
+            $description = $session['description'];
             $date = $session['starttime'];
             $hour = date('H:i', $date);
             $date = date('l, j \d\e F \d\e Y', $date);
@@ -243,7 +252,8 @@ class hybridteaching_sessions_render extends \table_sql implements dynamic_table
             ]);
 
             $options = '';
-            $params = array('sid' => $sessionid, 'h' => $hybridteachingid, 'id' => $id);
+            $hybridteachingid = empty($hybridteaching) ? $cm->instance : $hybridteachingid;
+            $params = array('sid' => $sessionid, 'h' => $hybridteachingid, 'id' => $id, 'returnurl' => $returnurl);
             /*if ($enabled) {
                 $options .= html_writer::link(new moodle_url($url, array_merge($params, array('action' => 'disable'))),
                     $OUTPUT->pix_icon('t/hide', $strdisable, 'moodle', array('class' => 'iconsmall')));
@@ -253,8 +263,8 @@ class hybridteaching_sessions_render extends \table_sql implements dynamic_table
                 $class = 'dimmed_text';
             }*/
 
-            //$urledit = '/mod/hybridteaching/vc/'.$instancetype.'/editinstance.php?type='.$instancetype.'&id='.$instanceid;
-            $options .= html_writer::link(new moodle_url(''),
+            $urledit = '/mod/hybridteaching/programsessions.php?id='.$cm->id .'&s='.$sessionid;
+            $options .= html_writer::link(new moodle_url($urledit),
                 $OUTPUT->pix_icon('t/edit', $stroptions, 'moodle', array('class' => 'iconsmall')));
 
             $options .= html_writer::link(new moodle_url(''),

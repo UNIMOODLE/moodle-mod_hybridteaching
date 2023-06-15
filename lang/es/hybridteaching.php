@@ -82,10 +82,10 @@ $string['completionattendance'] = 'El usuario debe asistir a sesiones';
 $string['completionattendancegroup'] = 'Requiere asistencia';
 $string['completiondetail:attendance'] = 'Sessions attendance: {$a}';
 
-$string['subplugintype_hybridteachingvc'] = 'Tipo de videoconferencia';
-$string['subplugintype_hybridteachingvc_plural'] = 'Tipos de videoconferencia';
-$string['hybridteachingvc'] = 'Plugin Videoconferencia';
-$string['hybridteachingvcpluginname'] = 'Plugin Videoconferencia';
+$string['subplugintype_hybridteachvc'] = 'Tipo de videoconferencia';
+$string['subplugintype_hybridteachvc_plural'] = 'Tipos de videoconferencia';
+$string['hybridteachvc'] = 'Plugin Videoconferencia';
+$string['hybridteachvcpluginname'] = 'Plugin Videoconferencia';
 $string['headerconfig'] = 'Gestionar extensiones de videoconferencia';
 $string['mediaplayers'] = 'Plugins de videoconferencia';
 
@@ -166,3 +166,4 @@ $string['repeaton'] = 'Repetir el';
 $string['repeatevery'] = 'Repetir cada';
 $string['repeatuntil'] = 'Repetir hasta';
 $string['otheroptions'] = 'Otras opciones';
+$string['sessionname'] = 'Nombre de la sesión';
