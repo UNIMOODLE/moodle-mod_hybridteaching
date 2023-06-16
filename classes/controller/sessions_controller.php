@@ -256,10 +256,8 @@ class sessions_controller extends common_controller {
      * @throws Exception If the database query fails.
      * @return int The number of sessions for the given hybrid teaching object and parameters.
      */
-    public function count_sessions($params = []) {
-        global $DB;
-        $params = array_merge(['hybridteachingid' => $this->hybridobject->id], $params);
-        return $DB->count_records('hybridteaching_session', $params);
+    public function count_sessions($params = [], $operator = self::OPERATOR_GREATER_THAN) {
+        return count($this->load_sessions(0, 0, $params, $operator));
     }
 
     /**

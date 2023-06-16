@@ -167,3 +167,5 @@ $string['repeatevery'] = 'Repetir cada';
 $string['repeatuntil'] = 'Repetir hasta';
 $string['otheroptions'] = 'Otras opciones';
 $string['sessionname'] = 'Nombre de la sesión';
+
+$string['nosessions'] = 'No hay sesiones disponibles';

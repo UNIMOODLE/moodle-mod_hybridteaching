@@ -82,9 +82,8 @@ class mod_hybridteaching_mod_form extends moodleform_mod {
         $mform->addHelpButton('userecordvc', 'userecordvc', 'hybridteaching');
 
         $instances = instances_controller::hybridteaching_get_instances_select('curso');
-        $mform->addElement('select','typevc',get_string('typevc', 'hybridteaching'),$instances);
-
-       
+        $mform->addElement('select','typevc',get_string('typevc', 'hybridteaching'),$instances);    
+          
         //esto dependerá de la videoconferencia seleccionada (zoom, meet, bbb...)
         
         //comprobar aqui si existe la funcion antes de llamarla y comprobar tb con plugin manager
@@ -272,7 +271,8 @@ class mod_hybridteaching_mod_form extends moodleform_mod {
     }
 
     function data_preprocessing(&$default_values){
-    
+        global $DB;
+
         // Set up the completion checkboxes which aren't part of standard data.
         // We also make the default value (if you turn on the checkbox) for those
         // numbers to be 1, this will not apply unless checkbox is ticked.
@@ -281,7 +281,15 @@ class mod_hybridteaching_mod_form extends moodleform_mod {
         if(empty($default_values['completionattendance'])) {
             $default_values['completionattendance']=1;
         }
-    }
 
-    
+        //Merge typevc and instance: get the correct value at typevc. 
+        //Ex: 2-bbb or 1-zoom
+        $content=$DB->get_record('hybridteaching',['id'=>$this->_instance]);
+        if ($content && $content->usevideoconference){
+            $typevc=$content->instance."-".$content->typevc;
+            $default_values['typevc'] = $typevc;
+        }
+
+    }
+   
 }

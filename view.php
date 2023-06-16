@@ -105,6 +105,11 @@ if ($hybridteaching->typevc){
             //obtnener aquí las grabaciones
             //echo $renderer->zone_records();
     }
+    else {
+        //errors: there are not sessions
+        $errors = ['error'=> get_string('nosessions','mod_hybridteaching')];
+        echo $renderer->zone_errors($errors);
+    }
 
 }
 

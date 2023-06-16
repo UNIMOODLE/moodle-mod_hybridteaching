@@ -32,9 +32,11 @@ class subobject{
 
         //solo obtener un registro
         $vc=$DB->get_record_sql("SELECT * 
-                                   FROM {hybridteaching_session} 
-                                  WHERE hybridteachingid = :id AND (starttime + duration >= UNIX_TIMESTAMP() OR starttime IS NULL) 
-                               ORDER BY starttime DESC LIMIT 1", array('id' => $hybridteachingid));
+                                   FROM {hybridteaching_session} hs
+                                   INNER JOIN {hybridteaching} ht ON ht.id=hs.hybridteachingid
+                                        AND ht.typevc=hs.typevc
+                                  WHERE hs.hybridteachingid = :id AND (hs.starttime + hs.duration >= UNIX_TIMESTAMP() OR hs.starttime IS NULL) 
+                               ORDER BY hs.starttime DESC LIMIT 1", array('id' => $hybridteachingid));
 
         /*
         if ($vc){
@@ -47,7 +49,7 @@ class subobject{
 
         if ($vc){
             //comprobar el estado de la reunión: 
-            $estado="en progreso";
+            $status="en progreso";
             $starturl="";
             if ($vc->starturl){
                 $starturl=base64_encode($vc->starturl);
@@ -55,12 +57,12 @@ class subobject{
 
             $array=[
                 'id'=>$vc->id,
-                'ishospedador'=>true,
+                'ishost'=>true,
                 'isaccess'=>true,
                 'url'=>$starturl,
                 'starttime'=>$vc->starttime,
                 'duration'=>$vc->duration,
-                'estado'=> $estado
+                'status'=> $status
             ];
             return $array;
         }

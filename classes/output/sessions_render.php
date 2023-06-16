@@ -98,7 +98,7 @@ class hybridteaching_sessions_render extends \table_sql implements dynamic_table
             $params = ['starttime' => time()];
         }
         $sessionslist = $sessioncontroller->load_sessions($page, $perpage, $params, sessions_controller::OPERATOR_LESS_THAN);
-        $sessionscount = $sessioncontroller->count_sessions($params);
+        $sessionscount = $sessioncontroller->count_sessions($params, sessions_controller::OPERATOR_LESS_THAN);
         $cm = get_coursemodule_from_instance('hybridteaching', $this->hybridteaching->id);
         $returnurl = new moodle_url('/mod/hybridteaching/sessions.php?id='.$cm->id.'&h='.$this->hybridteaching->id);
         foreach ($sessionslist as $session) {
@@ -285,7 +285,7 @@ class hybridteaching_sessions_render extends \table_sql implements dynamic_table
         }
 
         $return .= html_writer::table($table);
-        $baseurl = new moodle_url('/mod/hybridteaching/sessions.php', array('id' => $id, 'h' => $hybridteachingid, 'perpage' => $perpage));
+        $baseurl = new moodle_url('/mod/hybridteaching/programschedule.php', array('id' => $id, 'h' => $hybridteachingid, 'perpage' => $perpage));
         $return .= $OUTPUT->paging_bar($sessionscount, $page, $perpage, $baseurl);
 
         $selectactionparams = array(

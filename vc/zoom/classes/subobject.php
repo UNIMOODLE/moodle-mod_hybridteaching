@@ -49,17 +49,20 @@ class subobject {
 
         if ($vc){
             //comprobar el estado de la reunión: 
-            $estado="en progreso";
+            $status="en progreso";
             $array=[
                 'id'=>$vc->id,
-                'ishospedador'=>true,
+                'ishost'=>true,
                 'isaccess'=>true,
                 'url'=>base64_encode($vc->starturl),
                 'starttime'=>$vc->starttime,
                 'duration'=>$vc->duration,
-                'estado'=> $estado
+                'status'=> $status
             ];
             return $array;
+        }
+        else {
+            return null;
         }
     }
 }

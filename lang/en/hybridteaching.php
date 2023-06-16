@@ -164,3 +164,5 @@ $string['repeatuntil'] = 'Repeat until';
 $string['otheroptions'] = 'Other options';
 $string['sessionname'] = 'Session name';
 
+$string['nosessions'] = 'There are not sessions';
+
