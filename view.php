@@ -130,7 +130,7 @@ if ($hybridteaching->typevc){
             if ($hybridteaching->closedoorsunit==0){
                 $closedoors = get_string('closedoors_hours', 'mod_hybridteaching',$hybridteaching->closedoorscount);
                 $multiplydoors=3600;
-            } else if ($hybridteaching->closedoorsunit==1)
+            } else if ($hybridteaching->closedoorsunit==1){
                 $closedoors = get_string('closedoors_minutes', 'mod_hybridteaching',$hybridteaching->closedoorscount);
                 $multiplydoors=60;
             } else {
@@ -190,6 +190,6 @@ if ($hybridteaching->typevc){
         $errors = ['error'=> get_string('nosessions','mod_hybridteaching')];
         echo $renderer->zone_errors($errors);
     }
-
+}
 
 echo $OUTPUT->footer();
