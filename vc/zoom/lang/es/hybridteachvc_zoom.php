@@ -17,3 +17,4 @@ $string['zoomerr_field_missing'] = '{$a} no encontrado';
 $string['errorwebservice'] = 'Error de webservice de Zoom: {$a}.';
 $string['zoomerr_no_access_token'] = 'No access token returned';
 $string['licenses'] = 'Licencias';
+$string['downloadrecords'] = 'Descargar grabaciones';

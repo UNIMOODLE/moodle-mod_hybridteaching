@@ -200,6 +200,34 @@ class mod_hybrid_webservice {
         return $response;
     }
 
+
+    public function _make_call_download($path, $data = array(), $method = 'get') {
+ 
+        $url = $path;
+        $method = strtolower($method);
+        $curl = new curl();
+
+        if (isset($this->clientid) && isset($this->clientsecret) && isset($this->accountid)) {
+            $token = $this->get_access_token();
+        }
+
+        $curl->setHeader('Authorization: Bearer ' . $token);
+        $curl->setHeader('Accept: application/json');
+
+        if ($method != 'get') {
+            //$curl->setHeader('Content-Type: application/json');
+            $data = is_array($data) ? json_encode($data) : $data;
+        }
+
+        $rawresponse = $this->make_curl_call($curl, $method, $url, $data);
+    
+        if ($curl->get_errno()) {
+            throw new moodle_exception('errorwebservice', 'htzoom', '', $curl->error);
+        }
+
+        return $rawresponse;
+    }
+
     /**
      * Makes a paginated REST call.
      * Makes a call like _make_call() but specifically for GETs with paginated results.
@@ -488,7 +516,9 @@ class mod_hybrid_webservice {
      * @return stdClass Información sobre las grabaciones de un meeting.
      */
     public function get_meeting_recordings($id){
-        $url = 'meetings/'.$id."/recordings";
+        //$url = 'meetings/'.$id."/recordings";
+        $url = 'meetings/'.$id.'/recordings?include_fields=download_access_token';
+        
         $response = null;
         try {
             $response = $this->_make_call($url);
@@ -497,6 +527,17 @@ class mod_hybrid_webservice {
         return $response;
     }
     
+    public function get_meeting_recordingsettings($id){
+        $url = 'meetings/' . $id . '/recordings/settings';
+        $response = null;
+        try{
+            $response = $this->_make_call($url);
+        } catch (moodle_exception $error) {
+        }
+        return $response;
+
+    }
+
     public function get_past_meetings_uuid($id){
         $url = '/past_meetings/'.$id.'/instances';
         $response = null;
@@ -670,7 +711,7 @@ class mod_hybrid_webservice {
      * @throws moodle_exception
      * @return string access token
      */
-    protected function get_access_token() {
+    public function get_access_token() {
         $token = $this->oauth();
         return $token;
     }

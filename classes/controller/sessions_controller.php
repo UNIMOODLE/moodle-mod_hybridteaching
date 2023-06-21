@@ -87,6 +87,10 @@ class sessions_controller extends common_controller {
         $data->hybridteachingid = $this->hybridobject->id;
         $data->instance = $this->hybridobject->instance;
         $data->duration = sessions_controller::calculate_duration($data->duration, $data->timetype);
+        $data->userecordvc=$this->hybridobject->userecordvc;
+        if ($data->userecordvc==1){
+            $data->processedrecording=-1;
+        }
         if (isset($data->addmultiply)) {
             $this->create_multiple_sessions($data);
         } else {
@@ -299,8 +303,12 @@ class sessions_controller extends common_controller {
      */
     public function fill_session_data_for_create($data) {
         global $USER;
-        
+
         $session = clone $data;
+        echo "sesion:";
+        var_dump($session);
+        echo "<br><br>instance:";
+        var_dump($data);
         $description = !empty($data->description) ? $data->description : '';
         $session->description = null;
         $session->descrip = $description;

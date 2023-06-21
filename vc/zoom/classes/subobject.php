@@ -5,11 +5,28 @@ class subobject {
 
     protected $zoom;
 
-    public function __construct($id) {
+    public function __construct($hybridteachingid) {
         global $DB;
         //aqui leer de la bbdd del subplugin, para leer el reg de zoom.
 
-        $this->zoom = $DB->get_records('hybridteaching_session', array('hybridteachingid'=> $id));
+        //$this->zoom = $DB->get_records('hybridteaching_session', array('hybridteachingid'=> $id));
+        $sql="SELECT * 
+                FROM {hybridteaching_session} AS hs
+                INNER JOIN {hybridteachvc_zoom} AS zoom ON zoom.htsession=hs.id
+                WHERE hs.hybridteachingid = :id AND (hs.starttime + hs.duration >= UNIX_TIMESTAMP() OR hs.starttime IS NULL) 
+                ORDER BY hs.starttime LIMIT 1";
+        $this->zoom = $DB->get_record_sql($sql, array('id' => $hybridteachingid));
+
+        /*if there not are next session, get the last session*/
+        if (!$this->zoom){
+            $sql="SELECT * 
+                FROM {hybridteaching_session} AS hs
+                INNER JOIN {hybridteachvc_zoom} AS zoom ON zoom.htsession=hs.id
+                WHERE hs.hybridteachingid = :id
+                ORDER BY hs.starttime DESC LIMIT 1";
+            $this->zoom = $DB->get_record_sql($sql, array('id' => $hybridteachingid));
+        }
+
     }
 
     public function get_sessions() {
@@ -31,12 +48,12 @@ class subobject {
         //comprobar también que el usuario tiene permisos para acceder, que pertenezca al grupo, que puede acceder, bla bla,....
 
         //solo obtener un registro
-        $vc=$DB->get_record_sql("SELECT * 
+    /*    $vc=$DB->get_record_sql("SELECT * 
                                    FROM {hybridteaching_session} AS hs
                                    INNER JOIN {hybridteachvc_zoom} AS zoom ON zoom.htsession=hs.id
                                   WHERE hs.hybridteachingid = :id AND (hs.starttime + hs.duration >= UNIX_TIMESTAMP() OR hs.starttime IS NULL) 
                                ORDER BY hs.starttime LIMIT 1", array('id' => $hybridteachingid));
-
+        */
         /*
         if ($vc){
             //si hospedador:
@@ -47,17 +64,14 @@ class subobject {
         */
 
 
-        if ($vc){
-            //comprobar el estado de la reunión: 
-            $status="en progreso";
+        if ($this->zoom){
             $array=[
-                'id'=>$vc->id,
+                'id'=>$this->zoom->id,
                 'ishost'=>true,
                 'isaccess'=>true,
-                'url'=>base64_encode($vc->starturl),
-                'starttime'=>$vc->starttime,
-                'duration'=>$vc->duration,
-                'status'=> $status
+                'url'=>base64_encode($this->zoom->starturl),
+                'starttime'=>$this->zoom->starttime,
+                'duration'=>$this->zoom->duration,
             ];
             return $array;
         }
@@ -66,3 +80,7 @@ class subobject {
         }
     }
 }
+
+
+   
+

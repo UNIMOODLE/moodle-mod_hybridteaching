@@ -166,3 +166,22 @@ $string['sessionname'] = 'Session name';
 
 $string['nosessions'] = 'There are not sessions';
 
+$string['status_progress'] = 'In progress';
+$string['status_finished'] ='Has finished';
+$string['status_start'] = 'will start soon';
+
+$string['closedoors_hours'] = ' {$a} hours from start';
+$string['closedoors_minutes'] = ' {$a} minutes from start';
+$string['closedoors_seconds'] = ' {$a} seconds from start';
+
+$string['sessionstart'] = 'The next session will start on';
+$string['estimatedduration'] = 'Estimated duration:';
+$string['advanceentry'] = 'Advance entry:';
+$string['closedoors'] = 'Close doors:';
+$string['status'] = 'Status';
+$string['inprogress'] = 'In progress';
+$string['started'] = 'Started on';
+$string['closedoorsnext'] = 'Close doors after';
+$string['closedoorsnext2'] = 'from start';
+$string['closedoorsprev'] = 'This session closed doors to';
+$string['finished'] = 'This session ended on';

@@ -169,3 +169,24 @@ $string['otheroptions'] = 'Otras opciones';
 $string['sessionname'] = 'Nombre de la sesión';
 
 $string['nosessions'] = 'No hay sesiones disponibles';
+
+$string['status_progress'] = 'Videoconferencia en progreso';
+$string['status_finished'] ='Esta sesión de videoconferencia ha finalizado';
+$string['status_start'] = 'Comenzará próximamente';
+
+$string['closedoors_hours'] = ' {$a} horas tras el inicio';
+$string['closedoors_minutes'] = ' {$a} minutos tras el inicio';
+$string['closedoors_seconds'] = ' {$a} segundos tras el inicio';
+
+$string['sessionstart'] = 'La siguiente sesión comenzará el';
+$string['estimatedduration'] = 'Duración estimada:';
+$string['advanceentry'] = 'Antelación de entrada:';
+$string['closedoors'] = 'Cierre de puestas de acceso:';
+$string['status'] = 'Estado';
+$string['started'] = 'Inició el';
+$string['inprogress'] = 'En progreso';
+$string['closedoorsnext'] = 'Se cerrarán sus puertas tras';
+$string['closedoorsnext2'] = 'del inicio';
+$string['closedoorsprev'] = 'Esta sesión cerró sus puertas a los';
+$string['finished'] = 'Esta sesión se terminó el';
+

@@ -3,19 +3,50 @@
 	<BR>
 	ZONA DE MENSAJES
 	<BR>
-	Obtener aquí la fecha y hora de la reunión próxima (si hay), o el cierre de la última.
+	{{#isstart}}
+		{{#str}} sessionstart, mod_hybridteaching {{/str}}
+		{{starttime}} <br>
+		{{#str}} estimatedduration, mod_hybridteaching {{/str}} 
+		{{duration}} <br>
+		{{#isadvanceentry}}
+			{{#str}} advanceentry, mod_hybridteaching {{/str}}  {{advanceentrytime}}
+		{{/isadvanceentry}}
+		<br>
+		{{#isclosedoors}}
+			{{#str}} closedoors, mod_hybridteaching {{/str}} : {{closedoors}}
+		{{/isclosedoors}}
+		<br>
+		{{#str}} status, mod_hybridteaching {{/str}} {{status}} 
 	<BR>
-	{{#isaccess}}
-		La siguiente sesión comenzará el:  {{starttime}} <br>
-		Duración estimada: xxx h xx min <br>
-		Cierre de acceso : xx min tras inicio <br>
-		Estado: {{estado}} // comprobar estados: (en progreso / comenzará en / ha finalizado)
-	<BR>
-	{{/isaccess}}
+	{{/isstart}}
+
+	{{#isprogress}}
+		{{#str}} inprogress, mod_hybridteaching {{/str}}
+		<br>
+		{{#str}} status, mod_hybridteaching {{/str}} {{starttime}}
+		<br>
+		{{#isclosedoors}}
+			{{#canentry}}
+				{{#str}} closedoorsnext, mod_hybridteaching {{/str}} 
+				{{closedoorstime}} 
+				{{#str}} closedoorsnext2, mod_hybridteaching {{/str}}
+			{{/canentry}}
+			{{^canentry}}
+				{{#str}} closedoorsprev, mod_hybridteaching {{/str}} {{closedoorstime}} de comenzar
+			{{/canentry}}
+		{{/isclosedoors}}
+	{{/isprogress}}
+
+	{{#isfinished}}
+		{{status}}
+		<br>
+		{{#str}} finished, mod_hybridteaching {{/str}} {{finished}}
+	{{/isfinished}}
+	<br>
 	----------------
 </div>
 
-{{#isaccess}}
+{{#canentry}}
 	<div id="zoneaccess">		
 	<!-- Aqui enviar solo una url encriptada o algo así, y nada mas, para llegar y pulsar.
 	Del loadmeeting quitar casi todo, solo enviar la url, el course, y ya. -->
@@ -27,8 +58,5 @@
 				
 		</form>
 	</div>
-{{/isaccess}}	
-{{^isaccess}}	
-	En esta actividad no hay próxima reunión (no sacar botón), poner aquí mensaje de no hay próxima reunión.
-	<br>
-{{/isaccess}}
+{{/canentry}}	
+

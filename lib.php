@@ -70,6 +70,16 @@ function hybridteaching_add_instance($moduleinstance, $mform = null) {
         $moduleinstance->instance = 0;
         $moduleinstance->typevc = 0;
     }
+    
+    /*if session recording is used, userecordvc, the recording must be processed with processedrecording*/
+    /*processedrecording: 
+        -1: must process with vc
+        0: processed and downloaded with vc, ready to upload to storage
+        1: uploaded to storage
+    */
+    if ($moduleinstance->userecordvc==1) {
+        $moduleinstance->processedrecording=-1;
+    }
 
     $moduleinstance->id = $DB->insert_record('hybridteaching', $moduleinstance);
     if (!$moduleinstance->sessionscheduling && !empty($moduleinstance->id)) {

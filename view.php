@@ -30,6 +30,7 @@ require(__DIR__.'/../../config.php');
 require_once(__DIR__.'/lib.php');
 
 require_once($CFG->dirroot . '/mod/hybridteaching/locallib.php');
+require_once($CFG->dirroot . '/mod/hybridteaching/classes/helper.php');
 
 // Course module id.
 $id = optional_param('id', 0, PARAM_INT);
@@ -76,15 +77,6 @@ $PAGE->set_heading(format_string($course->fullname));
 $PAGE->set_context($modulecontext);
 $PAGE->set_activity_record($hybridteaching);
 
-// Output starts.
-//$renderer = $PAGE->get_renderer('mod_hybridteaching');
-//try {
-//    $renderedinfo = $renderer->render(new view_page($moduleinstance));
-//} catch (server_not_available_exception $e) {
-    //bigbluebutton_proxy::handle_server_not_available($instance);
-//}
-
-
 $renderer = $PAGE->get_renderer('mod_hybridteaching');
 
 echo $OUTPUT->header();
@@ -99,19 +91,105 @@ if ($hybridteaching->typevc){
     //si hay sessiones de vc creadas:  
     //(porque puede ser que sea programación de sesiones con vc y aun no se hayan creado las reuniones)
     if ($subobject->get_sessions()){
-            $resultsaccess=$subobject->get_zone_access($hybridteaching->id);
-            //dividir la vista en 3 mustaches: zona mensajes, boton reunion, zona grabaciones
-            echo $renderer->zone_access($resultsaccess);
-            //obtnener aquí las grabaciones
-            //echo $renderer->zone_records();
+        $resultsaccess=$subobject->get_zone_access($hybridteaching->id);
+        
+        //calcular resultados:
+
+        $date = new DateTime();
+        $date->setTimestamp(intval($resultsaccess['starttime']));
+        $timeinit=$date->getTimestamp();
+        $timeend=$timeinit+intval($resultsaccess['duration']);
+ 
+        /*calculate status:*/
+            /*in progress*/
+        $isprogress=false;
+        $isstart=false;
+        $isfinished=false;
+
+        if ($timeinit<time() && $timeend>time()){
+            $status=get_string('status_progress','mod_hybridteaching');
+            $isprogress=true;
+        }
+            /*will start*/
+        else if ($timeinit>=time()){
+            $status=get_string('status_start','mod_hybridteaching');
+            $isstart=true;
+        }
+            /*finished*/
+        else if ($timeend<time()){
+            $status=get_string('status_finished','mod_hybridteaching');
+            $isfinished=true;
+        }
+
+        //closedoors
+        $closedoors='';
+        $isclosedoors=false;
+        $closedoorstime=0;
+        if ($hybridteaching->closedoorscount>0){               
+            $isclosedoors=true;
+            if ($hybridteaching->closedoorsunit==0){
+                $closedoors = get_string('closedoors_hours', 'mod_hybridteaching',$hybridteaching->closedoorscount);
+                $multiplydoors=3600;
+            } else if ($hybridteaching->closedoorsunit==1)
+                $closedoors = get_string('closedoors_minutes', 'mod_hybridteaching',$hybridteaching->closedoorscount);
+                $multiplydoors=60;
+            } else {
+                $closedoors = get_string('closedoors_seconds', 'mod_hybridteaching',$hybridteaching->closedoorscount);
+                $multiplydoors=1;
+            }
+            $closedoorstime=$hybridteaching->closedoorscount*$multiplydoors;
+        }
+
+        //advanceentry (abrir puertas)
+        $advanceentrytime=0;
+        $isadvanceentry=false;
+        if ($hybridteaching->advanceentrycount>0){
+            $isadvanceentry=true;
+            if ($hybridteaching->advanceentryunit==0){
+                $multiplyadvance=3600;
+            } else if ($hybridteaching->advanceentryunit==1){
+                $multiplyadvance=60;
+            } else{
+                $multiplyadvance=1;
+            }
+            $advanceentrytime=$hybridteaching->advanceentrycount*$multiplyadvance;
+        }
+
+        $canentry=false;
+        if (($timeinit-$advanceentrytime)<time() && ($timeinit+$closedoorstime)>time()){
+            $canentry=true;
+        }
+
+        $result=array(
+            'isaccess' => true,
+            'id' => $hybridteaching->course,
+            'url' => $resultsaccess['url'],
+            'isprogress' => $isprogress,
+            'isstart' => $isstart,
+            'isfinished' => $isfinished,
+            'starttime' => userdate($timeinit),
+            'duration' => helper::get_hours_format($resultsaccess['duration']),
+            'finished' => userdate($timeend),
+            'status' => $status,
+            'isadvanceentry' => $isadvanceentry,
+            'advanceentrytime' => helper::get_hours_format($advanceentrytime),
+            'isclosedoors'=> $isclosedoors,
+            'closedoors' => $closedoors,
+            'closedoorstime' => helper::get_hours_format($closedoorstime),
+            'canentry' => $canentry,
+            
+        );
+
+        //dividir la vista en 3 mustaches: zona mensajes, boton reunion, zona grabaciones
+        echo $renderer->zone_access($result);
+        //obtnener aquí las grabaciones
+        //echo $renderer->zone_records();
     }
     else {
         //errors: there are not sessions
         $errors = ['error'=> get_string('nosessions','mod_hybridteaching')];
         echo $renderer->zone_errors($errors);
     }
-
-}
 
 
 echo $OUTPUT->footer();
