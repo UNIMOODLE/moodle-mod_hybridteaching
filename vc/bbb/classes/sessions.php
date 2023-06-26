@@ -51,25 +51,18 @@ class sessions extends sessions_controller {
         // As it is a new activity, assign passwords. 
         //process_pre_save:   //mod_helper::process_pre_save($moduleinstance);
 
-        $session = new stdClass();
+        $bbb = new stdClass();
+        $bbb->htsession = $data->htsession;
+        $bbb->meetingid=meeting::get_unique_meetingid_seed();
+        $bbb->moderatorpass = plugin::random_password(12);
+        $bbb->viewerpass = plugin::random_password(12, $bbb->moderatorpass);
+        [$bbb->guestlinkuid, $bbb->guestpassword] = plugin::generate_guest_meeting_credentials();
 
-        $session->hybridteachingid=$data->hybridteachingid;
-        //$session->meetingid = 0;
-        $session->meetingid=meeting::get_unique_meetingid_seed();
-        $session->moderatorpass = plugin::random_password(12);
-        $session->viewerpass = plugin::random_password(12, $session->moderatorpass);
-        [$session->guestlinkuid, $session->guestpassword] = plugin::generate_guest_meeting_credentials();
-        $session->starttime=$data->starttime;
-        $session->duration=$data->duration;
+        $bbb->timecreated = time();
+        $bbb->timemodified = 0;
+        $bbb->createdby = $USER->id;
 
-        $session->timecreated = time();
-        $session->timemodified = 0;
-        $session->createdby = $USER->id;
-
-        $session->id = $DB->insert_record('hybridteachvc_bbb', $session);
-
-
-        return $session;
+        $bbb->id = $DB->insert_record('hybridteachvc_bbb', $bbb);
     }
     
     public function update_session_extended($data) {
@@ -87,43 +80,33 @@ class sessions extends sessions_controller {
     }
 
     /**
-     * Deletes a session and its corresponding Zoom meeting via the mod_hybrid_webservice.
+     * Deletes a session and its corresponding BBB meeting via the mod_hybrid_webservice (if exists).
      *
      * @param mixed $id The ID of the session to delete.
      * @throws Some_Exception_Class description of exception
      * @return Some_Return_Value
      */
-    public function delete_session_extended($id) {
+    public function delete_session_extended($htsession, $instanceid) {
         global $DB;
 
-        $bbb = $DB->get_record('hybridteachvc_bbb', array('hybridteachingid' => $id));
+        $bbb = $DB->get_record('hybridteachvc_bbb', ['htsession' => $htsession]);
         $meeting = new meeting($bbb);
         $meeting->end_meeting(meetingid, $bbb->moderatorpass);
 
-
-
-        $service = new mod_hybrid_webservice();        
-        $zoom = $DB->get_record('hybridteachvc_bbb', array('hybridteachingid' => $id));
-        $service->delete_meeting($zoom->meetingid, 0); 
-        parent::delete_session($id);
+        $DB->delete_records('hybridteachvc_bbb', ['htsession' => $htsession]);
     }
 
     /**
-     * Deletes all Zoom meetings associated with a given hybridteaching instance.
+     * Deletes all BBB meetings associated with a given hybridteaching instance.
      *
      * @param mixed $moduleinstance the instance of the hybrid teaching
      * @throws Exception if an error occurs while deleting a meeting
      * @return void
      */
-    public function delete_all_sessions_extended($moduleinstance) {
+    public function delete_all_sessions_extended($htsession,$instanceid) {
         global $DB;
-        /*$service = new mod_hybrid_webservice();        
-        $zooms = $DB->get_records('hybridteachvc_bbb', array('hybridteachingid' => $moduleinstance->id));
-        foreach ($zooms as $zoom) {
-            $service->delete_meeting($zoom->meetingid, 0);
-        }*/
 
-        $DB->delete_records('hybridteachvc_bbb', array('hybridteachingid' => $moduleinstance->id));
+        $DB->delete_records('hybridteachvc_bbb', ['htsession' => $htsession]);
     }
 
     /**
@@ -134,32 +117,29 @@ class sessions extends sessions_controller {
      * @return object The populated stdClass object with Zoom meeting details.
      */
     function populate_htbbb_from_response($module, $response) {
-        global $USER;
-        
-        $newzoom = new stdClass();
-        $newzoom->hybridteachingid = $module->id;
-        $newzoom->meetingid = $response->id;
-        // Provisional name
-        $newzoom->name = $module->name;
-        $newzoom->hostid = $response->host_id;
-        $newzoom->hostemail = $response->host_email;
-        $newzoom->starturl = $response->start_url;
-        $newzoom->joinurl = $response->join_url;
-        $newzoom->optionhostvideo = $response->settings->host_video;
-        $newzoom->optionparticipantsvideo = $response->settings->participant_video;
-        $newzoom->existsonzoom = 1;
-        $newzoom->visible = 1;
-        $newzoom->timecreated = time();
-        $newzoom->createdby = $USER->id;
 
-        if (isset($response->start_time)) {
-            $newzoom->starttime = strtotime($response->start_time);
-        }
-
-        if (isset($response->duration)) {
-            $newzoom->duration = $response->duration * 60;
-        }
+        //not can populate yet
         
-        return $newzoom;
     }
+
+        /**
+     * Loads a BBB instance based on the given instance ID.
+     *
+     * @param int $instanceid The ID of the instance to load.
+     * @throws Exception If the SQL query fails.
+     * @return stdClass|false The Zoom instance record on success, or false on failure.
+     */
+    public function load_bbb_instance($instanceid) {
+        global $DB;
+
+        $sql = "SELECT bi.serverurl, bi.sharedsecret, bi.pollinterval
+                  FROM {hybridteaching_instances} hi
+                  JOIN {hybridteachvc_bbb_instance} bi ON bi.id = hi.subplugininstanceid
+                 WHERE hi.id = :instanceid AND hi.visible = 1";
+
+        $instance = $DB->get_record_sql($sql, ['instanceid' => $instanceid]);
+        return $instance;
+    }
+
+
 }

@@ -158,6 +158,7 @@ The sessions begin on the date of the base session and continue until the \'repe
   * <strong>Repeat every</strong>: This allows for a frequency setting. If your class will meet every week, select 1; if it will meet every other week, select 2; every 3rd week, select 3, etc.
   * <strong>Repeat until</strong>: Select the last day of class (the last day you want to take attendance).
 ';
+
 $string['repeaton'] = 'Repeat on';
 $string['repeatevery'] = 'Repeat every';
 $string['repeatuntil'] = 'Repeat until';
@@ -165,6 +166,9 @@ $string['otheroptions'] = 'Other options';
 $string['sessionname'] = 'Session name';
 
 $string['nosessions'] = 'There are not sessions';
+$string['nogroup'] = 'Next session is not for your group';
+$string['nosubplugin'] = 'Incorrect type of videoconference. El tipo de videoconferencia es incorrecto. Contact your administrator';
+$string['noinstance'] = 'The selected video conference configuration does not exist. Contact your administrator';
 
 $string['status_progress'] = 'In progress';
 $string['status_finished'] ='Has finished';

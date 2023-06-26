@@ -45,7 +45,7 @@ class addsessions_form extends moodleform {
                     $selectgroups[$group->id] = $group->name;
                 }
                 if ($groupmode == SEPARATEGROUPS) {
-                    array_shift($selectgroups);
+                    unset($selectgroups[0]); 
                 }
                 $mform->addElement('select', 'groupid', get_string('sessionfor', 'hybridteaching'), $selectgroups);
             } else {

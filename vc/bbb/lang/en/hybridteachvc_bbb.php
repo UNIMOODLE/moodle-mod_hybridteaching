@@ -14,3 +14,8 @@ $string['bbberr_field_missing'] = '{$a} not found';
 $string['errorwebservice'] = 'BBB webservice error: {$a}.';
 $string['bbberr_no_access_token'] = 'No access token returned';
 //$string['licenses'] = 'Licenses';
+
+$string['view_error_unable_join_student'] = 'Unable to connect to the BigBlueButton server.';
+$string['view_error_unable_join_teacher'] = 'Unable to connect to the BigBlueButton server. Please contact an administrator.';
+$string['view_error_unable_join'] = 'Unable to join the session. Please check the server added in the BigBlueButton instance and check that the BigBlueButton server is up and running.';
+

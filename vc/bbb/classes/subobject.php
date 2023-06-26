@@ -1,5 +1,9 @@
 <?php
 
+//use mod_bigbluebuttonbn\local\proxy\bigbluebutton_proxy;
+require_once($CFG->dirroot.'/mod/hybridteaching/vc/bbb/classes/bbbproxy.php');
+use mod_bigbluebuttonbn\local\exceptions\server_not_available_exception;
+
 
 class subobject{
 
@@ -38,6 +42,12 @@ class subobject{
                                   WHERE hs.hybridteachingid = :id AND (hs.starttime + hs.duration >= UNIX_TIMESTAMP() OR hs.starttime IS NULL) 
                                ORDER BY hs.starttime DESC LIMIT 1", array('id' => $hybridteachingid));
 
+// Require a working server.
+bbbproxy::require_working_server($vc);        
+
+
+
+
         /*
         if ($vc){
             //si hospedador:
@@ -62,9 +72,12 @@ class subobject{
                 'url'=>$starturl,
                 'starttime'=>$vc->starttime,
                 'duration'=>$vc->duration,
-                'status'=> $status
+                'status'=> $status,
             ];
             return $array;
         }
     }
+
+
+    
 }

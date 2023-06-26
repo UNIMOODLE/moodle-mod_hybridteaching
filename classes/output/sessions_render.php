@@ -232,7 +232,7 @@ class hybridteaching_sessions_render extends \table_sql implements dynamic_table
             // Hide/show links.
             $class = '';
             $sessionid = $session['id'];
-            $group = $session['groupid'] == 0 ? get_string('commonsession', 'hybridteaching') : groups_get_group($session['groupid']);
+            $group = $session['groupid'] == 0 ? get_string('commonsession', 'hybridteaching') : groups_get_group($session['groupid'])->name;
             $name = $session['name'];
             /*$description = file_rewrite_pluginfile_urls($session['description'],
                 'pluginfile.php', $this->hybridteaching->context->id, 'mod_hybridteaching', 'session', $sessionid);*/

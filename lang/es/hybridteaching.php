@@ -105,8 +105,6 @@ $string['hybridteaching:sessions'] = 'Ver sesiones';
 $string['hybridteaching:attendance'] = 'Ver asistencia';
 $string['hybridteaching:import'] = 'Importar';
 $string['hybridteaching:export'] = 'Exportar';
-
-
 $string['type'] = 'Tipo';
 $string['order'] = 'Ordenar';
 $string['hideshow'] = 'Ocultar/Mostrar';
@@ -140,7 +138,6 @@ $string['addsession'] = 'Añadir sesión';
 $string['commonsession'] = 'Todos los grupos';
 $string['sessiontypehelp'] = 'Puedes añadir sesiones para todos los alumnos o para un grupo de alumnos. 
 La posibilidad de añadir diferentes tipos depende del modo de grupo de la actividad.
-
   * En el modo de grupo "Sin grupos" sólo puede añadir sesiones para todos los estudiantes.
   * En el modo de grupo "Grupos separados" puede añadir sólo sesiones para un grupo de estudiantes.
   * En el modo de grupo "Grupos visibles" puede añadir ambos tipos de sesiones.
@@ -169,6 +166,9 @@ $string['otheroptions'] = 'Otras opciones';
 $string['sessionname'] = 'Nombre de la sesión';
 
 $string['nosessions'] = 'No hay sesiones disponibles';
+$string['nogroup'] = 'La próxima sesión no se realiza para su grupo';
+$string['nosubplugin'] = 'El tipo de videoconferencia es incorrecto. Contacte con su administrador';
+$string['noinstance'] = 'No existe la configuración de videoconferencia seleccionada. Contacte con su adminstrador';
 
 $string['status_progress'] = 'Videoconferencia en progreso';
 $string['status_finished'] ='Esta sesión de videoconferencia ha finalizado';
@@ -189,4 +189,5 @@ $string['closedoorsnext'] = 'Se cerrarán sus puertas tras';
 $string['closedoorsnext2'] = 'del inicio';
 $string['closedoorsprev'] = 'Esta sesión cerró sus puertas a los';
 $string['finished'] = 'Esta sesión se terminó el';
+
 

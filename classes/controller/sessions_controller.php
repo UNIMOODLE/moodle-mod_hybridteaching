@@ -24,8 +24,10 @@
  */
 
 defined('MOODLE_INTERNAL') || die();
+global $CFG;
 
 require_once('common_controller.php');
+require_once($CFG->dirroot . '/mod/hybridteaching/classes/helper.php');
 
 class sessions_controller extends common_controller {
     const MINUTE_TIMETYPE = 1;
@@ -209,8 +211,12 @@ class sessions_controller extends common_controller {
             $errormsg = 'errordeletesession';
         }
         if (!empty($sessiontype)) {
-            $subpluginsession = new sessions();
-            $subpluginsession->delete_session_extended($id, $this->hybridobject->instance);
+            // Check if the plugin exists
+            if (helper::subplugin_instance_exists($this->hybridobject->instance)){
+                require_once($CFG->dirroot.'/mod/hybridteaching/vc/'.$this->hybridobject->instance.'/classes/sessions.php');
+                $subpluginsession = new sessions();
+                $subpluginsession->delete_session_extended($id, $this->hybridobject->instance);
+            }
         }
         return $errormsg;
     }
@@ -223,13 +229,17 @@ class sessions_controller extends common_controller {
      */
     public function delete_all_sessions($moduleinstance) {
         global $DB;
-        
+
         $sessiontype = $DB->get_field('hybridteaching_session', 'typevc', array('id' => $moduleinstance->id));
         if (!empty($sessiontype)) {
-            $sessions = $DB->get_records('hybridteaching_session', array('hybridteachingid' => $moduleinstance->id), '', 'id');
-            $subpluginsession = new sessions();
-            foreach ($sessions as $session) {
-                $subpluginsession->delete_all_sessions_extended($session, $this->hybridobject->instance);
+            $sessionsht = $DB->get_records('hybridteaching_session', array('hybridteachingid' => $moduleinstance->id), '', 'id');
+            // Check if the plugin exists
+            if (helper::subplugin_instance_exists($this->hybridobject->instance)){
+                require_once($CFG->dirroot.'/mod/hybridteaching/vc/'.$moduleinstance->typevc.'/classes/sessions.php');
+                $subpluginsession = new sessions();
+                foreach ($sessionsht as $session) {
+                    $subpluginsession->delete_all_sessions_extended($session, $this->hybridobject->instance);
+                }
             }
         }
 
@@ -249,6 +259,34 @@ class sessions_controller extends common_controller {
         return $sessiondata;
     }
 
+    /**
+     * Retrieve the next session from the database using the given hybridteaching ID.
+     *
+     * @param int $htid
+     * @throws Some_Exception_Class Description of the exception that can be thrown.
+     * @return mixed The next session data.
+     */
+    public function get_next_session($htid){
+        global $DB;
+        
+        $sql="SELECT * 
+            FROM {hybridteaching_session} AS hs
+            WHERE hs.hybridteachingid = :id AND (hs.starttime + hs.duration >= UNIX_TIMESTAMP() OR hs.starttime IS NULL) 
+            ORDER BY hs.starttime LIMIT 1";
+           
+        $nextsession = $DB->get_record_sql($sql,['id'=> $htid]);
+
+        /*if there not are next session, get the last session*/
+        if (!$nextsession){
+            $sql="SELECT * 
+                FROM {hybridteaching_session} AS hs
+                WHERE hs.hybridteachingid = :id
+                ORDER BY hs.starttime DESC LIMIT 1";
+            $nextsession = $DB->get_record_sql($sql,['id'=> $htid]);
+        }
+
+        return $nextsession;
+    }
 
     /**
      * Counts the number of sessions for a given hybrid teaching object.
@@ -305,10 +343,6 @@ class sessions_controller extends common_controller {
         global $USER;
 
         $session = clone $data;
-        echo "sesion:";
-        var_dump($session);
-        echo "<br><br>instance:";
-        var_dump($data);
         $description = !empty($data->description) ? $data->description : '';
         $session->description = null;
         $session->descrip = $description;

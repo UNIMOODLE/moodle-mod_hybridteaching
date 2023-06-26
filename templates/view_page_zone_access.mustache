@@ -1,7 +1,11 @@
 <div id="zonemessage">
-	----------------
 	<BR>
-	ZONA DE MENSAJES
+	{{#alert}}
+		<!-- Notification: depends on will start, progress or finished -->
+		{{< core/notification_base}}
+			{{$alertclass}}{{alert}}{{/alertclass}}
+		{{/core/notification_base}}
+	{{/alert}}
 	<BR>
 	{{#isstart}}
 		{{#str}} sessionstart, mod_hybridteaching {{/str}}
@@ -16,14 +20,15 @@
 			{{#str}} closedoors, mod_hybridteaching {{/str}} : {{closedoors}}
 		{{/isclosedoors}}
 		<br>
-		{{#str}} status, mod_hybridteaching {{/str}} {{status}} 
 	<BR>
 	{{/isstart}}
 
 	{{#isprogress}}
 		{{#str}} inprogress, mod_hybridteaching {{/str}}
-		<br>
-		{{#str}} status, mod_hybridteaching {{/str}} {{starttime}}
+		{{#str}} started, mod_hybridteaching {{/str}}
+		{{starttime}} <br>
+		{{#str}} estimatedduration, mod_hybridteaching {{/str}} 
+		{{duration}}
 		<br>
 		{{#isclosedoors}}
 			{{#canentry}}
@@ -38,8 +43,6 @@
 	{{/isprogress}}
 
 	{{#isfinished}}
-		{{status}}
-		<br>
 		{{#str}} finished, mod_hybridteaching {{/str}} {{finished}}
 	{{/isfinished}}
 	<br>
