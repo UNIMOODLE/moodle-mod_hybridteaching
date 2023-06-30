@@ -87,16 +87,22 @@ echo $OUTPUT->header();
 require_once($CFG->dirroot.'/mod/hybridteaching/classes/controller/sessions_controller.php');
 
 $session = new sessions_controller($hybridteaching);
+//get next session
 $sessionshow = $session->get_next_session($hybridteaching->id);
-  
-//si existe tipo de videoconferencia:
+
+//if there are not next session, get last session
 if (!$sessionshow) {
-    //errors: there are not sessions
-    echo $OUTPUT->notification(get_string('nosessions','mod_hybridteaching', 'info'));
+    $sessionshow = $session->get_last_session($hybridteaching->id);
+}
+//if no next session neigher last session: notification
+if (!$sessionshow){
+        //errors: there are not sessions
+        echo $OUTPUT->notification(get_string('nosessions','mod_hybridteaching', 'info'));
 }
 else {
-
     if (!has_capability ('moodle/site:accessallgroups', $modulecontext)){  
+
+    //ARREGLAR ESTA PARTE        
         //comprobar también que el usuario tiene permisos para acceder, que pertenezca al grupo, que puede acceder, bla bla,....    
         //comprobar que el usuario pertenece al grupo y si tiene permisos
         $groupmode = groups_get_activity_groupmode($cm);
@@ -108,59 +114,49 @@ else {
         echo $OUTPUT->notification(get_string('nosessions','mod_hybridteaching', 'info'));
     }   
     else {
-
         $result=[];
         $correct=false;
-        if ($sessionshow->typevc){
+        if ($hybridteaching->instance){
             //comprobar que la instancia en hybridteaching_instances existe y no se ha borrado
             //y que el tipo de vc existe con el pluginmanager
             $config_exists = helper::subplugin_instance_exists($hybridteaching->instance);
-            if ($config_exists==0){
+            if (!is_object($config_exists) && $config_exists==0){
                 echo $OUTPUT->notification(get_string('nosubplugin','mod_hybridteaching', 'warning'));
                 $correct=false;
             }
-            else if ($config_exists==-1){
+            else if (!is_object($config_exists) && $config_exists==-1){
                 echo $OUTPUT->notification(get_string('noinstance','mod_hybridteaching', 'warning'));
                 $correct=false;
             }
-            else if ($config_exists==1){
-                require_once($CFG->dirroot.'/mod/hybridteaching/vc/'.$hybridteaching->typevc.'/classes/subobject.php');
-                $subobject=new subobject($sessionshow->id);
-        
-                //si hay sessiones de vc creadas:  
-                //(porque puede ser que sea programación de sesiones con vc y aun no se hayan creado las reuniones)
-
-                if ($subobject->get_sessions()){
-                    $resultsaccess=$subobject->get_zone_access();
-                    $result['url'] = $resultsaccess['url'];
-                    $result['ishost'] = $resultsaccess['ishost'];
-                    /*$result[]=[
-                        'url' => $resultsaccess['url'],
-                        'ishost' => $resultsaccess['ishost'],
-                    ];*/
-                }
+            else if ($config_exists){
                 $correct=true;
             }            
         } else {
             $correct=true;
         }
 
-        //si existe vc y 
         if ($correct){
-            //calcular resultados a mostrar:
+            //calculate results:
             $date = new DateTime();
             $date->setTimestamp(intval($sessionshow->starttime));
             $timeinit=$date->getTimestamp();
             $timeend=$timeinit+intval($sessionshow->duration);
 
             /*calculate status:*/
-            /*in progress*/
+            $isundatedsession=false;
             $isprogress=false;
             $isstart=false;
             $isfinished=false;
             $alert = 0;
 
-            if ($timeinit<time() && $timeend>time()){
+                /* starttime=0: permite acceso en cualquier momento */
+            if ($hybridteaching->starttime==0){
+                $status=get_string('status_undated','mod_hybridteaching');
+                $isundatedsession=true;
+                $alert='alert-info';
+            } 
+            /* in progress */
+            else if ( ($timeinit<time() && $timeend>time())){
                 $status=get_string('status_progress','mod_hybridteaching');
                 $isprogress=true;
                 $alert='alert-warning';
@@ -176,7 +172,7 @@ else {
                 $status=get_string('status_finished','mod_hybridteaching');
                 $isfinished=true;
                 $alert='alert-danger';
-            }
+            } 
         
             //closedoors
             $closedoors='';
@@ -213,11 +209,72 @@ else {
             }
 
             $canentry=false;
-            if (($timeinit-$advanceentrytime)<time() && ($timeinit+$closedoorstime)>time()){
+          
+            //if starttime=0, can entry always depends on rol
+            if ($hybridteaching->starttime==0){
                 $canentry=true;
             }
+
+            else {
+                //if have advanceentrytime
+                if ( ($timeinit-$advanceentrytime)<time() ){
+                    if ($isclosedoors){
+                        //if have cloors
+                        if ( ($timeinit+$closedoorstime)>time() ){
+                            $canentry=true;
+                        }
+                    }
+                    else {
+                        if ($timeend>time()){  //if not closedoors and not finished 
+                            $canentry=true;
+                        }
+                    }
+                }
+            }
+            
+            if ($hybridteaching->instance && $config_exists){
+                // AQUI CREAR LA VC SI NO EXISTE
+
+                //obtener el tipo de vc dependiendo del campo instance.
+                //$subplugin_instance=$DB->get_record('hybridteaching_instances',['id' => $hybridteaching->instance, 'visible' => 1]);
+                
+                require_once($CFG->dirroot.'/mod/hybridteaching/vc/'.$config_exists->type.'/classes/subobject.php');
+                require_once($CFG->dirroot.'/mod/hybridteaching/vc/'.$config_exists->type.'/classes/sessions.php');
+
+                //aqui crear la vc si no existe ya.
+                //1. comprobar si existe la vc en zoom, bbb...
+                //2. si no existe, crearla
+                    //2.1 primero comprobar si el usuario tiene permisos para crear la videoconferencia,
+                        //si hay que esperar al moderador,  si tiene acceso para crear,...
+                //3. si existe, obtenerla.
+
+
+                //el futuro es convertir este subobject en el sessions.php de cada vc. Solo uno, para qué mas.....
+                $subobject=new subobject($sessionshow->id);
+                //si hay sessiones de vc creadas:  
+                //(porque puede ser que sea programación de sesiones con vc y aun no se hayan creado las reuniones)
+
+                //si hay reunión zoom creada, obtenerla. Sino, crearla si tiene permisos
+              
+                if ($subobject->get_sessions()){
+                    $resultsaccess=$subobject->get_zone_access();
+                    $result['url'] = $resultsaccess['url'];
+                    $result['ishost'] = $resultsaccess['ishost'];
+                }
+                else {
+                    //si hay sesión pero no hay vc, crearla si es el momento y si hay permisos:
+                    //IMPORTANTE:
+                    //FALTA COMPROBAR SI HAY PERMISOS: SI ES PROFESOR, O SI PUEDE ENTRAR ANTES QUE EL ANFITRION
+                    if ($sessionshow && $canentry==true){ 
+                        $sessionvc=new sessions();
+                        $sessionvc->create_unique_session_extended($sessionshow, $hybridteaching);
+                    }
+                }
+            }
+
             $result['isaccess'] = true;
             $result['id'] = $hybridteaching->course;
+            $result['isundatedsession'] = $isundatedsession;
             $result['isprogress'] = $isprogress;
             $result['isstart'] = $isstart;
             $result['isfinished'] = $isfinished;

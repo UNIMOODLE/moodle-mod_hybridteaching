@@ -14,17 +14,17 @@
 		{{duration}} <br>
 		{{#isadvanceentry}}
 			{{#str}} advanceentry, mod_hybridteaching {{/str}}  {{advanceentrytime}}
+			<br>
 		{{/isadvanceentry}}
-		<br>
+		
 		{{#isclosedoors}}
 			{{#str}} closedoors, mod_hybridteaching {{/str}} : {{closedoors}}
+			<BR>
 		{{/isclosedoors}}
-		<br>
-	<BR>
+	
 	{{/isstart}}
 
 	{{#isprogress}}
-		{{#str}} inprogress, mod_hybridteaching {{/str}}
 		{{#str}} started, mod_hybridteaching {{/str}}
 		{{starttime}} <br>
 		{{#str}} estimatedduration, mod_hybridteaching {{/str}} 
@@ -44,17 +44,19 @@
 
 	{{#isfinished}}
 		{{#str}} finished, mod_hybridteaching {{/str}} {{finished}}
+		<br>
 	{{/isfinished}}
-	<br>
-	----------------
+
+	{{#isundatedsession}}
+	{{/isundatedsession}}
+	
 </div>
 
 {{#canentry}}
 	<div id="zoneaccess">		
 	<!-- Aqui enviar solo una url encriptada o algo así, y nada mas, para llegar y pulsar.
 	Del loadmeeting quitar casi todo, solo enviar la url, el course, y ya. -->
-		<form action="./loadmeeting.php"
-		target="_blank">
+		<form action="./loadmeeting.php" target="_blank">
 			<button type="submit" class="btn btn-success">Comenzar reunión</button>
 			<input type="hidden" name="id" value="{{id}}">
 			<input type="hidden" name="url" value="{{url}}">

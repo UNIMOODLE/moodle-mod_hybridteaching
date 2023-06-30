@@ -361,21 +361,12 @@ class mod_hybrid_webservice {
      * @todo Add functionality for 'alternative_hosts' => $zoom->option_alternative_hosts in $data['settings']
      * @todo Make UCLA data fields and API data fields match?
      */
-    protected function _database_to_api($zoom) {
+    protected function _database_to_api($zoom,$ht) {
         global $CFG;
-
-
 
         $data = array(
             'topic' => $zoom->name,
-            //'settings' => array(
-                //'host_video' => (bool) ($zoom->option_host_video),
-                //'audio' => $zoom->option_audio
-            //)
         );
-        if (isset($zoom->intro)) {
-            $data['agenda'] = strip_tags($zoom->intro);
-        }
         if (isset($CFG->timezone) && !empty($CFG->timezone)) {
             $data['timezone'] = $CFG->timezone;
         } else {
@@ -387,57 +378,37 @@ class mod_hybrid_webservice {
          SE ACTIVA/DESACTIVA DESDE LA CUENTA, NO DESDE LA REUNION:
          si la cuenta lo tiene activado, se activa
          Si la cuenta lo tiene desactivado, se queda desactivado, 
-         no funciona auto_recording
-        */
-        if (isset($zoom->initialrecord) && $zoom->initialrecord==1){
+         no funciona auto_recording.
+        Comprobar más adelante por si lo hubieran arreglado en la api
+         */
+        if (isset($ht->initialrecord) && $ht->initialrecord==1){
             $data['auto_recording'] = HTZOOM_RECORDING_CLOUD;
         }
-        if (isset($zoom->userecordvc) && $zoom->userecordvc==0) {
+        if (isset($ht->userecordvc) && $ht->userecordvc==0) {
             $data['auto_recording'] = HTZOOM_RECORDING_DISABLED;
         }
 
-        if (isset($zoom->webinar) && $zoom->webinar) {
-            //opción "Permitir acceso en cualquier momento", depende de variable undatedsession
-            $data['type'] = $zoom->undatedsession ? HTZOOM_RECURRING_WEBINAR : HTZOOM_SCHEDULED_WEBINAR;
-        } else {
-            $data['type'] = $zoom->undatedsession ? HTZOOM_RECURRING_MEETING : HTZOOM_SCHEDULED_MEETING;
-        }
-        if ($data['type'] == HTZOOM_SCHEDULED_MEETING || $data['type'] == HTZOOM_SCHEDULED_WEBINAR) {
+        $data['type'] = $ht->undatedsession ? HTZOOM_RECURRING_MEETING : HTZOOM_SCHEDULED_MEETING;
+
+        if ($data['type'] == HTZOOM_SCHEDULED_MEETING) {
             // Convert timestamp to ISO-8601. The API seems to insist that it end with 'Z' to indicate UTC.
             $data['start_time'] = gmdate('Y-m-d\TH:i:s\Z', $zoom->starttime);
             $data['duration'] = (int) ceil($zoom->duration / 60);
         }
 
-        if (isset($zoom->option_jbh)) {
-            $data['settings']['join_before_host'] = ! (bool) ($zoom->waitmoderator);
+        if (isset($ht->waitmoderator)) {
+            $data['settings']['join_before_host'] = ! (bool) ($ht->waitmoderator);
         }
 
-        if (isset($zoom->disablewebcam)){
-            $data['settings']['host_video'] = (bool)!$zoom->disablewebcam;
-            $data['settings']['participant_video'] = (bool)!$zoom->disablewebcam;
-        }
-        /*if (isset($zoom->option_host_video)) {
-            $data['settings']['host_video'] =(bool) ($zoom->optionhostvideo);
-        }*/
-        /*if (isset($zoom->option_participants_video)) {
-            $data['settings']['participant_video'] = (bool) ($zoom->option_participants_video);
-        }*/
-
-        if (isset($zoom->disablemicro)){
-            $data['settings']['mute_upon_entry']=(bool)$zoom->disablemicro;
+        if (isset($ht->disablecam)){
+            $data['settings']['host_video'] = (bool)!$ht->disablecam;
+            $data['settings']['participant_video'] = (bool)!$ht->disablecam;
         }
 
-
-
-        //eliminar anfitriones alternativos. Ahora anfitriones alternativos son los profesores del curso, si se añaden
-        /*if (isset($zoom->alternative_hosts)) {
-            //$data['settings']['alternative_hosts'] = $zoom->alternative_hosts;
-        }*/
-
-        
-        if (isset($zoom->password)) {
-            $data['password'] = $zoom->password;
-        }   
+        if (isset($ht->disablemic)){
+            $data['settings']['mute_upon_entry']=(bool)$ht->disablemic;
+        }
+       
 
         return $data;
     }
@@ -449,16 +420,11 @@ class mod_hybrid_webservice {
      * @param stdClass $zoom The meeting to create.
      * @return stdClass The call response.
      */
-    public function create_meeting($zoom) {
-        if (!isset($zoom->webinar)){
-            $zoom->webinar=false;
-        }
-        $zoom->undatedsession = 0;
+    public function create_meeting($zoom,$ht) {
+        $zoom->undatedsession = $ht->undatedsession;
 
-        //$url = "users/$this->hostid/" . ($zoom->webinar ? 'webinars' : 'meetings');
-        $url = "users/$this->emaillicense/" . ($zoom->webinar ? 'webinars' : 'meetings');
-
-        $response=$this->_make_call($url, $this->_database_to_api($zoom), 'post');
+        $url = 'users/'.$this->emaillicense.'/meetings';
+        $response=$this->_make_call($url, $this->_database_to_api($zoom,$ht), 'post');
         return $response;
 
     }
@@ -469,14 +435,11 @@ class mod_hybrid_webservice {
      * @param stdClass $zoom The meeting to update.
      * @return void
      */
-    public function update_meeting($zoom) {
-        if (!isset($zoom->webinar)){
-            $zoom->webinar=false;
-        }
-        $zoom->undatedsession = 0;
+    public function update_meeting($zoom,$ht) {
+        $zoom->undatedsession = $ht->undatedsession;
 
-        $url = ($zoom->webinar ? 'webinars/' : 'meetings/') . $zoom->meetingid;
-        $this->_make_call($url, $this->_database_to_api($zoom), 'patch');
+        $url = 'meetings/' . $zoom->meetingid;
+        $this->_make_call($url, $this->_database_to_api($zoom,$ht), 'patch');
     }
 
     /**
@@ -655,7 +618,7 @@ class mod_hybrid_webservice {
 
     //crea  un meeting en función de la licencia que ha solicitado el usuario al crear la actividad zoom
     //se modifica zoom->host_id en función del correo de la licencia
-    public function create_meeting_calendar($zoom) {
+    public function create_meeting_calendar($ht,$zoom) {
 
         $zoomuserid = false;
         $service = new mod_hybridteaching_webservice();
@@ -679,7 +642,7 @@ class mod_hybrid_webservice {
         if ($zoom->host_id!=false){ //si hemos obtenido usuario correcto:
             $url = "users/$zoom->host_id/" . (isset($zoom->webinar) && $zoom->webinar ? 'webinars' : 'meetings');
 
-            return $this->_make_call($url, $this->_database_to_api($zoom), 'post');
+            return $this->_make_call($url, $this->_database_to_api($zoom, $ht), 'post');
         }
 
     }

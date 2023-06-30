@@ -35,7 +35,7 @@ class helper{
                 }
             }
             if ($find){
-                return 1;  //correct
+                return $instance;  //correct
             } else {
                 return 0;  //no subplugin
             }

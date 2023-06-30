@@ -51,6 +51,9 @@ class sessions extends sessions_controller {
         // As it is a new activity, assign passwords. 
         //process_pre_save:   //mod_helper::process_pre_save($moduleinstance);
 
+//AQUI PONER LO MISMO QUE EN BBB, EN EL MEETING.PHP, EN FUNCION CREATE_MEETING(), ES MEJOR
+
+
         $bbb = new stdClass();
         $bbb->htsession = $data->htsession;
         $bbb->meetingid=meeting::get_unique_meetingid_seed();

@@ -35,14 +35,15 @@ class sessions {
      * @param mixed $data The data to create the meeting.
      * @throws Exception If the meeting creation fails.
      */
-    public function create_unique_session_extended($data) {
+    public function create_unique_session_extended($session,$ht) {
         global $DB;
 
-        $zoominstance = $this->load_zoom_instance($data->instance);
+        $zoominstance = $this->load_zoom_instance($ht->instance);
+   
         $service = new mod_hybrid_webservice($zoominstance);
-        $response = $service->create_meeting($data);
+        $response = $service->create_meeting($session,$ht);
         if ($response != false) {
-            $zoom = $this->populate_htzoom_from_response($data, $response);
+            $zoom = $this->populate_htzoom_from_response($session, $response);
             $zoom->id = $DB->insert_record('hybridteachvc_zoom', $zoom);  
         }
     }
@@ -54,14 +55,17 @@ class sessions {
      * @throws Exception If there is an error updating the Zoom session.
      * @return string An error message if there was an error updating the Zoom session, otherwise null.
      */
-    public function update_session_extended($data) {
-        global $DB, $USER;
+    public function update_session_extended($data, $ht) {
+        global $DB;
         $errormsg = '';
-        $zoominstance = $this->load_zoom_instance($data->instance);
-        $service = new mod_hybrid_webservice($zoominstance);
-        $zoom = $DB->get_record('hybridteachvc_zoom', ['htsession' => $data->s]);
-        $zoom = (object) array_merge((array) $zoom, (array) $data);
-        $service->update_meeting($zoom);
+        $zoominstance = $this->load_zoom_instance($ht->instance);
+        $zoom = $DB->get_record('hybridteachvc_zoom', ['htsession' => $data->id]);
+        //if is created zoom, change in zoom with webservice
+        if ($zoom){
+            $zoom = (object) array_merge((array) $zoom, (array) $data);
+            $service = new mod_hybrid_webservice($zoominstance);
+            $service->update_meeting($zoom,$ht);
+        }
         return $errormsg;
     }
 
@@ -110,7 +114,7 @@ class sessions {
      */
     function populate_htzoom_from_response($data, $response) {        
         $newzoom = new stdClass();
-        $newzoom->htsession = $data->htsession;
+        $newzoom->htsession = $data->id;   //session id
         $newzoom->meetingid = $response->id;
         $newzoom->hostid = $response->host_id;
         $newzoom->hostemail = $response->host_email;

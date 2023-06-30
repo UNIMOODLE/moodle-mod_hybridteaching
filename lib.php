@@ -38,6 +38,9 @@ function hybridteaching_supports($feature) {
         case FEATURE_GRADE_HAS_GRADE:
         case FEATURE_GROUPS:
         case FEATURE_GROUPINGS:
+        //case FEATURE_MOD_PURPOSE
+                // MOD_PURPOSE_COMMUNICATION
+        //FEATURE_BACKUP_MOODLE2
         //case FEATURE_ADVANCED_GRADING:
             return true;
         default:

@@ -30,6 +30,7 @@ use core_table\dynamic as dynamic_table;
 require_once($CFG->dirroot . '/mod/hybridteaching/classes/controller/sessions_controller.php');
 require_once($CFG->libdir . '/tablelib.php');
 require_once($CFG->dirroot . '/user/lib.php');
+require_once($CFG->dirroot . '/mod/hybridteaching/classes/helper.php');
 
 class hybridteaching_sessions_render extends \table_sql implements dynamic_table {
     protected $hybridteaching;
@@ -105,11 +106,11 @@ class hybridteaching_sessions_render extends \table_sql implements dynamic_table
             // Hide/show links.
             $class = '';
             $sessionid = $session['id'];
-            $group = $session['groupid'] == 0 ? get_string('commonsession', 'hybridteaching') : groups_get_group($session['groupid']);
+            $group = $session['groupid'] == 0 ? get_string('commonsession', 'hybridteaching') : groups_get_group($session['groupid'])->name;
             $name = $session['name'];
             $date = $session['starttime'];
             $date = date('l, j \d\e F \d\e Y, H:i', $date);
-            $duration = $this->get_hours_format($session['duration']);
+            $duration = helper::get_hours_format($session['duration']);
             $recordingbutton = html_writer::start_tag('input', ['type' => 'button', 'value' => $strrecording]);
             $attendance = '75/100 (75%)';
             $materials = 'Recursos';
@@ -122,8 +123,9 @@ class hybridteaching_sessions_render extends \table_sql implements dynamic_table
                 'checked' => false,
             ]);
 
+
             $options = '';
-            $hybridteachingid = empty($hybridteaching) ? $cm->instance : $hybridteachingid;
+           $hybridteachingid = empty($hybridteaching) ? $cm->instance : $hybridteachingid;
             $params = array('sid' => $sessionid, 'h' => $hybridteachingid, 'id' => $id, 'returnurl' => $returnurl);
             if ($enabled) {
                 $options .= html_writer::link(new moodle_url($url, array_merge($params, array('action' => 'disable'))),
@@ -133,7 +135,6 @@ class hybridteaching_sessions_render extends \table_sql implements dynamic_table
                     $OUTPUT->pix_icon('t/show', $strenable, 'moodle', array('class' => 'iconsmall')));
                 $class = 'dimmed_text';
             }
-
             $options .= html_writer::link(new moodle_url($url, array_merge($params, array('action' => 'delete'))),
                 $OUTPUT->pix_icon('t/delete', $struninstall, 'moodle', array('class' => 'iconsmall')),
                 array('onclick' => 'if (!confirm("'.get_string('deleteconfirm', 'mod_hybridteaching', $name).'"))
@@ -240,7 +241,7 @@ class hybridteaching_sessions_render extends \table_sql implements dynamic_table
             $date = $session['starttime'];
             $hour = date('H:i', $date);
             $date = date('l, j \d\e F \d\e Y', $date);
-            $duration = $this->get_hours_format($session['duration']);
+            $duration = helper::get_hours_format($session['duration']);
             $materials = 'Recursos';
             $enabled = $session['visible'];
 
@@ -307,7 +308,7 @@ class hybridteaching_sessions_render extends \table_sql implements dynamic_table
         return $return;
     }
 
-    public function get_hours_format($secs) {
+    /*public function get_hours_format($secs) {
         $hours = floor($secs / 3600);
         $minutes = floor(($secs - ($hours * 3600)) / 60);
         $formattime = '';
@@ -320,5 +321,5 @@ class hybridteaching_sessions_render extends \table_sql implements dynamic_table
             $formattime .=  $minutes . ' min';
         }
         return $formattime;
-    }
+    }*/
 }

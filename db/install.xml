@@ -35,8 +35,8 @@
         <FIELD NAME="hideuserlist" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Ocultar la lista de usuarios."/>
         <FIELD NAME="blockroomdesign" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Bloquear el diseño de la sala."/>
         <FIELD NAME="ignorelocksettings" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Ignorar los ajustes de bloqueo."/>
-        <FIELD NAME="recordallfromstart" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Grabar todo desde el inicio."/>
-        <FIELD NAME="recordhidebutton" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Ocultar botón de grabación."/>
+        <FIELD NAME="initialrecord" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Grabar todo desde el inicio."/>
+        <FIELD NAME="hiderecordbutton" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Ocultar botón de grabación."/>
         <FIELD NAME="showpreviewrecord" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Mostrar vista previa de grabación."/>
         <FIELD NAME="downloadrecords" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Estudiantes pueden descargar grabaciones."/>
         <FIELD NAME="validateattendance" TYPE="int" LENGTH="6" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Permanencia para validar asistencia."/>
@@ -82,7 +82,7 @@
         <FIELD NAME="typevc" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" COMMENT="The type of videoconference plugin"/>
         <FIELD NAME="typestorage" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false" COMMENT="Storage plugin type"/>
         <FIELD NAME="userecordvc" TYPE="int" LENGTH="11" NOTNULL="false" SEQUENCE="false" COMMENT="Allow recordings"/>
-        <FIELD NAME="processedrecording" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Session recording. -1: no downloaded from vc yet (ready for download), 0: downloaded from vc, positive number: activity id storage"/>
+        <FIELD NAME="processedrecording" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Session recording. -1: no downloaded from vc yet (ready for download), 0: downloaded from vc, positive number: activity id storage"/> 
         <FIELD NAME="storagereference" TYPE="int" LENGTH="11" NOTNULL="false" SEQUENCE="false" COMMENT="Recording reference"/>
         <FIELD NAME="visible" TYPE="int" LENGTH="1" NOTNULL="false" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="timecreated" TYPE="int" LENGTH="11" NOTNULL="false" SEQUENCE="false"/>

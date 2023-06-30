@@ -12,6 +12,7 @@ class subobject {
 
         $this->zoom = $DB->get_record('hybridteachvc_zoom',['htsession'=>$sessionid]);
 
+
         /*$sql="SELECT * 
                 FROM {hybridteaching_session} AS hs
                 INNER JOIN {hybridteachvc_zoom} AS zoom ON zoom.htsession=hs.id
@@ -34,6 +35,7 @@ class subobject {
     public function get_sessions() {
         return $this->zoom;
     }
+
 
     function get_zone_access() {
 

@@ -173,6 +173,7 @@ $string['noinstance'] = 'The selected video conference configuration does not ex
 $string['status_progress'] = 'In progress';
 $string['status_finished'] ='Has finished';
 $string['status_start'] = 'will start soon';
+$string['status_undated'] = 'This videoconference room is ready. You can join the meeting now.';
 
 $string['closedoors_hours'] = ' {$a} hours from start';
 $string['closedoors_minutes'] = ' {$a} minutes from start';

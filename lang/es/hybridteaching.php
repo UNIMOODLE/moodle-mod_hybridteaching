@@ -173,6 +173,7 @@ $string['noinstance'] = 'No existe la configuración de videoconferencia selecci
 $string['status_progress'] = 'Videoconferencia en progreso';
 $string['status_finished'] ='Esta sesión de videoconferencia ha finalizado';
 $string['status_start'] = 'Comenzará próximamente';
+$string['status_undated'] = 'Esta sala de videoconferencia está lista. Puede entrar a la reunión ahora.';
 
 $string['closedoors_hours'] = ' {$a} horas tras el inicio';
 $string['closedoors_minutes'] = ' {$a} minutos tras el inicio';
@@ -181,7 +182,7 @@ $string['closedoors_seconds'] = ' {$a} segundos tras el inicio';
 $string['sessionstart'] = 'La siguiente sesión comenzará el';
 $string['estimatedduration'] = 'Duración estimada:';
 $string['advanceentry'] = 'Antelación de entrada:';
-$string['closedoors'] = 'Cierre de puestas de acceso:';
+$string['closedoors'] = 'Cierre de puertas de acceso:';
 $string['status'] = 'Estado';
 $string['started'] = 'Inició el';
 $string['inprogress'] = 'En progreso';

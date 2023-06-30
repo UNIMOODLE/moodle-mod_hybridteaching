@@ -120,10 +120,12 @@ class sessions_controller extends common_controller {
         }
         $session->htsession = $session->id;
         
-        if (!empty($this->hybridobject->typevc) && $this->hybridobject->usevideoconference) {
+        //comentado para eliminar la creación de videoconferencias al crear la sesión
+        /*if (!empty($this->hybridobject->typevc) && $this->hybridobject->usevideoconference) {
             $subpluginsession = new sessions();
             $subpluginsession->create_unique_session_extended($session);
         }
+        */
     }
 
     /**
@@ -154,7 +156,6 @@ class sessions_controller extends common_controller {
         }
 
         $wdaydesc = array(0 => 'Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat');
-
         list($hour, $minutes) = $this->get_hour_and_minutes($data->starttime);
         while ($sdate < $enddate) {
             if ($sdate < strtotime('+1 week', $startweek)) {
@@ -181,17 +182,20 @@ class sessions_controller extends common_controller {
      * @return string Returns an error message if there is an error updating the session, otherwise, returns an empty string.
      */
     public function update_session($data) {
-        global $DB, $USER;
+        global $DB;
         $errormsg = '';
         $session = $this->fill_session_data_for_update($data);
         if (!$DB->update_record('hybridteaching_session', $session)) {
             $errormsg = 'errorupdatesession';
         }
 
-        $sessiontype = $DB->get_field('hybridteaching_session', 'typevc', array('id' => $session->id));
-        if (!empty($sessiontype)) {
+        //$sessiontype = $DB->get_field('hybridteaching_session', 'typevc', array('id' => $session->id));
+        $session = $DB->get_record('hybridteaching_session', ['id' => $session->id]);
+        if (!empty($session->typevc)) {
             $subpluginsession = new sessions();
-            $subpluginsession->update_session_extended($session);
+            $ht=$DB->get_record('hybridteaching',['id' => $session->hybridteachingid]);
+            
+            $subpluginsession->update_session_extended($session, $ht);
         }
 
         return $errormsg;
@@ -234,7 +238,7 @@ class sessions_controller extends common_controller {
         if (!empty($sessiontype)) {
             $sessionsht = $DB->get_records('hybridteaching_session', array('hybridteachingid' => $moduleinstance->id), '', 'id');
             // Check if the plugin exists
-            if (helper::subplugin_instance_exists($this->hybridobject->instance)){
+            if (helper::subplugin_instance_exists( $this->hybridobject->instance)){
                 require_once($CFG->dirroot.'/mod/hybridteaching/vc/'.$moduleinstance->typevc.'/classes/sessions.php');
                 $subpluginsession = new sessions();
                 foreach ($sessionsht as $session) {
@@ -276,17 +280,28 @@ class sessions_controller extends common_controller {
            
         $nextsession = $DB->get_record_sql($sql,['id'=> $htid]);
 
-        /*if there not are next session, get the last session*/
-        if (!$nextsession){
-            $sql="SELECT * 
-                FROM {hybridteaching_session} AS hs
-                WHERE hs.hybridteachingid = :id
-                ORDER BY hs.starttime DESC LIMIT 1";
-            $nextsession = $DB->get_record_sql($sql,['id'=> $htid]);
-        }
-
         return $nextsession;
     }
+
+    /**
+     * Retrieve the next session from the database using the given hybridteaching ID.
+     *
+     * @param int $htid
+     * @throws Some_Exception_Class Description of the exception that can be thrown.
+     * @return mixed The next session data.
+     */
+    public function get_last_session($htid){
+        global $DB;
+        
+        $sql="SELECT * 
+            FROM {hybridteaching_session} AS hs
+            WHERE hs.hybridteachingid = :id AND hs.starttime<uNIX_TIMESTAMP()
+            ORDER BY hs.starttime DESC LIMIT 1";
+        $lastsession = $DB->get_record_sql($sql,['id'=> $htid]);
+
+        return $lastsession;
+    }
+
 
     /**
      * Counts the number of sessions for a given hybrid teaching object.
