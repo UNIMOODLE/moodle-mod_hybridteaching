@@ -175,58 +175,55 @@ else {
             } 
         
             //closedoors
-            $closedoors='';
-            $isclosedoors=false;
-            $closedoorstime=0;
-            if ($hybridteaching->closedoorscount>0){               
-                $isclosedoors=true;
-                if ($hybridteaching->closedoorsunit==0){
-                    $closedoors = get_string('closedoors_hours', 'mod_hybridteaching',$hybridteaching->closedoorscount);
-                    $multiplydoors=3600;
-                } else if ($hybridteaching->closedoorsunit==1){
-                    $closedoors = get_string('closedoors_minutes', 'mod_hybridteaching',$hybridteaching->closedoorscount);
-                    $multiplydoors=60;
+            $closedoors = '';
+            $isclosedoors = false;
+            $closedoorstime = 0;
+            if ($hybridteaching->closedoorscount > 0) {               
+                $isclosedoors = true;
+                if ($hybridteaching->closedoorsunit == 0) {
+                    $closedoors = get_string('closedoors_hours', 'mod_hybridteaching', $hybridteaching->closedoorscount);
+                    $multiplydoors = HOURSECS;
+                } else if ($hybridteaching->closedoorsunit == 1) {
+                    $closedoors = get_string('closedoors_minutes', 'mod_hybridteaching', $hybridteaching->closedoorscount);
+                    $multiplydoors = MINSECS;
                 } else {
-                    $closedoors = get_string('closedoors_seconds', 'mod_hybridteaching',$hybridteaching->closedoorscount);
-                    $multiplydoors=1;
+                    $closedoors = get_string('closedoors_seconds', 'mod_hybridteaching', $hybridteaching->closedoorscount);
+                    $multiplydoors = 1;
                 }
-                $closedoorstime=$hybridteaching->closedoorscount*$multiplydoors;
+                $closedoorstime = $hybridteaching->closedoorscount * $multiplydoors;
             }
 
             //advanceentry (abrir puertas)
-            $advanceentrytime=0;
-            $isadvanceentry=false;
-            if ($hybridteaching->advanceentrycount>0){
-                $isadvanceentry=true;
-                if ($hybridteaching->advanceentryunit==0){
-                    $multiplyadvance=3600;
-                } else if ($hybridteaching->advanceentryunit==1){
-                    $multiplyadvance=60;
-                } else{
-                    $multiplyadvance=1;
+            $advanceentrytime = 0;
+            $isadvanceentry = false;
+            if ($hybridteaching->advanceentrycount > 0) {
+                $isadvanceentry = true;
+                if ($hybridteaching->advanceentryunit == 0) {
+                    $multiplyadvance = HOURSECS;
+                } else if ($hybridteaching->advanceentryunit == 1) {
+                    $multiplyadvance = MINSECS;
+                } else {
+                    $multiplyadvance = 1;
                 }
-                $advanceentrytime=$hybridteaching->advanceentrycount*$multiplyadvance;
+                $advanceentrytime = $hybridteaching->advanceentrycount * $multiplyadvance;
             }
 
-            $canentry=false;
+            $canentry = false;
           
             //if starttime=0, can entry always depends on rol
-            if ($hybridteaching->starttime==0){
-                $canentry=true;
-            }
-
-            else {
+            if ($hybridteaching->starttime == 0) {
+                $canentry = true;
+            } else {
                 //if have advanceentrytime
-                if ( ($timeinit-$advanceentrytime)<time() ){
-                    if ($isclosedoors){
+                if (($timeinit - $advanceentrytime) < time()) {
+                    if ($isclosedoors) {
                         //if have cloors
-                        if ( ($timeinit+$closedoorstime)>time() ){
-                            $canentry=true;
+                        if (($timeinit + $closedoorstime) > time()) {
+                            $canentry = true;
                         }
-                    }
-                    else {
-                        if ($timeend>time()){  //if not closedoors and not finished 
-                            $canentry=true;
+                    } else {
+                        if ($timeend > time()) {  //if not closedoors and not finished 
+                            $canentry = true;
                         }
                     }
                 }

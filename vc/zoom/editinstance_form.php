@@ -26,13 +26,7 @@
  defined('MOODLE_INTERNAL') || die();
 
  require_once($CFG->libdir.'/formslib.php');
- /**
-  * Standard edit form shared by all enrol plugins.
-  *
-  * @package    core_enrol
-  * @copyright  2015 Damyon Wiese
-  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
-  */
+
 class htzoom_instance_edit_form extends moodleform {
     /**
      * Called to define this moodle form

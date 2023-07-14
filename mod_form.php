@@ -21,7 +21,8 @@
  * @copyright   2023 isyc <isyc@example.com>
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-
+use mod_hybridteaching\helpers\roles;
+use mod_hybridteaching\hybridteaching_proxy;
 defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->dirroot.'/course/moodleform_mod.php');
@@ -44,7 +45,7 @@ class mod_hybridteaching_mod_form extends moodleform_mod {
 
         $mform = $this->_form;
 
-        //$PAGE->requires->js_call_amd('mod_hybridteaching/formconfig', 'init');
+        $PAGE->requires->js_call_amd('mod_hybridteaching/formconfig', 'init');
 
         // Adding the "general" fieldset, where all the common settings are shown.
         $mform->addElement('header', 'sectiongeneral', get_string('general', 'form'));
@@ -115,12 +116,21 @@ class mod_hybridteaching_mod_form extends moodleform_mod {
         $mform->setType('timetype', PARAM_INT);
         $mform->addGroup($duration, 'durationgroup', get_string('duration', 'hybridteaching'), array(' '), false);
 
-        $mform->addElement('header', 'sectionaudience', get_string('sectionaudience','hybridteaching'));
-// TO-DO ISYC: AÑADIR AQUÍ ELEMENTOS DE AUDIENCIA: TOMAR EJEMPLO DE BBB    
-        //$participantlist = roles::get_participant_list($bigbluebuttonbn, $context);
-        $mform->addElement('text', 'recordatorio', 'AÑADIR AQUÍ LO MISMO QUE HAY EN BIGBLUEBUTTON', array('size'=> 6));
-        
+        $course = $this->_course;
+        $context = context_course::instance($course->id);
+        $hybridteachingid = empty($this->get_current()->id) ? null : $this->get_current();
+        $participantlist = roles::get_participant_list($hybridteachingid, $context);
 
+        // Now add the instance type profiles to the form as a html hidden field.
+        $mform->addElement('html', html_writer::div('', 'd-none', [
+            'data-participant-data' => json_encode(roles::get_participant_data($context, $hybridteachingid)),
+        ]));
+
+        $PAGE->requires->js_call_amd('mod_hybridteaching/modform', 'init');
+
+        $this->hybridteaching_mform_insert_roles_access_mapping($mform,$participantlist);
+
+        
         $mform->addElement('header', 'sectionsessionaccess', get_string('sectionsessionaccess','hybridteaching'));
 // TO-DO ISYC: ESTAS OPCIONES DEPENDEN DE SI LA VC LO PERMITE O NO.
 // HAY QUE REVISAR SI SE PERMITE. SI NO SE PERMITE, HAY QUE DESACTIVAR Y SACAR UN MSJ SEGÚN 1ª PANTALLA DE PAG 12
@@ -228,68 +238,41 @@ class mod_hybridteaching_mod_form extends moodleform_mod {
         $this->add_action_buttons();
     }
 
-
-    /**
-     * Add elements for setting the custom completion rules.
+     /**
+     * Function for showing the block for setting participant roles.
      *
-     * @category completion
-     * @return array List of added element names, or names of wrapping group elements.
-    */
-
-    public function add_completion_rules() {
-
-        $mform = $this->_form;
-    
-        $group = [
-            $mform->createElement('checkbox', 'completionattendanceenabled', '', get_string('completionattendance', 'hybridteaching')),
-            $mform->createElement('text', 'completionattendance', '', ['size' => 5]),
+     * @param MoodleQuickForm $mform
+     * @param array $participantlist
+     * @return void
+     */
+    private function hybridteaching_mform_insert_roles_access_mapping(MoodleQuickForm &$mform, array $participantlist): void {
+        global $OUTPUT;
+        $participantselection = roles::get_participant_selection_data();
+        $mform->addElement('header', 'sectionaudience', get_string('sectionaudience','hybridteaching'));
+        $mform->addElement('hidden', 'participants', json_encode($participantlist));
+        $mform->setType('participants', PARAM_TEXT);
+        $selectiontype = new single_select(new moodle_url(qualified_me()),
+            'hybridteaching_participant_selection_type',
+            $participantselection['type_options'],
+            $participantselection['type_selected']);
+        $selectionparticipants = new single_select(new moodle_url(qualified_me()),
+            'hybridteaching_participant_selection',
+            $participantselection['options'],
+            $participantselection['selected']);
+        $action = new single_button(new moodle_url(qualified_me()),
+            get_string('mod_form_field_participant_list_action_add', 'hybridteaching'),
+            'post',
+            false,
+            ['name' => 'hybridteaching_participant_selection_add']
+        );
+        $pformcontext = [
+            'selectionType' => $selectiontype->export_for_template($OUTPUT),
+            'selectionParticipant' => $selectionparticipants->export_for_template($OUTPUT),
+            'action' => $action->export_for_template($OUTPUT),
         ];
-        $mform->setType('completionattendance', PARAM_INT);
-        $mform->addGroup($group, 'completionattendancegroup', get_string('completionattendancegroup','hybridteaching'), [' '], false);
-        $mform->disabledIf('completionattendance', 'completionattendanceenabled', 'notchecked');
-
-        return ['completionattendancegroup'];
-    }
-
-    public function completion_rule_enabled($data) {
-        return (!empty($data['completionattendanceenabled']) && $data['completionattendance'] != 0);
-    }
-
-    function get_data() {
-        $data = parent::get_data();
-        if (!$data) {
-            return $data;
-        }
-        if (!empty($data->completionunlocked)) {
-            // Turn off completion settings if the checkboxes aren't ticked
-            $autocompletion = !empty($data->completion) && $data->completion==COMPLETION_TRACKING_AUTOMATIC;
-            if (empty($data->completionattendanceenabled) || !$autocompletion) {
-            $data->completionattendance = 0;
-            }
-        }
-        return $data;
-    }
-
-    function data_preprocessing(&$default_values){
-        global $DB;
-
-        // Set up the completion checkboxes which aren't part of standard data.
-        // We also make the default value (if you turn on the checkbox) for those
-        // numbers to be 1, this will not apply unless checkbox is ticked.
-        $default_values['completionattendanceenabled']=
-            !empty($default_values['completionattendance']) ? 1 : 0;
-        if(empty($default_values['completionattendance'])) {
-            $default_values['completionattendance']=1;
-        }
-
-        //Merge typevc and instance: get the correct value at typevc. 
-        //Ex: 2-bbb or 1-zoom
-        $content=$DB->get_record('hybridteaching',['id'=>$this->_instance]);
-        if ($content && $content->usevideoconference){
-            $typevc=$content->instance."-".$content->typevc;
-            $default_values['typevc'] = $typevc;
-        }
-
+        $html = $OUTPUT->render_from_template('mod_hybridteaching/participant_form', $pformcontext);
+        $mform->addElement('static', 'static_participant_list',
+            get_string('mod_form_field_participant_list', 'hybridteaching'), $html);
     }
    
 }

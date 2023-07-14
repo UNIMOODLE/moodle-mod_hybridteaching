@@ -1,13 +1,14 @@
 <?php
 
 require_once(__DIR__.'/../../config.php');
-require_once(__DIR__.'/classes/form/addsessions_form.php');
+require_once(__DIR__.'/classes/form/sessions_form.php');
 require_once(__DIR__.'/classes/controller/sessions_controller.php');
 
 // Course module id.
 $id = required_param('id', PARAM_INT);
 $sid = optional_param('s', 0, PARAM_INT);
 $h = optional_param('h', 0, PARAM_INT);
+$slist = optional_param('l', 2, PARAM_INT);
 
 list($course, $cm) = get_course_and_cm_from_cmid($id, 'hybridteaching');
 require_login($course, true, $cm);
@@ -30,7 +31,7 @@ if (!empty($sid)) {
     $sessionobj = $DB->get_record('hybridteaching_session', array('id' => $sid), '*', MUST_EXIST);
     $sessionobj->sessionid = $sessionobj->id;
     unset($sessionobj->id);
-    $sessionobj->duration = $sessionobj->duration / 60;
+    $sessionobj->duration = $sessionobj->duration / MINSECS;
 }
 
 $sessioncontroller = new sessions_controller($hybridteaching);
@@ -40,8 +41,8 @@ $params = [
     'session' => $sessionobj,
     'typevc' => $hybridteaching->typevc,
 ];
-$mform = new addsessions_form(null, $params);
-$return = new moodle_url('programschedule.php?id='.$id);
+$mform = new sessions_form(null, $params);
+$return = new moodle_url('sessions.php?id='.$id.'&l='.$slist);
 $message = '';
 $error = '';
 if ($mform->is_cancelled()) {

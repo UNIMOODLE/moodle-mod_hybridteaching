@@ -100,19 +100,6 @@ class sessions extends sessions_controller {
     }
 
     /**
-     * Deletes all BBB meetings associated with a given hybridteaching instance.
-     *
-     * @param mixed $moduleinstance the instance of the hybrid teaching
-     * @throws Exception if an error occurs while deleting a meeting
-     * @return void
-     */
-    public function delete_all_sessions_extended($htsession,$instanceid) {
-        global $DB;
-
-        $DB->delete_records('hybridteachvc_bbb', ['htsession' => $htsession]);
-    }
-
-    /**
      * Populates a stdClass object with Zoom meeting details from a given response object. 
      *
      * @param object $module The module object containing the Zoom meeting.

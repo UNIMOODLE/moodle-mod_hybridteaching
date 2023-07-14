@@ -28,20 +28,15 @@ defined('MOODLE_INTERNAL') || die();
 require_once($CFG->libdir . '/adminlib.php');
 require_once($CFG->dirroot . '/mod/hybridteaching/classes/controller/instances_controller.php');
 
-/**
- * Admin external page that displays a list of the installed submission plugins.
- *
- * @package   mod_hybridteaching
- * @copyright 2012 NetSpot {@link http://www.netspot.com.au}
- * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
 class hybridteaching_admin_plugins_instances extends admin_setting {
+    protected $type;
     /**
      * Calls parent::__construct with specific arguments
      */
-    public function __construct() {
+    public function __construct($name, $visiblename, $description, $defaultsetting, $type) {
         $this->nosave = true;
-        parent::__construct('managevideoconferenceplugins', get_string('videoconferenceplugins', 'mod_hybridteaching'), '', '');
+        parent::__construct($name, $visiblename, $description, $defaultsetting);
+        $this->type = $type;
     }
 
     /**
@@ -85,7 +80,7 @@ class hybridteaching_admin_plugins_instances extends admin_setting {
 
         // Display strings.
         $strorder = get_string('order', 'mod_hybridteaching');
-        $stroptions = ucfirst(get_string('options'));
+        $stroptions = get_string('options', 'mod_hybridteaching');
         $strstate = get_string('hideshow', 'mod_hybridteaching');
         $struninstall = get_string('delete');
         $strversion = get_string('version');
@@ -126,7 +121,7 @@ class hybridteaching_admin_plugins_instances extends admin_setting {
             $instancename = $instance['instancename'];
             $instanceversion = $instance['version'];
             $instancetype = $instance['type'];
-            $instancetypealias = get_string('alias', 'hybridteachvc_'.$instance['type']);
+            $instancetypealias = get_string('alias', $this->type.'_'.$instance['type']);
 
             // Up/down link (only if enrol is enabled).
             $updown = '';
@@ -180,10 +175,12 @@ class hybridteaching_admin_plugins_instances extends admin_setting {
         $subplugins = $pluginmanager->get_subplugins_of_plugin('mod_hybridteaching');
         $subpluginsarray = array();
         foreach ($subplugins as $subplugin) {
-            $url = new moodle_url('/mod/hybridteaching/vc/'.$subplugin->name.'/editinstance.php?type='.$subplugin->name);
-            $link = $url->out();
-            $subplugincommonname = get_string('alias', 'hybridteachvc_'.$subplugin->name);
-            $subpluginsarray[$link] = $subplugincommonname;
+            if ($subplugin->type == $this->type) {
+                $url = new moodle_url('/mod/hybridteaching/vc/'.$subplugin->name.'/editinstance.php?type='.$subplugin->name);
+                $link = $url->out();
+                $subplugincommonname = get_string('alias', $this->type.'_'.$subplugin->name);
+                $subpluginsarray[$link] = $subplugincommonname;
+            }
         }
         $selectsubplugins = new url_select($subpluginsarray);
         $selectsubplugins->set_label(get_string('addinstance', 'hybridteaching'));

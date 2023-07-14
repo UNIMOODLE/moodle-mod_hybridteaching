@@ -26,26 +26,36 @@ define('NO_OUTPUT_BUFFERING', true);
 
 require('../../../../config.php');
 require_once('../controller/sessions_controller.php');
+require('../output/sessions_render.php');
+require_once('../form/sessions_form.php');
 
 $action = required_param('action', PARAM_ALPHANUMEXT);
-$moduleid = optional_param('id', 0, PARAM_INT);
-$sesionid = optional_param('sid', 0, PARAM_INT);
+$moduleid = required_param('id', PARAM_INT);
 $hybridteachingid = required_param('h', PARAM_INT);
-$return = optional_param('returnurl', '', PARAM_URL);
+$sesionid = optional_param('sid', 0, PARAM_INT);
+$slist = optional_param('l', 1, PARAM_INT);
 
-$PAGE->set_url('/mod/hybridteaching/classes/action/session_action.php');
-$PAGE->set_context(context_system::instance());
+list($course, $cm) = get_course_and_cm_from_cmid($moduleid, 'hybridteaching');
 
-require_admin();
-require_sesskey();
+$hybridteaching = $DB->get_record('hybridteaching', array('id' => $cm->instance), '*', MUST_EXIST);
+$url = new moodle_url('/mod/hybridteaching/classes/action/session_action.php');
+$PAGE->set_url($url);
+$context = context_module::instance($cm->id);
+$PAGE->set_context($context);
+$PAGE->set_cm($cm, $course);
 
+//require_sesskey();
+
+$returnparams = [
+    'id' => $moduleid,
+    'l' => $slist,
+];
+
+$return = new moodle_url('/mod/hybridteaching/sessions.php', $returnparams);
 $hybridteaching = $DB->get_record('hybridteaching', array('id' => $hybridteachingid), '*', MUST_EXIST);
 $sessioncontroller = new sessions_controller($hybridteaching, 'hybridteaching_session');
 $sessionslist = $sessioncontroller->load_sessions();
-
-if (!array_key_exists($sesionid, $sessionslist)) {
-    redirect($return);
-}
+$mform = null;
 
 switch ($action) {
     case 'disable':
@@ -57,6 +67,87 @@ switch ($action) {
     case 'delete':
         $sessioncontroller->delete_session($sesionid, $hybridteachingid);
         break;
+        case 'bulkupdateduration':
+        case 'bulkupdatestarttime':
+            $sessid = optional_param_array('session', '', PARAM_SEQUENCE);
+            $ids = optional_param('ids', '', PARAM_ALPHANUMEXT);
+    
+            $PAGE->set_title(format_string($hybridteaching->name));
+            $PAGE->set_heading(format_string($course->fullname));
+    
+            $sesslist = !empty($sessid) ? implode('_', $sessid) : '';
+            $params = [
+                'id' => $moduleid,
+                'action' => $action,
+            ];
+    
+            $formparams = compact('sesslist', 'cm', 'hybridteaching', 'slist');
+            $sessionrender = new hybridteaching_sessions_render($hybridteaching, $slist);
+            $mform = ($action === 'bulkupdateduration') ? new bulk_update_duration_form($url, $formparams) : new bulk_update_starttime_form($url, $formparams);
+    
+            if ($mform->is_cancelled()) {
+                redirect($return);
+            }
+    
+            if ($formdata = $mform->get_data()) {
+                $sessioncontroller->update_multiple_session(explode('_', $formdata->ids), $formdata);
+                redirect($return);
+            }
+    
+            if ($slist === '') {
+                throw new moodle_exception('nosessionsselected', 'mod_hybridteaching', $return);
+            }
+    
+            echo $OUTPUT->header();
+            echo $sessionrender->print_sessions_bulk_table($sessid);
+            echo $mform->display();
+            echo $OUTPUT->footer();
+            break;
+    case 'bulkdelete':
+        $confirm = optional_param('confirm', null, PARAM_INT);
+        $message = get_string('deletecheckfull', 'hybridteaching', get_string('sessions', 'hybridteaching'));
+
+        if (isset($confirm) && confirm_sesskey()) {
+            $sessionsids = required_param('session', PARAM_ALPHANUMEXT);
+            $sessionsids = explode('_', $sessionsids);
+            foreach ($sessionsids as $sessid) {
+                $sessioncontroller->delete_session($sessid);
+            }
+            redirect($return, get_string('sessiondeleted', 'hybridteaching'));
+        }
+        $sessid = optional_param_array('session', '', PARAM_SEQUENCE);
+        if (empty($sessid)) {
+            throw new moodle_exception('nosessionsselected', 'mod_hybridteaching', $return);
+        }
+
+        list($extrasql, $params) = $DB->get_in_or_equal($sessid, SQL_PARAMS_NAMED, 'id');
+        $extrasql = 'id ' . $extrasql;
+        $sessionsinfo = $sessioncontroller->load_sessions(0, 0, $params, $extrasql);
+
+        $message .= html_writer::empty_tag('br');
+        foreach ($sessionsinfo as $sessinfo) {
+            $message .= html_writer::empty_tag('br');
+            $message .= userdate($sessinfo['starttime'], get_string('strftimedmyhm', 'hybridteaching'));
+            $message .= html_writer::empty_tag('br');
+            $message .= $sessinfo['name'];
+        }
+
+        $sessionsids = implode('_', $sessid);
+        $params = array('action' => 'bulkdelete', 'session' => $sessionsids,
+                        'confirm' => 1, 'sesskey' => sesskey(), 'id' => $moduleid,
+                        'l' => $slist, 'h' => $hybridteachingid);
+
+        $url = new moodle_url('/mod/hybridteaching/classes/action/session_action.php', $params);
+        echo $OUTPUT->header();
+        echo $OUTPUT->confirm($message, $url, $return);
+        echo $OUTPUT->footer();
+        break;
+    default:
+        redirect($return);
+        break;
 }
 
-redirect($return);
+
+if (empty($mform)) {
+    redirect($return);
+}

@@ -64,7 +64,7 @@ class sessions {
         if ($zoom){
             $zoom = (object) array_merge((array) $zoom, (array) $data);
             $service = new mod_hybrid_webservice($zoominstance);
-            $service->update_meeting($zoom,$ht);
+            $service->update_meeting($zoom, $ht);
         }
         return $errormsg;
     }
@@ -81,28 +81,10 @@ class sessions {
         $zoominstance = $this->load_zoom_instance($instanceid);
         $service = new mod_hybrid_webservice($zoominstance);        
         $zoom = $DB->get_record('hybridteachvc_zoom', ['htsession' => $htsession]);
-        $service->delete_meeting($zoom->meetingid, 0);
-        $DB->delete_records('hybridteachvc_zoom', ['htsession' => $htsession]);
-    }
-
-    /**
-     * Deletes all sessions related to a specific instance of a zoom meeting.
-     *
-     * @param mixed $htsession The session data to delete.
-     * @param mixed $instanceid The instance id to delete sessions for.
-     * @throws Exception If there is an error deleting the sessions.
-     * @return void
-     */
-    public function delete_all_sessions_extended($htsession, $instanceid) {
-        global $DB;
-        $zoominstance = $this->load_zoom_instance($instanceid);
-        $service = new mod_hybrid_webservice($zoominstance);   
-        $zooms = $DB->get_records('hybridteachvc_zoom', array('htsession' => $htsession));
-        foreach ($zooms as $zoom) {
+        if (!empty($zoom->meetingid)) {
             $service->delete_meeting($zoom->meetingid, 0);
+            $DB->delete_records('hybridteachvc_zoom', ['htsession' => $htsession]);
         }
-
-        $DB->delete_records('hybridteachvc_zoom', ['htsession' => $htsession]);
     }
 
     /**

@@ -39,13 +39,15 @@ if ($hassiteconfig) {
         $instancesettings->add(new admin_setting_heading(
             'headerconfig',
             get_string('headerconfig', 'mod_hybridteaching'),
-            ""
+            ''
         ));
 
         $instancesettings->add(new hybridteaching_admin_plugins_instances(
-            'videoconferenceplugins',
+            'managevideoconferenceplugins',
             get_string('videoconferenceplugins', 'mod_hybridteaching'),
-            ""
+            '',
+            '',
+            'hybridteachvc'
         ));
     }
 

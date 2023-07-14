@@ -22,6 +22,9 @@
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+define('SESSION_LIST', 1);
+define('PROGRAM_SESSION_LIST', 2);
+
 /**
  * Return if the plugin supports $feature.
  *
@@ -141,8 +144,8 @@ function hybridteaching_delete_instance($id) {
     //opción "Usar programación de sesiones" está sin marcar
     if (!$existshybrid->sessionscheduling && $existshybrid->typevc != ''){
         require_once($CFG->dirroot.'/mod/hybridteaching/classes/controller/sessions_controller.php');    
-        $sessions = new sessions_controller();
-        $sessions->delete_all_sessions($existshybrid);
+        $sessions = new sessions_controller($existshybrid);
+        $sessions->delete_all_sessions();
     }
 
     $DB->delete_records('hybridteaching', array('id' => $id));
@@ -417,7 +420,7 @@ function hybridteaching_extend_settings_navigation(settings_navigation $settings
 
     $hassessionsscheduling=$DB->get_field('hybridteaching','sessionscheduling',array('id' => $cm->instance));
     if (has_capability('mod/hybridteaching:sessions', $context)) {
-        $nodes[] = ['url' => new moodle_url('/mod/hybridteaching/sessions.php', ['id' => $cm->id]),
+        $nodes[] = ['url' => new moodle_url('/mod/hybridteaching/sessions.php', ['id' => $cm->id, 'l' => SESSION_LIST]),
                     'title' => get_string('sessions', 'hybridteaching')];
     }
 
@@ -431,7 +434,7 @@ function hybridteaching_extend_settings_navigation(settings_navigation $settings
         //mostrar solo pestaña de "Programación de sesiones" solo si esta VC tiene marcada la opción de "usar programación de sesiones"
         $hassessionsscheduling=$DB->get_field('hybridteaching','sessionscheduling',array('id' => $cm->instance));
         if ($hassessionsscheduling){
-            $nodes[] = ['url' => new moodle_url('/mod/hybridteaching/programschedule.php', ['id' => $cm->id]),
+            $nodes[] = ['url' => new moodle_url('/mod/hybridteaching/sessions.php', ['id' => $cm->id, 'l' => PROGRAM_SESSION_LIST]),
                         'title' => get_string('programschedule', 'hybridteaching')];
         }
     }

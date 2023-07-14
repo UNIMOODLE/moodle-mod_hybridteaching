@@ -32,6 +32,10 @@ require_once($CFG->dirroot . '/mod/hybridteaching/classes/helper.php');
 class sessions_controller extends common_controller {
     const MINUTE_TIMETYPE = 1;
     const HOUR_TIMETYPE = 2;
+    const EQUAL = 1;
+    const ADD = 2;
+    const REDUCE = 3;
+    protected $existssubplugin = false;
 
     /**
      * Constructs a new instance of the class.
@@ -43,7 +47,8 @@ class sessions_controller extends common_controller {
      */
     public function __construct(stdClass $hybridobject = null, string $table = null) {
         parent::__construct($hybridobject, $table);
-        if (!empty($hybridobject->typevc)) {
+        if (!empty($hybridobject->typevc) && helper::subplugin_instance_exists($hybridobject->instance)) {
+            $this->existssubplugin = true;
             $this->require_subplugin_session($hybridobject->typevc);
         }
     }
@@ -57,19 +62,24 @@ class sessions_controller extends common_controller {
      * @param string $operator comparison operator to use in the WHERE clause.
      * @return array An array of session objects.
      */
-    public function load_sessions($page = 0, $recordsperpage = 0, $params = [], $operator = self::OPERATOR_GREATER_THAN) {
+    public function load_sessions($page = 0, $recordsperpage = 0, $params = [], $extraselect = '', 
+          $operator = self::OPERATOR_GREATER_THAN, $sort = 'starttime', $dir = 'ASC') {
         global $DB;
         $where = '';
-        $params = array_merge(['hybridteachingid' => $this->hybridobject->id], $params);
+        $params = $params + ['hybridteachingid' => $this->hybridobject->id];
 
         if (!empty($params['starttime'])) {
-            $where .= ' AND starttime '.$operator.' :starttime';
+            $where .= ' AND starttime + duration '.$operator.' :starttime';
+        }
+
+        if (!empty($extraselect)) {
+            $where .= " AND $extraselect";
         }
         
         $sql = 'SELECT * 
                   FROM {hybridteaching_session} 
                  WHERE hybridteachingid = :hybridteachingid ' . $where . '
-                 ORDER BY visible DESC, id';
+              ORDER BY visible DESC, ' . $sort . ' ' . $dir;
 
         $sessions = $DB->get_records_sql($sql, $params, $page, $recordsperpage);
         $sessionsarray = json_decode(json_encode($sessions), true);
@@ -111,11 +121,11 @@ class sessions_controller extends common_controller {
 
         $session = $this->fill_session_data_for_create($data);
         $session->id = $DB->insert_record('hybridteaching_session', $session); 
-        if (!empty($session->descrip)) {
-            $description = file_save_draft_area_files($session->descrip['itemid'],
+        if (!empty($session->description)) {
+            $description = file_save_draft_area_files($session->descriptionitemid,
             $session->context->id, 'mod_hybridteaching', 'session', $session->id,
                 array('subdirs' => false, 'maxfiles' => -1, 'maxbytes' => 0),
-                $session->descrip['text']);
+                $session->description);
             $DB->set_field('hybridteaching_session', 'description', $description, array('id' => $session->id));
         }
         $session->htsession = $session->id;
@@ -193,9 +203,55 @@ class sessions_controller extends common_controller {
         $session = $DB->get_record('hybridteaching_session', ['id' => $session->id]);
         if (!empty($session->typevc)) {
             $subpluginsession = new sessions();
-            $ht=$DB->get_record('hybridteaching',['id' => $session->hybridteachingid]);
+            $subpluginsession->update_session_extended($session, $this->hybridobject);
+        }
+
+        return $errormsg;
+    }
+
+    public function update_multiple_session($sessids, $data) {
+        global $DB;
+        $errormsg = '';
+
+        foreach ($sessids as $sessid) {
+            $session = $DB->get_record('hybridteaching_session', ['id' => $sessid]); 
+            if (!empty($data->duration) && !empty($data->timetype)) {
+                switch ($data->operation) {
+                    case sessions_controller::EQUAL:
+                        $session->duration = sessions_controller::calculate_duration($data->duration, $data->timetype);
+                        break;
+                    case sessions_controller::ADD:
+                        $session->duration = $session->duration + 
+                            sessions_controller::calculate_duration($data->duration, $data->timetype);
+                        break;
+                    case sessions_controller::REDUCE:
+                        $session->duration = $session->duration - 
+                            sessions_controller::calculate_duration($data->duration, $data->timetype);
+                        break;
+                }
+            } 
             
-            $subpluginsession->update_session_extended($session, $ht);
+            if (!empty($data->starttime) && !empty($data->timetype)) {
+                switch ($data->operation) {
+                    case sessions_controller::REDUCE:
+                        $session->starttime = $session->starttime -
+                            sessions_controller::calculate_duration($data->starttime, $data->timetype);
+                        break;
+                    case sessions_controller::ADD:
+                        $session->starttime = $session->starttime +
+                            sessions_controller::calculate_duration($data->starttime, $data->timetype);
+                        break;
+                }
+            }           
+
+            if (!$DB->update_record('hybridteaching_session', $session)) {
+                $errormsg = 'errorupdatesession';
+            }
+
+            if (!empty($session->typevc)) {
+                $subpluginsession = new sessions();                
+                $subpluginsession->update_session_extended($session, $this->hybridobject);
+            }
         }
 
         return $errormsg;
@@ -210,14 +266,14 @@ class sessions_controller extends common_controller {
     public function delete_session($id) {
         global $DB;
         $errormsg = '';
-        $sessiontype = $DB->get_field('hybridteaching_session', 'typevc', ['id' => $id]);
-        if (!$DB->delete_records('hybridteaching_session', ['id' => $id])) {
-            $errormsg = 'errordeletesession';
-        }
-        if (!empty($sessiontype)) {
-            // Check if the plugin exists
-            if (helper::subplugin_instance_exists($this->hybridobject->instance)){
-                require_once($CFG->dirroot.'/mod/hybridteaching/vc/'.$this->hybridobject->instance.'/classes/sessions.php');
+        $sessiondata = $this->get_session($id);
+        if (time() >= $sessiondata->starttime && time() < ($sessiondata->starttime + $sessiondata->duration)) {
+            $$errormsg = 'errordsinprogress';
+        } else {
+            if (!$DB->delete_records('hybridteaching_session', ['id' => $id])) {
+                $errormsg = 'errordeletesession';
+            }
+            if (!empty($sessiondata->typevc) && $this->existssubplugin) {
                 $subpluginsession = new sessions();
                 $subpluginsession->delete_session_extended($id, $this->hybridobject->instance);
             }
@@ -231,23 +287,19 @@ class sessions_controller extends common_controller {
      * @param object $moduleinstance The module instance object
      * @throws Exception If an error occurs while deleting sessions
      */
-    public function delete_all_sessions($moduleinstance) {
+    public function delete_all_sessions() {
         global $DB;
 
-        $sessiontype = $DB->get_field('hybridteaching_session', 'typevc', array('id' => $moduleinstance->id));
-        if (!empty($sessiontype)) {
-            $sessionsht = $DB->get_records('hybridteaching_session', array('hybridteachingid' => $moduleinstance->id), '', 'id');
-            // Check if the plugin exists
-            if (helper::subplugin_instance_exists( $this->hybridobject->instance)){
-                require_once($CFG->dirroot.'/mod/hybridteaching/vc/'.$moduleinstance->typevc.'/classes/sessions.php');
-                $subpluginsession = new sessions();
-                foreach ($sessionsht as $session) {
-                    $subpluginsession->delete_all_sessions_extended($session, $this->hybridobject->instance);
-                }
+        $sessiontype = $DB->get_field('hybridteaching_session', 'typevc', array('id' => $this->hybridobject->id));
+        if (!empty($sessiontype) && $this->existssubplugin) {
+            $sessionsht = $DB->get_records('hybridteaching_session', array('hybridteachingid' => $this->hybridobject->id), '', 'id');
+            $subpluginsession = new sessions();
+            foreach ($sessionsht as $session) {
+                $subpluginsession->delete_session_extended($session, $this->hybridobject->instance);
             }
         }
 
-        $DB->delete_records('hybridteaching_session', array('hybridteachingid' => $moduleinstance->id));
+        $DB->delete_records('hybridteaching_session', array('hybridteachingid' => $this->hybridobject->id));
     }
 
     /**
@@ -314,7 +366,7 @@ class sessions_controller extends common_controller {
      * @return int The number of sessions for the given hybrid teaching object and parameters.
      */
     public function count_sessions($params = [], $operator = self::OPERATOR_GREATER_THAN) {
-        return count($this->load_sessions(0, 0, $params, $operator));
+        return count($this->load_sessions(0, 0, $params, '', $operator));
     }
 
     /**
@@ -326,9 +378,9 @@ class sessions_controller extends common_controller {
      */
     public static function calculate_duration($duration, $timetype) {
         if ($timetype == self::MINUTE_TIMETYPE) {
-            return $duration * 60;
+            return $duration * MINSECS;
         } elseif ($timetype == self::HOUR_TIMETYPE) {
-            return $duration * 3600;
+            return $duration * HOURSECS;
         } else {
             // Invalid timetype, return 0
             return 0;
@@ -358,9 +410,9 @@ class sessions_controller extends common_controller {
         global $USER;
 
         $session = clone $data;
-        $description = !empty($data->description) ? $data->description : '';
-        $session->description = null;
-        $session->descrip = $description;
+        $session->descriptionitemid = $data->description['itemid'];
+        $session->description = $data->description['text'];
+        $session->descriptionformat = $data->description['format'];
         $session->visible = 1;
         $session->timecreated = time();
         $session->createdby = $USER->id;
@@ -373,9 +425,9 @@ class sessions_controller extends common_controller {
         
         $session = clone $data;
         $session->duration = sessions_controller::calculate_duration($data->duration, $data->timetype);
-        $description = !empty($data->description) ? $data->description : '';
-        $session->description = null;
-        $session->descrip = $description;
+        $session->descriptionitemid = $data->description['itemid'];
+        $session->description = $data->description['text'];
+        $session->descriptionformat = $data->description['format'];
         $session->timemodified = time();
         $session->modifiedby = $USER->id;
         
