@@ -45,6 +45,7 @@ $PAGE->set_context($context);
 $PAGE->set_cm($cm, $course);
 
 //require_sesskey();
+require_login();
 
 $returnparams = [
     'id' => $moduleid,
@@ -59,50 +60,51 @@ $mform = null;
 
 switch ($action) {
     case 'disable':
-        $sessioncontroller->enable_data($sesionid, false);
+        $sessioncontroller->enable_data($sesionid, false, 'hybridteaching_sessions');
         break;
     case 'enable':
-        $sessioncontroller->enable_data($sesionid, true);
+        $sessioncontroller->enable_data($sesionid, true, 'hybridteaching_sessions');
         break;
     case 'delete':
         $sessioncontroller->delete_session($sesionid, $hybridteachingid);
         break;
-        case 'bulkupdateduration':
-        case 'bulkupdatestarttime':
-            $sessid = optional_param_array('session', '', PARAM_SEQUENCE);
-            $ids = optional_param('ids', '', PARAM_ALPHANUMEXT);
-    
-            $PAGE->set_title(format_string($hybridteaching->name));
-            $PAGE->set_heading(format_string($course->fullname));
-    
-            $sesslist = !empty($sessid) ? implode('_', $sessid) : '';
-            $params = [
-                'id' => $moduleid,
-                'action' => $action,
-            ];
-    
-            $formparams = compact('sesslist', 'cm', 'hybridteaching', 'slist');
-            $sessionrender = new hybridteaching_sessions_render($hybridteaching, $slist);
-            $mform = ($action === 'bulkupdateduration') ? new bulk_update_duration_form($url, $formparams) : new bulk_update_starttime_form($url, $formparams);
-    
-            if ($mform->is_cancelled()) {
-                redirect($return);
-            }
-    
-            if ($formdata = $mform->get_data()) {
-                $sessioncontroller->update_multiple_session(explode('_', $formdata->ids), $formdata);
-                redirect($return);
-            }
-    
-            if ($slist === '') {
-                throw new moodle_exception('nosessionsselected', 'mod_hybridteaching', $return);
-            }
-    
-            echo $OUTPUT->header();
-            echo $sessionrender->print_sessions_bulk_table($sessid);
-            echo $mform->display();
-            echo $OUTPUT->footer();
-            break;
+    case 'bulkupdateduration':
+    case 'bulkupdatestarttime':
+        $sessid = optional_param_array('session', '', PARAM_SEQUENCE);
+        $ids = optional_param('ids', '', PARAM_ALPHANUMEXT);
+
+        $PAGE->set_title(format_string($hybridteaching->name));
+        $PAGE->set_heading(format_string($course->fullname));
+
+        $sesslist = !empty($sessid) ? implode('_', $sessid) : '';
+        $params = [
+            'id' => $moduleid,
+            'action' => $action,
+        ];
+
+        $formparams = compact('sesslist', 'cm', 'hybridteaching', 'slist');
+        $sessionrender = new hybridteaching_sessions_render($hybridteaching, $slist);
+        $mform = ($action === 'bulkupdateduration') ? new bulk_update_duration_form($url, $formparams) 
+            : new bulk_update_starttime_form($url, $formparams);
+
+        if ($mform->is_cancelled()) {
+            redirect($return);
+        }
+
+        if ($formdata = $mform->get_data()) {
+            $sessioncontroller->update_multiple_session(explode('_', $formdata->ids), $formdata);
+            redirect($return);
+        }
+
+        if ($slist === '') {
+            throw new moodle_exception('nosessionsselected', 'mod_hybridteaching', $return);
+        }
+
+        echo $OUTPUT->header();
+        echo $sessionrender->print_sessions_bulk_table($sessid);
+        echo $mform->display();
+        echo $OUTPUT->footer();
+        break;
     case 'bulkdelete':
         $confirm = optional_param('confirm', null, PARAM_INT);
         $message = get_string('deletecheckfull', 'hybridteaching', get_string('sessions', 'hybridteaching'));

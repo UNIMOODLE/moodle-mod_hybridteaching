@@ -57,6 +57,7 @@
         <FIELD NAME="id" TYPE="int" LENGTH="11" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="instancename" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" COMMENT="Instance name"/>
         <FIELD NAME="type" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" COMMENT="Subplugin type"/>
+        <FIELD NAME="subplugintype" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="subplugininstanceid" TYPE="int" LENGTH="11" NOTNULL="true" SEQUENCE="false" COMMENT="Id from the subplugins tables"/>
         <FIELD NAME="version" TYPE="int" LENGTH="20" NOTNULL="false" DEFAULT="0" SEQUENCE="false" COMMENT="Subplugin version"/>
         <FIELD NAME="visible" TYPE="int" LENGTH="1" NOTNULL="false" DEFAULT="0" SEQUENCE="false"/>

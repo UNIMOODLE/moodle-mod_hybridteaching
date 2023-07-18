@@ -45,8 +45,8 @@ class sessions_controller extends common_controller {
      * @throws Some_Exception_Class Description of exception.
      * @return void
      */
-    public function __construct(stdClass $hybridobject = null, string $table = null) {
-        parent::__construct($hybridobject, $table);
+    public function __construct(stdClass $hybridobject = null) {
+        parent::__construct($hybridobject);
         if (!empty($hybridobject->typevc) && helper::subplugin_instance_exists($hybridobject->instance)) {
             $this->existssubplugin = true;
             $this->require_subplugin_session($hybridobject->typevc);
@@ -62,7 +62,7 @@ class sessions_controller extends common_controller {
      * @param string $operator comparison operator to use in the WHERE clause.
      * @return array An array of session objects.
      */
-    public function load_sessions($page = 0, $recordsperpage = 0, $params = [], $extraselect = '', 
+    public function load_sessions($page = 0, $recordsperpage = 0, $params = [], $extraselect = '',
           $operator = self::OPERATOR_GREATER_THAN, $sort = 'starttime', $dir = 'ASC') {
         global $DB;
         $where = '';
@@ -75,9 +75,9 @@ class sessions_controller extends common_controller {
         if (!empty($extraselect)) {
             $where .= " AND $extraselect";
         }
-        
-        $sql = 'SELECT * 
-                  FROM {hybridteaching_session} 
+
+        $sql = 'SELECT *
+                  FROM {hybridteaching_session}
                  WHERE hybridteachingid = :hybridteachingid ' . $where . '
               ORDER BY visible DESC, ' . $sort . ' ' . $dir;
 
@@ -98,10 +98,10 @@ class sessions_controller extends common_controller {
     public function create_session($data) {
         $data->hybridteachingid = $this->hybridobject->id;
         $data->instance = $this->hybridobject->instance;
-        $data->duration = sessions_controller::calculate_duration($data->duration, $data->timetype);
-        $data->userecordvc=$this->hybridobject->userecordvc;
-        if ($data->userecordvc==1){
-            $data->processedrecording=-1;
+        $data->duration = self::calculate_duration($data->duration, $data->timetype);
+        $data->userecordvc = $this->hybridobject->userecordvc;
+        if ($data->userecordvc == 1) {
+            $data->processedrecording =- 1;
         }
         if (isset($data->addmultiply)) {
             $this->create_multiple_sessions($data);
@@ -120,7 +120,7 @@ class sessions_controller extends common_controller {
         global $DB;
 
         $session = $this->fill_session_data_for_create($data);
-        $session->id = $DB->insert_record('hybridteaching_session', $session); 
+        $session->id = $DB->insert_record('hybridteaching_session', $session);
         if (!empty($session->description)) {
             $description = file_save_draft_area_files($session->descriptionitemid,
             $session->context->id, 'mod_hybridteaching', 'session', $session->id,
@@ -129,13 +129,6 @@ class sessions_controller extends common_controller {
             $DB->set_field('hybridteaching_session', 'description', $description, array('id' => $session->id));
         }
         $session->htsession = $session->id;
-        
-        //comentado para eliminar la creación de videoconferencias al crear la sesión
-        /*if (!empty($this->hybridobject->typevc) && $this->hybridobject->usevideoconference) {
-            $subpluginsession = new sessions();
-            $subpluginsession->create_unique_session_extended($session);
-        }
-        */
     }
 
     /**
@@ -217,32 +210,32 @@ class sessions_controller extends common_controller {
             $session = $DB->get_record('hybridteaching_session', ['id' => $sessid]); 
             if (!empty($data->duration) && !empty($data->timetype)) {
                 switch ($data->operation) {
-                    case sessions_controller::EQUAL:
-                        $session->duration = sessions_controller::calculate_duration($data->duration, $data->timetype);
+                    case self::EQUAL:
+                        $session->duration = self::calculate_duration($data->duration, $data->timetype);
                         break;
-                    case sessions_controller::ADD:
-                        $session->duration = $session->duration + 
-                            sessions_controller::calculate_duration($data->duration, $data->timetype);
+                    case self::ADD:
+                        $session->duration = $session->duration +
+                            self::calculate_duration($data->duration, $data->timetype);
                         break;
-                    case sessions_controller::REDUCE:
-                        $session->duration = $session->duration - 
-                            sessions_controller::calculate_duration($data->duration, $data->timetype);
+                    case self::REDUCE:
+                        $session->duration = $session->duration -
+                            self::calculate_duration($data->duration, $data->timetype);
                         break;
                 }
             } 
             
             if (!empty($data->starttime) && !empty($data->timetype)) {
                 switch ($data->operation) {
-                    case sessions_controller::REDUCE:
+                    case self::REDUCE:
                         $session->starttime = $session->starttime -
-                            sessions_controller::calculate_duration($data->starttime, $data->timetype);
+                            self::calculate_duration($data->starttime, $data->timetype);
                         break;
-                    case sessions_controller::ADD:
+                    case self::ADD:
                         $session->starttime = $session->starttime +
-                            sessions_controller::calculate_duration($data->starttime, $data->timetype);
+                            self::calculate_duration($data->starttime, $data->timetype);
                         break;
                 }
-            }           
+            }
 
             if (!$DB->update_record('hybridteaching_session', $session)) {
                 $errormsg = 'errorupdatesession';
@@ -292,7 +285,8 @@ class sessions_controller extends common_controller {
 
         $sessiontype = $DB->get_field('hybridteaching_session', 'typevc', array('id' => $this->hybridobject->id));
         if (!empty($sessiontype) && $this->existssubplugin) {
-            $sessionsht = $DB->get_records('hybridteaching_session', array('hybridteachingid' => $this->hybridobject->id), '', 'id');
+            $sessionsht = $DB->get_records('hybridteaching_session', 
+                array('hybridteachingid' => $this->hybridobject->id), '', 'id');
             $subpluginsession = new sessions();
             foreach ($sessionsht as $session) {
                 $subpluginsession->delete_session_extended($session, $this->hybridobject->instance);
@@ -322,15 +316,15 @@ class sessions_controller extends common_controller {
      * @throws Some_Exception_Class Description of the exception that can be thrown.
      * @return mixed The next session data.
      */
-    public function get_next_session($htid){
+    public function get_next_session($htid) {
         global $DB;
-        
-        $sql="SELECT * 
+
+        $sql = "SELECT *
             FROM {hybridteaching_session} AS hs
-            WHERE hs.hybridteachingid = :id AND (hs.starttime + hs.duration >= UNIX_TIMESTAMP() OR hs.starttime IS NULL) 
+            WHERE hs.hybridteachingid = :id AND (hs.starttime + hs.duration >= UNIX_TIMESTAMP() OR hs.starttime IS NULL)
             ORDER BY hs.starttime LIMIT 1";
-           
-        $nextsession = $DB->get_record_sql($sql,['id'=> $htid]);
+
+        $nextsession = $DB->get_record_sql($sql, ['id' => $htid]);
 
         return $nextsession;
     }
@@ -342,14 +336,14 @@ class sessions_controller extends common_controller {
      * @throws Some_Exception_Class Description of the exception that can be thrown.
      * @return mixed The next session data.
      */
-    public function get_last_session($htid){
+    public function get_last_session($htid) {
         global $DB;
-        
-        $sql="SELECT * 
+
+        $sql = "SELECT *
             FROM {hybridteaching_session} AS hs
             WHERE hs.hybridteachingid = :id AND hs.starttime<uNIX_TIMESTAMP()
             ORDER BY hs.starttime DESC LIMIT 1";
-        $lastsession = $DB->get_record_sql($sql,['id'=> $htid]);
+        $lastsession = $DB->get_record_sql($sql, ['id' => $htid]);
 
         return $lastsession;
     }
@@ -379,7 +373,7 @@ class sessions_controller extends common_controller {
     public static function calculate_duration($duration, $timetype) {
         if ($timetype == self::MINUTE_TIMETYPE) {
             return $duration * MINSECS;
-        } elseif ($timetype == self::HOUR_TIMETYPE) {
+        } else if ($timetype == self::HOUR_TIMETYPE) {
             return $duration * HOURSECS;
         } else {
             // Invalid timetype, return 0
@@ -393,7 +387,7 @@ class sessions_controller extends common_controller {
      * @param int $timestamp Unix timestamp to get hour and minutes from.
      * @return array An array containing the hour and minutes in the format [hour, minutes].
      */
-    function get_hour_and_minutes($timestamp) {
+    public function get_hour_and_minutes($timestamp) {
         $hour = date('H', $timestamp);
         $minutes = date('i', $timestamp);
         return [$hour, $minutes];
@@ -422,15 +416,15 @@ class sessions_controller extends common_controller {
 
     public function fill_session_data_for_update($data) {
         global $USER;
-        
+
         $session = clone $data;
-        $session->duration = sessions_controller::calculate_duration($data->duration, $data->timetype);
+        $session->duration = self::calculate_duration($data->duration, $data->timetype);
         $session->descriptionitemid = $data->description['itemid'];
         $session->description = $data->description['text'];
         $session->descriptionformat = $data->description['format'];
         $session->timemodified = time();
         $session->modifiedby = $USER->id;
-        
+
         return $session;
     }
 

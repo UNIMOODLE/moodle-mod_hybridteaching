@@ -45,7 +45,7 @@ $string['duration'] = 'Duration';
 
 $string['useattendance'] = 'Use student attendance record';
 $string['useattendance_help'] = 'Activate student attendance registration, and consequently attendance-based grades';
-$string['usevideoconference'] = 'Use video conferencing access';
+$string['usevideoconference'] = 'Use videoconferencing access';
 $string['usevideoconference_help'] = 'Activate the use of videoconference';
 $string['typevc'] = 'Videoconference type';
 $string['userecordvc'] = 'Allow videoconference recordings';
@@ -86,14 +86,13 @@ $string['subplugintype_hybridteachvc'] = 'Videoconference type';
 $string['subplugintype_hybridteachvc_plural'] = 'Videoconferences types';
 $string['hybridteachvc'] = 'Videoconference plugin';
 $string['hybridteachvcpluginname'] = 'Videoconference plugin';
-$string['headerconfig'] = 'Manage video conference extensions';
-$string['videoconferenceplugins'] = 'Video conference plugins';
+$string['headerconfigvc'] = 'Manage videoconference extensions';
+$string['videoconferenceplugins'] = 'Videoconference plugins';
 
 $string['view_error_url_missing_parameters'] = 'There are parameters missing in this URL';
 
 $string['programschedule'] = 'Schedule program';
 $string['sessions'] = 'Sessions';
-$string['attendance'] = 'Attendance';
 $string['import'] = 'Import';
 $string['export'] = 'Export';
 
@@ -108,7 +107,7 @@ $string['hybridteaching:export'] = 'Export';
 $string['type'] = 'Type';
 $string['order'] = 'Order';
 $string['hideshow'] = 'Show/Hide';
-$string['addinstance'] = 'Add instance';
+$string['addsetting'] = 'Add setting';
 $string['editinstance'] = 'Edit instance';
 $string['saveinstance'] = 'Save instance';
 $string['instancegeneralsettings'] = 'Hybrid teaching general settings';
@@ -116,6 +115,8 @@ $string['instancename'] = 'Instance name';
 $string['instanceselect'] = 'Select an instance';
 $string['generalconfig'] = 'General configuration';
 $string['instancesconfig'] = 'Manage instances';
+$string['instancesvcconfig'] = 'Manage videoconference settings';
+$string['instancesstoreconfig'] = 'Manage storage settings';
 
 $string['errorcreateinstance'] = 'Error creating instance';
 $string['errorupdateinstance'] = 'Error updateing instance';
@@ -168,7 +169,7 @@ $string['sessionname'] = 'Session name';
 $string['nosessions'] = 'There are not sessions';
 $string['nogroup'] = 'Next session is not for your group';
 $string['nosubplugin'] = 'Incorrect type of videoconference. El tipo de videoconferencia es incorrecto. Contact your administrator';
-$string['noinstance'] = 'The selected video conference configuration does not exist. Contact your administrator';
+$string['noinstance'] = 'The selected videoconference configuration does not exist. Contact your administrator';
 
 $string['status_progress'] = 'In progress';
 $string['status_finished'] ='Has finished';
@@ -238,3 +239,7 @@ $string['delayin'] = 'Delay in';
 $string['updatestarttime'] = 'Modify start time';
 $string['hybridteaching:sessionsactions'] = 'See session list actions';
 $string['hybridteaching:sessionsfulltable'] = 'Display all fields of session list';
+
+$string['headerconfigstore'] = 'Manage storage extensions';
+$string['storageplugins'] = 'Storage plugins';
+$string['editsession'] = 'Edit session';

@@ -40,7 +40,7 @@ class instances extends instances_controller {
         $zoomrecords->emaillicense = $data->emaillicense;
         $zoomrecords->timecreated = time();
         $zoomrecords->createdby = $USER->id;
-        $id=$DB->insert_record('hybridteachvc_zoom_instance', $zoomrecords);
+        $id = $DB->insert_record('hybridteachvc_zoom_instance', $zoomrecords);
         return $id;
     }
 

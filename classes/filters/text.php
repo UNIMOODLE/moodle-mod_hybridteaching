@@ -69,7 +69,7 @@ class session_filter_text extends session_filter_type {
         $operator = $field.'_op';
 
         if (property_exists($formdata, $operator)) {
-            if ($formdata->$operator != 5 and $formdata->$field == '') {
+            if ($formdata->$operator != 5 && $formdata->$field == '') {
                 // No data - no change except for empty filter.
                 return false;
             }
@@ -106,7 +106,7 @@ class session_filter_text extends session_filter_type {
 
         $params = array();
 
-        if ($operator != 5 and $value === '') {
+        if ($operator != 5 && $value === '') {
             return '';
         }
 

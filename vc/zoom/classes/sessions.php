@@ -35,19 +35,19 @@ class sessions {
      * @param mixed $data The data to create the meeting.
      * @throws Exception If the meeting creation fails.
      */
-    public function create_unique_session_extended($session,$ht) {
+    public function create_unique_session_extended($session, $ht) {
         global $DB;
 
         $zoominstance = $this->load_zoom_instance($ht->instance);
-   
+
         $service = new mod_hybrid_webservice($zoominstance);
-        $response = $service->create_meeting($session,$ht);
+        $response = $service->create_meeting($session, $ht);
         if ($response != false) {
             $zoom = $this->populate_htzoom_from_response($session, $response);
-            $zoom->id = $DB->insert_record('hybridteachvc_zoom', $zoom);  
+            $zoom->id = $DB->insert_record('hybridteachvc_zoom', $zoom);
         }
     }
-    
+
     /**
      * Updates a Zoom session with new data.
      *
@@ -61,7 +61,7 @@ class sessions {
         $zoominstance = $this->load_zoom_instance($ht->instance);
         $zoom = $DB->get_record('hybridteachvc_zoom', ['htsession' => $data->id]);
         //if is created zoom, change in zoom with webservice
-        if ($zoom){
+        if ($zoom) {
             $zoom = (object) array_merge((array) $zoom, (array) $data);
             $service = new mod_hybrid_webservice($zoominstance);
             $service->update_meeting($zoom, $ht);
@@ -79,7 +79,7 @@ class sessions {
     public function delete_session_extended($htsession, $instanceid) {
         global $DB;
         $zoominstance = $this->load_zoom_instance($instanceid);
-        $service = new mod_hybrid_webservice($zoominstance);        
+        $service = new mod_hybrid_webservice($zoominstance);
         $zoom = $DB->get_record('hybridteachvc_zoom', ['htsession' => $htsession]);
         if (!empty($zoom->meetingid)) {
             $service->delete_meeting($zoom->meetingid, 0);
@@ -94,7 +94,7 @@ class sessions {
      * @param mixed $response stdClass object containing Zoom API response data
      * @return stdClass $newzoom stdClass object containing relevant data
      */
-    function populate_htzoom_from_response($data, $response) {        
+    public function populate_htzoom_from_response($data, $response) {        
         $newzoom = new stdClass();
         $newzoom->htsession = $data->id;   //session id
         $newzoom->meetingid = $response->id;
@@ -105,7 +105,7 @@ class sessions {
         $newzoom->optionhostvideo = $response->settings->host_video;
         $newzoom->optionparticipantsvideo = $response->settings->participant_video;
         $newzoom->existsonzoom = 1;
-        
+
         return $newzoom;
     }
 

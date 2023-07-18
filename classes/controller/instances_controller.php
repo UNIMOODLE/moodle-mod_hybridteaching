@@ -28,17 +28,30 @@ defined('MOODLE_INTERNAL') || die();
 require_once('common_controller.php');
 
 class instances_controller extends common_controller {
+    protected $splugindir;
+    protected $splugintype;
+
+    public function __construct(stdClass $hybridobject = null, $splugintype) {
+        parent::__construct($hybridobject);
+        $this->splugintype = $splugintype;
+        if (!empty($this->hybridobject->subplugintype)) {
+            $this->splugindir = $this->hybridobject->subplugintype;
+        } else {
+            $this->splugindir = $this->get_subplugin_dir($splugintype);
+        }
+    }
+
     /**
      * Loads an instance of the class by its ID.
      *
      * @param int $instanceid The ID of the instance to load.
      * @throws Exception If the instance cannot be loaded.
      * @return mixed The loaded instance data
-     * 
+     *
      */
     public function hybridteaching_load_instance($instanceid) {
         global $DB;
-        $instancedata = $DB->get_record($this->table, ['id' => $instanceid]);
+        $instancedata = $DB->get_record('hybridteaching_instances', ['id' => $instanceid]);
         return $instancedata;
     }
 
@@ -52,17 +65,18 @@ class instances_controller extends common_controller {
     public function hybridteaching_create_instance($data) {
         global $DB, $USER;
         $plugin = new stdClass();
-        require_once('../../vc/'.$this->hybridobject->type.'/version.php');
+        require_once('../../'.$this->splugindir.'/'.$this->hybridobject->type.'/version.php');
         $errormsg = '';
         $instance = new stdClass();
         $instance->instancename = $data->instancename;
         $instance->type = $this->hybridobject->type;
+        $instance->subplugintype = $this->splugindir;
         $instance->version = $plugin->version;
         $instance->visible = 1;
         $instance->timecreated = time();
         $instance->createdby = $USER->id;
         $instance->subplugininstanceid = $data->id;
-        if (!$DB->insert_record($this->table, $instance)) {
+        if (!$DB->insert_record('hybridteaching_instances', $instance)) {
             $errormsg = 'errorcreateinstance';
         }
         return $errormsg;
@@ -83,7 +97,7 @@ class instances_controller extends common_controller {
         $instance->instancename = $data->instancename;
         $instance->timemodified = time();
         $instance->modifiedby = $USER->id;
-        if (!$DB->update_record($this->table, $instance)) {
+        if (!$DB->update_record('hybridteaching_instances', $instance)) {
             $errormsg = 'errorupdateinstance';
         }
         return $errormsg;
@@ -100,11 +114,11 @@ class instances_controller extends common_controller {
         global $DB;
         $errormsg = '';
         $instanceid = ['id' => $instanceid];
-        $subplugininstanceid = $DB->get_field($this->table, 'subplugininstanceid', $instanceid);
-        if (!$DB->delete_records($this->table, $instanceid)) {
+        $subplugininstanceid = $DB->get_field('hybridteaching_instances', 'subplugininstanceid', $instanceid);
+        if (!$DB->delete_records('hybridteaching_instances', $instanceid)) {
             $errormsg = 'errordeleteinstance';
         } else {
-            require_once('../../vc/'.$this->hybridobject->type.'/classes/instances.php');
+            require_once('../../'.$this->splugindir.'/'.$this->hybridobject->type.'/classes/instances.php');
             instances::delete_instance($subplugininstanceid);
         }
         return $errormsg;
@@ -117,14 +131,16 @@ class instances_controller extends common_controller {
      * @throws Exception if an error occurs while retrieving instances
      * @return array|null The instances retrieved from the database in an array format
      */
-    public static function hybridteaching_get_instances($params = null){
+    public function hybridteaching_get_instances($params = null) {
         global $DB;
 
         $pluginmanager = core_plugin_manager::instance();
         $subplugins = $pluginmanager->get_subplugins_of_plugin('mod_hybridteaching');
         $subtypes = [];
-        foreach ($subplugins as $sub){
-            $subtypes[] = $sub->name;
+        foreach ($subplugins as $sub) {
+            if ($sub->type == $this->splugintype) {
+                $subtypes[] = $sub->name;
+            }
         }
 
         //comprobar aquí, además, que la instancia pertenece a la categoría del curso: 
@@ -134,10 +150,14 @@ class instances_controller extends common_controller {
             $conditions = ' AND hi.visible = ' . $params['visible'];
         }
 
-        [$insql, $inparams] = $DB->get_in_or_equal($subtypes);
+        $inparams = [];
+        $insql = '';
+        if (!empty($subtypes)) {
+            [$insql, $inparams] = $DB->get_in_or_equal($subtypes);
+        }
 
-        $sql = "SELECT * 
-                  FROM {hybridteaching_instances} hi 
+        $sql = "SELECT *
+                  FROM {hybridteaching_instances} hi
                  WHERE hi.type $insql $conditions
               ORDER BY visible DESC, sortorder, id";
         $instances = $DB->get_records_sql($sql, $inparams);
@@ -151,12 +171,16 @@ class instances_controller extends common_controller {
      *
      * @return array the instance select list
      */
-    public static function hybridteaching_get_instances_select() {    
-        $instances = self::hybridteaching_get_instances(['visible' => 1]);
+    public function hybridteaching_get_instances_select() {
+        $instances = $this->hybridteaching_get_instances(['visible' => 1]);
         $instanceselect = [];
         foreach ($instances as $instance) {
             $instanceselect[$instance['id']."-".$instance['type']] = $instance['instancename']." (".$instance['type'].")";
         }
         return $instanceselect;
+    }
+
+    public static function get_subplugin_dir($type) {
+        return substr($type, strlen("hybridteach"));
     }
 }

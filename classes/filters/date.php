@@ -62,7 +62,7 @@ class session_filter_date extends session_filter_type {
         $sdt = $this->_name.'_sdt';
         $edt = $this->_name.'_edt';
 
-        if (!$formdata->$sdt and !$formdata->$edt) {
+        if (!$formdata->$sdt && !$formdata->$edt) {
             return false;
         }
 
@@ -84,7 +84,7 @@ class session_filter_date extends session_filter_type {
 
         $field  = $this->_field;
 
-        if (empty($after) and empty($before)) {
+        if (empty($after) && empty($before)) {
             return array('', array());
         }
 
@@ -115,7 +115,7 @@ class session_filter_date extends session_filter_type {
         $a->after  = userdate($after);
         $a->before = userdate($before);
 
-        if ($after and $before) {
+        if ($after && $before) {
             return get_string('datelabelisbetween', 'filters', $a);
         } else if ($after) {
             return get_string('datelabelisafter', 'filters', $a);

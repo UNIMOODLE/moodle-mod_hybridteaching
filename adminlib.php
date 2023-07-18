@@ -29,14 +29,17 @@ require_once($CFG->libdir . '/adminlib.php');
 require_once($CFG->dirroot . '/mod/hybridteaching/classes/controller/instances_controller.php');
 
 class hybridteaching_admin_plugins_instances extends admin_setting {
-    protected $type;
+    protected $splugintype;
+    protected $splugindir;
     /**
      * Calls parent::__construct with specific arguments
      */
-    public function __construct($name, $visiblename, $description, $defaultsetting, $type) {
+    public function __construct($name, $visiblename, $description, $defaultsetting, $splugintype) {
         $this->nosave = true;
+        $this->splugindir = instances_controller::get_subplugin_dir($splugintype);
+        $this->splugintype = $splugintype;
+
         parent::__construct($name, $visiblename, $description, $defaultsetting);
-        $this->type = $type;
     }
 
     /**
@@ -75,7 +78,7 @@ class hybridteaching_admin_plugins_instances extends admin_setting {
      * @param string $query
      * @return string
      */
-    public function output_html($data, $query='') {
+    public function output_html($data, $query = '') {
         global $CFG, $OUTPUT, $DB, $PAGE;
 
         // Display strings.
@@ -107,8 +110,8 @@ class hybridteaching_admin_plugins_instances extends admin_setting {
         $spacer = $OUTPUT->pix_icon('spacer', '', 'moodle', array('class' => 'iconsmall'));
 
         $url = new moodle_url('/mod/hybridteaching/classes/action/instance_action.php', array('sesskey' => sesskey()));
-        $instancecontroller = new instances_controller(null, 'hybridteaching_instances');
-        $instancelist = $instancecontroller::hybridteaching_get_instances();
+        $instancecontroller = new instances_controller(null, $this->splugintype);
+        $instancelist = $instancecontroller->hybridteaching_get_instances();
         $enabledinstances = $instancecontroller->get_enabled_data('hybridteaching_instances');
         if (!empty($message)) {
             \core\notification::add(get_string($message, 'mod_hybridteaching'), \core\output\notification::NOTIFY_INFO);
@@ -121,7 +124,7 @@ class hybridteaching_admin_plugins_instances extends admin_setting {
             $instancename = $instance['instancename'];
             $instanceversion = $instance['version'];
             $instancetype = $instance['type'];
-            $instancetypealias = get_string('alias', $this->type.'_'.$instance['type']);
+            $instancetypealias = get_string('alias', $this->splugintype.'_'.$instance['type']);
 
             // Up/down link (only if enrol is enabled).
             $updown = '';
@@ -151,7 +154,8 @@ class hybridteaching_admin_plugins_instances extends admin_setting {
                 $class = 'dimmed_text';
             }
 
-            $urledit = '/mod/hybridteaching/vc/'.$instancetype.'/editinstance.php?type='.$instancetype.'&id='.$instanceid;
+            $urledit = '/mod/hybridteaching/'. $this->splugindir .'/'.$instancetype.
+                '/editinstance.php?type='.$instancetype.'&id='.$instanceid;
             $options .= html_writer::link(new moodle_url($urledit),
                 $OUTPUT->pix_icon('t/edit', $stroptions, 'moodle', array('class' => 'iconsmall')));
 
@@ -170,24 +174,30 @@ class hybridteaching_admin_plugins_instances extends admin_setting {
         }
 
         $return .= html_writer::table($table);
-
-        $pluginmanager = core_plugin_manager::instance();
-        $subplugins = $pluginmanager->get_subplugins_of_plugin('mod_hybridteaching');
-        $subpluginsarray = array();
-        foreach ($subplugins as $subplugin) {
-            if ($subplugin->type == $this->type) {
-                $url = new moodle_url('/mod/hybridteaching/vc/'.$subplugin->name.'/editinstance.php?type='.$subplugin->name);
-                $link = $url->out();
-                $subplugincommonname = get_string('alias', $this->type.'_'.$subplugin->name);
-                $subpluginsarray[$link] = $subplugincommonname;
-            }
-        }
-        $selectsubplugins = new url_select($subpluginsarray);
-        $selectsubplugins->set_label(get_string('addinstance', 'hybridteaching'));
+        $selectsubplugins = $this->create_subplugin_select();
         echo $OUTPUT->render($selectsubplugins);
 
         $return .= $OUTPUT->box_end();
         return highlight($query, $return);
     }
-}
 
+    public function create_subplugin_select() {
+        $subpluginsarray = array();
+        $pluginmanager = core_plugin_manager::instance();
+        $subplugins = $pluginmanager->get_subplugins_of_plugin('mod_hybridteaching');
+        foreach ($subplugins as $subplugin) {
+            if ($subplugin->type == $this->splugintype) {
+                $url = new moodle_url('/mod/hybridteaching/'. $this->splugindir .'/'.$subplugin->name.
+                    '/editinstance.php?type='.$subplugin->name);
+                $link = $url->out();
+                $subplugincommonname = get_string('alias', $this->splugintype.'_'.$subplugin->name);
+                $subpluginsarray[$link] = $subplugincommonname;
+            }
+        }
+
+        $selectsubplugins = new url_select($subpluginsarray);
+        $selectsubplugins->set_label(get_string('addsetting', 'hybridteaching'));
+
+        return $selectsubplugins;
+    }
+}

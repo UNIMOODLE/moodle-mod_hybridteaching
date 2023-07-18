@@ -32,25 +32,42 @@ if ($hassiteconfig) {
     $ADMIN->add('modsettings', new admin_category('hybridteaching', new lang_string('pluginname', 'mod_hybridteaching')));
     $generalsettings = new admin_settingpage('hybridteaching_generalsettings',
         new lang_string('generalconfig', 'mod_hybridteaching'));
-    $instancesettings = new admin_settingpage('hybridteaching_instancesettings',
-        new lang_string('instancesconfig', 'mod_hybridteaching'));
+    $instancevcsettings = new admin_settingpage('hybridteaching_instancevcsettings',
+        new lang_string('instancesvcconfig', 'mod_hybridteaching'));
+    $instancestoresettings = new admin_settingpage('hybridteaching_instancestoresettings',
+        new lang_string('instancesstoreconfig', 'mod_hybridteaching'));
 
     if ($ADMIN->fulltree) {
-        $instancesettings->add(new admin_setting_heading(
-            'headerconfig',
-            get_string('headerconfig', 'mod_hybridteaching'),
+        $instancevcsettings->add(new admin_setting_heading(
+            'headerconfigvc',
+            get_string('headerconfigvc', 'mod_hybridteaching'),
             ''
         ));
 
-        $instancesettings->add(new hybridteaching_admin_plugins_instances(
+        $instancevcsettings->add(new hybridteaching_admin_plugins_instances(
             'managevideoconferenceplugins',
             get_string('videoconferenceplugins', 'mod_hybridteaching'),
             '',
             '',
             'hybridteachvc'
         ));
+
+        $instancestoresettings->add(new admin_setting_heading(
+            'headerconfigstore',
+            get_string('headerconfigstore', 'mod_hybridteaching'),
+            ''
+        ));
+
+        $instancestoresettings->add(new hybridteaching_admin_plugins_instances(
+            'managestorageplugins',
+            get_string('storageplugins', 'mod_hybridteaching'),
+            '',
+            '',
+            'hybridteachstore'
+        ));
     }
 
     $ADMIN->add('hybridteaching', $generalsettings);
-    $ADMIN->add('hybridteaching', $instancesettings);
+    $ADMIN->add('hybridteaching', $instancevcsettings);
+    $ADMIN->add('hybridteaching', $instancestoresettings);
 }

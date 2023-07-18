@@ -77,7 +77,7 @@ class htyoutube_instance_edit_form extends moodleform {
         $mform->addRule('emaillicense', null, 'maxlength', 255, 'client');
 
         if (empty($instance)) {
-            $this->add_action_buttons(true, get_string('addinstance', 'hybridteaching'));
+            $this->add_action_buttons(true, get_string('addsetting', 'hybridteaching'));
         } else {
             $this->add_action_buttons(true, get_string('saveinstance', 'hybridteaching'));
         }

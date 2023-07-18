@@ -27,9 +27,8 @@ defined('MOODLE_INTERNAL') || die();
 
 class common_controller {
     const OPERATOR_GREATER_THAN = ">";
-    const OPERATOR_LESS_THAN = "<";    
+    const OPERATOR_LESS_THAN = "<";
     public $hybridobject;
-    public $table;
 
     /**
      * Constructs a new instance of the class.
@@ -37,9 +36,8 @@ class common_controller {
      * @param stdClass|null $hybridobject The hybrid object to be used
      * @param string|null $table The table to be used
      */
-    public function __construct(stdClass $hybridobject = null, string $table = null) {
+    public function __construct(stdClass $hybridobject = null) {
         $this->hybridobject = $hybridobject;
-        $this->table = $table;
     }
 
     /**
@@ -48,9 +46,10 @@ class common_controller {
      * @global moodle_database $DB Moodle database global object.
      * @return int The number of enabled records in the table.
      */
-    public function get_enabled_data() {
+    public function get_enabled_data($table, $params = []) {
         global $DB;
-        $countenabled = $DB->count_records($this->table, ['visible' => 1]);
+        $params = ['visible' => 1];
+        $countenabled = $DB->count_records($table, $params);
         return $countenabled;
     }
 
@@ -61,14 +60,14 @@ class common_controller {
      * @param bool $visible determines whether the data object is visible or not
      * @throws Exception if the database update fails
      */
-    public function enable_data($id, $visible) {
+    public function enable_data($id, $visible, $table) {
         global $DB, $USER;
         $object = new stdClass();
         $object->id = $id;
         $object->visible = $visible;
         $object->timemodified = time();
         $object->modifiedby = $USER->id;
-        $DB->update_record($this->table, $object);
+        $DB->update_record($table, $object);
     }
 
     /**
@@ -79,11 +78,11 @@ class common_controller {
      * @throws Exception If the database update fails.
      * @return void
      */
-    public function update_data_sortorder($id, $sortorder) {
+    public function update_data_sortorder($id, $sortorder, $table) {
         global $DB;
         $object = new stdClass();
         $object->id = $id;
         $object->sortorder = $sortorder;
-        $DB->update_record($this->table, $object);
+        $DB->update_record($table, $object);
     }
 }

@@ -39,13 +39,12 @@ require_admin();
 require_sesskey();
 
 $hybridinstance = $DB->get_record('hybridteaching_instances', array('id' => $instanceid), '*', MUST_EXIST);
-$table = 'hybridteaching_instances';
-$instancecontroller = new instances_controller($hybridinstance, $table);
-$instanceids = $instancecontroller::hybridteaching_get_instances();
+$instancecontroller = new instances_controller($hybridinstance, 'hybridteach'.$hybridinstance->subplugintype);
+$instanceids = $instancecontroller->hybridteaching_get_instances();
 
 $sortorder = array_values($instanceids);
 
-$return = new moodle_url('/admin/settings.php', array('section' => 'hybridteaching_instancesettings'));
+$return = new moodle_url('/admin/settings.php', array('section' => 'hybridteaching_instancevcsettings'));
 
 if (!array_key_exists($instanceid, $instanceids)) {
     redirect($return);
@@ -53,11 +52,11 @@ if (!array_key_exists($instanceid, $instanceids)) {
 
 switch ($action) {
     case 'disable':
-        $instancecontroller->enable_data($instanceid, false);
+        $instancecontroller->enable_data($instanceid, false, 'hybridteaching_instances');
         break;
 
     case 'enable':
-        $instancecontroller->enable_data($instanceid, true);
+        $instancecontroller->enable_data($instanceid, true, 'hybridteaching_instances');
         break;
 
     case 'up':
@@ -70,7 +69,6 @@ switch ($action) {
             $temp = $resorted[$pos];
             $resorted[$pos] = $resorted[$switch];
             $resorted[$switch] = $temp;
-            // now update db sortorder
             foreach ($resorted as $sortorder => $instance) {
                 if ($instance["sortorder"] != $sortorder) {
                     $instancecontroller->update_data_sortorder($instance["id"], $sortorder, 'hybridteaching_instances');
@@ -89,7 +87,6 @@ switch ($action) {
             $temp = $resorted[$pos];
             $resorted[$pos] = $resorted[$switch];
             $resorted[$switch] = $temp;
-            // now update db sortorder
             foreach ($resorted as $sortorder => $instance) {
                 if ($instance["sortorder"] != $sortorder) {
                     $instancecontroller->update_data_sortorder($instance["id"], $sortorder, 'hybridteaching_instances');

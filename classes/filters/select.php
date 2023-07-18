@@ -58,7 +58,7 @@ class session_filter_select extends session_filter_type {
     public function check_data($formdata) {
         $field = $this->_name;
 
-        if (property_exists($formdata, $field) and $formdata->$field !== '') {
+        if (property_exists($formdata, $field) && $formdata->$field !== '') {
             return array('value' => (string)$formdata->$field);
         }
 

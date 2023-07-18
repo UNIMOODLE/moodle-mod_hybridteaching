@@ -93,7 +93,6 @@ $string['view_error_url_missing_parameters'] = 'Faltan parámetros en esta URL';
 
 $string['programschedule'] = 'Programación';
 $string['sessions'] = 'Sesiones';
-$string['attendance'] = 'Asistencia';
 $string['import'] = 'Importar';
 $string['export'] = 'Exportar';
 
@@ -108,7 +107,7 @@ $string['hybridteaching:export'] = 'Exportar';
 $string['type'] = 'Tipo';
 $string['order'] = 'Ordenar';
 $string['hideshow'] = 'Ocultar/Mostrar';
-$string['addinstance'] = 'Agregar instancia';
+$string['addsetting'] = 'Añadir configuración';
 $string['editinstance'] = 'Editar instancia';
 $string['saveinstance'] = 'Guardar instancia';
 $string['instancegeneralsettings'] = 'Configuración general de docencia híbrida';
@@ -116,6 +115,9 @@ $string['instancename'] = 'Nombre de instancia';
 $string['instanceselect'] = 'Seleccionar una instancia';
 $string['generalconfig'] = 'Configuración general';
 $string['instancesconfig'] = 'Administrar instancias';
+$string['instancesvcconfig'] = 'Administrar configuraciones de videoconferencia';
+$string['instancesstoreconfig'] = 'Administrar configuraciones de almacenamiento';
+$string['storageplugins'] = 'Extensiones de almacenamiento';
 
 $string['errorcreateinstance'] = 'Error al crear la instancia';
 $string['errorupdateinstance'] = 'Error al actualizar la instancia';
@@ -231,4 +233,4 @@ $string['advance'] = 'Adelantar';
 $string['delayin'] = 'Retrasar en';
 $string['hybridteaching:sessionsactions'] = 'Ver acciones en la lista de sesiones';
 $string['hybridteaching:sessionsfulltable'] = 'Mostrar todos los campos de las lista de sesiones';
-
+$string['editsession'] = 'Editar la sesión';

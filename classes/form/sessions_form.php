@@ -11,14 +11,21 @@ class sessions_form extends moodleform {
         $cm = $this->_customdata['cm'];
         $session = $this->_customdata['session'];
         $typevc = $this->_customdata['typevc'];
-        
+
         $modcontext = context_module::instance($cm->id);
         $defopts = array('maxfiles' => EDITOR_UNLIMITED_FILES, 'noclean' => true, 'context' => $modcontext);
-        $session = file_prepare_standard_editor($session, 'description', $defopts, $modcontext, 'mod_hybridteaching', 'session', $session->sessionid);
+        $session = file_prepare_standard_editor($session, 'description', 
+            $defopts, $modcontext, 'mod_hybridteaching', 'session', $session->sessionid);
+
+        if (empty($session)) {
+            $headertitle = get_string('addsession', 'hybridteaching');
+        } else {
+            $headertitle = get_string('editsession', 'hybridteaching');
+        }
         
         $mform->addElement('header', 'general', get_string('addsession', 'hybridteaching'));
 
-        $mform->addElement('text', 'name', get_string('sessionname', 'hybridteaching'),);
+        $mform->addElement('text', 'name', get_string('sessionname', 'hybridteaching'));
         $mform->setType('name', PARAM_TEXT);
         $mform->addRule('name', null, 'required', null, 'client');
 
@@ -33,7 +40,7 @@ class sessions_form extends moodleform {
 
         $mform->addElement('hidden', 'typevc', $typevc);
         $mform->setType('typevc', PARAM_ALPHA);
-        
+
         $groupmode = groups_get_activity_groupmode($cm);
         $selectgroups = array();
         $selectgroups[0] = get_string('commonsession', 'hybridteaching');
@@ -62,7 +69,7 @@ class sessions_form extends moodleform {
             $mform->addElement('select', 'groupid', get_string('groups', 'group'), $selectgroups);
         }
 
-        $mform->addElement('date_time_selector', 'starttime', get_string('sessiondate', 'hybridteaching'),);
+        $mform->addElement('date_time_selector', 'starttime', get_string('sessiondate', 'hybridteaching'));
         $mform->setType('starttime', PARAM_TEXT);
 
         $duration[] = &$mform->createElement('text', 'duration', get_string('duration', 'hybridteaching'));
@@ -76,7 +83,7 @@ class sessions_form extends moodleform {
         $mform->setType('timetype', PARAM_INT);
         $mform->addGroup($duration, 'durationgroup', get_string('duration', 'hybridteaching'), array(' '), false);
         $mform->addRule('durationgroup', null, 'required', null, 'client');
-        
+
         $mform->addElement('editor', 'description', get_string('description'), array('rows' => 1, 'columns' => 80),
                             array('maxfiles' => EDITOR_UNLIMITED_FILES, 'noclean' => true, 'context' => $modcontext));
         $mform->setType('description', PARAM_RAW);
@@ -109,7 +116,8 @@ class sessions_form extends moodleform {
             if ($CFG->calendar_startwday !== '0') { // Week start from sunday.
                 $sdays[] =& $mform->createElement('checkbox', 'Sun', '', get_string('sunday', 'calendar'));
             }
-            $mform->addGroup($sdays, 'sdays', get_string('repeaton', 'hybridteaching'), array('&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'), true);
+            $mform->addGroup($sdays, 'sdays', get_string('repeaton', 'hybridteaching'), 
+                array('&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'), true);
             $mform->disabledIf('sdays', 'addmultiply', 'notchecked');
 
             $period = array(1 => 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
@@ -120,7 +128,7 @@ class sessions_form extends moodleform {
             $mform->addGroup($periodgroup, 'periodgroup', get_string('repeatevery', 'hybridteaching'), array(' '), false);
             $mform->disabledIf('periodgroup', 'addmultiply', 'notchecked');
 
-            $mform->addElement('date_selector', 'sessionenddate', get_string('repeatuntil', 'hybridteaching'),);
+            $mform->addElement('date_selector', 'sessionenddate', get_string('repeatuntil', 'hybridteaching'));
             $mform->disabledIf('sessionenddate', 'addmultiply', 'notchecked');
         }
 
@@ -167,7 +175,7 @@ class bulk_update_duration_form extends moodleform {
 
         $mform->addElement('hidden', 'action', 'bulkupdateduration');
         $mform->setType('action', PARAM_INT);
-        addHiddens($mform, $ids, $cm, $hybridteaching, $slist);
+        addhiddens($mform, $ids, $cm, $hybridteaching, $slist);
         $submitstring = get_string('updatesessions', 'hybridteaching');
         $this->add_action_buttons(true, $submitstring);
     }
@@ -202,7 +210,7 @@ class bulk_update_starttime_form extends moodleform {
 
         $mform->addElement('hidden', 'action', 'bulkupdatestarttime');
         $mform->setType('action', PARAM_INT);
-        addHiddens($mform, $ids, $cm, $hybridteaching, $slist);
+        addhiddens($mform, $ids, $cm, $hybridteaching, $slist);
         $submitstring = get_string('updatesessions', 'hybridteaching');
         $this->add_action_buttons(true, $submitstring);
     }
@@ -230,13 +238,12 @@ class session_options_form extends moodleform {
         ];
         $mform->addElement('select', 'perpage', get_string('sesperpage', 'mod_hybridteaching'), $perpage);
         $mform->setDefault('perpage', 10);
-
     }
 }
 
 
 
-function addHiddens($mform, $ids, $cm, $hybridteaching, $slist) {
+function addhiddens($mform, $ids, $cm, $hybridteaching, $slist) {
     $mform->addElement('hidden', 'ids', $ids);
     $mform->setType('ids', PARAM_ALPHANUMEXT);
     $mform->addElement('hidden', 'id', $cm->id);

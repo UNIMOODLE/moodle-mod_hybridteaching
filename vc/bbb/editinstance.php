@@ -33,7 +33,7 @@ require_once('classes/instances.php');
 $type = optional_param('type', "", PARAM_COMPONENT);
 $instanceid = optional_param('id', 0, PARAM_INT);
 $context = context_system::instance();
-$return = new moodle_url('/admin/settings.php', array('section' => 'hybridteaching_instancesettings'));
+$return = new moodle_url('/admin/settings.php', array('section' => 'hybridteaching_instancevcsettings'));
 require_admin();
 
 if (empty($type)) {
@@ -53,7 +53,7 @@ if (!empty($instanceid)) {
 }
 
 
-$instancecontroller = new instances_controller($hybridinstance, 'hybridteaching_instances');
+$instancecontroller = new instances_controller($hybridinstance, 'hybridteachvc');
 
 $instance = null;
 if (!empty($instanceid)) {
@@ -78,7 +78,7 @@ if ($mform->is_cancelled()) {
         instances::update_instance($data);
         empty($error) ? $message = 'updatedinstance' : $message = $error;
     }
-    $return = new moodle_url('/admin/settings.php', array('section' => 'hybridteaching_instancesettings',
+    $return = new moodle_url('/admin/settings.php', array('section' => 'hybridteaching_instancevcsettings',
         'message' => $message));
 
     redirect($return);

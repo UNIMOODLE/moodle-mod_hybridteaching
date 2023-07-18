@@ -82,7 +82,8 @@ class mod_hybridteaching_mod_form extends moodleform_mod {
         $mform->setDefault('userecordvc', 0);
         $mform->addHelpButton('userecordvc', 'userecordvc', 'hybridteaching');
 
-        $instances = instances_controller::hybridteaching_get_instances_select('curso');
+        $vcinstancescontroller = new instances_controller(null, 'hybridteachvc');
+        $instances = $vcinstancescontroller->hybridteaching_get_instances_select('curso');
         $mform->addElement('select','typevc',get_string('typevc', 'hybridteaching'),$instances);    
           
         //esto dependerá de la videoconferencia seleccionada (zoom, meet, bbb...)
