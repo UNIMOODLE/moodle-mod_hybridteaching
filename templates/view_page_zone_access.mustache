@@ -51,15 +51,20 @@
 	{{/isundatedsession}}
 	
 </div>
-
+<br>
 {{#canentry}}
 	<div id="zoneaccess">		
-		<form action="./loadmeeting.php" target="_blank">
-			<button type="submit" class="btn btn-success">Comenzar reunión</button>
-			<input type="hidden" name="id" value="{{id}}">
-			<input type="hidden" name="url" value="{{url}}">
-				
-		</form>
+		{{#createok}}
+			<form action="./loadmeeting.php" target="_blank">
+				<button type="submit" class="btn btn-success">Comenzar reunión</button>
+				<input type="hidden" name="id" value="{{id}}">
+				<input type="hidden" name="url" value="{{url}}">
+			</form>
+		{{/createok}}
+		{{^createok}}
+			<button type="button" class="btn btn-success">Comenzar reunión</button>
+			<br>(En construcción, utilidad aún no disponible)
+		{{/createok}}
 	</div>
 {{/canentry}}	
 

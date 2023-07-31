@@ -49,9 +49,3 @@ function htzoom_is_roles_not_found_error($error) {
 function htzoom_is_users_not_found_error($error) {
     return strpos($error,'invalid access')!==false;
 }
-
-function get_zone_access($hybridteaching){
-    
-    require_once($CFG->dirroot.'/mod/hybridteaching/vc/hybrid'.$type.'/locallib.php'); 
-
-}

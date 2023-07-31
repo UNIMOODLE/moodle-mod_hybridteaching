@@ -14,6 +14,8 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+namespace hybridteachvc_bbb;
+
 use mod_bigbluebuttonbn\local\proxy\proxy_base;
 
 defined('MOODLE_INTERNAL') || die();

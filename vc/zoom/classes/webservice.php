@@ -14,6 +14,9 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+
+namespace hybridteachvc_zoom;
+
 defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->dirroot.'/mod/hybridteaching/vc/zoom/locallib.php');
@@ -88,7 +91,7 @@ class mod_hybrid_webservice {
 
     /**
      * The constructor for the webservice class.
-     * @throws moodle_exception Moodle exception is thrown for missing config settings.
+     * @throws \moodle_exception Moodle exception is thrown for missing config settings.
      */
     public function __construct($zoominstance) {
 
@@ -107,8 +110,8 @@ class mod_hybrid_webservice {
             // Get and remember the API URL.
             $this->apiurl = HTZOOM_API_URL;
             
-        } catch (moodle_exception $exception) {
-            throw new moodle_exception('errorwebservice', 'htzoom', '', $exception->getMessage());
+        } catch (\moodle_exception $exception) {
+            throw new \moodle_exception('errorwebservice', 'htzoom', '', $exception->getMessage());
         }
         
     }
@@ -133,7 +136,7 @@ class mod_hybrid_webservice {
      * @return curl The curl object used to make the API calls
      */
     protected function get_curl_object() {
-        return new curl();
+        return new \curl();
     }
     
     /**
@@ -143,12 +146,12 @@ class mod_hybrid_webservice {
      * @param array|string $data The data to attach to the call.
      * @param string $method The HTTP method to use.
      * @return stdClass The call's result in JSON format.
-     * @throws moodle_exception Moodle exception is thrown for curl errors.
+     * @throws \moodle_exception Moodle exception is thrown for curl errors.
      */
     protected function _make_call($path, $data = array(), $method = 'get') {
         $url = $this->apiurl . $path;
         $method = strtolower($method);
-        $curl = new curl();
+        $curl = new \curl();
 
         if (isset($this->clientid) && isset($this->clientsecret) && isset($this->accountid)) {
             $token = $this->get_access_token();
@@ -167,7 +170,7 @@ class mod_hybrid_webservice {
         //$response = call_user_func_array(array($curl, $method), array($path, $data));
 
         if ($curl->get_errno()) {
-            throw new moodle_exception('errorwebservice', 'htzoom', '', $curl->error);
+            throw new \moodle_exception('errorwebservice', 'htzoom', '', $curl->error);
         }
 
         $response = json_decode($rawresponse);
@@ -176,9 +179,9 @@ class mod_hybrid_webservice {
         
         if ($httpstatus >= 400) {
             if ($response) {
-                throw new moodle_exception('errorwebservice', 'htzoom', '', get_string('errorwebservice', 'hybridteachvc_zoom',$response->message) );
+                throw new \moodle_exception('errorwebservice', 'htzoom', '', get_string('errorwebservice', 'hybridteachvc_zoom',$response->message) );
             } else {
-                throw new moodle_exception('errorwebservice', 'htzoom', '', "HTTP Status $httpstatus");
+                throw new \moodle_exception('errorwebservice', 'htzoom', '', "HTTP Status $httpstatus");
             }
         }
 
@@ -190,7 +193,7 @@ class mod_hybrid_webservice {
  
         $url = $path;
         $method = strtolower($method);
-        $curl = new curl();
+        $curl = new \curl();
 
         if (isset($this->clientid) && isset($this->clientsecret) && isset($this->accountid)) {
             $token = $this->get_access_token();
@@ -207,7 +210,7 @@ class mod_hybrid_webservice {
         $rawresponse = $this->make_curl_call($curl, $method, $url, $data);
     
         if ($curl->get_errno()) {
-            throw new moodle_exception('errorwebservice', 'htzoom', '', $curl->error);
+            throw new \moodle_exception('errorwebservice', 'htzoom', '', $curl->error);
         }
 
         return $rawresponse;
@@ -283,7 +286,7 @@ class mod_hybrid_webservice {
 
         try {
             $founduser = $this->_make_call($url);
-        } catch (moodle_exception $error) {
+        } catch (\moodle_exception $error) {
             if (htzoom_is_user_not_found_error($error->getMessage())) {
                 return false;
             } else {
@@ -307,7 +310,7 @@ class mod_hybrid_webservice {
 
         try {
             $foundroles = $this->_make_call($url);
-        } catch (moodle_exception $error) {
+        } catch (\moodle_exception $error) {
             if (htzoom_is_roles_not_found_error($error->getMessage())) {
                 return false;
             } else {
@@ -324,7 +327,7 @@ class mod_hybrid_webservice {
 
         try {
             $foundusers = $this->_make_call($url);
-        } catch (moodle_exception $error) {
+        } catch (\moodle_exception $error) {
             if (htzoom_is_users_not_found_error($error->getMessage())) {
                 return false;
             } else {
@@ -451,7 +454,7 @@ class mod_hybrid_webservice {
         $response = null;
         try {
             $response = $this->_make_call($url);
-        } catch (moodle_exception $error) {
+        } catch (\moodle_exception $error) {
             throw $error;
         }
         return $response;
@@ -470,7 +473,7 @@ class mod_hybrid_webservice {
         $response = null;
         try {
             $response = $this->_make_call($url);
-        } catch (moodle_exception $error) {
+        } catch (\moodle_exception $error) {
         }
         return $response;
     }
@@ -480,7 +483,7 @@ class mod_hybrid_webservice {
         $response = null;
         try{
             $response = $this->_make_call($url);
-        } catch (moodle_exception $error) {
+        } catch (\moodle_exception $error) {
         }
         return $response;
 
@@ -491,7 +494,7 @@ class mod_hybrid_webservice {
         $response = null;
         try{
             $response = $this->_make_call($url);
-        } catch (moodle_exception $error) {
+        } catch (\moodle_exception $error) {
         }
         return $response;
     }
@@ -503,7 +506,7 @@ class mod_hybrid_webservice {
         $response = null;
         try {
             $response = $this->_make_call($url);
-        } catch (moodle_exception $error) {
+        } catch (\moodle_exception $error) {
             throw $error;
         }
         return $response;
@@ -619,7 +622,7 @@ class mod_hybrid_webservice {
                 $zoom->host_id=false;
                 return false;
             }
-        } catch (moodle_exception $error) {
+        } catch (\moodle_exception $error) {
             throw $error;
         }
 
@@ -656,7 +659,7 @@ class mod_hybrid_webservice {
      /**
      * Returns a server to server oauth access token, good for 1 hour.
      *
-     * @throws moodle_exception
+     * @throws \moodle_exception
      * @return string access token
      */
     public function get_access_token() {
@@ -669,11 +672,11 @@ class mod_hybrid_webservice {
      * Stores token and expiration in cache, returns token from OAuth call.
      *
      * @param cache $cache
-     * @throws moodle_exception
+     * @throws \moodle_exception
      * @return string access token
      */
     private function oauth() {
-        $curl = new curl();
+        $curl = new \curl();
         $curl->setHeader('Authorization: Basic ' . base64_encode($this->clientid . ':' . $this->clientsecret));
         $curl->setHeader('Content-Type: application/json');
 
@@ -687,7 +690,7 @@ class mod_hybrid_webservice {
             'https://zoom.us/oauth/token?grant_type=account_credentials&account_id=' . $this->accountid, []);
 
         if ($curl->get_errno()) {
-            throw new moodle_exception('errorwebservice', 'htzoom', '', $curl->error);
+            throw new \moodle_exception('errorwebservice', 'htzoom', '', $curl->error);
         }
 
         $response = json_decode($response);
@@ -695,7 +698,7 @@ class mod_hybrid_webservice {
             $token = $response->access_token;
             return $token;
         } else {
-            throw new moodle_exception('errorwebservice', 'htzoom', '', get_string('zoomerr_no_access_token', 'hybridteachvc_zoom'));
+            throw new \moodle_exception('errorwebservice', 'htzoom', '', get_string('zoomerr_no_access_token', 'hybridteachvc_zoom'));
         }
     }
 

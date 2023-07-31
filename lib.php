@@ -74,7 +74,7 @@ function hybridteaching_add_instance($moduleinstance, $mform = null) {
         }
     } else {
         $moduleinstance->instance = 0;
-        $moduleinstance->typevc = 0;
+        $moduleinstance->typevc = '';
     }
     
     /*if session recording is used, userecordvc, the recording must be processed with processedrecording*/
@@ -108,7 +108,7 @@ function hybridteaching_add_instance($moduleinstance, $mform = null) {
  * @return bool True if successful, false otherwise.
  */
 function hybridteaching_update_instance($moduleinstance, $mform = null) {
-    global $DB;
+    global $CFG, $DB;
 
     $moduleinstance->timemodified = time();
     $moduleinstance->id = $moduleinstance->instance;
@@ -121,9 +121,15 @@ function hybridteaching_update_instance($moduleinstance, $mform = null) {
         }
     } else {
         $moduleinstance->instance = 0;
-        $moduleinstance->typevc = 0;
+        $moduleinstance->typevc = '';
     }
 
+    //if there is not sessionscheduling, change time in the unique session
+    if ($moduleinstance->sessionscheduling == 0){
+        require_once($CFG->dirroot.'/mod/hybridteaching/classes/controller/sessions_controller.php');
+        $session=new sessions_controller($moduleinstance);
+        $result=$session->update_session($moduleinstance);
+    }
     return $DB->update_record('hybridteaching', $moduleinstance);
 }
 
@@ -380,8 +386,6 @@ function hybridteaching_update_grades($hybridteaching, $userid=0, $nullifnone=tr
  */
 function hybridteaching_get_user_grades($hybridteaching, $userid=0) {
     global $CFG;
-
-    require_once($CFG->dirroot . '/mod/hybridteaching/locallib.php');
 
     $cm = get_coursemodule_from_instance('hybridteaching', $hybridteaching->id, 0, false, MUST_EXIST);
     $context = context_module::instance($cm->id);

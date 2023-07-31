@@ -243,3 +243,22 @@ $string['hybridteaching:sessionsfulltable'] = 'Display all fields of session lis
 $string['headerconfigstore'] = 'Manage storage extensions';
 $string['storageplugins'] = 'Storage plugins';
 $string['editsession'] = 'Edit session';
+$string['importsessions'] = 'Import sessions';
+$string['invalidimportfile'] = 'File format is invalid.';
+$string['processingfile'] = 'Processing file...';
+$string['sessionsgenerated'] = '{$a} sessions were successfully generated';
+
+$string['error:importsessionname'] = 'Invalid session name! Skipping line {$a}.';
+$string['error:importsessionstarttime'] = 'Invalid session start time! Skipping line {$a}.';
+$string['error:importsessionduration'] = 'Invalid session duration! Skipping line {$a}.';
+$string['formaterror:importsessionstarttime'] = 'Invalid format for session start time! Skipping line {$a}.';
+$string['formaterror:importsessionduration'] = 'Invalid format for session duration! Skipping line {$a}.';
+$string['error:sessionunknowngroup'] = 'Unknown group name: {$a}.';
+$string['examplecsv'] = 'Example text file';
+$string['examplecsv_help'] = 'Sessions may be imported via CSV, Excel or ODP. The format of the file should be as follows:
+
+  * Each line of the file contains one record
+  * Each record is a series of data separated by the selected separator
+  * The first record contains a list of fieldnames defining the format of the rest of the file
+  * Required fieldname is name, starttime and duration
+  * Optional fieldnames are groups and description';

@@ -49,7 +49,7 @@ class sessions_controller extends common_controller {
         parent::__construct($hybridobject);
         if (!empty($hybridobject->typevc) && helper::subplugin_instance_exists($hybridobject->instance)) {
             $this->existssubplugin = true;
-            $this->require_subplugin_session($hybridobject->typevc);
+            self::require_subplugin_session($hybridobject->typevc);
         }
     }
 
@@ -195,7 +195,8 @@ class sessions_controller extends common_controller {
         //$sessiontype = $DB->get_field('hybridteaching_session', 'typevc', array('id' => $session->id));
         $session = $DB->get_record('hybridteaching_session', ['id' => $session->id]);
         if (!empty($session->typevc)) {
-            $subpluginsession = new sessions();
+            $classname = $this->get_subplugin_class($session->typevc);
+            $subpluginsession = new $classname();
             $subpluginsession->update_session_extended($session, $this->hybridobject);
         }
 
@@ -242,7 +243,8 @@ class sessions_controller extends common_controller {
             }
 
             if (!empty($session->typevc)) {
-                $subpluginsession = new sessions();                
+                $classname = $this->get_subplugin_class($session->typevc);
+                $subpluginsession = new $classname();             
                 $subpluginsession->update_session_extended($session, $this->hybridobject);
             }
         }
@@ -267,7 +269,8 @@ class sessions_controller extends common_controller {
                 $errormsg = 'errordeletesession';
             }
             if (!empty($sessiondata->typevc) && $this->existssubplugin) {
-                $subpluginsession = new sessions();
+                $classname = $this->get_subplugin_class($sessiondata->typevc);
+                $subpluginsession = new $classname();
                 $subpluginsession->delete_session_extended($id, $this->hybridobject->instance);
             }
         }
@@ -287,7 +290,8 @@ class sessions_controller extends common_controller {
         if (!empty($sessiontype) && $this->existssubplugin) {
             $sessionsht = $DB->get_records('hybridteaching_session', 
                 array('hybridteachingid' => $this->hybridobject->id), '', 'id');
-            $subpluginsession = new sessions();
+            $classname = $this->get_subplugin_class($sessiontype);
+            $subpluginsession = new $classname();
             foreach ($sessionsht as $session) {
                 $subpluginsession->delete_session_extended($session, $this->hybridobject->instance);
             }
@@ -341,7 +345,7 @@ class sessions_controller extends common_controller {
 
         $sql = "SELECT *
             FROM {hybridteaching_session} AS hs
-            WHERE hs.hybridteachingid = :id AND hs.starttime<uNIX_TIMESTAMP()
+            WHERE hs.hybridteachingid = :id AND hs.starttime < UNIX_TIMESTAMP()
             ORDER BY hs.starttime DESC LIMIT 1";
         $lastsession = $DB->get_record_sql($sql, ['id' => $htid]);
 
@@ -394,19 +398,35 @@ class sessions_controller extends common_controller {
     }
 
     /**
-     * Creates a new session object from the given data object, populating some of the fields
-     * with default values. Returns the new session object.
+     * Fills the session data with the provided data.
      *
-     * @param object $data The data object to create the session from.
-     * @return object The new session object.
+     * @param mixed $data The data to fill the session with.
+     * @return mixed The session object with the filled data.
+     */
+    public function fill_session_data($data) {
+        $session = clone $data;
+        if (!empty($data->description["text"])) {
+            $session->descriptionitemid = $data->description['itemid'];
+            $session->description = $data->description['text'];
+            $session->descriptionformat = $data->description['format'];
+        } else {
+            $session->description = '';
+            $session->descriptionformat = 0;
+        }
+        
+        return $session;
+    }
+
+    /**
+     * Fills session data for create.
+     *
+     * @param mixed $data The data to fill the session with.
+     * @return mixed The filled session.
      */
     public function fill_session_data_for_create($data) {
         global $USER;
 
-        $session = clone $data;
-        $session->descriptionitemid = $data->description['itemid'];
-        $session->description = $data->description['text'];
-        $session->descriptionformat = $data->description['format'];
+        $session = $this->fill_session_data($data);
         $session->visible = 1;
         $session->timecreated = time();
         $session->createdby = $USER->id;
@@ -414,14 +434,17 @@ class sessions_controller extends common_controller {
         return $session;
     }
 
+    /**
+     * Fills the session data for update.
+     *
+     * @param mixed $data The data to fill the session with.
+     * @global object $USER The global user object.
+     * @return object The updated session object.
+     */
     public function fill_session_data_for_update($data) {
         global $USER;
 
-        $session = clone $data;
-        $session->duration = self::calculate_duration($data->duration, $data->timetype);
-        $session->descriptionitemid = $data->description['itemid'];
-        $session->description = $data->description['text'];
-        $session->descriptionformat = $data->description['format'];
+        $session = $this->fill_session_data($data);
         $session->timemodified = time();
         $session->modifiedby = $USER->id;
 
@@ -433,8 +456,13 @@ class sessions_controller extends common_controller {
      *
      * @param string $typevc the type of VC to require the session file for
      */
-    public function require_subplugin_session($typevc) {
+    public static function require_subplugin_session($typevc) {
         global $CFG;
         require_once($CFG->dirroot.'/mod/hybridteaching/vc/'.$typevc.'/classes/sessions.php');
+    }
+
+    public static function get_subplugin_class($typevc) {
+        $classname = '\hybridteachvc_' . $typevc . '\sessions';
+        return $classname;
     }
 }

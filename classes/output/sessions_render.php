@@ -36,6 +36,7 @@ require_once($CFG->dirroot . '/mod/hybridteaching/classes/form/sessions_form.php
 $PAGE->requires->js_call_amd('mod_hybridteaching/sessions', 'init');
 
 class hybridteaching_sessions_render extends \table_sql implements dynamic_table {
+    const EMPTY = "-";
     protected $hybridteaching;
     protected $typelist;
     protected $cm;
@@ -65,6 +66,7 @@ class hybridteaching_sessions_render extends \table_sql implements dynamic_table
         $perpage = optional_param('perpage', 10, PARAM_INT);
         $sort = optional_param('sort', 'name', PARAM_ALPHANUMEXT);
         $dir = optional_param('dir', 'ASC', PARAM_ALPHA);
+        $slist = optional_param('l', 1, PARAM_INT);
 
         $columns = [
             'strgroup' => get_string('group'),
@@ -148,20 +150,26 @@ class hybridteaching_sessions_render extends \table_sql implements dynamic_table
             $date = $session['starttime'];
             $sessionid = $session['id'];
             $hour = date('H:i', $date);
-            if ($this->typelist == SESSION_LIST) {
-                $date = date('l, j \d\e F \d\e Y, H:i', $date);
+            if (!empty($date)) {
+                if ($this->typelist == SESSION_LIST) {
+                    $date = date('l, j \d\e F \d\e Y, H:i', $date);
+                } else {
+                    $date = date('l, j \d\e F \d\e Y', $date);
+                }
             } else {
-                $date = date('l, j \d\e F \d\e Y', $date);
+                $date = self::EMPTY;
             }
+
             $body = [
                 'class' => '',
                 'sessionid' => $session['id'],
                 'group' => $session['groupid'] == 0 ? get_string('commonsession', 'hybridteaching') : groups_get_group($session['groupid'])->name,
                 'name' => $session['name'],
+                'typevc' => $session['typevc'],
                 'description' => $session['description'],
                 'date' => $date,
                 'hour' => $hour,
-                'duration' => helper::get_hours_format($session['duration']),
+                'duration' => !empty($session['duration']) ? helper::get_hours_format($session['duration']) : self::EMPTY,
                 'recordingbutton' => html_writer::start_tag('input', ['type' => 'button', 'value' => get_string('recording', 'mod_hybridteaching')]),
                 'attendance' => '75/100 (75%)',
                 'materials' => 'Recursos',
@@ -176,7 +184,7 @@ class hybridteaching_sessions_render extends \table_sql implements dynamic_table
             ];
 
             $hybridteachingid = empty($hybridteaching) ? $this->cm->instance : $hybridteachingid;
-            $params = array('sid' => $sessionid, 'h' => $hybridteachingid, 'id' => $id, 'returnurl' => $returnurl);
+            $params = array('sid' => $sessionid, 'h' => $hybridteachingid, 'id' => $id, 'l' => $slist);
             $urledit = '/mod/hybridteaching/programsessions.php?id='.$this->cm->id .'&s='.$sessionid;
 
             $options = $this->get_table_options($body, $params, $url, $urledit);
@@ -314,10 +322,12 @@ class hybridteaching_sessions_render extends \table_sql implements dynamic_table
 
     public function get_session_row($params, $options) {
         global $OUTPUT;
-        $type = $this->hybridteaching->typevc;
+        $type = $params['typevc'];
         $typealias = '';
         if (!empty($type) && has_capability('mod/hybridteaching:sessionsfulltable', $this->context)) {
             $typealias = get_string('alias', 'hybridteachvc_'.$type);
+        } else {
+            $typealias = self::EMPTY;
         }
 
         $row = '';

@@ -1,0 +1,4 @@
+group,name,starttime,duration
+group1,Session name1,2023-07-24 18:00,60
+group2,Session name2,2023-07-25 12:00,45
+All groups,Session name3,2023-07-26 9:00,30

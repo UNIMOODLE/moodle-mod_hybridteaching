@@ -23,12 +23,30 @@
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+namespace hybridteachvc_zoom;
 
 defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->dirroot.'/mod/hybridteaching/vc/zoom/classes/webservice.php');
 
 class sessions {
+    protected $zoomsession;
+
+    public function __construct($htsessionid = null) {
+        if (!empty($htsessionid)) {
+            $this->zoomsession = $this->load_session($htsessionid);
+        }
+    }
+
+    public function load_session($htsessionid) {
+        global $DB;
+        return $DB->get_record('hybridteachvc_zoom', ['htsession' => $htsessionid]);
+    }
+
+    public function get_session() {
+        return $this->zoomsession;
+    }
+
     /**
      * Creates a unique session extended for a Zoom meeting instance.
      *
@@ -40,11 +58,15 @@ class sessions {
 
         $zoominstance = $this->load_zoom_instance($ht->instance);
 
-        $service = new mod_hybrid_webservice($zoominstance);
+        $service = new \hybridteachvc_zoom\mod_hybrid_webservice($zoominstance);
         $response = $service->create_meeting($session, $ht);
         if ($response != false) {
             $zoom = $this->populate_htzoom_from_response($session, $response);
             $zoom->id = $DB->insert_record('hybridteachvc_zoom', $zoom);
+            return true;
+        }
+        else{
+            return false;
         }
     }
 
@@ -63,7 +85,7 @@ class sessions {
         //if is created zoom, change in zoom with webservice
         if ($zoom) {
             $zoom = (object) array_merge((array) $zoom, (array) $data);
-            $service = new mod_hybrid_webservice($zoominstance);
+            $service = new \hybridteachvc_zoom\mod_hybrid_webservice($zoominstance);
             $service->update_meeting($zoom, $ht);
         }
         return $errormsg;
@@ -79,7 +101,7 @@ class sessions {
     public function delete_session_extended($htsession, $instanceid) {
         global $DB;
         $zoominstance = $this->load_zoom_instance($instanceid);
-        $service = new mod_hybrid_webservice($zoominstance);
+        $service = new \hybridteachvc_zoom\mod_hybrid_webservice($zoominstance);
         $zoom = $DB->get_record('hybridteachvc_zoom', ['htsession' => $htsession]);
         if (!empty($zoom->meetingid)) {
             $service->delete_meeting($zoom->meetingid, 0);
@@ -95,7 +117,7 @@ class sessions {
      * @return stdClass $newzoom stdClass object containing relevant data
      */
     public function populate_htzoom_from_response($data, $response) {        
-        $newzoom = new stdClass();
+        $newzoom = new \stdClass();
         $newzoom->htsession = $data->id;   //session id
         $newzoom->meetingid = $response->id;
         $newzoom->hostid = $response->host_id;
@@ -127,5 +149,35 @@ class sessions {
 
         $zoominstance = $DB->get_record_sql($sql, ['instanceid' => $instanceid]);
         return $zoominstance;
+    }
+
+    public function get_zone_access() {
+        //comprobar si el rol es para iniciar reunión o para entrar a reunión
+        //y mandamos la url de acceso (o bien starturl o bien joinurl)
+        //starturl o join url, según sea hospedador o participante
+
+        //aqui antes también comprobar que el plugin de tipo $type existe, está instalado y activo
+        
+        /*
+        if ($vc){
+            //si hospedador:
+            $nexturl = new moodle_url($vc->starturl);
+            //si participante
+            $nexturl = new moodle_url($vc->joinurl);
+        }
+        */
+
+
+        if ($this->zoomsession) {
+            $array = [
+                'id' => $this->zoomsession->id,
+                'ishost' => true,
+                'isaccess' => true,
+                'url' => base64_encode($this->zoomsession->starturl),
+            ];
+            return $array;
+        } else {
+            return null;
+        }
     }
 }

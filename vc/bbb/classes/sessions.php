@@ -23,7 +23,10 @@
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+namespace hybridteachvc_bbb;
+
 use function Symfony\Component\DependencyInjection\Loader\Configurator\param;
+use hybridteachvc_bbb\bbbproxy;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -31,11 +34,29 @@ global $CFG;
 
 require_once($CFG->dirroot.'/mod/hybridteaching/classes/controller/sessions_controller.php');
 require_once($CFG->dirroot.'/mod/hybridteaching/vc/bbb/classes/webservice.php');
+require_once($CFG->dirroot.'/mod/hybridteaching/vc/bbb/classes/bbbproxy.php');
 use mod_bigbluebuttonbn\meeting;
-use  mod_bigbluebuttonbn\plugin;
+use mod_bigbluebuttonbn\plugin;
 
 
-class sessions extends sessions_controller {
+class sessions {
+    protected $bbbsession;
+
+    public function __construct($htsessionid = null) {
+        if (!empty($htsessionid)) {
+            $this->bbbsession = $this->load_session($htsessionid);
+        }
+    }
+
+    public function load_session($htsessionid) {
+        global $DB;
+        return $DB->get_record('hybridteachvc_bbb', ['htsession' => $htsessionid]);
+    }
+
+    public function get_session() {
+        return $this->bbbsession;
+    }
+
     /**
      * Creates a new session by calling the Hybrid Web Service's create_meeting function
      * and stores the data returned from it in the hybridteachvc_zoom table if the response
@@ -53,8 +74,8 @@ class sessions extends sessions_controller {
 
 //AQUI PONER LO MISMO QUE EN BBB, EN EL MEETING.PHP, EN FUNCION CREATE_MEETING(), ES MEJOR
 
-
-        $bbb = new stdClass();
+/*
+        $bbb = new \stdClass();
         $bbb->htsession = $data->htsession;
         $bbb->meetingid=meeting::get_unique_meetingid_seed();
         $bbb->moderatorpass = plugin::random_password(12);
@@ -66,12 +87,17 @@ class sessions extends sessions_controller {
         $bbb->createdby = $USER->id;
 
         $bbb->id = $DB->insert_record('hybridteachvc_bbb', $bbb);
+        */
+
+        //FALTA COMPLETAR
+        return false;
     }
     
     public function update_session_extended($data) {
+        /*
         global $DB, $USER;
         $errormsg = '';
-        $session = new stdClass();
+        $session = new \stdClass();
         $session->id = $data->id;
         $session->name = $data->name;
         $session->timemodified = time();
@@ -80,6 +106,7 @@ class sessions extends sessions_controller {
             $errormsg = 'errorupdatesession';
         }
         return $errormsg;
+        */
     }
 
     /**
@@ -131,5 +158,32 @@ class sessions extends sessions_controller {
         return $instance;
     }
 
+    function get_zone_access() {
+        //ESTA FUNCION NO NECESITA NINGÚN $hybridteachingid
+        //PORQUE YA ESTÁ INICIALIZADA EN EL CONSTRUCTOR CON SU SESSION, 
+        //NO ES NECESARIO NINGÚN id DE ACTIVIDAD
+        
+        //la info ya está cargada del constructor
 
+
+        //aquÍ solo calcular los datos necesarios de la zona de acceso
+        //comprobar si el rol es para iniciar reunión o para entrar a reunión
+        //y mandamos la url de acceso (o bien starturl o bien joinurl)
+        //starturl o join url, según sea hospedador o participante
+
+
+        //bbbproxy::require_working_server($vc);        
+    
+        if ($this->bbbsession) {
+            $array = [
+                'id' => $this->bbbsession->id,
+                'ishost' => true,
+                'isaccess' => true,
+                'url' => base64_encode($this->bbbsession->starturl),
+            ];
+            return $array;
+        } else {
+            return null;
+        }
+    }
 }

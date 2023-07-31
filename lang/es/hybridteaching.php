@@ -234,3 +234,22 @@ $string['delayin'] = 'Retrasar en';
 $string['hybridteaching:sessionsactions'] = 'Ver acciones en la lista de sesiones';
 $string['hybridteaching:sessionsfulltable'] = 'Mostrar todos los campos de las lista de sesiones';
 $string['editsession'] = 'Editar la sesión';
+$string['importsessions'] = 'Importar sesiones';
+$string['invalidimportfile'] = 'El formato del archivo no es correcto.';
+$string['processingfile'] = 'Procesando archivo...';
+$string['sessionsgenerated'] = '{$a} sesiones generadas con éxito';
+
+$string['error:importsessionname'] = '¡Nombre de sesión inválido! Saltando línea {$a}.';
+$string['error:importsessionstarttime'] = '¡Hora de inicio de sesión no válida! Saltando línea {$a}.';
+$string['error:importsessionduration'] = '¡Duración de sesión inválida! Saltando línea {$a}.';
+$string['formaterror:importsessionstarttime'] = '¡Formato no válido para la hora de inicio de sesión! Saltando línea {$a}.';
+$string['formaterror:importsessionduration'] = '¡Formato no válido para la duración de la sesión! Saltando línea {$a}.';
+$string['error:sessionunknowngroup'] = 'Nombre de grupo desconocido: {$a}.';
+$string['examplecsv'] = 'Archivo de texto de ejemplo';
+$string['examplecsv_help'] = 'Las sesiones pueden importarse mediante CSV, Excel u ODP. El formato del archivo debe ser el siguiente:
+
+  * Cada línea del archivo contiene un registro
+  * Cada registro es una serie de datos separados por el separador seleccionado.
+  * El primer registro contiene una lista de nombres de campo que definen el formato del resto del fichero.
+  * Los nombres de campo obligatorios son el nombre, la hora de inicio y la duración.
+  * Los nombres de campo opcionales son grupos y descripción';

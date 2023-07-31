@@ -107,9 +107,11 @@ class session_filtering {
                 list($course, $cm) = get_course_and_cm_from_cmid($id, 'hybridteaching');
                 $groupmode = groups_get_activity_groupmode($cm);
                 $context = context_module::instance($cm->id);
-                if (has_capability('mod/hybridteaching:sessionsfulltable', $context) || $groupmode == VISIBLEGROUPS) {
+                if (has_capability('mod/hybridteaching:sessionsfulltable', $context)) {
                     $groups = groups_get_all_groups($course->id, 0, $cm->groupingid);
-                } else {
+                } else if ($groupmode == VISIBLEGROUPS) {
+                    $groups = groups_get_all_groups($course->id, 0, $cm->groupingid);
+                } else if ($groupmode == SEPARATEGROUPS) {
                     $groups = groups_get_all_groups($course->id, $USER->id, $cm->groupingid);
                 }
                 $choices = array();

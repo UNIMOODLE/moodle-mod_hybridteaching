@@ -13,9 +13,11 @@ class sessions_form extends moodleform {
         $typevc = $this->_customdata['typevc'];
 
         $modcontext = context_module::instance($cm->id);
-        $defopts = array('maxfiles' => EDITOR_UNLIMITED_FILES, 'noclean' => true, 'context' => $modcontext);
-        $session = file_prepare_standard_editor($session, 'description', 
-            $defopts, $modcontext, 'mod_hybridteaching', 'session', $session->sessionid);
+        if (!empty($session)) {
+            $defopts = array('maxfiles' => EDITOR_UNLIMITED_FILES, 'noclean' => true, 'context' => $modcontext);
+            $session = file_prepare_standard_editor($session, 'description', 
+                $defopts, $modcontext, 'mod_hybridteaching', 'session', $session->sessionid);
+        }
 
         if (empty($session)) {
             $headertitle = get_string('addsession', 'hybridteaching');
