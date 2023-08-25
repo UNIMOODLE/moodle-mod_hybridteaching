@@ -1,11 +1,11 @@
 <?php
 
 $string['pluginname'] = 'Hybrid zoom';
-$string['plugininstance'] = 'Hybrid zoom instance';
-$string['pluginnewinstance'] = 'New hybrid zoom instance';
+$string['pluginconfig'] = 'Hybrid zoom config';
+$string['pluginnewconfig'] = 'New hybrid zoom config';
 $string['accountid'] = 'Accountid';
-$string['clientid'] = 'Clientid';
-$string['clientsecret'] = 'Clientsecret';
+$string['clientid'] = 'Client ID';
+$string['clientsecret'] = 'Client secret';
 $string['zoom'] = 'zoom';
 $string['alias'] = 'Zoom';
 $string['pluginname']='Hybrid zoom';
@@ -17,4 +17,4 @@ $string['zoomerr_field_missing'] = '{$a} not found';
 $string['errorwebservice'] = 'Zoom webservice error: {$a}.';
 $string['zoomerr_no_access_token'] = 'No access token returned';
 $string['licenses'] = 'Licenses';
-$string['downloadrecords'] = 'Download records';
+$string['downloadrecordszoom'] = 'Download Zoom records';

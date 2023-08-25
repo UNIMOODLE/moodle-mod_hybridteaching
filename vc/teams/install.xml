@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<XMLDB PATH="mod/hybridteaching/vc/teams/db" VERSION="20230816" COMMENT="XMLDB file for Moodle mod/hybridteaching/vc/teams"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="../../../../../lib/xmldb/xmldb.xsd"
+>
+  <TABLES>
+    <TABLE NAME="hybridteachvc_teams" COMMENT="Stores the teams activity module instances.">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="htsession" TYPE="int" LENGTH="11" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Hybridteaching session id"/>
+        <FIELD NAME="meetingid" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false" COMMENT="meeting id"/>
+        <FIELD NAME="joinurl" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="The join URL"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+      </KEYS>
+    </TABLE>
+
+    <TABLE NAME="hybridteachvc_teams_config" COMMENT="Teams configs">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="11" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="serverurl" TYPE="char" LENGTH="200" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="sharedsecret" TYPE="char" LENGTH="60" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="pollinterval" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id" COMMENT="The unique id for this config teams."/>
+      </KEYS>
+    </TABLE>
+  </TABLES>
+</XMLDB>

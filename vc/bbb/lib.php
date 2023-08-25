@@ -17,7 +17,7 @@ function hybridteachvc_bbb_addform($mform){
 function get_salas(){
     global $DB;
     //buscar aqui solo las licencias libres, y de la instancia seleccionada.
-    //habrá que relaciona la tabla hybridteachvc_zoom_license con hybridteaching_instances
+    //habrá que relaciona la tabla hybridteachvc_zoom_license con hybridteaching_configs
     
     //$select_licencias_libres="SELECT id,nombre_sala, email_licencia, rol
     //".$licencias_ocupadas. " ORDER BY nombre_sala";

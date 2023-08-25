@@ -96,7 +96,7 @@ $string['sessions'] = 'Sessions';
 $string['import'] = 'Import';
 $string['export'] = 'Export';
 
-$string['hybridteaching:addinstance'] = 'Add new hybrid teaching';
+$string['hybridteaching:addconfig'] = 'Add new hybrid teaching';
 $string['hybridteaching:view'] = 'View hybrid teaching';
 $string['hybridteaching:viewjoinurl'] = 'View join url';
 $string['hybridteaching:programschedule'] = 'View Program schedule';
@@ -108,23 +108,23 @@ $string['type'] = 'Type';
 $string['order'] = 'Order';
 $string['hideshow'] = 'Show/Hide';
 $string['addsetting'] = 'Add setting';
-$string['editinstance'] = 'Edit instance';
-$string['saveinstance'] = 'Save instance';
-$string['instancegeneralsettings'] = 'Hybrid teaching general settings';
-$string['instancename'] = 'Instance name';
-$string['instanceselect'] = 'Select an instance';
+$string['editconfig'] = 'Edit config';
+$string['saveconfig'] = 'Save config';
+$string['configgeneralsettings'] = 'Hybrid teaching general settings';
+$string['configname'] = 'Config name';
+$string['configselect'] = 'Select an config';
 $string['generalconfig'] = 'General configuration';
-$string['instancesconfig'] = 'Manage instances';
-$string['instancesvcconfig'] = 'Manage videoconference settings';
-$string['instancesstoreconfig'] = 'Manage storage settings';
+$string['configsconfig'] = 'Manage configs';
+$string['configsvcconfig'] = 'Manage videoconference settings';
+$string['configsstoreconfig'] = 'Manage storage settings';
 
-$string['errorcreateinstance'] = 'Error creating instance';
-$string['errorupdateinstance'] = 'Error updateing instance';
-$string['errordeleteinstance'] = 'Error deleting instance';
-$string['createdinstance'] = 'Instance created successfully';
-$string['updatedinstance'] = 'Instance updated successfully';
-$string['deletedinstance'] = 'Instance deleted successfully';
-$string['deleteconfirm'] = 'Are you sure you want to delete {$a} instance?';
+$string['errorcreateconfig'] = 'Error creating config';
+$string['errorupdateconfig'] = 'Error updateing config';
+$string['errordeleteconfig'] = 'Error deleting config';
+$string['createdconfig'] = 'config created successfully';
+$string['updatedconfig'] = 'config updated successfully';
+$string['deletedconfig'] = 'config deleted successfully';
+$string['deleteconfirm'] = 'Are you sure you want to delete {$a} config?';
 
 $string['view_error_url_missing_parameters'] = 'There are parameters missing in this URL';
 
@@ -169,12 +169,14 @@ $string['sessionname'] = 'Session name';
 $string['nosessions'] = 'There are not sessions';
 $string['nogroup'] = 'Next session is not for your group';
 $string['nosubplugin'] = 'Incorrect type of videoconference. El tipo de videoconferencia es incorrecto. Contact your administrator';
-$string['noinstance'] = 'The selected videoconference configuration does not exist. Contact your administrator';
+$string['noconfig'] = 'The selected videoconference configuration does not exist. Contact your administrator';
 
-$string['status_progress'] = 'In progress';
-$string['status_finished'] ='Has finished';
-$string['status_start'] = 'will start soon';
-$string['status_undated'] = 'This videoconference room is ready. You can join the meeting now.';
+$string['status_progress'] = 'The session is in progress';
+$string['status_finished'] ='The session has finished';
+$string['status_start'] = 'The session will start soon';
+$string['status_ready'] = 'This session is ready. You can join now.';
+$string['status_undated'] = 'You can create a new recurring session';
+$string['status_undated_wait'] = 'You must wait until new session starts';
 
 $string['closedoors_hours'] = ' {$a} hours from start';
 $string['closedoors_minutes'] = ' {$a} minutes from start';
@@ -190,7 +192,7 @@ $string['started'] = 'Started on';
 $string['closedoorsnext'] = 'Close doors after';
 $string['closedoorsnext2'] = 'from start';
 $string['closedoorsprev'] = 'This session closed doors to';
-$string['finished'] = 'This session ended on';
+$string['finished'] = 'Last session ended on';
 
 $string['mod_form_field_participant_list_action_add'] = 'Add';
 $string['mod_form_field_participant_list'] = 'Assignee';
@@ -262,3 +264,49 @@ $string['examplecsv_help'] = 'Sessions may be imported via CSV, Excel or ODP. Th
   * The first record contains a list of fieldnames defining the format of the rest of the file
   * Required fieldname is name, starttime and duration
   * Optional fieldnames are groups and description';
+
+$string['nostarttime'] = 'Without start time';
+$string['noduration'] = 'Without duration';
+$string['notypevc'] = 'Without videoconference type';
+$string['joinvc'] = 'Join videoconference';
+$string['createsession'] = 'Create session';
+$string['showqr'] = 'Show QR';
+$string['canjoin'] = 'You can join the meeting when the teacher has started it';
+$string['canattendance'] = 'You will be able to register your attendance when the teacher has started the session';
+$string['recurringses'] = 'Recurring session';
+$string['finishsession'] = 'Finish session';
+$string['sessionnoaccess'] = 'You have no access to this session';
+$string['lessamin'] = 'Less than 1 min';
+
+$string['qrcode'] = 'QR code';
+$string['qrheader'] = 'Scan the QR or use the password listed below to take assistance';
+$string['useqr'] = 'Include QR use';
+$string['rotateqr'] = 'Rotate QR code';
+$string['studentpassword'] = 'Student password';
+$string['passwordheader'] = 'Use the password listed below to take your attendance';
+$string['qrcodeheader'] = 'Scan the QR code below to take your attendance';
+$string['qrcodeandpasswordheader'] = 'Scan the QR code below or use the password listed below to take your attendance';
+$string['noqrpassworduse'] = 'The use of QR or password to take attendance is disabled';
+$string['showqrpassword'] = 'Show Password / QR';
+$string['qrcodevalidbefore'] = 'QR code valid for:';
+$string['qrcodevalidafter'] = 'seconds.';
+$string['attendwithpassword'] = 'Access password: ';
+$string['markattendance'] = 'Sign attendance';
+$string['incorrect_password'] = 'Incorrect password entered.';
+$string['attendance_registered'] = 'Attendance registered succesfully';
+$string['qr_expired'] = 'The QR expired, make sure to read the correct qr';
+$string['grade'] = 'Grade';
+$string['commonattendance'] = 'All groups';
+$string['videoconference'] = 'Vconf';
+$string['classroom'] = 'Classroom';
+
+$string['resultsperpage'] = 'Results per page';
+$string['sessresultsperpage_desc'] = 'Number of sessions to show per page';
+$string['donotusepaging'] = 'Do not use paging';
+$string['reusesession'] = 'Reuse external session resources';
+$string['reusesession_desc'] = 'If is checked, the session resources will be reused for recurring sessions';
+
+$string['allsessions'] = 'Global - all sessions';
+$string['entrytime'] = 'Entry';
+$string['leavetime'] = 'Leave';
+$string['permanence'] = 'Permanence';

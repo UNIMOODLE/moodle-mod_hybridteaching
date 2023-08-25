@@ -47,7 +47,7 @@ class sessions_controller extends common_controller {
      */
     public function __construct(stdClass $hybridobject = null) {
         parent::__construct($hybridobject);
-        if (!empty($hybridobject->typevc) && helper::subplugin_instance_exists($hybridobject->instance)) {
+        if (!empty($hybridobject->typevc) && helper::subplugin_config_exists($hybridobject->config)) {
             $this->existssubplugin = true;
             self::require_subplugin_session($hybridobject->typevc);
         }
@@ -96,8 +96,9 @@ class sessions_controller extends common_controller {
      * @return void
      */
     public function create_session($data) {
+        $session = null;
         $data->hybridteachingid = $this->hybridobject->id;
-        $data->instance = $this->hybridobject->instance;
+        $data->config = $this->hybridobject->config;
         $data->duration = self::calculate_duration($data->duration, $data->timetype);
         $data->userecordvc = $this->hybridobject->userecordvc;
         if ($data->userecordvc == 1) {
@@ -106,8 +107,10 @@ class sessions_controller extends common_controller {
         if (isset($data->addmultiply)) {
             $this->create_multiple_sessions($data);
         } else {
-            $this->create_unique_session($data);
+            $session = $this->create_unique_session($data);
         }
+
+        return $session;
     }
 
     /**
@@ -116,10 +119,10 @@ class sessions_controller extends common_controller {
      * @param array $data An array of session data to be saved.
      * @throws Exception If there is an error inserting the session into the database.
      */
-    public function create_unique_session($data) {
+    public function create_unique_session($session) {
         global $DB;
 
-        $session = $this->fill_session_data_for_create($data);
+        $session = $this->fill_session_data_for_create($session);
         $session->id = $DB->insert_record('hybridteaching_session', $session);
         if (!empty($session->description)) {
             $description = file_save_draft_area_files($session->descriptionitemid,
@@ -129,6 +132,8 @@ class sessions_controller extends common_controller {
             $DB->set_field('hybridteaching_session', 'description', $description, array('id' => $session->id));
         }
         $session->htsession = $session->id;
+
+        return $session;
     }
 
     /**
@@ -188,11 +193,11 @@ class sessions_controller extends common_controller {
         global $DB;
         $errormsg = '';
         $session = $this->fill_session_data_for_update($data);
+        $session->duration = self::calculate_duration($data->duration, $data->timetype);
         if (!$DB->update_record('hybridteaching_session', $session)) {
             $errormsg = 'errorupdatesession';
         }
 
-        //$sessiontype = $DB->get_field('hybridteaching_session', 'typevc', array('id' => $session->id));
         $session = $DB->get_record('hybridteaching_session', ['id' => $session->id]);
         if (!empty($session->typevc)) {
             $classname = $this->get_subplugin_class($session->typevc);
@@ -271,7 +276,7 @@ class sessions_controller extends common_controller {
             if (!empty($sessiondata->typevc) && $this->existssubplugin) {
                 $classname = $this->get_subplugin_class($sessiondata->typevc);
                 $subpluginsession = new $classname();
-                $subpluginsession->delete_session_extended($id, $this->hybridobject->instance);
+                $subpluginsession->delete_session_extended($id, $this->hybridobject->config);
             }
         }
         return $errormsg;
@@ -293,7 +298,7 @@ class sessions_controller extends common_controller {
             $classname = $this->get_subplugin_class($sessiontype);
             $subpluginsession = new $classname();
             foreach ($sessionsht as $session) {
-                $subpluginsession->delete_session_extended($session, $this->hybridobject->instance);
+                $subpluginsession->delete_session_extended($session, $this->hybridobject->config);
             }
         }
 
@@ -320,34 +325,44 @@ class sessions_controller extends common_controller {
      * @throws Some_Exception_Class Description of the exception that can be thrown.
      * @return mixed The next session data.
      */
-    public function get_next_session($htid) {
+    public function get_next_session() {
         global $DB;
 
-        $sql = "SELECT *
-            FROM {hybridteaching_session} AS hs
-            WHERE hs.hybridteachingid = :id AND (hs.starttime + hs.duration >= UNIX_TIMESTAMP() OR hs.starttime IS NULL)
-            ORDER BY hs.starttime LIMIT 1";
+        $datefilter = "";
+        if (empty($this->hybridobject->undatedsession)) {
+            $datefilter  = " AND (hs.starttime + hs.duration >= UNIX_TIMESTAMP() OR hs.starttime IS NULL)";
+        }
 
-        $nextsession = $DB->get_record_sql($sql, ['id' => $htid]);
+        $sql = "SELECT *
+                  FROM {hybridteaching_session} AS hs
+                 WHERE hs.hybridteachingid = :id 
+                   $datefilter
+                   AND (hs.isfinished = 0 OR hs.isfinished IS NULL)
+              ORDER BY hs.starttime LIMIT 1";
+
+        $nextsession = $DB->get_record_sql($sql, ['id' => $this->hybridobject->id]);
 
         return $nextsession;
     }
 
     /**
-     * Retrieve the next session from the database using the given hybridteaching ID.
+     * Retrieves the last session from the hybrid teaching session table based on the provided hybrid teaching ID.
      *
-     * @param int $htid
-     * @throws Some_Exception_Class Description of the exception that can be thrown.
-     * @return mixed The next session data.
+     * @param int $htid The ID of the hybrid teaching.
+     * @global object $DB The global database object.
+     * @throws None
+     * @return mixed The last session record from the hybrid teaching session table.
      */
-    public function get_last_session($htid) {
+    public function get_last_session() {
         global $DB;
 
         $sql = "SELECT *
-            FROM {hybridteaching_session} AS hs
-            WHERE hs.hybridteachingid = :id AND hs.starttime < UNIX_TIMESTAMP()
-            ORDER BY hs.starttime DESC LIMIT 1";
-        $lastsession = $DB->get_record_sql($sql, ['id' => $htid]);
+                  FROM {hybridteaching_session} AS hs
+                 WHERE hs.hybridteachingid = :id 
+                   AND hs.starttime < UNIX_TIMESTAMP()
+                   AND hs.isfinished = 1
+              ORDER BY hs.starttime DESC LIMIT 1";
+        $lastsession = $DB->get_record_sql($sql, ['id' => $this->hybridobject->id]);
 
         return $lastsession;
     }
@@ -464,5 +479,29 @@ class sessions_controller extends common_controller {
     public static function get_subplugin_class($typevc) {
         $classname = '\hybridteachvc_' . $typevc . '\sessions';
         return $classname;
+    }
+
+    /**
+    * Save session storage config id
+    *
+    * @param object The session object to calculate to save.
+    */
+    public static function savestorage($session){
+
+        //FALTA CALCULAR CON LA SELECCION DE CURSOS DE LA CONFIGURACIÓN
+
+        //calculate storage
+        global $DB;
+        $sql= 'SELECT id FROM {hybridteaching_configs}
+            WHERE subplugintype=:type AND visible=1
+            ORDER BY sortorder, id
+            LIMIT 1';
+        $record=$DB->get_record_sql($sql,['type' => 'storage']);
+
+        //save storage in session
+        if ($record){
+            $session->storagereference=$record->id;
+            $DB->update_record('hybridteaching_session',$session);
+        }
     }
 }

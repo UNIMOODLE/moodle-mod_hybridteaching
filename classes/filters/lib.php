@@ -115,9 +115,13 @@ class session_filtering {
                     $groups = groups_get_all_groups($course->id, $USER->id, $cm->groupingid);
                 }
                 $choices = array();
-                $choices[0] = get_string('commonsession', 'hybridteaching');
-                foreach ($groups as $group) {
-                    $choices[$group->id] = $group->name;
+                if (has_capability('mod/hybridteaching:sessionsfulltable', $context) || $groupmode != SEPARATEGROUPS) {
+                    $choices[0] = get_string('commonsession', 'hybridteaching');
+                }
+                if (!empty($groups)) {
+                    foreach ($groups as $group) {
+                        $choices[$group->id] = $group->name;
+                    }
                 }
                 return new session_filter_select('groupid', get_string('groups'), $advanced, 'groupid', $choices);
             case 'starttime': 

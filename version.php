@@ -26,6 +26,6 @@ defined('MOODLE_INTERNAL') || die();
 
 $plugin->component = 'mod_hybridteaching';
 $plugin->release = '0.1.0';
-$plugin->version = 2023031700.03;
+$plugin->version = 2023031700.10;
 $plugin->requires = 2022041900;
 $plugin->maturity = MATURITY_ALPHA;

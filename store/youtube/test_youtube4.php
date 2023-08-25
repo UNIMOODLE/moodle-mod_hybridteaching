@@ -28,26 +28,26 @@ require(__DIR__.'/../../../../config.php');
 require_once(__DIR__.'/../../lib.php');
 global $DB;
 
-$instanceyt=$DB->get_record('hybridteachstore_youtube_ins',array('emaillicense'=>'mcalvo@isyc.com'));
-if (!$instanceyt) {
+$configyt=$DB->get_record('hybridteachstore_youtube_con', array('emaillicense'=>'mcalvo@isyc.com'));
+if (!$configyt) {
     return;
 }
 try{
     // Client init
     $client = new Google_Client();
-    $client->setApplicationName($instanceyt->accountid);
-    $client->setClientId($instanceyt->clientid);
+    $client->setApplicationName($configyt->accountid);
+    $client->setClientId($configyt->clientid);
     $client->setAccessType('offline');
 
     $client->setScopes($scope);
-    $client->setClientSecret($instanceyt->clientsecret);
+    $client->setClientSecret($configyt->clientsecret);
     $redirect = filter_var('http://' . $_SERVER['HTTP_HOST'] . $_SERVER['PHP_SELF'],
     FILTER_SANITIZE_URL);
     $client->setRedirectUri($redirect);
     $client->setApprovalPrompt('consent');
     //$client->setIncludeGrantedScopes(true);   // incremental auth
 
-    $client->setAccessToken($instanceyt->token);
+    $client->setAccessToken($configyt->token);
 
 
     

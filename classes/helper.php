@@ -21,38 +21,43 @@ class helper{
         if ($minutes > 0) {
             $formattime .=  $minutes . ' min';
         }
+
+        if (!empty($secs) && empty($formattime)) {
+            $formattime = get_string('lessamin', 'hybridteaching');
+        }
+        
         return $formattime;
     }
 
     /**
-     * Checks if a subplugin instance exists.
+     * Checks if a subplugin config exists.
      *
-     * @param int $instanceid The ID of the subplugin instance.
-     * @return mixed Returns the instance if found, 0 if no subplugin, -1 if no instance.
+     * @param int $configid The ID of the subplugin config.
+     * @return mixed Returns the config if found, 0 if no subplugin, -1 if no config.
      */
-    public static function subplugin_instance_exists($instanceid){
+    public static function subplugin_config_exists($configid){
         global $DB;
-        $instance = $DB->get_record('hybridteaching_instances', ['id' => $instanceid, 'visible' => 1]);
+        $config = $DB->get_record('hybridteaching_configs', ['id' => $configid, 'visible' => 1]);
     
-        if ($instance) {
+        if ($config) {
             $pluginmanager = core_plugin_manager::instance();
             $subplugins = $pluginmanager->get_subplugins_of_plugin('mod_hybridteaching');
             $find = false;
     
             foreach ($subplugins as $subplugin) {
-                if ($subplugin->type == 'hybridteachvc' && $subplugin->name == $instance->type) {
+                if ($subplugin->type == 'hybridteachvc' && $subplugin->name == $config->type) {
                     $find = true;
                     break;
                 }
             }
     
             if ($find) {
-                return $instance;  // Correct
+                return $config;  // Correct
             } else {
                 return 0;  // No subplugin
             }
         } else {
-            return -1;  // No instance
+            return -1;  // No config
         }
     }
 

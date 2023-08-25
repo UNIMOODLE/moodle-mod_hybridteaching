@@ -22,7 +22,7 @@ require_once($CFG->dirroot.'/mod/hybridteaching/vc/bbb/locallib.php');
 require_once($CFG->dirroot.'/lib/filelib.php');
 
 
-class mod_hybrid_webservice {
+class webservice {
 
 
     /**

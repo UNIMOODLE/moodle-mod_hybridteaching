@@ -22,14 +22,16 @@ class updatestores extends \core\task\scheduled_task {
         require_once($CFG->dirroot . '/mod/hybridteaching/store/youtube/classes/youtube_handler.php');
         //sessions to get
         //1.  obtener las sesiones de las que descargar grabaciones, que tengan el método de almacenamiento de youtube
-        $sql=" SELECT ht.id AS htid,ht.course, hs.id AS hsid, hs.name, hs.typestorage, hs.userecordvc, hs.processedrecording, hs.storagereference
+        $sql="SELECT ht.id AS htid,ht.course, hs.id AS hsid, hs.name, hs.userecordvc, hs.processedrecording, hs.storagereference, hc.subpluginconfigid
         FROM {hybridteaching_session} hs
         INNER JOIN {hybridteaching} ht ON ht.id=hs.hybridteachingid
-        WHERE hs.userecordvc=1 AND hs.typestorage='youtube' AND hs.processedrecording=0";
+        INNER JOIN {hybridteaching_configs} hc ON hs.storagereference=hc.id          
+        WHERE hs.userecordvc=1 AND hc.type='youtube' AND hs.processedrecording=0";
+
         $storesyoutube=$DB->get_records_sql($sql);
 
         //2.  descargarlas utilizando el método adecuado de cada subplugin, descargarlas en moodledata
-        //este paso 2 igual habría que hacerlo en otra task del subplugin de vc, que descargue automa´ticamentene moodledata, 
+        //este paso 2 hecho en otra task del subplugin de vc, que descargue automa´ticamentene moodledata, 
         //y luego esta task que suba de moodledata a youtube.
         //3.  subirlas a youtube
         //4. guardar el registro como ya subido a youtube
@@ -39,9 +41,11 @@ class updatestores extends \core\task\scheduled_task {
           
             //aquí hay que leer la instancia de store que corresponda. 
             //De momento leemos la guardada con storeinstance
-            $configyt=$DB->get_record('hybridteachstore_youtube_ins',array('id'=>$store->storagereference));
 
+            $configyt=$DB->get_record('hybridteachstore_youtube_con', array('id'=>$store->subpluginconfigid));
             $youtubeclient = new \youtube_handler($configyt);
+            $redirect = $CFG->wwwroot . '/admin/cli/scheduled_task.php';
+            $youtubeclient->setredirecturi($redirect);
 
             //$videoPath es el path que se guardará de moodledata en la subactividad de vc (zoom,bbb)
             //hay que hacer una estructura donde poder descargar los vídeos antes de subirlos,

@@ -1,5 +1,6 @@
 <?php
 
+use Google\Service\CloudAsset\Resource\V1;
 
 class youtube_handler{
 
@@ -10,23 +11,18 @@ class youtube_handler{
         require_once (__DIR__.'../../vendor/autoload.php');
         //aqui leer de la bbdd del subplugin, para leer el reg.
 
-        $scope = array('https://www.googleapis.com/auth/youtube.upload', 'https://www.googleapis.com/auth/youtube', 'https://www.googleapis.com/auth/youtubepartner');
+        //$scope = array('https://www.googleapis.com/auth/youtube.upload', 'https://www.googleapis.com/auth/youtube', 'https://www.googleapis.com/auth/youtubepartner');
 
-        try{         
-            $this->client = new Google_Client();
-            $this->client->setApplicationName(get_string('pluginname','hybridteaching'));
-            $this->client->setClientId($configyt->clientid);
+        try{    
+
+            $this->createclient($configyt);
+            //$this->client->setPrompt('consent');
             
-            $this->client->setScopes($scope);
-            $this->client->setClientSecret($configyt->clientsecret);
-
-            $redirect = $CFG->wwwroot . '/admin/cli/scheduled_task.php';
-            //$redirect = filter_var('http://' . $_SERVER['HTTP_HOST'] . $_SERVER['PHP_SELF'], FILTER_SANITIZE_URL);
-            $this->client->setRedirectUri($redirect);
             $this->client->setApprovalPrompt('consent');
-            //$this->client->setIncludeGrantedScopes(true);   // incremental auth
-            $this->client->setAccessType('offline');     
-            $this->client->setAccessToken($configyt->token);          
+            if (isset($configyt->token) && $configyt->token){
+                $this->client->setAccessToken($configyt->token);          
+            }
+
             //comprobar si hay que actualizar el acceso con el refreshtoken
             if ($this->client->getAccessToken()) {               
                 if($this->client->isAccessTokenExpired()) {    
@@ -34,7 +30,7 @@ class youtube_handler{
                     //guardar el token obtenido para no tener que solicitarlo al usuario en ningún momento
                     $this->saveToken($configyt);
                 }
-            }      
+            }    
         } catch(Google_Service_Exception $e) {
             print "Caught Google service Exception ".$e->getCode(). " message is ".$e->getMessage();
             print "Stack trace is ".$e->getTraceAsString();
@@ -42,6 +38,31 @@ class youtube_handler{
             print "Caught Google service Exception ".$e->getCode(). " message is ".$e->getMessage();
             print "Stack trace is ".$e->getTraceAsString();
         }
+    }
+
+    public function setredirecturi($url){
+        //this uri must be in youtube config api: console.cloud.google.com
+        $this->client->setRedirectUri($url);
+        return $this->client;
+    }
+
+    public function createclient($configyt){
+        global $CFG;
+        require_once (__DIR__.'../../vendor/autoload.php');
+
+        $this->client = new Google_Client();
+        
+        $this->client->setClientId($configyt->clientid);
+        $this->client->setClientSecret($configyt->clientsecret);
+        $this->client->setScopes('https://www.googleapis.com/auth/youtube');
+        //$redirect = filter_var('http://' . $_SERVER['HTTP_HOST'] . $_SERVER['PHP_SELF'], FILTER_SANITIZE_URL);
+        //$redirect = $CFG->wwwroot.'/mod/hybridteaching/store/youtube/classes/youtubeaccess.php';
+
+        //$this->client->setRedirectUri($redirect);
+        $this->client->setApplicationName(get_string('pluginname','hybridteaching'));
+        $this->client->setAccessType('offline');
+
+        return $this->client;    
     }
 
     public function uploadfile($store,$videoPath){
@@ -115,7 +136,7 @@ class youtube_handler{
         global $DB;
 
         $configyt->token = json_encode($this->client->getAccessToken());;
-        $DB->update_record('hybridteachstore_youtube_ins',$configyt);
+        $DB->update_record('hybridteachstore_youtube_con',$configyt);
     }
 
     

@@ -22,6 +22,8 @@
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+use mod_hybridteaching\plugininfo\hybridteachvc;
+
 define('SESSION_LIST', 1);
 define('PROGRAM_SESSION_LIST', 2);
 
@@ -64,16 +66,14 @@ function hybridteaching_supports($feature) {
  */
 function hybridteaching_add_instance($moduleinstance, $mform = null) {
     global $CFG, $DB;
-   
+
     $moduleinstance->timecreated = time();
     if ($moduleinstance->usevideoconference == 1) {
-        if (isset($moduleinstance->typevc)) {
-            $divide = explode('-', $moduleinstance->typevc, 2);
-            $moduleinstance->instance = $divide[0];
-            $moduleinstance->typevc = $divide[1];
-        }
+        $divide = isset($moduleinstance->typevc) ? explode('-', $moduleinstance->typevc, 2) : [];
+        $moduleinstance->config = isset($divide[0]) ? $divide[0] : 0;
+        $moduleinstance->typevc = isset($divide[1]) ? $divide[1] : '';
     } else {
-        $moduleinstance->instance = 0;
+        $moduleinstance->config = 0;
         $moduleinstance->typevc = '';
     }
     
@@ -83,15 +83,20 @@ function hybridteaching_add_instance($moduleinstance, $mform = null) {
         0: processed and downloaded with vc, ready to upload to storage
         1: uploaded to storage
     */
-    if ($moduleinstance->userecordvc==1) {
-        $moduleinstance->processedrecording=-1;
+    if ($moduleinstance->userecordvc == 1) {
+        $moduleinstance->processedrecording = -1;
+    }
+
+    if (empty($moduleinstance->duration) && !$moduleinstance->sessionscheduling) {
+        $moduleinstance->undatedsession = 1;
+        $moduleinstance->starttime = time();
     }
 
     $moduleinstance->id = $DB->insert_record('hybridteaching', $moduleinstance);
     if (!$moduleinstance->sessionscheduling && !empty($moduleinstance->id)) {
         require_once($CFG->dirroot.'/mod/hybridteaching/classes/controller/sessions_controller.php');
         $sessions = new sessions_controller($moduleinstance);
-        $result = $sessions->create_session($moduleinstance);
+        $sessions->create_session($moduleinstance);
     }
     
     return $moduleinstance->id;
@@ -114,21 +119,25 @@ function hybridteaching_update_instance($moduleinstance, $mform = null) {
     $moduleinstance->id = $moduleinstance->instance;
 
     if ($moduleinstance->usevideoconference == 1) {
-        if (isset($moduleinstance->typevc)) {
-            $divide = explode('-', $moduleinstance->typevc, 2);
-            $moduleinstance->instance = $divide[0];
-            $moduleinstance->typevc = $divide[1];
-        }
+        $divide = isset($moduleinstance->typevc) ? explode('-', $moduleinstance->typevc, 2) : [];
+        $moduleinstance->config = isset($divide[0]) ? $divide[0] : 0;
+        $moduleinstance->typevc = isset($divide[1]) ? $divide[1] : '';
     } else {
-        $moduleinstance->instance = 0;
+        $moduleinstance->config = 0;
         $moduleinstance->typevc = '';
     }
 
+    if (empty($moduleinstance->duration) && !$moduleinstance->sessionscheduling) {
+        $moduleinstance->undatedsession = 1;
+    } else {
+        $moduleinstance->undatedsession = 0;
+    }
+
     //if there is not sessionscheduling, change time in the unique session
-    if ($moduleinstance->sessionscheduling == 0){
+    if ($moduleinstance->sessionscheduling == 0) {
         require_once($CFG->dirroot.'/mod/hybridteaching/classes/controller/sessions_controller.php');
-        $session=new sessions_controller($moduleinstance);
-        $result=$session->update_session($moduleinstance);
+        $session = new sessions_controller($moduleinstance);
+        $session->update_session($moduleinstance);
     }
     return $DB->update_record('hybridteaching', $moduleinstance);
 }
@@ -148,7 +157,7 @@ function hybridteaching_delete_instance($id) {
     }
     
     //opción "Usar programación de sesiones" está sin marcar
-    if (!$existshybrid->sessionscheduling && $existshybrid->typevc != ''){
+    if (!$existshybrid->sessionscheduling && $existshybrid->typevc != '') {
         require_once($CFG->dirroot.'/mod/hybridteaching/classes/controller/sessions_controller.php');    
         $sessions = new sessions_controller($existshybrid);
         $sessions->delete_all_sessions();

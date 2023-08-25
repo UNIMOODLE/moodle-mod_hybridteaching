@@ -26,9 +26,9 @@
 defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->libdir . '/adminlib.php');
-require_once($CFG->dirroot . '/mod/hybridteaching/classes/controller/instances_controller.php');
+require_once($CFG->dirroot . '/mod/hybridteaching/classes/controller/configs_controller.php');
 
-class hybridteaching_admin_plugins_instances extends admin_setting {
+class hybridteaching_admin_plugins_configs extends admin_setting {
     protected $splugintype;
     protected $splugindir;
     /**
@@ -36,7 +36,7 @@ class hybridteaching_admin_plugins_instances extends admin_setting {
      */
     public function __construct($name, $visiblename, $description, $defaultsetting, $splugintype) {
         $this->nosave = true;
-        $this->splugindir = instances_controller::get_subplugin_dir($splugintype);
+        $this->splugindir = configs_controller::get_subplugin_dir($splugintype);
         $this->splugintype = $splugintype;
 
         parent::__construct($name, $visiblename, $description, $defaultsetting);
@@ -93,15 +93,16 @@ class hybridteaching_admin_plugins_instances extends admin_setting {
         $strdown = get_string('down');
         $strname = get_string('name');
         $strtype = get_string('type', 'mod_hybridteaching');
+        $section = optional_param('section', '', PARAM_COMPONENT);
         $message = optional_param('message', 0, PARAM_COMPONENT);
 
-        $return = $OUTPUT->box_start('generalbox hybridteachingpluginsinstances');
+        $return = $OUTPUT->box_start('generalbox hybridteachingpluginsconfigs');
 
         $table = new html_table();
         $table->head = array($strname, $strtype, $strversion, $strorder, $stroptions);
         $table->colclasses = array('leftalign', 'leftalign', 'centeralign',
             'centeralign', 'centeralign', 'centeralign', 'centeralign');
-        $table->id = 'hybridteachingpluginsinstances';
+        $table->id = 'hybridteachingpluginsconfigs';
         $table->attributes['class'] = 'admintable generaltable';
         $table->data = array();
 
@@ -109,34 +110,35 @@ class hybridteaching_admin_plugins_instances extends admin_setting {
         $printed = array();
         $spacer = $OUTPUT->pix_icon('spacer', '', 'moodle', array('class' => 'iconsmall'));
 
-        $url = new moodle_url('/mod/hybridteaching/classes/action/instance_action.php', array('sesskey' => sesskey()));
-        $instancecontroller = new instances_controller(null, $this->splugintype);
-        $instancelist = $instancecontroller->hybridteaching_get_instances();
-        $enabledinstances = $instancecontroller->get_enabled_data('hybridteaching_instances');
+        $url = new moodle_url('/mod/hybridteaching/classes/action/config_action.php', 
+            array('sesskey' => sesskey(), 'section' => $section));
+        $configcontroller = new configs_controller(null, $this->splugintype);
+        $configlist = $configcontroller->hybridteaching_get_configs();
+        $enabledconfigs = $configcontroller->get_enabled_data('hybridteaching_configs', ['subplugintype' => $this->splugindir]);
         if (!empty($message)) {
             \core\notification::add(get_string($message, 'mod_hybridteaching'), \core\output\notification::NOTIFY_INFO);
         }
-        foreach ($instancelist as $instance) {
+        foreach ($configlist as $config) {
             // Hide/show links.
             $class = '';
-            $enabled = $instance['visible'];
-            $instanceid = $instance['id'];
-            $instancename = $instance['instancename'];
-            $instanceversion = $instance['version'];
-            $instancetype = $instance['type'];
-            $instancetypealias = get_string('alias', $this->splugintype.'_'.$instance['type']);
+            $enabled = $config['visible'];
+            $configid = $config['id'];
+            $configname = $config['configname'];
+            $configversion = $config['version'];
+            $configtype = $config['type'];
+            $configtypealias = get_string('alias', $this->splugintype.'_'.$config['type']);
 
             // Up/down link (only if enrol is enabled).
             $updown = '';
             if ($enabled) {
                 if ($updowncount > 1) {
-                    $updown = html_writer::link(new moodle_url($url, array('action' => 'up', 'id' => $instanceid)),
+                    $updown = html_writer::link(new moodle_url($url, array('action' => 'up', 'id' => $configid)),
                         $OUTPUT->pix_icon('t/up', $strup, 'moodle', array('class' => 'iconsmall')));
                 } else {
                     $updown = $spacer;
                 }
-                if ($updowncount < $enabledinstances) {
-                    $updown .= html_writer::link(new moodle_url($url, array('action' => 'down', 'id' => $instanceid)),
+                if ($updowncount < $enabledconfigs) {
+                    $updown .= html_writer::link(new moodle_url($url, array('action' => 'down', 'id' => $configid)),
                         $OUTPUT->pix_icon('t/down', $strdown, 'moodle', array('class' => 'iconsmall')));
                 } else {
                     $updown .= $spacer;
@@ -146,27 +148,27 @@ class hybridteaching_admin_plugins_instances extends admin_setting {
 
             $options = '';
             if ($enabled) {
-                $options .= html_writer::link(new moodle_url($url, array('action' => 'disable', 'id' => $instanceid)),
+                $options .= html_writer::link(new moodle_url($url, array('action' => 'disable', 'id' => $configid)),
                     $OUTPUT->pix_icon('t/hide', $strdisable, 'moodle', array('class' => 'iconsmall')));
             } else {
-                $options .= html_writer::link(new moodle_url($url, array('action' => 'enable', 'id' => $instanceid)),
+                $options .= html_writer::link(new moodle_url($url, array('action' => 'enable', 'id' => $configid)),
                     $OUTPUT->pix_icon('t/show', $strenable, 'moodle', array('class' => 'iconsmall')));
                 $class = 'dimmed_text';
             }
 
-            $urledit = '/mod/hybridteaching/'. $this->splugindir .'/'.$instancetype.
-                '/editinstance.php?type='.$instancetype.'&id='.$instanceid;
+            $urledit = '/mod/hybridteaching/'. $this->splugindir .'/'.$configtype.
+                '/editconfig.php?type='.$configtype.'&id='.$configid;
             $options .= html_writer::link(new moodle_url($urledit),
                 $OUTPUT->pix_icon('t/edit', $stroptions, 'moodle', array('class' => 'iconsmall')));
 
-            $options .= html_writer::link(new moodle_url($url, array('action' => 'delete', 'id' => $instanceid)),
+            $options .= html_writer::link(new moodle_url($url, array('action' => 'delete', 'id' => $configid)),
                 $OUTPUT->pix_icon('t/delete', $struninstall, 'moodle', array('class' => 'iconsmall')),
-                array('onclick' => 'if (!confirm("'.get_string('deleteconfirm', 'mod_hybridteaching', $instancename).'"))
+                array('onclick' => 'if (!confirm("'.get_string('deleteconfirm', 'mod_hybridteaching', $configname).'"))
                 { return false; }')
             );
 
             // Add a row to the table.
-            $row = new html_table_row(array($instancename, $instancetypealias, $instanceversion, $updown, $options));
+            $row = new html_table_row(array($configname, $configtypealias, $configversion, $updown, $options));
             if (!empty($class)) {
                 $row->attributes['class'] = $class;
             }
@@ -188,7 +190,7 @@ class hybridteaching_admin_plugins_instances extends admin_setting {
         foreach ($subplugins as $subplugin) {
             if ($subplugin->type == $this->splugintype) {
                 $url = new moodle_url('/mod/hybridteaching/'. $this->splugindir .'/'.$subplugin->name.
-                    '/editinstance.php?type='.$subplugin->name);
+                    '/editconfig.php?type='.$subplugin->name);
                 $link = $url->out();
                 $subplugincommonname = get_string('alias', $this->splugintype.'_'.$subplugin->name);
                 $subpluginsarray[$link] = $subplugincommonname;

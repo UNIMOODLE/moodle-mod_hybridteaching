@@ -58,18 +58,17 @@ if (isset($_SESSION['token'])) {
     //guardar en instancia para poder guardar el token, y que funcione el cron, 
     //sino no podremos conectar con ninguna cuenta youtube de manera automática
     
-    $instanceyoutube=$DB->get_record('hybridteachstore_youtube_ins',['id'=>1]);
-    if ($instanceyoutube){
-        $instanceyoutube->token=json_encode($_SESSION['token']);
-        $DB->update_record('hybridteachstore_youtube_ins',$instanceyoutube);
-    }
-    else{
+    $configyoutube=$DB->get_record('hybridteachstore_youtube_con', ['id'=>1]);
+    if ($configyoutube){
+        $configyoutube->token=json_encode($_SESSION['token']);
+        $DB->update_record('hybridteachstore_youtube_con' ,$configyoutube);
+    } else{
         $yt=new stdClass;
         $yt->clientid=OAUTH2_CLIENT_ID;
         $yt->clientsecret=OAUTH2_CLIENT_SECRET;
         $yt->email='mcalvo@isyc.com';
         $yt->token=json_encode($_SESSION['token']);
-        $DB->insert_record('hybridteachstore_youtube_ins',$yt);
+        $DB->insert_record('hybridteachstore_youtube_con', $yt);
     }
 }
 $htmlBody = '';

@@ -53,7 +53,7 @@ if ($mform->is_cancelled()) {
         $sessioncontroller->create_session($data);
     } else {
         $data->id = required_param('s', PARAM_INT);
-        $data->instance = $hybridteaching->instance;
+        $data->config = $hybridteaching->config;
         $sessioncontroller->update_session($data);
     }
     redirect($return);

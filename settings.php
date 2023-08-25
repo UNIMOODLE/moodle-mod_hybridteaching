@@ -32,19 +32,37 @@ if ($hassiteconfig) {
     $ADMIN->add('modsettings', new admin_category('hybridteaching', new lang_string('pluginname', 'mod_hybridteaching')));
     $generalsettings = new admin_settingpage('hybridteaching_generalsettings',
         new lang_string('generalconfig', 'mod_hybridteaching'));
-    $instancevcsettings = new admin_settingpage('hybridteaching_instancevcsettings',
-        new lang_string('instancesvcconfig', 'mod_hybridteaching'));
-    $instancestoresettings = new admin_settingpage('hybridteaching_instancestoresettings',
-        new lang_string('instancesstoreconfig', 'mod_hybridteaching'));
+    $vcsettings = new admin_settingpage('hybridteaching_configvcsettings',
+        new lang_string('configsvcconfig', 'mod_hybridteaching'));
+    $storesettings = new admin_settingpage('hybridteaching_configstoresettings',
+        new lang_string('configsstoreconfig', 'mod_hybridteaching'));
 
     if ($ADMIN->fulltree) {
-        $instancevcsettings->add(new admin_setting_heading(
+        $options = array(
+            0 => get_string('donotusepaging', 'attendance'),
+            10 => 10,
+            25 => 25,
+            50 => 50,
+            75 => 75,
+            100 => 100,
+            250 => 250,
+            500 => 500,
+            1000 => 1000,
+        );
+    
+        $generalsettings->add(new admin_setting_configselect('hybridteaching/resultsperpage',
+            get_string('resultsperpage', 'hybridteaching'), get_string('sessresultsperpage_desc', 'hybridteaching'), 25, $options));
+    
+        $generalsettings->add(new admin_setting_configcheckbox('hybridteaching/reusesession',
+            get_string('reusesession', 'hybridteaching'), get_string('reusesession_desc', 'hybridteaching'), 0));
+
+        $vcsettings->add(new admin_setting_heading(
             'headerconfigvc',
             get_string('headerconfigvc', 'mod_hybridteaching'),
             ''
         ));
 
-        $instancevcsettings->add(new hybridteaching_admin_plugins_instances(
+        $vcsettings->add(new hybridteaching_admin_plugins_configs(
             'managevideoconferenceplugins',
             get_string('videoconferenceplugins', 'mod_hybridteaching'),
             '',
@@ -52,13 +70,13 @@ if ($hassiteconfig) {
             'hybridteachvc'
         ));
 
-        $instancestoresettings->add(new admin_setting_heading(
+        $storesettings->add(new admin_setting_heading(
             'headerconfigstore',
             get_string('headerconfigstore', 'mod_hybridteaching'),
             ''
         ));
 
-        $instancestoresettings->add(new hybridteaching_admin_plugins_instances(
+        $storesettings->add(new hybridteaching_admin_plugins_configs(
             'managestorageplugins',
             get_string('storageplugins', 'mod_hybridteaching'),
             '',
@@ -68,6 +86,6 @@ if ($hassiteconfig) {
     }
 
     $ADMIN->add('hybridteaching', $generalsettings);
-    $ADMIN->add('hybridteaching', $instancevcsettings);
-    $ADMIN->add('hybridteaching', $instancestoresettings);
+    $ADMIN->add('hybridteaching', $vcsettings);
+    $ADMIN->add('hybridteaching', $storesettings);
 }

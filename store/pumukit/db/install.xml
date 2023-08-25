@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<XMLDB PATH="mod/hybridteaching/store/pumukit/db" VERSION="20230504" COMMENT="XMLDB file for Moodle mod/hybridteaching/store/pumukit"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="../../../../../lib/xmldb/xmldb.xsd"
+>
+  <TABLES>
+    <TABLE NAME="hybridteachstore_pumukit" COMMENT="Info about pumukit store">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="11" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="sessionid" TYPE="int" LENGTH="11" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="code" TYPE="char" LENGTH="60" NOTNULL="true" SEQUENCE="false" COMMENT="The name of the session"/>
+        <FIELD NAME="name" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" COMMENT="The name of the session"/>
+        <FIELD NAME="visible" TYPE="int" LENGTH="1" NOTNULL="false" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="11" NOTNULL="false" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id" COMMENT="The unique id for this Pumukit store."/>
+      </KEYS>
+    </TABLE>
+
+    <TABLE NAME="hybridteachstore_pumukit_con" COMMENT="Pumukit configs">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="11" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="url" TYPE="char" LENGTH="700" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Pumukit URL Server"/>
+        <FIELD NAME="user" TYPE="char" LENGTH="255" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="User Pumukit"/>
+        <FIELD NAME="secret" TYPE="char" LENGTH="255" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Secret Pumukit"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id" COMMENT="The unique id for this configs."/>
+      </KEYS>
+    </TABLE>
+
+  </TABLES>
+</XMLDB>

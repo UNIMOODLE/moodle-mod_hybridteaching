@@ -22,6 +22,8 @@ defined('MOODLE_INTERNAL') || die();
 require_once($CFG->dirroot.'/mod/hybridteaching/vc/zoom/locallib.php');
 require_once($CFG->dirroot.'/lib/filelib.php');
 
+
+
 // Some plugins already might include this library, like mod_bigbluebuttonbn.
 // Hacky, but need to create whitelist of plugins that might have JWT library.
 // NOTE: Remove file_exists checks and the JWT library in mod when versions prior to Moodle 3.7 is no longer supported
@@ -39,7 +41,7 @@ if (!class_exists('Firebase\JWT\JWT')) {
 
 define('HTZOOM_API_URL', 'https://api.zoom.us/v2/');
 
-class mod_hybrid_webservice {
+class webservice {
 
     /**
      * Client ID
@@ -93,27 +95,21 @@ class mod_hybrid_webservice {
      * The constructor for the webservice class.
      * @throws \moodle_exception Moodle exception is thrown for missing config settings.
      */
-    public function __construct($zoominstance) {
+    public function __construct($zoomconfig) {
 
         try{
-            $this->accountid=$zoominstance->accountid;
-            $this->clientid=$zoominstance->clientid;
-            $this->clientsecret=$zoominstance->clientsecret;
-            //$this->hostid=$zoominstance->hostid;
-            $this->emaillicense=$zoominstance->emaillicense;
-
-            /*$this->clientid="baIYr83oQNSCufK4YctaA";
-            $this->clientsecret="m08ydwE3yoNDG0dznXHdcfIfRCaEMklE";
-            $this->accountid="sav-NZcjSqWvNHcdmP_JMQ";
-            */
-                      
+            $this->accountid=$zoomconfig->accountid;
+            $this->clientid=$zoomconfig->clientid;
+            $this->clientsecret=$zoomconfig->clientsecret;
+            //$this->hostid=$zoomconfig->hostid;
+            $this->emaillicense=$zoomconfig->emaillicense;
+  
             // Get and remember the API URL.
             $this->apiurl = HTZOOM_API_URL;
             
         } catch (\moodle_exception $exception) {
             throw new \moodle_exception('errorwebservice', 'htzoom', '', $exception->getMessage());
         }
-        
     }
 
     /**
@@ -490,7 +486,7 @@ class mod_hybrid_webservice {
     }
 
     public function get_past_meetings_uuid($id){
-        $url = '/past_meetings/'.$id.'/instances';
+        $url = '/past_meetings/'.$id.'/configs';
         $response = null;
         try{
             $response = $this->_make_call($url);
@@ -540,8 +536,8 @@ class mod_hybrid_webservice {
      */
     public function list_meetings($userid, $webinar) {
         $url = 'users/' . $userid . ($webinar ? '/webinars' : '/meetings');
-        $instances = $this->_make_paginated_call($url, null, ($webinar ? 'webinars' : 'meetings'));
-        return $instances;
+        $configs = $this->_make_paginated_call($url, null, ($webinar ? 'webinars' : 'meetings'));
+        return $configs;
     }
 
     /**
@@ -581,7 +577,7 @@ class mod_hybrid_webservice {
     /**
      * Retrieves ended webinar details report.
      *
-     * @param string|int $identifier The webinar ID or webinar UUID. If given webinar ID, Zoom will take the last webinar instance.
+     * @param string|int $identifier The webinar ID or webinar UUID. If given webinar ID, Zoom will take the last webinar config.
      */
     public function get_webinar_details_report($identifier) {
         return $this->_make_call('report/webinars/' . $identifier);

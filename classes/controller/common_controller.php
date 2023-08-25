@@ -48,7 +48,7 @@ class common_controller {
      */
     public function get_enabled_data($table, $params = []) {
         global $DB;
-        $params = ['visible' => 1];
+        $params['visible'] = 1;
         $countenabled = $DB->count_records($table, $params);
         return $countenabled;
     }

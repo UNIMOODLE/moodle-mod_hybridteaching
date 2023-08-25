@@ -4,11 +4,37 @@
     composer require google/apiclient:^2.0
 
 **
+INICIALMENTE SEGUIR ESTE TUTORIAL PARA LA CONFIGURACIÓN DE APIS DE YOUTUBE: 
+(CAMBIARLO POR UNO OFICIAL EN LUGAR DE ESTA PÁGINA)
+https://blog.hubspot.com/website/how-to-get-youtube-api-key
+
+
+Se necesita una cuenta google
+Crear credenciales a través de la consola de google: console.cloud.google.com 
+Crear un nuevo proyecto en Google Developers Console y obtener las credenciales de autorización para realizar solicitudes api.
+Habilitar apis y servicios.
+Añadir api de "Youtube data api v3"
+Crear credenciales, con claves de api
+Asignar los permisos siguienTes:
+			- .../auth/youtube.readonly     Ve tu cuenta de YouTube
+			- .../auth/youtube				Administrar tu cuenta de YouTube
+			- .../auth/youtubepartner		Permite ver y administrar tus elementos y el contenido asociado en YouTube.
+			- .../auth/youtube.upload   	Administra tus videos de YouTube
+
+
+Añadir las urls autorizadas (uris) siguientes:
+https://DOMINIO-MOODLE/mod/hybridteaching/store/youtube    
+    (comprobar si se puede no añadir como uri)
+
+https://DOMINIO-MOODLE/mod/hybridteaching/store/youtube/classes/youtube_handler.php
+    (comprobar si se puede no añadir como uri)
+
+https://DOMINIO-MOODLE/admin/tool/task/scheduledtasks.php
+
+https://DOMINIO-MOODLE/mod/hybridteaching/store/youtube/classes/youtubeaccess.php
+
+
+
 TEMPORALMENTE:
-Hasta que esté realizada la parte de creación de configuraciones de youtube, se debe cargar la página de:
-/mod/hybridteaching/store/youtube/test_youtube3.php
-para poder guardar en BBDD las credenciales de la cuenta de youtube, y poder realizar la task updatestores.php correctamente.
+Las páginas test_youtube3.php y test_youtube4.php se deben eliminar.
 
-Una vez realizada y finalizada la página de configuraciones de youtube (instancias), esta página test_youtube3.php, se debe eliminar.
-
--

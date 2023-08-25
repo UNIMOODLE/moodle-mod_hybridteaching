@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB PATH="mod/hybridteaching/db" VERSION="20230707" COMMENT="XMLDB file for Moodle mod_hybridteaching"
+<XMLDB PATH="mod/hybridteaching/db" VERSION="20230822" COMMENT="XMLDB file for Moodle mod_hybridteaching"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd"
 >
@@ -15,7 +15,7 @@
         <FIELD NAME="usevideoconference" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Usar acceso por videoconferencia."/>
         <FIELD NAME="userecordvc" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Permitir grabaciones de videoconferencia."/>
         <FIELD NAME="typevc" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" COMMENT="The type of videoconference plugin"/>
-        <FIELD NAME="instance" TYPE="int" LENGTH="6" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Instancia utilizada en la videoconferencia."/>
+        <FIELD NAME="config" TYPE="int" LENGTH="6" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Configuracion utilizada en la videoconferencia."/>
         <FIELD NAME="sessionscheduling" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Utilizar programación de sesiones."/>
         <FIELD NAME="undatedsession" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Permitir acceso en cualquier momento."/>
         <FIELD NAME="starttime" TYPE="int" LENGTH="11" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Inicio de sesión."/>
@@ -43,6 +43,10 @@
         <FIELD NAME="validateattendance" TYPE="int" LENGTH="6" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Permanencia para validar asistencia."/>
         <FIELD NAME="attendanceunit" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Unidad de tiempo para validar asistencia."/>
         <FIELD NAME="completionattendance" TYPE="int" LENGTH="5" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Condición de finalización El usuario debe asistir a num. sesiones."/>
+        <FIELD NAME="useqr" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="whether to use qr for on-site rooms"/>
+        <FIELD NAME="rotateqr" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="forces qr use aswell as disabling student password for on-site rooms"/>
+        <FIELD NAME="rotateqrsecret" TYPE="char" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="studentpassword" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="password alternative for on-site rooms instead of qr use"/>
         <FIELD NAME="usercreator" TYPE="int" LENGTH="11" NOTNULL="false" SEQUENCE="false" COMMENT="User creator"/>
         <FIELD NAME="timecreated" TYPE="int" LENGTH="11" NOTNULL="false" SEQUENCE="false" COMMENT="Datetime created"/>
         <FIELD NAME="timemodified" TYPE="int" LENGTH="11" NOTNULL="false" SEQUENCE="false" COMMENT="Datetime modified"/>
@@ -52,13 +56,13 @@
         <KEY NAME="fk_course" TYPE="foreign" FIELDS="course" REFTABLE="course" REFFIELDS="id"/>
       </KEYS>
     </TABLE>
-    <TABLE NAME="hybridteaching_instances" COMMENT="This table will be responsible for saving instances of the subplugins for the hybrid teaching plugin">
+    <TABLE NAME="hybridteaching_configs" COMMENT="This table will be responsible for saving configs of the subplugins for the hybrid teaching plugin">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="11" NOTNULL="true" SEQUENCE="true"/>
-        <FIELD NAME="instancename" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" COMMENT="Instance name"/>
+        <FIELD NAME="configname" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" COMMENT="Config name"/>
         <FIELD NAME="type" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" COMMENT="Subplugin type"/>
         <FIELD NAME="subplugintype" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false"/>
-        <FIELD NAME="subplugininstanceid" TYPE="int" LENGTH="11" NOTNULL="true" SEQUENCE="false" COMMENT="Id from the subplugins tables"/>
+        <FIELD NAME="subpluginconfigid" TYPE="int" LENGTH="11" NOTNULL="true" SEQUENCE="false" COMMENT="Id from the subplugins tables"/>
         <FIELD NAME="version" TYPE="int" LENGTH="20" NOTNULL="false" DEFAULT="0" SEQUENCE="false" COMMENT="Subplugin version"/>
         <FIELD NAME="visible" TYPE="int" LENGTH="1" NOTNULL="false" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="sortorder" TYPE="int" LENGTH="11" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
@@ -83,10 +87,10 @@
         <FIELD NAME="duration" TYPE="int" LENGTH="11" NOTNULL="false" SEQUENCE="false" COMMENT="Session duration"/>
         <FIELD NAME="sessionfiles" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Session files"/>
         <FIELD NAME="typevc" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" COMMENT="The type of videoconference plugin"/>
-        <FIELD NAME="typestorage" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false" COMMENT="Storage plugin type"/>
         <FIELD NAME="userecordvc" TYPE="int" LENGTH="11" NOTNULL="false" SEQUENCE="false" COMMENT="Allow recordings"/>
         <FIELD NAME="processedrecording" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Session recording. -1: no downloaded from vc yet (ready for download), 0: downloaded from vc, positive number: activity id storage"/>
         <FIELD NAME="storagereference" TYPE="int" LENGTH="11" NOTNULL="false" SEQUENCE="false" COMMENT="Recording reference"/>
+        <FIELD NAME="isfinished" TYPE="int" LENGTH="1" NOTNULL="false" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="visible" TYPE="int" LENGTH="1" NOTNULL="false" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="timecreated" TYPE="int" LENGTH="11" NOTNULL="false" SEQUENCE="false"/>
         <FIELD NAME="timemodified" TYPE="int" LENGTH="11" NOTNULL="false" SEQUENCE="false"/>
@@ -96,6 +100,50 @@
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
         <KEY NAME="hybridteachingid" TYPE="foreign" FIELDS="hybridteachingid" REFTABLE="hybridteaching" REFFIELDS="id"/>
+      </KEYS>
+    </TABLE>
+    <TABLE NAME="hybridteaching_session_pwd" COMMENT="temp passwords rotation used in rotating qr for extra security">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="attendanceid" TYPE="int" LENGTH="5" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="password" TYPE="char" LENGTH="20" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="expirytime" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+      </KEYS>
+    </TABLE>
+    <TABLE NAME="hybridteaching_attendance" COMMENT="records users attendances in sessions">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="hybridteachingid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="sessionid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="status" TYPE="int" LENGTH="1" NOTNULL="false" DEFAULT="0" SEQUENCE="false" COMMENT="0 = no attendance, 1 = attended 2 = late attendance"/>
+        <FIELD NAME="type" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="grade" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="visible" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="1" SEQUENCE="false"/>
+        <FIELD NAME="usermodified" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="hybridteachingid" TYPE="foreign" FIELDS="hybridteachingid" REFTABLE="hybridteaching" REFFIELDS="id"/>
+        <KEY NAME="sessionid" TYPE="foreign" FIELDS="sessionid" REFTABLE="hybridteaching_session" REFFIELDS="id"/>
+      </KEYS>
+    </TABLE>
+    <TABLE NAME="hybridteaching_attend_log" COMMENT="log of users entering and exiting in sessions">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="attendanceid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="action" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="0 -&amp;gt; user exits the session 1 -&amp;gt; user enter the session"/>
+        <FIELD NAME="usermodified" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="attendanceid" TYPE="foreign" FIELDS="attendanceid" REFTABLE="hybridteaching_attendance" REFFIELDS="id"/>
       </KEYS>
     </TABLE>
   </TABLES>

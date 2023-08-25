@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<XMLDB PATH="mod/hybridteaching/vc/meet/db" VERSION="20230504" COMMENT="XMLDB file for Moodle mod/hybridteaching/vc/meet"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="../../../../../lib/xmldb/xmldb.xsd"
+>
+  <TABLES>
+    <TABLE NAME="hybridteachvc_meet" COMMENT="Stores the googlemeet activity module instances.">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="htsession" TYPE="int" LENGTH="11" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Hybridteaching session id"/>
+        <FIELD NAME="url" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" COMMENT="The URL of room."/>
+        <FIELD NAME="creatoremail" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false" COMMENT="Email from the Google account that created the room."/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+      </KEYS>
+    </TABLE>
+
+    <TABLE NAME="hybridteachvc_meet_config" COMMENT="Meet configss">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="11" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="emailaccount" TYPE="char" LENGTH="255" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="clientid" TYPE="char" LENGTH="255" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="clientsecret" TYPE="char" LENGTH="255" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="token" TYPE="char" LENGTH="500" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="eventid" TYPE="char" LENGTH="255" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id" COMMENT="The unique id for this config meet."/>
+      </KEYS>
+    </TABLE>
+  </TABLES>
+</XMLDB>

@@ -34,38 +34,42 @@ class sessions {
 
     public function __construct($htsessionid = null) {
         if (!empty($htsessionid)) {
-            $this->zoomsession = $this->load_session($htsessionid);
+            $this->set_session($htsessionid);
         }
     }
 
     public function load_session($htsessionid) {
         global $DB;
-        return $DB->get_record('hybridteachvc_zoom', ['htsession' => $htsessionid]);
+        $this->zoomsession = $DB->get_record('hybridteachvc_zoom', ['htsession' => $htsessionid]);
+        return $this->zoomsession;
     }
 
     public function get_session() {
         return $this->zoomsession;
     }
 
+    public function set_session($htsessionid) {
+        $this->zoomsession = $this->load_session($htsessionid);
+    }
+    
     /**
-     * Creates a unique session extended for a Zoom meeting instance.
+     * Creates a unique session extended for a Zoom meeting config.
      *
-     * @param mixed $data The data to create the meeting.
+     * @param mixed $session The data to create the meeting.
      * @throws Exception If the meeting creation fails.
      */
     public function create_unique_session_extended($session, $ht) {
         global $DB;
 
-        $zoominstance = $this->load_zoom_instance($ht->instance);
+        $zoomconfig = $this->load_zoom_config($ht->config);
 
-        $service = new \hybridteachvc_zoom\mod_hybrid_webservice($zoominstance);
+        $service = new \hybridteachvc_zoom\webservice($zoomconfig);
         $response = $service->create_meeting($session, $ht);
         if ($response != false) {
             $zoom = $this->populate_htzoom_from_response($session, $response);
             $zoom->id = $DB->insert_record('hybridteachvc_zoom', $zoom);
             return true;
-        }
-        else{
+        } else {
             return false;
         }
     }
@@ -80,12 +84,12 @@ class sessions {
     public function update_session_extended($data, $ht) {
         global $DB;
         $errormsg = '';
-        $zoominstance = $this->load_zoom_instance($ht->instance);
+        $zoomconfig = $this->load_zoom_config($ht->config);
         $zoom = $DB->get_record('hybridteachvc_zoom', ['htsession' => $data->id]);
         //if is created zoom, change in zoom with webservice
         if ($zoom) {
             $zoom = (object) array_merge((array) $zoom, (array) $data);
-            $service = new \hybridteachvc_zoom\mod_hybrid_webservice($zoominstance);
+            $service = new \hybridteachvc_zoom\webservice($zoomconfig);
             $service->update_meeting($zoom, $ht);
         }
         return $errormsg;
@@ -95,13 +99,13 @@ class sessions {
      * Deletes a Zoom session extended and all its associated records from the database.
      *
      * @param mixed $htsession the session identifier
-     * @param mixed $instanceid the instance identifier
+     * @param mixed $configid the config identifier
      * @throws Exception if an error occurs while deleting the session
      */
-    public function delete_session_extended($htsession, $instanceid) {
+    public function delete_session_extended($htsession, $configid) {
         global $DB;
-        $zoominstance = $this->load_zoom_instance($instanceid);
-        $service = new \hybridteachvc_zoom\mod_hybrid_webservice($zoominstance);
+        $zoomconfig = $this->load_zoom_config($configid);
+        $service = new \hybridteachvc_zoom\webservice($zoomconfig);
         $zoom = $DB->get_record('hybridteachvc_zoom', ['htsession' => $htsession]);
         if (!empty($zoom->meetingid)) {
             $service->delete_meeting($zoom->meetingid, 0);
@@ -132,23 +136,23 @@ class sessions {
     }
 
     /**
-     * Loads a Zoom instance based on the given instance ID.
+     * Loads a Zoom config based on the given config ID.
      *
-     * @param int $instanceid The ID of the instance to load.
+     * @param int $configid The ID of the config to load.
      * @throws Exception If the SQL query fails.
-     * @return stdClass|false The Zoom instance record on success, or false on failure.
+     * @return stdClass|false The Zoom config record on success, or false on failure.
      */
-    public function load_zoom_instance($instanceid) {
+    public function load_zoom_config($configid) {
         global $DB;
 
         $sql = "SELECT zi.accountid, zi.clientid, zi.clientsecret,
                        zi.emaillicense
-                  FROM {hybridteaching_instances} hi
-                  JOIN {hybridteachvc_zoom_instance} zi ON zi.id = hi.subplugininstanceid
-                 WHERE hi.id = :instanceid AND hi.visible = 1";
+                  FROM {hybridteaching_configs} hi
+                  JOIN {hybridteachvc_zoom_config} zi ON zi.id = hi.subpluginconfigid
+                 WHERE hi.id = :configid AND hi.visible = 1";
 
-        $zoominstance = $DB->get_record_sql($sql, ['instanceid' => $instanceid]);
-        return $zoominstance;
+        $zoomconfig = $DB->get_record_sql($sql, ['configid' => $configid]);
+        return $zoomconfig;
     }
 
     public function get_zone_access() {

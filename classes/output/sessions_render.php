@@ -63,7 +63,7 @@ class hybridteaching_sessions_render extends \table_sql implements dynamic_table
         $id = required_param('id', PARAM_INT);
         $hybridteachingid = optional_param('h', 0, PARAM_INT);
         $page = optional_param('page', 0, PARAM_INT);
-        $perpage = optional_param('perpage', 10, PARAM_INT);
+        $perpage = optional_param('perpage', get_config('hybridteaching', 'resultsperpage'), PARAM_INT);
         $sort = optional_param('sort', 'name', PARAM_ALPHANUMEXT);
         $dir = optional_param('dir', 'ASC', PARAM_ALPHA);
         $slist = optional_param('l', 1, PARAM_INT);
@@ -324,12 +324,14 @@ class hybridteaching_sessions_render extends \table_sql implements dynamic_table
         global $OUTPUT;
         $type = $params['typevc'];
         $typealias = '';
-        if (!empty($type) && has_capability('mod/hybridteaching:sessionsfulltable', $this->context)) {
-            $typealias = get_string('alias', 'hybridteachvc_'.$type);
-        } else {
-            $typealias = self::EMPTY;
+        if (has_capability('mod/hybridteaching:sessionsfulltable', $this->context)) {
+            if (!empty($type)) {
+                $typealias = get_string('alias', 'hybridteachvc_'.$type);
+            } else {
+                $typealias = self::EMPTY;
+            }
         }
-
+        
         $row = '';
         if ($this->typelist == SESSION_LIST) {
             $row = new html_table_row(array($OUTPUT->render($params['checkbox']), $params['group'], $typealias,

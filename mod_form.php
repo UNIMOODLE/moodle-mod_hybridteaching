@@ -22,11 +22,10 @@
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 use mod_hybridteaching\helpers\roles;
-use mod_hybridteaching\hybridteaching_proxy;
 defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->dirroot.'/course/moodleform_mod.php');
-require_once('classes/controller/instances_controller.php');
+require_once('classes/controller/configs_controller.php');
 
 /**
  * Module instance settings form.
@@ -82,14 +81,14 @@ class mod_hybridteaching_mod_form extends moodleform_mod {
         $mform->setDefault('userecordvc', 0);
         $mform->addHelpButton('userecordvc', 'userecordvc', 'hybridteaching');
 
-        $vcinstancescontroller = new instances_controller(null, 'hybridteachvc');
-        $instances = $vcinstancescontroller->hybridteaching_get_instances_select('curso');
-        $mform->addElement('select','typevc',get_string('typevc', 'hybridteaching'),$instances);    
+        $vcconfigscontroller = new configs_controller(null, 'hybridteachvc');
+        $configs = $vcconfigscontroller->hybridteaching_get_configs_select('curso');
+        $mform->addElement('select','typevc',get_string('typevc', 'hybridteaching'),$configs);    
           
         //esto dependerá de la videoconferencia seleccionada (zoom, meet, bbb...)
         
         //comprobar aqui si existe la funcion antes de llamarla y comprobar tb con plugin manager
-        //component_callback("hybridteachvc_zoom", 'addform',[$mform]);
+        //component_callback("hybridteachvc_meet", 'addform', [$mform]);
     
         
         // NUEVAS SECCIONES PERSONALIZADAS:
@@ -213,7 +212,6 @@ class mod_hybridteaching_mod_form extends moodleform_mod {
         $mform->addElement('advcheckbox','downloadrecords','',get_string('downloadrecords','hybridteaching'), null, array(0, 1));
         $mform->setDefault('downloadrecords', 0);
 
-
         $mform->addElement('header', 'sectionattendance', get_string('sectionattendance','hybridteaching'));
 
         $units=[get_string('hours'),
@@ -227,6 +225,20 @@ class mod_hybridteaching_mod_form extends moodleform_mod {
             ), 'attendance', get_string('validateattendance', 'hybridteaching'), ' ', false);
         $mform->addHelpButton('attendance', 'attendance', 'hybridteaching'); 
         $mform->setType('validateattendance', PARAM_INT);      
+
+        $mform->addElement('advcheckbox','useqr','',get_string('useqr','hybridteaching'), null, array(0, 1));
+        $mform->setDefault('useqr', 0);
+        $mform->disabledif('useqr', 'rotateqr', 'checked');
+        $mform->addElement('advcheckbox','rotateqr','',get_string('rotateqr','hybridteaching'), null, array(0, 1));
+        $mform->setDefault('rotateqr', 0);
+        $mform->addElement('hidden', 'rotateqrsecret', '');
+        $mform->setDefault('rotateqrsecret', random_string(8));
+        $mform->setType('rotateqrsecret', PARAM_TEXT);
+        $mform->disabledIf('rotateqrsecret', 'rotateqr', 'unchecked');
+        $mform->addElement('text', 'studentpassword', get_string('studentpassword', 'hybridteaching'));
+        $mform->setType('studentpassword', PARAM_TEXT);
+        $mform->disabledif('studentpassword', 'rotateqr', 'checked');
+        $mform->addHelpButton('studentpassword', 'passwordgrp', 'attendance');
 
         // Add standard grading elements.
         $this->standard_grading_coursemodule_elements();
@@ -297,7 +309,7 @@ class mod_hybridteaching_mod_form extends moodleform_mod {
         //Ex: 2-bbb or 1-zoom
         $content=$DB->get_record('hybridteaching',['id'=>$this->_instance]);
         if ($content && $content->usevideoconference){
-            $typevc=$content->instance."-".$content->typevc;
+            $typevc=$content->config."-".$content->typevc;
             $default_values['typevc'] = $typevc;
         }
     }

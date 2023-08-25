@@ -28,8 +28,8 @@
  */
 function xmldb_hybridteachvc_zoom_uninstall() {
 
-    //eliminar aquí las instancias guardadas en hybridteaching_instances
+    //eliminar aquí las instancias guardadas en hybridteaching_configs
     //global $DB;
-    //$DB->delete_records('hybridteaching_instances',['type'=>'hybridteachvc_zoom']);
+    //$DB->delete_records('hybridteaching_configs',['type'=>'hybridteachvc_zoom']);
     return true;
 }

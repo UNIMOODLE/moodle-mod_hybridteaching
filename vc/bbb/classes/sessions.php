@@ -27,17 +27,14 @@ namespace hybridteachvc_bbb;
 
 use function Symfony\Component\DependencyInjection\Loader\Configurator\param;
 use hybridteachvc_bbb\bbbproxy;
-
+use hybridteachvc_bbb\meeting;
 defined('MOODLE_INTERNAL') || die();
 
 global $CFG;
 
 require_once($CFG->dirroot.'/mod/hybridteaching/classes/controller/sessions_controller.php');
-require_once($CFG->dirroot.'/mod/hybridteaching/vc/bbb/classes/webservice.php');
-require_once($CFG->dirroot.'/mod/hybridteaching/vc/bbb/classes/bbbproxy.php');
-use mod_bigbluebuttonbn\meeting;
-use mod_bigbluebuttonbn\plugin;
 
+use mod_bigbluebuttonbn\plugin;
 
 class sessions {
     protected $bbbsession;
@@ -50,7 +47,8 @@ class sessions {
 
     public function load_session($htsessionid) {
         global $DB;
-        return $DB->get_record('hybridteachvc_bbb', ['htsession' => $htsessionid]);
+        $this->bbbsession = $DB->get_record('hybridteachvc_bbb', ['htsession' => $htsessionid]);
+        return $this->bbbsession;
     }
 
     public function get_session() {
@@ -59,112 +57,110 @@ class sessions {
 
     /**
      * Creates a new session by calling the Hybrid Web Service's create_meeting function
-     * and stores the data returned from it in the hybridteachvc_zoom table if the response
+     * and stores the data returned from it in the hybridteachvc_bbb table if the response
      * is not false.
      *
-     * @param mixed $data the data to be passed to the create_meeting function
+     * @param mixed $session the data to be passed to the create_meeting function
      * @throws 
      * @return mixed the response from the create_meeting function
      */
-    public function create_unique_session_extended($data) {
-        global $DB, $USER;
+    public function create_unique_session_extended($session, $ht) {
+        global $DB;
 
-        // As it is a new activity, assign passwords. 
-        //process_pre_save:   //mod_helper::process_pre_save($moduleinstance);
+        $bbbconfig = $this->load_bbb_config($ht->config);
 
-//AQUI PONER LO MISMO QUE EN BBB, EN EL MEETING.PHP, EN FUNCION CREATE_MEETING(), ES MEJOR
+        $meeting = new meeting($bbbconfig);
+        $response = $meeting->create_meeting($session,$ht);
 
-/*
-        $bbb = new \stdClass();
-        $bbb->htsession = $data->htsession;
-        $bbb->meetingid=meeting::get_unique_meetingid_seed();
-        $bbb->moderatorpass = plugin::random_password(12);
-        $bbb->viewerpass = plugin::random_password(12, $bbb->moderatorpass);
-        [$bbb->guestlinkuid, $bbb->guestpassword] = plugin::generate_guest_meeting_credentials();
-
-        $bbb->timecreated = time();
-        $bbb->timemodified = 0;
-        $bbb->createdby = $USER->id;
-
-        $bbb->id = $DB->insert_record('hybridteachvc_bbb', $bbb);
-        */
-
-        //FALTA COMPLETAR
-        return false;
+        if (isset($response['returncode']) && $response['returncode']=='SUCCESS'){
+            $bbb = $this->populate_htbbb_from_response($session,$response);
+            $bbb->id = $DB->insert_record('hybridteachvc_bbb', $bbb);        
+            return true;
+        }
+        else {
+            return false;
+        }
     }
     
     public function update_session_extended($data) {
-        /*
-        global $DB, $USER;
-        $errormsg = '';
-        $session = new \stdClass();
-        $session->id = $data->id;
-        $session->name = $data->name;
-        $session->timemodified = time();
-        $session->modifiedby = $USER->id;
-        if (!$DB->update_record($this->table, $session)) {
-            $errormsg = 'errorupdatesession';
-        }
-        return $errormsg;
-        */
+        //no requires action 
     }
 
     /**
-     * Deletes a session and its corresponding BBB meeting via the mod_hybrid_webservice (if exists).
+     * Deletes a session and its corresponding BBB meeting via the webservice (if exists).
      *
      * @param mixed $id The ID of the session to delete.
      * @throws Some_Exception_Class description of exception
      * @return Some_Return_Value
      */
-    public function delete_session_extended($htsession, $instanceid) {
+    public function delete_session_extended($htsession, $configid) {
         global $DB;
-
+        $bbbconfig = $this->load_bbb_config($configid);      
         $bbb = $DB->get_record('hybridteachvc_bbb', ['htsession' => $htsession]);
-        $meeting = new meeting($bbb);
-        $meeting->end_meeting(meetingid, $bbb->moderatorpass);
+        $meeting = new meeting($bbbconfig);
+        $meeting->end_meeting($bbb->meetingid, $bbb->moderatorpass);
 
         $DB->delete_records('hybridteachvc_bbb', ['htsession' => $htsession]);
     }
 
     /**
-     * Populates a stdClass object with Zoom meeting details from a given response object. 
+     * Populates a new stdClass object with relevant data from a BBB API response and returns it.
      *
-     * @param object $module The module object containing the Zoom meeting.
-     * @param object $response The response object from a Zoom API call.
-     * @return object The populated stdClass object with Zoom meeting details.
+     * @param mixed $data stdClass object containing htsession data
+     * @param mixed $response stdClass object containing BBB API response data
+     * @return stdClass $newbbb stdClass object containing relevant data
      */
-    function populate_htbbb_from_response($module, $response) {
+    public function populate_htbbb_from_response($data, $response) {        
+        $newbbb = new \stdClass();
+        $newbbb->htsession = $data->id;   //session id
+        $newbbb->meetingid = $response['meetingID'];
+        $newbbb->moderatorpass = $response['moderatorPW'];
+        $newbbb->viewerpass = $response['attendeePW'];
+        $newbbb->createtime = $response['createTime'];
 
-        //not can populate yet
-        
+        return $newbbb;
     }
 
         /**
-     * Loads a BBB instance based on the given instance ID.
+     * Loads a BBB config based on the given config ID.
      *
-     * @param int $instanceid The ID of the instance to load.
+     * @param int $configid The ID of the config to load.
      * @throws Exception If the SQL query fails.
-     * @return stdClass|false The Zoom instance record on success, or false on failure.
+     * @return stdClass|false The Zoom config record on success, or false on failure.
      */
-    public function load_bbb_instance($instanceid) {
+    public function load_bbb_config($configid) {
         global $DB;
 
         $sql = "SELECT bi.serverurl, bi.sharedsecret, bi.pollinterval
-                  FROM {hybridteaching_instances} hi
-                  JOIN {hybridteachvc_bbb_instance} bi ON bi.id = hi.subplugininstanceid
-                 WHERE hi.id = :instanceid AND hi.visible = 1";
+                  FROM {hybridteaching_configs} hi
+                  JOIN {hybridteachvc_bbb_config} bi ON bi.id = hi.subpluginconfigid
+                 WHERE hi.id = :configid AND hi.visible = 1";
 
-        $instance = $DB->get_record_sql($sql, ['instanceid' => $instanceid]);
-        return $instance;
+        $config = $DB->get_record_sql($sql, ['configid' => $configid]);
+        return $config;
+    }
+
+    //carga la configuración de isntancia desde el htsession
+    // (ya inicializado con el constructor)
+
+    public function load_bbb_config_from_session(){
+        global $DB;
+        $sql = "SELECT h.config
+                FROM mdl_hybridteaching h
+                JOIN mdl_hybridteaching_session hs ON hs.hybridteachingid=h.id
+                WHERE hs.id=:htsession";
+
+        $configpartial = $DB->get_record_sql($sql, ['htsession' => $this->bbbsession->htsession]);
+        $config = $this->load_bbb_config($configpartial->config);
+        return $config;
+
     }
 
     function get_zone_access() {
         //ESTA FUNCION NO NECESITA NINGÚN $hybridteachingid
         //PORQUE YA ESTÁ INICIALIZADA EN EL CONSTRUCTOR CON SU SESSION, 
-        //NO ES NECESARIO NINGÚN id DE ACTIVIDAD
-        
+        //NO ES NECESARIO NINGÚN id DE ACTIVIDAD     
         //la info ya está cargada del constructor
-
 
         //aquÍ solo calcular los datos necesarios de la zona de acceso
         //comprobar si el rol es para iniciar reunión o para entrar a reunión
@@ -172,18 +168,39 @@ class sessions {
         //starturl o join url, según sea hospedador o participante
 
 
-        //bbbproxy::require_working_server($vc);        
-    
-        if ($this->bbbsession) {
-            $array = [
-                'id' => $this->bbbsession->id,
-                'ishost' => true,
-                'isaccess' => true,
-                'url' => base64_encode($this->bbbsession->starturl),
-            ];
-            return $array;
-        } else {
-            return null;
-        }
+            global $USER;
+
+            if ($this->bbbsession) {
+                $bbbconfig = $this->load_bbb_config_from_session();
+                $bbbproxy=new bbbproxy($bbbconfig);
+
+                //COMO BBB NO TIENE SALA DE ESPERA AL MODERADOR, HAY QUE SIMULARLA EN BBB:
+
+                //comprobar aquí si es moderator o viewer.
+                //Si es admin o moderador, poder entrar.
+                //Si es viewer, comprobar si está activa la opción de waitmoderator. 
+                    //Si es así, sacar un msj de "esperando al moderador". 
+                    //Si no, poder entrar.
+
+                $url=$bbbproxy->get_join_url(
+                    $this->bbbsession->meetingid,
+                    $USER->username,
+                    'https://www.urldelogout',   ///comprobar
+                    'MODERATOR',     //aqui VIEWER or MODERATOR. Según sea admin o moderator, o viewer
+                    null, //un token
+                    $USER->id,
+                    $this->bbbsession->createtime  
+                );
+
+                $array = [
+                    'id' => $this->bbbsession->id,
+                    'ishost' => true,
+                    'isaccess' => true,
+                    'url' => base64_encode($url),
+                ];
+                return $array;
+            } else {
+                return null;
+            }
     }
 }

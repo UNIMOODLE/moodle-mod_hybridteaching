@@ -44,6 +44,7 @@ export const init = () => {
     /**
      * page load
      */
+    oldtypevc = ELEMENT_SELECTOR.typeVC().value;
     useVC();
     useAttendance();
     useSessionsScheduling();
@@ -63,7 +64,7 @@ const useSessionsScheduling = (e = ELEMENT_SELECTOR.sessionscheduling()) => {
         sectionsessions.querySelector('#id_duration').value = 0;
         sectionsessions.querySelector('#id_starttime_enabled').checked = 0;
 
-        sectionsessions.querySelector('#id_undatedsession').disabled = false;
+        //sectionsessions.querySelector('#id_undatedsession').disabled = false;
         
     } else {
         sectionsessions.querySelector('#fitem_id_starttime').setAttribute('style', 'display:flex');
@@ -71,7 +72,7 @@ const useSessionsScheduling = (e = ELEMENT_SELECTOR.sessionscheduling()) => {
         sectionsessions.querySelector('#fitem_id_starttime').value = 0;
         sectionsessions.querySelector('#id_undatedsession').checked = 0;
 
-        sectionsessions.querySelector('#id_undatedsession').disabled = true;
+        //sectionsessions.querySelector('#id_undatedsession').disabled = true;
     }
     
 }
@@ -94,7 +95,7 @@ const useAttendance = (e = ELEMENT_SELECTOR.useAttendance()) => {
     } else {
         formi.forEach(input => {
             if (input.type !== 'hidden') {
-                input.value = 0;
+                input.value = '';
             }  
         });
         sectionAttendance.setAttribute('style', 'display:none');
@@ -117,7 +118,7 @@ const useVC = (e = ELEMENT_SELECTOR.useVC()) => {
 
     if (is_checkbox_checked(e) && is_element_displayed(e)) {
         recordoptions.value = 1
-        typeVC.value = 1;
+        typeVC.value = oldtypevc;
         recordoptions.closest('.form-group').setAttribute('style', 'display:flex');
         typeVC.closest('.form-group').setAttribute('style', 'display:flex');
 
@@ -142,6 +143,7 @@ const useVC = (e = ELEMENT_SELECTOR.useVC()) => {
 
     } else {
         recordoptions.value = 0
+        oldtypevc = typeVC.value;
         typeVC.value = 0;
         recordoptions.closest('.form-group').setAttribute('style', 'display:none');
         typeVC.closest('.form-group').setAttribute('style', 'display:none');

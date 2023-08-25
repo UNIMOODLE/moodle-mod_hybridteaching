@@ -96,7 +96,7 @@ $string['sessions'] = 'Sesiones';
 $string['import'] = 'Importar';
 $string['export'] = 'Exportar';
 
-$string['hybridteaching:addinstance'] = 'Añade una nueva docencia híbrida';
+$string['hybridteaching:addconfig'] = 'Añade una nueva docencia híbrida';
 $string['hybridteaching:view'] = 'Ver docencia híbrida';
 $string['hybridteaching:viewjoinurl'] = 'Ver url de inicio';
 $string['hybridteaching:programschedule'] = 'Programación de docencia híbrida';
@@ -108,24 +108,24 @@ $string['type'] = 'Tipo';
 $string['order'] = 'Ordenar';
 $string['hideshow'] = 'Ocultar/Mostrar';
 $string['addsetting'] = 'Añadir configuración';
-$string['editinstance'] = 'Editar instancia';
-$string['saveinstance'] = 'Guardar instancia';
-$string['instancegeneralsettings'] = 'Configuración general de docencia híbrida';
-$string['instancename'] = 'Nombre de instancia';
-$string['instanceselect'] = 'Seleccionar una instancia';
+$string['editconfig'] = 'Editar configuración';
+$string['saveconfig'] = 'Guardar configuración';
+$string['configgeneralsettings'] = 'Configuración general de docencia híbrida';
+$string['configname'] = 'Nombre de configuración';
+$string['configselect'] = 'Seleccionar una configuración';
 $string['generalconfig'] = 'Configuración general';
-$string['instancesconfig'] = 'Administrar instancias';
-$string['instancesvcconfig'] = 'Administrar configuraciones de videoconferencia';
-$string['instancesstoreconfig'] = 'Administrar configuraciones de almacenamiento';
+$string['configsconfig'] = 'Administrar configuracións';
+$string['configsvcconfig'] = 'Administrar configuraciones de videoconferencia';
+$string['configsstoreconfig'] = 'Administrar configuraciones de almacenamiento';
 $string['storageplugins'] = 'Extensiones de almacenamiento';
 
-$string['errorcreateinstance'] = 'Error al crear la instancia';
-$string['errorupdateinstance'] = 'Error al actualizar la instancia';
-$string['errordeleteinstance'] = 'Error al eliminar la instancia';
-$string['createdinstance'] = 'Instancia creada con éxito';
-$string['updatedinstance'] = 'Instancia actualizada con éxito';
-$string['deletedinstance'] = 'Instancia eliminada con éxito';
-$string['deleteconfirm'] = '¿Está seguro de que desea eliminar la instancia: {$a}?';
+$string['errorcreateconfig'] = 'Error al crear la configuración';
+$string['errorupdateconfig'] = 'Error al actualizar la configuración';
+$string['errordeleteconfig'] = 'Error al eliminar la configuración';
+$string['createdconfig'] = 'Configuración creada con éxito';
+$string['updatedconfig'] = 'Configuración actualizada con éxito';
+$string['deletedconfig'] = 'Configuración eliminada con éxito';
+$string['deleteconfirm'] = '¿Está seguro de que desea eliminar la configuración: {$a}?';
 
 $string['view_error_url_missing_parameters'] = 'Faltan parámetros en esta URL';
 
@@ -170,12 +170,13 @@ $string['sessionname'] = 'Nombre de la sesión';
 $string['nosessions'] = 'No hay sesiones disponibles';
 $string['nogroup'] = 'La próxima sesión no se realiza para su grupo';
 $string['nosubplugin'] = 'El tipo de videoconferencia es incorrecto. Contacte con su administrador';
-$string['noinstance'] = 'No existe la configuración de videoconferencia seleccionada. Contacte con su adminstrador';
+$string['noconfig'] = 'No existe la configuración de videoconferencia seleccionada. Contacte con su adminstrador';
 
-$string['status_progress'] = 'Videoconferencia en progreso';
-$string['status_finished'] ='Esta sesión de videoconferencia ha finalizado';
-$string['status_start'] = 'Comenzará próximamente';
-$string['status_undated'] = 'Esta sala de videoconferencia está lista. Puede entrar a la reunión ahora.';
+$string['status_progress'] = 'Sesión en progreso';
+$string['status_finished'] ='Esta sesión ha finalizado';
+$string['status_start'] = 'La sesión comenzará próximamente';
+$string['status_ready'] = 'La sesión está lista. Puede entrar ahora.';
+$string['status_undated'] = 'Puede crear una sesión recurrente';
 
 $string['closedoors_hours'] = ' {$a} horas tras el inicio';
 $string['closedoors_minutes'] = ' {$a} minutos tras el inicio';
@@ -234,10 +235,6 @@ $string['delayin'] = 'Retrasar en';
 $string['hybridteaching:sessionsactions'] = 'Ver acciones en la lista de sesiones';
 $string['hybridteaching:sessionsfulltable'] = 'Mostrar todos los campos de las lista de sesiones';
 $string['editsession'] = 'Editar la sesión';
-$string['importsessions'] = 'Importar sesiones';
-$string['invalidimportfile'] = 'El formato del archivo no es correcto.';
-$string['processingfile'] = 'Procesando archivo...';
-$string['sessionsgenerated'] = '{$a} sesiones generadas con éxito';
 
 $string['error:importsessionname'] = '¡Nombre de sesión inválido! Saltando línea {$a}.';
 $string['error:importsessionstarttime'] = '¡Hora de inicio de sesión no válida! Saltando línea {$a}.';
@@ -253,3 +250,52 @@ $string['examplecsv_help'] = 'Las sesiones pueden importarse mediante CSV, Excel
   * El primer registro contiene una lista de nombres de campo que definen el formato del resto del fichero.
   * Los nombres de campo obligatorios son el nombre, la hora de inicio y la duración.
   * Los nombres de campo opcionales son grupos y descripción';
+
+$string['nostarttime'] = 'Sin fecha de inicio';
+$string['noduration'] = 'Sin duración';
+$string['notypevc'] = 'Sin tipo de videoconferencia';
+$string['joinvc'] = 'Unirte a la reunión';
+$string['createsession'] = 'Crear sesión';
+$string['showqr'] = 'Mostrar código QR';
+$string['canjoin'] = 'Podrás unirte a la reunión cuando el profesor la haya iniciado';
+$string['canattendance'] = 'Podrás registrar tu asistencia cuando el profesor haya iniciado la sesión';
+$string['recurringses'] = 'Sesión recurrente';
+$string['finishsession'] = 'Finalizar sesión';
+$string['sessionnoaccess'] = 'No tienes acceso a esta sesión';
+$string['lessamin'] = 'Menos de 1 min';
+
+$string['qrcode'] = 'Codigo QR';
+$string['useqr'] = 'Incluir uso de QR';
+$string['rotateqr'] = 'Rotar codigo QR';
+$string['studentpassword'] = 'Contraseña de alumnos';
+$string['passwordheader'] = 'Introduzca la contraseña de abajo para registrar su asistencia';
+$string['qrcodeheader'] = 'Escanee el qr para registrar su asistencia';
+$string['qrcodeandpasswordheader'] = 'Escanee el QR o introduzca la contraseña de abajo para registrar su asistencia';
+$string['noqrpassworduse'] = 'El uso de QR o contraseña se encuentran deshabilitados';
+$string['showqrpassword'] = 'Mostrar Contraseña / QR';
+$string['qrcodevalidbefore'] = 'Codigo QR valido por:';
+$string['qrcodevalidafter'] = 'segundos.';
+$string['attendwithpassword'] = 'Contraseña de acceso: ';
+$string['markattendance'] = 'Registrar asistencia';
+$string['incorrect_password'] = 'Contraseña incorrecta introducida.';
+$string['attendance_registered'] = 'Asistencia registrada correctamente';
+$string['qr_expired'] = 'El codigo QR ha expirado, asegurese de leer el codigo correcto';
+$string['grade'] = 'Calificaciones';
+$string['commonattendance'] = 'Todos los grupos';
+$string['videoconference'] = 'Vconf';
+$string['classroom'] = 'Aula';
+
+$string['importsessions'] = 'Importar sesiones';
+$string['invalidimportfile'] = 'El formato del archivo no es correcto.';
+$string['processingfile'] = 'Procesando archivo...';
+$string['sessionsgenerated'] = '{$a} sesiones generadas con éxito';
+$string['resultsperpage'] = 'Resultados por página';
+$string['sessresultsperpage_desc'] = 'Número de sesiones por página';
+$string['donotusepaging'] = 'No usar paginación';
+$string['reusesession'] = 'Reutilizar recursos externos de sesiones';
+$string['reusesession_desc'] = 'Si está marcado, se reutilizarán los recursos de sesiones recurrentes';
+
+$string['allsessions'] = 'Global - todas las sesiones';
+$string['entrytime'] = 'Entrada';
+$string['leavetime'] = 'Salida';
+$string['permanence'] = 'Permanencia';

@@ -1,8 +1,8 @@
 <?php 
 
 $string['pluginname'] = 'BigBlueButton híbrido';
-$string['plugininstance'] = 'Instancia de bbb híbrido';
-$string['pluginnewinstance'] = 'Nueva instancia de bbb híbrido';
+$string['pluginconfig'] = 'Configuración de bbb híbrido';
+$string['pluginnewconfig'] = 'Nueva configuración de bbb híbrido';
 $string['serverurl'] = 'Url del servidor BigBlueButton';
 $string['sharedsecret'] = 'Clave secreta de BigBlueButton';
 $string['pollinterval'] = 'Intervalo de sondeo (en segundos) para actualizar el estado de la sala';
@@ -16,5 +16,6 @@ $string['bbberr_no_access_token'] = 'No access token returned';
 
 $string['view_error_unable_join_student'] = 'Unable to connect to the BigBlueButton server.';
 $string['view_error_unable_join_teacher'] = 'Unable to connect to the BigBlueButton server. Please contact an administrator.';
-$string['view_error_unable_join'] = 'Incapaz de unirse a la sesión. Por favor compruebe el servidor añadido en la instancia de BigBlueButton y compruebe que el servidor de BigBlueButton está en funcionamiento.';
+$string['view_error_unable_join'] = 'Incapaz de unirse a la sesión. Por favor compruebe el servidor añadido en la configuración de BigBlueButton y compruebe que el servidor de BigBlueButton está en funcionamiento.';
 
+$string['downloadrecordsbbb'] = 'Descargar grabaciones BigBlueButton';

@@ -1,11 +1,9 @@
 <?php
 
 $string['pluginname'] = 'Youtube Store';
-$string['plugininstance'] = 'Youtube Storeinstance';
-$string['pluginnewinstance'] = 'New Youtube Store instance';
+$string['pluginconfig'] = 'Youtube Storeconfig';
+$string['pluginnewconfig'] = 'New Youtube Store config';
 $string['accountid'] = 'Accountid';
-$string['clientid'] = 'Clientid';
-$string['clientsecret'] = 'Clientsecret';
 $string['youtube'] = 'youtube';
 $string['alias'] = 'Youtube Store';
 $string['pluginname']='Youtube Store';

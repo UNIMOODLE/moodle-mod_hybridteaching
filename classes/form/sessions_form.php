@@ -231,15 +231,19 @@ class session_options_form extends moodleform {
         $mform->setType('id', PARAM_INT);
         $mform->setType('l', PARAM_INT);
         $mform->addElement('header', 'options', get_string('options', 'mod_hybridteaching'));
-        $perpage = [
-            '5' => 5,
-            '10' => 10,
-            '20' => 20,
-            '50' => 50,
-            '100' => 100
-        ];
+        $perpage = array(
+            0 => get_string('donotusepaging', 'attendance'),
+            10 => 10,
+            25 => 25,
+            50 => 50,
+            75 => 75,
+            100 => 100,
+            250 => 250,
+            500 => 500,
+            1000 => 1000,
+        );
         $mform->addElement('select', 'perpage', get_string('sesperpage', 'mod_hybridteaching'), $perpage);
-        $mform->setDefault('perpage', 10);
+        $mform->setDefault('perpage', get_config('hybridteaching', 'resultsperpage'));
     }
 }
 

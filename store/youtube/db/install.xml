@@ -18,16 +18,16 @@
       </KEYS>
     </TABLE>
 
-    <TABLE NAME="hybridteachstore_youtube_ins" COMMENT="Youtube instances">
+    <TABLE NAME="hybridteachstore_youtube_con" COMMENT="Youtube configs">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="11" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="clientid" TYPE="char" LENGTH="255" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Oauth2 Client Id YouTube"/>
         <FIELD NAME="clientsecret" TYPE="char" LENGTH="255" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Oauth2 Client secret YouTube"/>
-        <FIELD NAME="email" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false" COMMENT="Email YouTube"/>
-        <FIELD NAME="token" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false" COMMENT="Token for YouTube account"/>
+        <FIELD NAME="emaillicense" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false" COMMENT="Email YouTube"/>
+        <FIELD NAME="token" TYPE="char" LENGTH="700" NOTNULL="false" SEQUENCE="false" COMMENT="Token for YouTube account"/>
       </FIELDS>
       <KEYS>
-        <KEY NAME="primary" TYPE="primary" FIELDS="id" COMMENT="The unique id for this instances youtube."/>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id" COMMENT="The unique id for this configs youtube."/>
       </KEYS>
     </TABLE>
 

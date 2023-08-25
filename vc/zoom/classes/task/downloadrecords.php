@@ -1,6 +1,8 @@
 <?php 
 namespace hybridteachvc_zoom\task;
 
+use hybridteachvc_zoom\sessions;
+use hybridteachvc_zoom\webservice;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -14,17 +16,15 @@ class downloadrecords extends \core\task\scheduled_task {
      * @return string
      */
     public function get_name() {
-        return get_string('downloadrecords', 'hybridteachvc_zoom');
+        return get_string('downloadrecordszoom', 'hybridteachvc_zoom');
     }
 
     public function execute() {
         global $DB, $CFG;
-        require_once($CFG->dirroot . '/mod/hybridteaching/vc/zoom/classes/webservice.php');
-        require_once($CFG->dirroot . '/mod/hybridteaching/vc/zoom/classes/sessions.php');
         
-        $sessioninstance=new \sessions();
+        $sessionconfig = new sessions();
 
-        $sql='SELECT hs.id AS hsid, ht.id AS htid, ht.course, ht.instance, zoom.meetingid
+        $sql='SELECT hs.id AS hsid, ht.id AS htid, ht.course, ht.config, zoom.meetingid
             FROM {hybridteaching_session} hs
             INNER JOIN {hybridteachvc_zoom} zoom ON zoom.htsession=hs.id
             INNER JOIN {hybridteaching} ht ON ht.id=hs.hybridteachingid
@@ -39,13 +39,10 @@ class downloadrecords extends \core\task\scheduled_task {
 
             $folder_file=$folder."/".$session->htid."-".$session->hsid;
 
-            $zoominstance = $sessioninstance->load_zoom_instance($session->instance);
-            $service = new \mod_hybrid_webservice($zoominstance); 
+            $zoomconfig = $sessionconfig->load_zoom_config($session->config);
+            $service = new \webservice($zoomconfig); 
             $response = $service->get_meeting_recordings($session->meetingid);
-            //$responsesettings=$service->get_meeting_recordingsettings($session->meetingid);
-            //var_dump($response->download_access_token);
-            /*echo "<br>settings:";
-            var_dump($responsesettings);*/
+
             if ($response != false) {
                 $count=1;
                 foreach ($response->recording_files as $file){

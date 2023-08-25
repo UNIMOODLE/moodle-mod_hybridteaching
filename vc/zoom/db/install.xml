@@ -23,7 +23,7 @@
       </KEYS>
     </TABLE>
 
-    <TABLE NAME="hybridteachvc_zoom_instance" COMMENT="Zoom instances">
+    <TABLE NAME="hybridteachvc_zoom_config" COMMENT="Zoom configs">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="11" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="accountid" TYPE="char" LENGTH="60" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
@@ -32,7 +32,7 @@
         <FIELD NAME="emaillicense" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false" COMMENT="El email que corresponde a la licencia zoom"/>
       </FIELDS>
       <KEYS>
-        <KEY NAME="primary" TYPE="primary" FIELDS="id" COMMENT="The unique id for this instances zoom."/>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id" COMMENT="The unique id for this configs zoom."/>
       </KEYS>
     </TABLE>
 
