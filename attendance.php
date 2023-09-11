@@ -15,7 +15,7 @@ require_capability('mod/hybridteaching:attendance', $context);
 
 $hybridteaching = $DB->get_record('hybridteaching', array('id' => $cm->instance), '*', MUST_EXIST);
 $hybridteaching->context = $context;
-$url = new moodle_url('/mod/hybridteaching/attendance.php', array('id' => $id));
+$url = new moodle_url('/mod/hybridteaching/attendance.php', array('id' => $id, 'editing' => 1));
 $attendancerender = new hybridteaching_attendance_render($hybridteaching);
 
 $PAGE->set_url($url);
@@ -30,8 +30,8 @@ echo $OUTPUT->header();
 echo $OUTPUT->heading(get_string('attendance', 'hybridteaching'));
 
 if (has_capability('mod/hybridteaching:sessionsfulltable', $context, $user, $doanything = true)) {
-    echo "<a href='attendance.php?id=".$id."&view=studentattendance'  class='btn btn-info' role='button'>studentattendance</a>";
-    echo "<a href='attendance.php?id=".$id."&view=sessionattendance'  class='btn btn-info' role='button'>sessionattendance</a>";
+    echo "<a href='attendance.php?id=".$id."&view=extendedstudentatt&attid=1&editing=1'  class='btn btn-info' role='button'>extendedstudentatt</a>";
+    echo "<a href='attendance.php?id=".$id."&view=sessionattendance&editing=1'  class='btn btn-info' role='button'>sessionattendance</a>";
 }
 echo $attendancerender->print_attendance_table();
 

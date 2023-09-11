@@ -49,7 +49,8 @@ class rotateQR {
     }
 
     changeQRCode(password) {
-        var qrcodeurl = document.URL.substr(0,document.URL.lastIndexOf('/')) + '/passwordaccess.php?qrpass=' + password + '&id=' + this.sessionId;
+        var qrcodeurl = document.URL.substr(0,document.URL.lastIndexOf('/')) + '/passwordaccess.php?qrpass=' +
+             password + '&id=' + this.sessionId + '&attaction=1';
         this.qrCodeInstance.clear();
         this.qrCodeInstance.makeCode(qrcodeurl);
     }

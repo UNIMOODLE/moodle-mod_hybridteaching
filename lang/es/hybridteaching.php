@@ -299,3 +299,59 @@ $string['allsessions'] = 'Global - todas las sesiones';
 $string['entrytime'] = 'Entrada';
 $string['leavetime'] = 'Salida';
 $string['permanence'] = 'Permanencia';
+
+$string['passwordgrp'] = 'Contraseña de estudiante';
+$string['passwordgrp_help'] = 'Si se establece, los estudiantes deberán ingresar esta contraseña antes de poder establecer su propio estado de asistencia para la sesión. Si está vacío, no se requiere contraseña.';
+
+$string['maxgradeattendance'] = 'Asistencia para máxima puntuación';
+$string['maxgradeattendance_help'] = 'Modo de cálculo
+  * Nº de sesiones dadas por asistidas
+  * % nº de asistencias sobre el total de sesiones accesibles
+  * % tiempo asistido sobre el total nominal de sesiones accesibles';
+
+$string['numsess'] = 'Nº sesiones';
+$string['percennumatt'] = '% nº asistencia';
+$string['percentotaltime'] = '% tiempo total';
+
+$string['eventsessionadded'] = 'Sesión añadida';
+$string['eventsessionviewed'] = 'Sesión vista';
+$string['eventsessionupdated'] = 'Sesión actualizada';
+$string['eventsessionrecordviewed'] = 'Registro de sesión visto';
+$string['eventsessionrecorddownloaded'] = 'Registro de sesión descargado';
+$string['eventsessionmngviewed'] = 'Gestión de sesión vista';
+$string['eventsessionjoined'] = 'Sesión unida';
+$string['eventsessioninfoviewed'] = 'Información de la sesión vista';
+$string['eventsessionfinished'] = 'Sesión finalizada';
+$string['eventsessiondeleted'] = 'Sesión eliminada';
+$string['eventattviewed'] = 'Asistencia vista';
+$string['eventattupdated'] = 'Asistencia actualizada';
+$string['eventattmngviewed'] = 'Gestión de asistencia vista';
+
+$string['gradenoun'] = 'Calificación';
+$string['gradenoun_help'] = 'Calificación de la sesión / Calificación total de la actividad / Calificación máxima de la actividad';
+$string['finishattend'] = 'Terminar asistencia';
+$string['bad_neededtime'] = 'Tiempo para completar asistencia menor que el de la session';
+$string['attnotfound'] = 'Error al encontrar el id para su asistencia contacte un administrador';
+$string['entryregistered'] = 'Se ha registrado su entrada correctamente';
+$string['exitregistered'] = 'Se ha registrado su salida correctamente';
+$string['alreadyregistered'] = 'Ya ha registrado su entrada, si no puede entrar a la sesion, intente finalizar su asistencia y pruebe a unirse de nuevo';
+$string['exitingleavedsession'] = 'Ya ha registrado su salida';
+$string['entryneededtoexit'] = 'Intentando finalizar asistencia en sesion sin entrada, debe registrar su entrada a la sesión antes de salir';
+$string['marks'] = 'Marca';
+$string['hour'] = 'Hora';
+$string['firstentry'] = 'Entrada a la sesión';
+$string['lastexit'] = 'Salida de la sesión';
+$string['sessionstarttime'] = 'Inicio efectivo';
+$string['sessionendtime'] = 'Finalización real';
+$string['participant'] = 'Participante';
+$string['userfor'] = 'Asistencia para estudiante:';
+$string['combinedatt'] = 'Total registrado';
+$string['withselectedattends'] = 'Con las asistencias seleccionadas';
+$string['prevattend'] = 'Asistencia';
+$string['setattendance'] = 'Cambiar asistencia';
+$string['setexent'] = 'Cambiar exento';
+$string['setinclude'] = 'Cambiar incluir en computo nota';
+$string['activeattendance'] = 'Dar por asistido';
+$string['inactiveattendance'] = 'Dar por no asistido';
+$string['updateattendance'] = 'Actualizar asistencia';
+$string['attnotforgrade'] = '(Sesión no usada en computo de notas)';

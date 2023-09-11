@@ -98,6 +98,8 @@ function hybridteaching_add_instance($moduleinstance, $mform = null) {
         $sessions = new sessions_controller($moduleinstance);
         $sessions->create_session($moduleinstance);
     }
+
+    hybridteaching_grade_item_update($moduleinstance);
     
     return $moduleinstance->id;
 }
@@ -134,12 +136,20 @@ function hybridteaching_update_instance($moduleinstance, $mform = null) {
     }
 
     //if there is not sessionscheduling, change time in the unique session
-    if ($moduleinstance->sessionscheduling == 0) {
+    $hadsessionsscheduling = $DB->get_field('hybridteaching', 'sessionscheduling', array('id' => $moduleinstance->id));
+    if ($moduleinstance->sessionscheduling == 0 && $hadsessionsscheduling == 1) {
         require_once($CFG->dirroot.'/mod/hybridteaching/classes/controller/sessions_controller.php');
         $session = new sessions_controller($moduleinstance);
         $session->update_session($moduleinstance);
     }
-    return $DB->update_record('hybridteaching', $moduleinstance);
+    
+    if (!$DB->update_record('hybridteaching', $moduleinstance)) {
+        return false;
+    }
+
+    hybridteaching_grade_item_update($moduleinstance);
+
+    return true;
 }
 
 /**
@@ -328,22 +338,19 @@ function hybridteaching_scale_used_anywhere($scaleid) {
  * @param array $grades optional array/object of grade(s); 'reset' means reset grades in gradebook
  * @return int 0 if ok, error code otherwise
  */
-function hybridteaching_grade_item_update($hybridteaching, $grades=null) {
-
-//TO-DO: REVISAR ESTA FUNCION PARA VER QUE HACE INSERTANDO CALIFICACIONES    
-    
+function hybridteaching_grade_item_update($hybridteaching, $grades = null) {    
     global $CFG;
     require_once($CFG->libdir.'/gradelib.php');
 
-    $params = array('itemname'=>$hybridteaching->name, 'idnumber'=>$hybridteaching->cmidnumber);
+    $params = array('itemname' => $hybridteaching->name, 'idnumber' => $hybridteaching->cmidnumber);
 
     if ($hybridteaching->grade > 0) {
         $params['gradetype'] = GRADE_TYPE_VALUE;
-        $params['grademax']  = $hybridteaching->grade;
-        $params['grademin']  = 0;
+        $params['grademax'] = $hybridteaching->grade;
+        $params['grademin'] = 0;
     } else if ($hybridteaching->grade < 0) {
         $params['gradetype'] = GRADE_TYPE_SCALE;
-        $params['scaleid']   = -$hybridteaching->grade;
+        $params['scaleid'] = -$hybridteaching->grade;
     } else {
         $params['gradetype'] = GRADE_TYPE_NONE;
     }
@@ -357,53 +364,6 @@ function hybridteaching_grade_item_update($hybridteaching, $grades=null) {
 }
 
 /**
- * Update activity grades.
- *
- * @param stdClass $hybridteaching database record
- * @param int $userid specific user only, 0 means all
- * @param bool $nullifnone - not used
- */
-function hybridteaching_update_grades($hybridteaching, $userid=0, $nullifnone=true) {
-
-// TO-DO: REVISAR ESTA FUNCION PARA VER QUE HACE
-    global $CFG;
-    require_once($CFG->libdir.'/gradelib.php');
-
-    if ($asshybridteachingign->grade == 0) {
-        hybridteaching_grade_item_update($hybridteaching);
-
-    } else if ($grades = hybridteaching_get_user_grades($hybridteaching, $userid)) {
-        foreach ($grades as $k => $v) {
-            if ($v->rawgrade == -1) {
-                $grades[$k]->rawgrade = null;
-            }
-        }
-        hybridteaching_grade_item_update($hybridteaching, $grades);
-
-    } else {
-        hybridteaching_grade_item_update($hybridteaching);
-    }
-}
-
-
-/**
- * Return grade for given user or all users.
- *
- * @param stdClass $hybridteaching record of assign with an additional cmidnumber
- * @param int $userid optional user id, 0 means all users
- * @return array array of grades, false if none
- */
-function hybridteaching_get_user_grades($hybridteaching, $userid=0) {
-    global $CFG;
-
-    $cm = get_coursemodule_from_instance('hybridteaching', $hybridteaching->id, 0, false, MUST_EXIST);
-    $context = context_module::instance($cm->id);
-    $hybrid = new hybridteaching($context, null, null);
-    $hybrid->set_instance($hybridteaching);
-    return $hybrid->get_user_grades_for_gradebook($userid);
-}
-
-/**
  * Delete grade item for given hybridteaching instance
  *
  * @param stdClass $hybridteaching instance object
@@ -414,7 +374,7 @@ function hybridteaching_grade_item_delete($hybridteaching) {
     require_once($CFG->libdir.'/gradelib.php');
 
     return grade_update('mod/hybridteaching', $hybridteaching->course, 'mod', 'hybridteaching',
-            $hybridteaching->id, 0, null, array('deleted' => 1));
+        $hybridteaching->id, 0, null, array('deleted' => 1));
 }
 
 /**

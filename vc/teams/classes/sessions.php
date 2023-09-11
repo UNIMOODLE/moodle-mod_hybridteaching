@@ -30,6 +30,7 @@ defined('MOODLE_INTERNAL') || die();
 global $CFG;
 
 require_once($CFG->dirroot.'/mod/hybridteaching/classes/controller/sessions_controller.php');
+require_once($CFG->dirroot.'/mod/hybridteaching/vc/teams/classes/teams_handler.php');
 
 class sessions {
     protected $teamssession;
@@ -63,6 +64,10 @@ class sessions {
         global $DB;
 
         $teamsconfig = $this->load_teams_config($ht->config);
+
+        $teams = new \teams_handler($teamsconfig);
+        $response = $teams->createmeeting($session,$ht);
+
     //load_teams_config: parece similar a lo siguiente
     //    $o365api = \mod_teamsmeeting\rest\unified::get_o365api($teamsmeeting);            
     //crear el algún tipo de clase unified
@@ -139,10 +144,10 @@ class sessions {
     public function load_teams_config($configid) {
         global $DB;
 
-        $sql = "SELECT ti.serverurl, ti.sharedsecret, ti.pollinterval
-                  FROM {hybridteaching_configs} hi
-                  JOIN {hybridteachvc_teams_config} bi ON ti.id = hi.subpluginconfigid
-                 WHERE hi.id = :configid AND hi.visible = 1";
+        $sql = "SELECT tc.*
+                  FROM {hybridteaching_configs} hc
+                  JOIN {hybridteachvc_teams_config} tc ON tc.id = hc.subpluginconfigid
+                 WHERE hc.id = :configid AND hc.visible = 1";
 
         $config = $DB->get_record_sql($sql, ['configid' => $configid]);
         return $config;

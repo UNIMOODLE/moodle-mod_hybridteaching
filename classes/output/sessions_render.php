@@ -28,6 +28,7 @@ defined('MOODLE_INTERNAL') || die();
 use core_table\dynamic as dynamic_table;
 
 require_once($CFG->dirroot . '/mod/hybridteaching/classes/controller/sessions_controller.php');
+require_once($CFG->dirroot . '/mod/hybridteaching/classes/helpers/attendance.php');
 require_once($CFG->libdir . '/tablelib.php');
 require_once($CFG->dirroot . '/user/lib.php');
 require_once($CFG->dirroot . '/mod/hybridteaching/classes/helper.php');
@@ -41,6 +42,7 @@ class hybridteaching_sessions_render extends \table_sql implements dynamic_table
     protected $typelist;
     protected $cm;
     protected $context;
+    protected $coursecontext;
 
     public function __construct(stdClass $hybridteaching, int $typelist) {
         $this->hybridteaching = $hybridteaching;
@@ -48,6 +50,7 @@ class hybridteaching_sessions_render extends \table_sql implements dynamic_table
         if (!empty($this->hybridteaching)) {
             $this->cm = get_coursemodule_from_instance('hybridteaching', $this->hybridteaching->id);
             $this->context = context_module::instance($this->cm->id);
+            $this->coursecontext = context_course::instance($this->cm->course);
         }
     }
 
@@ -146,6 +149,7 @@ class hybridteaching_sessions_render extends \table_sql implements dynamic_table
         $sessionscount = $sessioncontroller->count_sessions($params, $operator);
 
         $returnurl = new moodle_url('/mod/hybridteaching/sessions.php?id='.$this->cm->id.'&l='.$this->typelist);
+        $cache = cache::make('mod_hybridteaching', 'sessatt');
         foreach ($sessionslist as $session) {
             $date = $session['starttime'];
             $sessionid = $session['id'];
@@ -160,6 +164,20 @@ class hybridteaching_sessions_render extends \table_sql implements dynamic_table
                 $date = self::EMPTY;
             }
 
+            $sessatt = [];
+            $sessatt['sessatt_string'] = '';
+            if ($this->hybridteaching->useattendance) {
+                $cache_key = $sessionid . '_' . $session['groupid'];
+                $sessatt = $cache->get($cache_key);
+
+                if ($sessatt === false) {
+                    $this->hybridteaching->context = $this->context;
+                    $this->hybridteaching->coursecontext = $this->coursecontext;
+                    $sessatt = attendance::calculate_session_att($this->hybridteaching, $sessionid, $session['groupid']);
+                    $cache->set($cache_key, $sessatt);
+                }
+            }
+
             $body = [
                 'class' => '',
                 'sessionid' => $session['id'],
@@ -171,7 +189,7 @@ class hybridteaching_sessions_render extends \table_sql implements dynamic_table
                 'hour' => $hour,
                 'duration' => !empty($session['duration']) ? helper::get_hours_format($session['duration']) : self::EMPTY,
                 'recordingbutton' => html_writer::start_tag('input', ['type' => 'button', 'value' => get_string('recording', 'mod_hybridteaching')]),
-                'attendance' => '75/100 (75%)',
+                'attendance' => $sessatt['sessatt_string'],
                 'materials' => 'Recursos',
                 'enabled' => $session['visible'],
                 'checkbox' => new \core\output\checkbox_toggleall('sessions-table', false, [

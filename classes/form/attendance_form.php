@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
- * The password and qr helper.
+ * The attendance filtering form.
  *
  * @package     mod_hybridteaching
  * @copyright   2023 isyc <isyc@example.com>
@@ -24,7 +24,7 @@
 
  require_once($CFG->libdir.'/formslib.php');
  
- class  attendance_options_form extends moodleform {
+ class attendance_options_form extends moodleform {
     public function definition() {
         $mform = &$this->_form;
 
@@ -35,7 +35,7 @@
         $mform->addElement('hidden', 'id');
         $mform->setDefault('id', $id);
         $mform->setType('id', PARAM_INT);
-
+        
         $groupmode = groups_get_activity_groupmode($cm);
         $selectgroups = array();
         $selectgroups[0] = get_string('commonsession', 'hybridteaching');
@@ -64,7 +64,7 @@
         } else {
             $mform->addElement('select', 'groupid', get_string('groups', 'group'), $selectgroups);
         }
-
+        
         $mform->addElement('header', 'options', get_string('options', 'mod_hybridteaching'));
         $perpage = array(
             0 => get_string('donotusepaging', 'attendance'),
@@ -80,4 +80,40 @@
         $mform->addElement('select', 'perpage', get_string('sesperpage', 'mod_hybridteaching'), $perpage);
         $mform->setDefault('perpage', get_config('hybridteaching', 'resultsperpage'));
     }
+}
+
+class bulk_set_attendance_form extends moodleform {
+    public function definition() {
+        $mform =& $this->_form;
+        $cm = $this->_customdata['cm'];
+        $ids = $this->_customdata['attendslist'];
+        $sessionid = $this->_customdata['sessionid'];
+        $hybridteaching = $this->_customdata['hybridteaching'];
+
+        $mform->addElement('header', 'general', get_string('setattendance', 'hybridteaching'));
+        $options = array(
+            '1' => get_string('activeattendance', 'hybridteaching'),
+            '2' => get_string('inactiveattendance', 'hybridteaching'),
+        );
+        $mform->addElement('select', 'operation', get_string('updateduration', 'hybridteaching'), $options);
+        $mform->setType('operation', PARAM_INT);
+
+        $mform->addElement('hidden', 'action', 'bulksetattendance');
+        $mform->setType('action', PARAM_INT);
+
+        addhiddens($mform, $ids, $cm, $hybridteaching, $sessionid);
+        $submitstring = get_string('updateattendance', 'hybridteaching');
+        $this->add_action_buttons(true, $submitstring);
+    }
+}
+
+function addhiddens($mform, $ids, $cm, $hybridteaching, $sessionid) {
+    $mform->addElement('hidden', 'ids', $ids);
+    $mform->setType('ids', PARAM_ALPHANUMEXT);
+    $mform->addElement('hidden', 'id', $cm->id);
+    $mform->setType('id', PARAM_INT);
+    $mform->addElement('hidden', 'h', $hybridteaching->id);
+    $mform->setType('h', PARAM_INT);
+    $mform->addElement('hidden', 'sessionid', $sessionid);
+    $mform->setType('sessionid', PARAM_INT);
 }

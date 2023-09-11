@@ -60,5 +60,4 @@ class helper{
             return -1;  // No config
         }
     }
-
 }

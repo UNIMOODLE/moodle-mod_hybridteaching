@@ -310,3 +310,60 @@ $string['allsessions'] = 'Global - all sessions';
 $string['entrytime'] = 'Entry';
 $string['leavetime'] = 'Leave';
 $string['permanence'] = 'Permanence';
+
+$string['passwordgrp'] = 'Student password';
+$string['passwordgrp_help'] = 'If set students will be required to enter this password before they can set their own attendance status for the session. If empty, no password is required.';
+
+$string['maxgradeattendance'] = 'Attendance for maximum score';
+$string['maxgradeattendance_help'] = 'Calculation mode
+
+  * Number of sessions given by attended
+  * % number of attendances out of the total sessions accessible
+  * % time attended over the nominal total of accessible sessions
+
+';
+$string['numsess'] = 'Nº sessions';
+$string['percennumatt'] = '% nº attendance';
+$string['percentotaltime'] = '% total time';
+
+$string['eventsessionadded'] = 'Session added';
+$string['eventsessionviewed'] = 'Session viewed';
+$string['eventsessionupdated'] = 'Session updated';
+$string['eventsessionrecordviewed'] = 'Session record viewed';
+$string['eventsessionrecorddownloaded'] = 'Session record downloaded';
+$string['eventsessionmngviewed'] = 'Session manage viewed';
+$string['eventsessionjoined'] = 'Session joined';
+$string['eventsessioninfoviewed'] = 'Session info viewed';
+$string['eventsessionfinished'] = 'Session finished';
+$string['eventsessiondeleted'] = 'Session deleted';
+$string['eventattviewed'] = 'Attendance viewed';
+$string['eventattupdated'] = 'Attendance updated';
+$string['eventattmngviewed'] = 'Attendance manage viewed';
+$string['gradenoun'] = 'Grade';
+$string['gradenoun_help'] = 'Session grade / Total activity grade / Max activity grade';
+$string['finishattend'] = 'Finish attendance';
+$string['bad_neededtime'] = 'The time for completing the attendance is lower than the session time';
+$string['attnotfound'] = 'Attendance id error contact an administrator';
+$string['entryregistered'] = 'Attendance entry registered succesfully';
+$string['exitregistered'] = 'Attendance exit registered succesfully';
+$string['alreadyregistered'] = 'Attendance already registered, if you are having trouble entering the session, try to exit the session and enter again';
+$string['exitingleavedsession'] = 'Attendance exit already registered';
+$string['entryneededtoexit'] = 'Trying to exit without entering the session, you must register your attendance first';
+$string['marks'] = 'Marks';
+$string['hour'] = 'Hour';
+$string['firstentry'] = 'Session entry';
+$string['lastexit'] = 'Session exit';
+$string['sessionstarttime'] = 'Session start';
+$string['sessionendtime'] = 'Session end';
+$string['participant'] = 'Participant';
+$string['userfor'] = 'Attendance for user:';
+$string['combinedatt'] = 'Total attendance registered';
+$string['withselectedattends'] = 'With the selected attends';
+$string['prevattend'] = 'Attendance';
+$string['setattendance'] = 'Modify attendance';
+$string['setexent'] = 'Modify exent';
+$string['setinclude'] = 'Modify grade inclusion';
+$string['activeattendance'] = 'Set attendance';
+$string['inactiveattendance'] = 'Remove attendance';
+$string['updateattendance'] = 'Update attendance';
+$string['attnotforgrade'] = '(Session not used for grades)';

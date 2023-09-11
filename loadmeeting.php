@@ -5,6 +5,7 @@
 
 require_once(dirname(dirname(dirname(__FILE__))).'/config.php');
 require_once(__DIR__.'/classes/controller/sessions_controller.php');
+require_once($CFG->dirroot.'/mod/hybridteaching/classes/controller/attendance_controller.php');
 
 $id = required_param('id', PARAM_INT);
 $url = optional_param('url', '', PARAM_RAW);
@@ -14,7 +15,7 @@ $finishsession = optional_param('finishsession', 0, PARAM_INT);
 list($course, $cm) = get_course_and_cm_from_cmid($id, 'hybridteaching');
 $modulecontext = context_module::instance($cm->id);
 $hybridteaching = $DB->get_record('hybridteaching', array('id' => $cm->instance), '*', MUST_EXIST);
-
+$attendance_controller = new attendance_controller($hybridteaching);
 if (!empty($sid)) {
     $activesession = $DB->get_record('hybridteaching_session', array('id' => $sid), '*', MUST_EXIST);
     if (!$finishsession) {
@@ -95,5 +96,19 @@ if (!empty($sid)) {
 $nexturl = base64_decode($url);
 
 require_login($course->id, true);
-
+if (!$finishsession) {
+    isset($activesession) ? $sessiontype = $activesession : $sessiontype = $session;
+    
+    $timeparams = ['start' => $sessiontype->starttime, 'end' => $sessiontype->starttime + $sessiontype->duration,
+        'timeneeded' => $hybridteaching->attendanceunit, 'validateunit' => $hybridteaching->attendanceunit];
+        if ($hybridteaching->useattendance) {
+        $notify = attendance_controller::hybridteaching_set_attendance_log($hybridteaching, $sessiontype, $timeparams, 1);
+        if ($notify['ntype'] == 'success') {
+            attendance_controller::hybridteaching_set_attendance($hybridteaching, $sessiontype, 1, 1);
+        }
+        $url = new moodle_url('/mod/hybridteaching/view.php', ['id' => $id]);
+        $notify['ntype'] == 'error' ? redirect($url, get_string($notify['gstring'], 'hybridteaching'), null, $notify['ntype']) :
+            redirect($nexturl);
+        }
+}
 redirect($nexturl);

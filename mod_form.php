@@ -67,7 +67,7 @@ class mod_hybridteaching_mod_form extends moodleform_mod {
 
         // registro de asistencia de estudiantes
         $mform->addElement('advcheckbox','useattendance','',get_string('useattendance','hybridteaching'),null, array(0, 1));
-        $mform->setDefault('useattendance', 0);
+        $mform->setDefault('useattendance', 1);
         $mform->addHelpButton('useattendance', 'useattendance', 'hybridteaching');
 
         // usar acceso por videoconferencia
@@ -84,12 +84,6 @@ class mod_hybridteaching_mod_form extends moodleform_mod {
         $vcconfigscontroller = new configs_controller(null, 'hybridteachvc');
         $configs = $vcconfigscontroller->hybridteaching_get_configs_select('curso');
         $mform->addElement('select','typevc',get_string('typevc', 'hybridteaching'),$configs);    
-          
-        //esto dependerá de la videoconferencia seleccionada (zoom, meet, bbb...)
-        
-        //comprobar aqui si existe la funcion antes de llamarla y comprobar tb con plugin manager
-        //component_callback("hybridteachvc_meet", 'addform', [$mform]);
-    
         
         // NUEVAS SECCIONES PERSONALIZADAS:
 
@@ -226,8 +220,8 @@ class mod_hybridteaching_mod_form extends moodleform_mod {
         $mform->addHelpButton('attendance', 'attendance', 'hybridteaching'); 
         $mform->setType('validateattendance', PARAM_INT);      
 
-        $mform->addElement('advcheckbox','useqr','',get_string('useqr','hybridteaching'), null, array(0, 1));
-        $mform->setDefault('useqr', 0);
+        $mform->addElement('advcheckbox', 'useqr', '', get_string('useqr', 'hybridteaching'), null, array(0, 1));
+        $mform->setDefault('useqr', 1);
         $mform->disabledif('useqr', 'rotateqr', 'checked');
         $mform->addElement('advcheckbox','rotateqr','',get_string('rotateqr','hybridteaching'), null, array(0, 1));
         $mform->setDefault('rotateqr', 0);
@@ -238,10 +232,23 @@ class mod_hybridteaching_mod_form extends moodleform_mod {
         $mform->addElement('text', 'studentpassword', get_string('studentpassword', 'hybridteaching'));
         $mform->setType('studentpassword', PARAM_TEXT);
         $mform->disabledif('studentpassword', 'rotateqr', 'checked');
-        $mform->addHelpButton('studentpassword', 'passwordgrp', 'attendance');
+        $mform->addHelpButton('studentpassword', 'passwordgrp', 'hybridteaching');
 
         // Add standard grading elements.
         $this->standard_grading_coursemodule_elements();
+        $maxgradeattendance[] = &$mform->createElement('text', 'maxgradeattendance', get_string('maxgradeattendance', 'hybridteaching'));
+        $mform->setType('maxgradeattendance', PARAM_INT);
+
+        $options = array(
+            '1' => get_string('numsess', 'hybridteaching'),
+            '2' => get_string('percennumatt', 'hybridteaching'),
+            '3' => get_string('percentotaltime', 'hybridteaching'),
+        );
+        $maxgradeattendance[] = &$mform->createElement('select', 'maxgradeattendanceunit', '', $options);
+        $mform->setType('maxgradeattendanceunit', PARAM_INT);
+        $mform->addGroup($maxgradeattendance, 'maxgradeattendancegroup', get_string('maxgradeattendance', 'hybridteaching'), array(' '), false);
+        $mform->addHelpButton('maxgradeattendancegroup', 'maxgradeattendance', 'hybridteaching');
+
         //$mform->setDefault('grade', false);
 
         // Add standard elements.

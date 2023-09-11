@@ -1,6 +1,4 @@
 <?php
-//aqui desde qr / contraseña el usuario, si coincide mandar a meeting si existe.
-//+ cumple condiciones
 
 require(__DIR__.'/../../config.php');
 require_once(__DIR__.'/lib.php');
@@ -12,15 +10,22 @@ $cm = get_coursemodule_from_instance('hybridteaching', $hybridteaching->id, 0, f
 $session = new sessions_controller($hybridteaching);
 $attendance_controller = new attendance_controller($hybridteaching);
 $sessionshow = $session->get_next_session($hybridteaching->id);
+
 $url = new moodle_url('/mod/hybridteaching/view.php', array('id' => $cm->id));
 if (!$sessionshow) {
     $sessionshow = $session->get_last_session($hybridteaching->id);
 }
 //if not use of attendance return to main view.
-if($hybridteaching->useattendance == 0) {
+if ($hybridteaching->useattendance == 0) {
     
     throw new moodle_exception('attendancedisabled', 'hybridteaching', $url);
 }
+$timestart = $sessionshow->starttime;
+$timeend = $timestart + intval($sessionshow->duration);
+$validatetime = $hybridteaching->validateattendance;
+$validateunit = $hybridteaching->attendanceunit;
+$timeparams = array('start' => $timestart, 'end' => $timeend, 'timeneeded' => $validatetime, 'validateunit' => $validateunit);
+$action = optional_param('attaction', null, PARAM_INT);
 $qrpass = optional_param('qrpass', '', PARAM_TEXT);
 $qrpassflag = false;
 if ($att = attendance_controller::hybridteaching_get_attendance($hybridteaching, $sessionshow)) {
@@ -28,7 +33,8 @@ if ($att = attendance_controller::hybridteaching_get_attendance($hybridteaching,
     } else {
     }
 }
-if ($hybridteaching->rotateqr == 1) {
+$atttype = 0;
+if ($hybridteaching->rotateqr == 1 && $action == 1) {
     $cookiename = 'hybridteaching'.$hybridteaching->id;
     $secrethash = md5($USER->id.$hybridteaching->rotateqrsecret);
     $url = new moodle_url('/mod/hybridteaching/view.php', array('id' => $cm->id));
@@ -37,16 +43,21 @@ if ($hybridteaching->rotateqr == 1) {
         ' WHERE attendanceid = ? AND expirytime > ? ORDER BY expirytime ASC';
     $qrpassdatabase = $DB->get_records_sql($sql, ['attendanceid' => $id, time() - 2], 0, 2);
     foreach ($qrpassdatabase as $qrpasselement) {
+        var_dump($qrpasselement->password);
         if ($qrpass == $qrpasselement->password) {
             $qrpassflag = true;
         }
     }
+    echo '<br> pass:';
+    var_dump($qrpass);
     if ($qrpassflag) {
         // Create and store the token.
         setcookie($cookiename, $secrethash, time() + (60 * 5), "/");
         $status = 1;
-        attendance_controller::hybridteaching_set_attendance($hybridteaching, $sessionshow, $status);
-        redirect($url ,get_string('attendance_registered', 'hybridteaching'), null, \core\output\notification::NOTIFY_SUCCESS);
+        attendance_controller::hybridteaching_set_attendance($hybridteaching, $sessionshow, $status, $atttype);
+        if ($notify = attendance_controller::hybridteaching_set_attendance_log($hybridteaching, $sessionshow, $timeparams, $action)) {
+            redirect($url ,get_string($notify['gstring'], 'hybridteaching'), null, $notify['ntype']);
+        }
     } else {
         // Flag error.
         if (debugging('', DEBUG_DEVELOPER)) {
@@ -67,25 +78,52 @@ if ($hybridteaching->rotateqr == 1) {
 
 } else if (!empty($qrpass) && $hybridteaching->studentpassword == $qrpass) {
     $status = 1;
-    $qrsecret = optional_param('secretqr', null, PARAM_TEXT);
-    if ($qrsecret) {
-        if ($qrsecret == $hybridteaching->rotateqrsecret) {
-            attendance_controller::hybridteaching_set_attendance($hybridteaching, $sessionshow, $status);
-            redirect($url ,get_string('attendance_registered', 'hybridteaching'), null, \core\output\notification::NOTIFY_SUCCESS);
+    if ($notify = attendance_controller::hybridteaching_set_attendance_log($hybridteaching, $sessionshow, $timeparams, $action)) {
+        if ($notify['ntype'] == 'success') { 
+            attendance_controller::hybridteaching_set_attendance($hybridteaching, $sessionshow, $status, $atttype);
         }
-        redirect($url ,get_string('incorrect_password', 'hybridteaching'), null, \core\output\notification::NOTIFY_ERROR);
+        redirect($url, get_string($notify['gstring'], 'hybridteaching'), null, $notify['ntype']);
     }
-    attendance_controller::hybridteaching_set_attendance($hybridteaching, $sessionshow, $status);
-    redirect($url ,get_string('attendance_registered', 'hybridteaching'), null, \core\output\notification::NOTIFY_SUCCESS);
+    redirect($url ,get_string('incorrect_password', 'hybridteaching'), null, \core\output\notification::NOTIFY_ERROR);
 } else if ($hybridteaching->useqr && strlen($hybridteaching->studentpassword == '')) {
     $status = 1;
     $qrsecret = optional_param('secretqr', null, PARAM_TEXT);
+    if ($action == 0 ) {
+        if ($notify = attendance_controller::hybridteaching_set_attendance_log($hybridteaching, $sessionshow, $timeparams, $action)) {
+            if ($notify['ntype'] == 'success') {
+                attendance_controller::hybridteaching_set_attendance($hybridteaching, $sessionshow, 1);
+            }
+            redirect($url, get_string($notify['gstring'], 'hybridteaching'), null, $notify['ntype']);
+        }
+    }
     if ($qrsecret != '' && $qrsecret == $hybridteaching->rotateqrsecret) {
-        attendance_controller::hybridteaching_set_attendance($hybridteaching, $sessionshow, $status);
-        redirect($url ,get_string('attendance_registered', 'hybridteaching'), null, \core\output\notification::NOTIFY_SUCCESS);
+        if ($notify = attendance_controller::hybridteaching_set_attendance_log($hybridteaching, $sessionshow, $timeparams, $action)) {
+           
+            if ($notify['ntype'] == 'success') {
+                attendance_controller::hybridteaching_set_attendance($hybridteaching, $sessionshow, $status, $atttype);
+            }
+            redirect($url, get_string($notify['gstring'], 'hybridteaching'), null, $notify['ntype']);
+        }
     }
     redirect($url ,get_string('incorrect_password', 'hybridteaching'), null, \core\output\notification::NOTIFY_ERROR);
 } else {
-    redirect($url ,get_string('incorrect_password', 'hybridteaching'), null, \core\output\notification::NOTIFY_ERROR);
+    if ($action != 0 ) {
+        redirect($url, get_string('incorrect_password', 'hybridteaching'), null, \core\output\notification::NOTIFY_INFO);
+    }
+    $qrsecret = optional_param('secretqr', null, PARAM_TEXT);
+    if ($qrsecret != '' && $qrsecret == $hybridteaching->rotateqrsecret) {
+        if ($notify = attendance_controller::hybridteaching_set_attendance_log($hybridteaching, $sessionshow, $timeparams, $action)) {
+            if ($notify['ntype'] == 'success') {
+                attendance_controller::hybridteaching_set_attendance($hybridteaching, $sessionshow, $status, $atttype);
+            }
+            redirect($url, get_string($notify['gstring'], 'hybridteaching'), null, $notify['ntype']);
+        }
+    }
+    if ($notify = attendance_controller::hybridteaching_set_attendance_log($hybridteaching, $sessionshow, $timeparams, $action)) {
+        if ($notify['ntype'] == 'success') {
+            attendance_controller::hybridteaching_set_attendance($hybridteaching, $sessionshow, 1);
+        }
+        redirect($url, get_string($notify['gstring'], 'hybridteaching'), null, $notify['ntype']);
+    }
 }
 redirect($url);

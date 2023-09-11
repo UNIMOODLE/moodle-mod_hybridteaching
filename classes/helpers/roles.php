@@ -309,4 +309,48 @@ class roles {
         ];
     }
 
+
+    static function count_role_users($roleid, context $context, $parent = false, $group = null) {
+        global $DB;
+    
+        if ($parent) {
+            if ($contexts = $context->get_parent_context_ids()) {
+                $parentcontexts = ' OR r.contextid IN ('.implode(',', $contexts).')';
+            } else {
+                $parentcontexts = '';
+            }
+        } else {
+            $parentcontexts = '';
+        }
+    
+        if ($roleid) {
+            list($rids, $params) = $DB->get_in_or_equal($roleid, SQL_PARAMS_QM);
+            $roleselect = "AND r.roleid $rids";
+        } else {
+            $params = array();
+            $roleselect = '';
+        }
+
+        if ($group) {
+            $groupjoin   = "JOIN {groups_members} gm ON gm.userid = u.id";
+            $groupselect = " AND gm.groupid = :groupid ";
+            $params['groupid'] = $group;
+        } else {
+            $groupjoin   = '';
+            $groupselect = '';
+        }
+    
+        array_unshift($params, $context->id);
+    
+        $sql = "SELECT COUNT(DISTINCT u.id)
+                  FROM {role_assignments} r
+                  JOIN {user} u ON u.id = r.userid
+                  $groupjoin
+                 WHERE (r.contextid = ? $parentcontexts)
+                       $roleselect
+                       $groupselect
+                       AND u.deleted = 0";
+    
+        return $DB->count_records_sql($sql, $params);
+    }
 }

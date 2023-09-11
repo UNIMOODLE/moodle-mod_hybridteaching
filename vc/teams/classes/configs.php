@@ -35,9 +35,10 @@ class configs extends configs_controller {
     public static function create_config($data) {
         global $DB, $USER;
         $records = new stdClass();
-        $records->serverurl = $data->serverurl;
-        $records->sharedsecret = $data->sharedsecret;
-        $records->pollinterval = $data->pollinterval;
+        $records->tenantid = $data->tenantid;
+        $records->clientid = $data->clientid;
+        $records->clientsecret = $data->clientsecret;
+        $records->useremail = $data->useremail;
         $records->timecreated = time();
         $records->createdby = $USER->id;
         $id = $DB->insert_record('hybridteachvc_teams_config', $records);
@@ -48,9 +49,10 @@ class configs extends configs_controller {
         global $DB;
         $records = new stdClass();
         $records->id = $data->subpluginconfigid;
-        $records->serverurl = $data->serverurl;
-        $records->sharedsecret = $data->sharedsecret;
-        $records->pollinterval = $data->pollinterval;
+        $records->tenantid = $data->tenantid;
+        $records->clientid = $data->clientid;
+        $records->clientsecret = $data->clientsecret;
+        $records->useremail = $data->useremail;
         $DB->update_record('hybridteachvc_teams_config', $records);
     }
 

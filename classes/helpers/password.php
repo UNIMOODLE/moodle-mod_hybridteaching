@@ -39,10 +39,10 @@ class password {
         $cm = get_coursemodule_from_instance('hybridteaching', $session->id);
         if (strlen($session->studentpassword) > 0) {
             $qrcodeurl = $CFG->wwwroot . '/mod/hybridteaching/passwordaccess.php?qrpass=' .
-                $session->studentpassword . '&id=' . $session->id . '&secretqr=' . $session->rotateqrsecret;;
+                $session->studentpassword . '&id=' . $session->id . '&secretqr=' . $session->rotateqrsecret . '&attaction=1';
         } else {
             $qrcodeurl = $CFG->wwwroot . '/mod/hybridteaching/passwordaccess.php?id=' . $session->id .
-             '&secretqr=' . $session->rotateqrsecret;
+             '&secretqr=' . $session->rotateqrsecret . '&attaction=1';
         }
         $barcode = new TCPDF2DBarcode($qrcodeurl, 'QRCODE');
         $image = $barcode->getBarcodePngData(12, 12);

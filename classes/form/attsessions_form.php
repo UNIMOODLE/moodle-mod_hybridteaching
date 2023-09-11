@@ -24,6 +24,7 @@
 
  require_once($CFG->libdir.'/formslib.php');
  require_once($CFG->dirroot . '/mod/hybridteaching/classes/controller/sessions_controller.php');
+ require_once($CFG->dirroot . '/mod/hybridteaching/classes/controller/attendance_controller.php');
 
  class attsessions_options_form extends moodleform {
     public function definition() {
@@ -34,36 +35,59 @@
         $cm = get_coursemodule_from_id('hybridteaching', $id,  0,  false,  MUST_EXIST);
         $hid = $this->_customdata['hid'];
         $hybridteaching = $DB->get_record('hybridteaching', array('id' => $hid), '*', MUST_EXIST);
-        $sessionid = $this->_customdata['sessionid'];
+        $selectedsession = $this->_customdata['selectedsession'];
+        $selectedsession ? $sessionid = $selectedsession :  $sessionid = $this->_customdata['sessionid'];
         $sessioncontroller = new sessions_controller($hybridteaching);
         $session = $sessioncontroller->get_session($sessionid);
         $sessions = $sessioncontroller->load_sessions();
+        $view = $this->_customdata['view'];
+        $attcontroller = new attendance_controller();
+        $sessioninfo = $attcontroller->hybridteaching_print_session_info($session);
+        echo $sessioninfo;
+
+        $attid = optional_param('attid', 1, PARAM_INT);
+        $mform->addElement('hidden', 'attid');
+        $mform->setDefault('attid', $attid);
+        $mform->setType('attid', PARAM_INT);
 
         $mform->addElement('hidden', 'id');
         $mform->setDefault('id', $id);
         $mform->setType('id', PARAM_INT);
+
+        if ($view == 'attendlog') {
+            $selecteduser = $this->_customdata['selecteduser'];
+            $attid =optional_param('attid', 0, PARAM_INT);
+            $selecteduser ? $attid = $selecteduser :  $selecteduser = $attid;
+         
+            $mform->addElement('header', 'participant', get_string('participant', 'mod_hybridteaching'));
+            $selectedusers = array();
+            $sessionusers = $attcontroller->hybridteaching_get_attendance_users_in_session($sessionid);
+            if ($sessionusers) {
+                foreach($sessionusers as $sesuser) {
+                    $selectedusers[$sesuser->id] = $sesuser->lastname . ' ' . $sesuser->firstname;
+                }
+                $mform->addElement('select', 'selecteduser', get_string('userfor', 'mod_hybridteaching'), $selectedusers);
+                $mform->setDefault('selecteduser', $attid);
+            }
+        }
 
         $selectedsessions = array();
 
         $selectedsessions[0] = get_string('allsessions', 'hybridteaching');
         $mform->addElement('header', 'sessions', get_string('sessions', 'mod_hybridteaching'));
 
+        foreach($sessions as $sess) {
+            if ($att = $attcontroller->hybridteaching_get_attendance($hybridteaching, $sess)) {
+                $att->visible ? $visible = '' : $visible = get_string('attnotforgrade', 'hybridteaching') ;
+                $selectedsessions[$sess['id']] = $sess['name'] . ' | ' . date('l, j \d\e F \d\e Y H:i', $sess['starttime']) . ' ' . $visible;
+            }
+        }
+        $mform->addElement('select', 'selectedsession', get_string('sessionfor', 'mod_hybridteaching'), $selectedsessions);
         if ($sessionid) {
             $selectedsessions[$sessionid] = $session->name;
-            foreach($sessions as $sess) {
-                $selectedsessions[$sess['id']] = $sess['name'] . ' | ' . date('l, j \d\e F \d\e Y H:i', $sess['starttime']);
-            }
-            $mform->addElement('select', 'selectedsession', get_string('sessionfor', 'mod_hybridteaching'), $selectedsessions);
             $mform->setDefault('selectedsession', $sessionid);
-            
-            echo '<br>' . $selectedsessions[$sessionid];
         } else {
-            foreach($sessions as $sess) {
-                $selectedsessions[$sess['id']] = $sess['name'];
-            }
-            $mform->addElement('select', 'selectedsession', get_string('sessionfor', 'mod_hybridteaching'), $selectedsessions);
             $mform->setDefault('selectedsession', 0);
         }
-        
     }
 }

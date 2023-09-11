@@ -104,11 +104,25 @@ class sessions_controller extends common_controller {
         if ($data->userecordvc == 1) {
             $data->processedrecording =- 1;
         }
+
+        $multiplesess = false;
         if (isset($data->addmultiply)) {
             $this->create_multiple_sessions($data);
+            $multiplesess = true;
         } else {
             $session = $this->create_unique_session($data);
         }
+
+        $event = \mod_hybridteaching\event\session_added::create(array(
+            'objectid' => $this->hybridobject->id,
+            'context' => \context_course::instance($this->hybridobject->course),
+            'other' => array(
+                'multiplesess' => $multiplesess,
+                'sessid' => $session->id
+            )
+        ));
+
+        $event->trigger();
 
         return $session;
     }
@@ -279,6 +293,17 @@ class sessions_controller extends common_controller {
                 $subpluginsession->delete_session_extended($id, $this->hybridobject->config);
             }
         }
+
+        $event = \mod_hybridteaching\event\session_deleted::create(array(
+            'objectid' => $this->hybridobject->id,
+            'context' => \context_course::instance($this->hybridobject->course),
+            'other' => array(
+                'sessid' => $id
+            )
+        ));
+
+        $event->trigger();
+        
         return $errormsg;
     }
 

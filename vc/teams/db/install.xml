@@ -19,9 +19,12 @@
     <TABLE NAME="hybridteachvc_teams_config" COMMENT="Teams configs">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="11" NOTNULL="true" SEQUENCE="true"/>
-        <FIELD NAME="serverurl" TYPE="char" LENGTH="200" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
-        <FIELD NAME="sharedsecret" TYPE="char" LENGTH="60" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
-        <FIELD NAME="pollinterval" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="tenantid" TYPE="char" LENGTH="100" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="clientid" TYPE="char" LENGTH="100" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="clientsecret" TYPE="char" LENGTH="100" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="useremail" TYPE="char" LENGTH="100" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="accesstoken" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Access token for Teams account"/>
+        <FIELD NAME="refreshtoken" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Refresh token for Teams account"/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id" COMMENT="The unique id for this config teams."/>

@@ -60,10 +60,10 @@ $mform = null;
 
 switch ($action) {
     case 'disable':
-        $sessioncontroller->enable_data($sesionid, false, 'hybridteaching_sessions');
+        $sessioncontroller->enable_data($sesionid, false, 'hybridteaching_session');
         break;
     case 'enable':
-        $sessioncontroller->enable_data($sesionid, true, 'hybridteaching_sessions');
+        $sessioncontroller->enable_data($sesionid, true, 'hybridteaching_session');
         break;
     case 'delete':
         $sessioncontroller->delete_session($sesionid, $hybridteachingid);

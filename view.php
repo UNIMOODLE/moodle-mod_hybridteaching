@@ -230,6 +230,7 @@ if (!$activesession) {
         $result['useqr'] = $hybridteaching->useqr;
         $result['usepassword'] = $hybridteaching->studentpassword;
         $result['rotateqr'] = $hybridteaching->rotateqr;
+        $result['useattendance'] = $hybridteaching->useattendance;
     }
 }
 

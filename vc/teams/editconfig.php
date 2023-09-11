@@ -76,7 +76,10 @@ if ($mform->is_cancelled()) {
         empty($error) ? $message = 'updatedconfig' : $message = $error;
     }
 
-    redirect($return);
+    //add access code and permissions to teams
+    $url = new moodle_url('./classes/teamsaccess.php',array('id'=>$configid) );
+    redirect($url);
+
 }
 
 $PAGE->set_heading($SITE->fullname);

@@ -56,17 +56,20 @@ class htteams_config_edit_form extends moodleform {
         $mform->addRule('configname', null, 'maxlength', 255, 'client');
 
         $mform->addElement('header', 'subplugin', get_string('pluginname', 'hybridteachvc_teams'));
-        $mform->addElement('text', 'serverurl', get_string('serverurl', 'hybridteachvc_teams'));
-        $mform->addElement('text', 'sharedsecret', get_string('sharedsecret', 'hybridteachvc_teams'));
-        $mform->addElement('text', 'pollinterval', get_string('pollinterval', 'hybridteachvc_teams'));
+        $mform->addElement('text', 'tenantid', get_string('tenantid', 'hybridteachvc_teams'));
+        $mform->addElement('text', 'clientid', get_string('clientid', 'hybridteachvc_teams'));
+        $mform->addElement('text', 'clientsecret', get_string('clientsecret', 'hybridteachvc_teams'));
+        $mform->addElement('text', 'useremail', get_string('useremail', 'hybridteachvc_teams'));
 
-        $mform->setType('serverurl', PARAM_TEXT);
-        $mform->setType('sharedsecret', PARAM_TEXT);
-        $mform->setType('pollinterval', PARAM_TEXT);
+        $mform->setType('tenantid', PARAM_TEXT);
+        $mform->setType('clientid', PARAM_TEXT);
+        $mform->setType('clientsecret', PARAM_TEXT);
+        $mform->setType('useremail', PARAM_TEXT);
 
-        $mform->addRule('serverurl', null, 'required', null, 'client');
-        $mform->addRule('sharedsecret', null, 'required', null, 'client');
-
+        $mform->addRule('tenantid', null, 'required', null, 'client');
+        $mform->addRule('clientid', null, 'required', null, 'client');
+        $mform->addRule('clientsecret', null, 'required', null, 'client');
+        $mform->addRule('useremail', null, 'required', null, 'client');
         
         if (empty($config)) {
             $this->add_action_buttons(true, get_string('addsetting', 'hybridteaching'));
