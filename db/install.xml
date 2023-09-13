@@ -124,6 +124,7 @@
         <FIELD NAME="sessionid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="connectiontime" TYPE="int" LENGTH="11" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="sum of time an user has expended in a session used for grading the user."/>
+        <FIELD NAME="exempt" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="status" TYPE="int" LENGTH="1" NOTNULL="false" DEFAULT="0" SEQUENCE="false" COMMENT="0 = no attendance, 1 = attended 2 = late attendance"/>
         <FIELD NAME="type" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="grade" TYPE="float" LENGTH="10" NOTNULL="false" DEFAULT="0" SEQUENCE="false"/>
