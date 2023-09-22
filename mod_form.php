@@ -155,6 +155,13 @@ class mod_hybridteaching_mod_form extends moodleform_mod {
         $mform->addHelpButton('userslimit', 'userslimit', 'hybridteaching');
         $mform->setType('userslimit', PARAM_INT);
 
+        $mform->addGroup(array(
+            $mform->createElement('text', 'graceperiod', '', array('size'=> 10)),
+            $mform->createElement('select', 'graceperiodunit', '', $units),
+            ), 'graceperiod', get_string('graceperiod', 'hybridteaching'), ' ', false);
+        $mform->addHelpButton('graceperiod', 'graceperiod', 'hybridteaching');
+        $mform->setType('graceperiod', PARAM_INT);
+
 // TO-DO ISYC: AÑADIR AQUI OPCIONES ESPECÍFICAS DEL SUBPLUGIN SELECCIONADO EN LA SECCIÓN GENERAL
         $mform->addElement('text', 'recordatorio', 'AÑADIR AQUÍ OPCIONES PROPIAS SEGÚN CADA SUBPLUGIN DE VIDEOCONFERENCIA', array('size'=> 6));
         $mform->setType('recordatorio', PARAM_RAW);

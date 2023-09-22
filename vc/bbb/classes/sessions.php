@@ -51,6 +51,10 @@ class sessions {
         return $this->bbbsession;
     }
 
+    public function set_session($htsessionid) {
+        $this->bbbsession = $this->load_session($htsessionid);
+    }
+
     public function get_session() {
         return $this->bbbsession;
     }

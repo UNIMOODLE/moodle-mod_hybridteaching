@@ -26,6 +26,7 @@ defined('MOODLE_INTERNAL') || die();
 global $CFG;
 
 require_once('common_controller.php');
+require_once('sessions_controller.php');
 require_once($CFG->dirroot . '/mod/hybridteaching/classes/helper.php');
 require_once(dirname(__FILE__).'../../../../../config.php');
 
@@ -33,9 +34,10 @@ class attendance_controller extends common_controller {
 
     const ACTIVE = 1;
     const INACTIVE = 2;
-    const EXENT = 1;
-    const NOTEXENT = 2;
-
+    const EXEMPT = 3;
+    const NOTEXEMPT = 4;
+    const SESSIONEXEMPT = 5;
+    const NOTSESSIONEXEMPT = 6;
     /**
      * Retrieves a list of attendance for the current hybrid teaching module.
      *
@@ -49,6 +51,8 @@ class attendance_controller extends common_controller {
           $operator = self::OPERATOR_GREATER_THAN, $sort = 'hs.name', $dir = 'ASC', $view = '', $sessionid = 0) {
         global $DB, $USER;
         $where = '';
+        $groupby = '';
+        $altergroupby = '';
         $groupby = '';
         $altergroupby = '';
         $params = $params + ['hybridteachingid' => $this->hybridobject->id];
@@ -112,9 +116,11 @@ class attendance_controller extends common_controller {
             $where = '';
             $params = $params + ['hybridteachingid' => $this->hybridobject->id];
 
+
             if (!empty($params['starttime'])) {
                 $where .= ' AND starttime + duration '.$operator.' :starttime';
             }
+
 
             if (!empty($extraselect)) {
                 $where .= " AND $extraselect";
@@ -157,6 +163,7 @@ class attendance_controller extends common_controller {
             } else {
                 $userid = $attendancelist;
             }
+
             $params = ['hybridteachingid' => $this->hybridobject->id];
             $sql = 'SELECT *
                       FROM {user}
@@ -170,8 +177,13 @@ class attendance_controller extends common_controller {
         if (empty($userid)) {
             $userid = $USER->id;
         }
-
-        $att = self::hybridteaching_get_attendance($hybridteaching, $session);
+        
+        $att = self::hybridteaching_get_attendance($hybridteaching, $session, $userid);
+        if ($att) {
+            if ($atttype === null) {
+                $atttype = $att->type;
+            }
+        }
         $timenow = (new \DateTime('now', \core_date::get_server_timezone_object()))->getTimestamp();
         $atttype === null ? $type = $hybridteaching->usevideoconference : $type = $atttype;
         if (!$att) {
@@ -195,7 +207,7 @@ class attendance_controller extends common_controller {
         $neededtime = self::hybridteaching_get_needed_time($hybridteaching->validateattendance,
             $hybridteaching->attendanceunit, $session->duration);
         echo '<br>';
-        $status = self::verify_user_attendance($att->id, $neededtime, $timespent);
+        $status = self::verify_user_attendance($hybridteaching, $session, $att->id, $neededtime, $timespent);
 
         $att->type = $type;
         $att->status = $status;
@@ -225,23 +237,13 @@ class attendance_controller extends common_controller {
 
     public static function hybridteaching_get_attendance($hybridteaching, $session, $userid = null) {
         global $DB, $USER;
-
-        if (empty($userid)) {
-            $userid = $USER->id;
-        }
         is_integer($session) ? $sessid = $session : $sessid = false;
         if (!$sessid) {
             is_array($session) ? $sessid = $session['id'] : $sessid = $session->id;
         }
-        $sql = "SELECT *
-                  FROM {hybridteaching_attendance}
-                 WHERE hybridteachingid = :hybridid
-                   AND sessionid = :sessid
-                   AND userid = :userid";
-
-        $params = ['hybridid' => $hybridteaching->id, 'sessid' => $sessid,
-             'userid' => $userid];
-        return $DB->get_record_sql($sql, $params, IGNORE_MISSING);
+        $params = ['sessionid' => $sessid];
+        !empty($userid) ? $params['userid'] = $userid : ''; 
+        return $DB->get_record('hybridteaching_attendance', $params, '*', 1, IGNORE_MISSING);
     }
 
     public static function hybridteaching_get_attendance_from_id($attid = 1) {
@@ -250,14 +252,14 @@ class attendance_controller extends common_controller {
     }
 
     /**
-     * Counts the number of sessions for a given hybrid teaching object.
+     * Counts the number of attendances for a given hybrid teaching object.
      *
-     * @param array $params An optional array of parameters to filter the sessions by.
+     * @param array $params An optional array of parameters to filter the attendance by.
      *                      Defaults to an empty array.
-     *                      - hybridteachingid: The ID of the hybrid teaching object to count sessions for.
+     *                      - hybridteachingid: The ID of the hybrid teaching object to count attendance for.
      * @global moodle_database $DB The Moodle database object.
      * @throws Exception If the database query fails.
-     * @return int The number of sessions for the given hybrid teaching object and parameters.
+     * @return int The number of attendances for the given hybrid teaching object and parameters.
      */
     public function count_attendance($params = [], $operator = self::OPERATOR_GREATER_THAN) {
         return count($this->load_attendance(0, 0, $params, '', $operator));
@@ -268,25 +270,21 @@ class attendance_controller extends common_controller {
         return count($DB->get_records('hybridteaching_attendance', $params, '', 'id'));
     }
 
-
+    /**
+     * 
+     */
     public static function hybridteaching_set_attendance_log($hybridteaching, $session, $time, $action) {
         global $DB, $USER;
 
-        $att = self::hybridteaching_get_attendance($hybridteaching, $session);
+        $att = self::hybridteaching_get_attendance($hybridteaching, $session, $USER->id);
         if (!$att) {
+            $att = new \StdClass();
             //Creates an empty attendance, for registering the log, if log isn't valid, delete the attendance.
-            $att = self::hybridteaching_get_attendance_from_id(
-                self::hybridteaching_set_attendance($hybridteaching, $session, 1, -1) //The just created attendance id.
-            );
+            $id = $DB->get_field('hybridteaching_attendance', 'id',
+                ['id' => self::hybridteaching_set_attendance($hybridteaching, $session, 1, -1)], MUST_EXIST);
+            $att->id = $id;
         }
         $timenow = (new \DateTime('now', \core_date::get_server_timezone_object()))->getTimestamp();
-
-        $start = $time['start'];$end = $time['end'];$timeneeded = $time['timeneeded'];$validateunit = $time['validateunit'];
-        $sesstime = $end - $start;
-        $neededtime = self::hybridteaching_get_needed_time($timeneeded, $validateunit);
-        if ($neededtime > $sesstime) {
-            return $notify = ['gstring' => 'bad_neededtime', 'ntype' => \core\output\notification::NOTIFY_ERROR];
-        }
         $log = self::hybridteaching_get_last_attend($att->id, $USER->id);
         if ($log) {
             if ($log->action == 1 && $action == 0) {
@@ -373,11 +371,11 @@ class attendance_controller extends common_controller {
             throw $dbexception;
         }
     }
-    public static function hybridteaching_get_needed_time($timevalue, $timeunit) : int {
 
+    public static function hybridteaching_get_needed_time($timevalue, $timeunit, $sesstime = 0) : int {
         switch ($timeunit) {
             case 3:
-                $neededtime = $timevalue / 100;
+                $neededtime = $sesstime * ($timevalue / 100);
                 break;
             case 2:
                 $neededtime = $timevalue;
@@ -397,15 +395,15 @@ class attendance_controller extends common_controller {
             return '<h2>' . get_string('allsessions', 'hybridteaching') . '</h2>';
         }
         $s = '<br>';
-        $s .= get_string('sessionsuc', 'hybridteaching') . ' ' . $session->name;
+        $s .= $session->name;
         $s .= '<br>' . date('l, j \d\e F \d\e Y H:i', $session->starttime).'<br>';
         $session->groupid == 0 ? $s .= get_string('commonattendance', 'hybridteaching') : $s .= groups_get_group($session->groupid)->name;
         $session->typevc != '' ?  $s .= '<br>' . $session->typevc : $s .= '';
-        $s .= '<br>' . get_string('sessionstarttime', 'hybridteaching') . ' ' . date('H:i', $session->starttime);
+        $s .= '<br>' . get_string('sessionstarttime', 'hybridteaching') . ': ' . date('H:i', $session->starttime);
         ($session->starttime + $session->duration) == $session->starttime ?
-            $s .= '<br>' . get_string('sessionendtime', 'hybridteaching') . ' ' .  get_string('noduration', 'hybridteaching'):
-            $s .= '<br>' . get_string('sessionendtime', 'hybridteaching') . ' ' . date('H:i', $session->starttime + $session->duration);
-        $s .= '<br>' . get_string('duration', 'mod_hybridteaching') . ' '; 
+            $s .= '<br>' . get_string('sessionendtime', 'hybridteaching') . ': ' .  get_string('noduration', 'hybridteaching'):
+            $s .= '<br>' . get_string('sessionendtime', 'hybridteaching') . ': ' . date('H:i', $session->starttime + $session->duration);
+        $s .= '<br>' . get_string('duration', 'mod_hybridteaching') . ': '; 
         !empty($session->duration) ? $s .= helper::get_hours_format($session->duration) : $s .= ' - ';
         return $s;
     }
@@ -435,13 +433,23 @@ class attendance_controller extends common_controller {
                       WHERE al.attendanceid = :attid
                    ORDER BY al.timecreated ASC
                       LIMIT 1";
-         $sqlend = "SELECT al.timecreated as endtime, al.action
-                      FROM {hybridteaching_attend_log} al
-                     WHERE al.attendanceid = :attid
-                  ORDER BY al.timecreated DESC
-                     LIMIT 1";
+        $sqlend = "SELECT al.timecreated as endtime, al.action
+                     FROM {hybridteaching_attend_log} al
+                    WHERE al.attendanceid = :attid
+                 ORDER BY al.timecreated DESC
+                    LIMIT 1";
         $params = ['attid' => $attendanceid];
         try {
+            $DB->get_record_sql($sqlentry, $params) ?
+                $entrytime = $DB->get_record_sql($sqlentry, $params)->entrytime : $entrytime = 0;
+            if ($DB->get_record_sql($sqlend, $params)) {
+                $endlog = $DB->get_record_sql($sqlend, $params);
+                $endtime = $endlog->endtime;
+                $action = $endlog->action;
+            } else {
+                $endtime = 0;
+                $action = 0;
+            }
             $entrytime = '';
             $endtime = '';
             $action = '';
@@ -479,7 +487,9 @@ class attendance_controller extends common_controller {
     public static function hybridteaching_get_students_participation($hid = '') {
         global $DB;
 
-        !$hid ? $hid = $this->hybridobject->id : '' ;
+        if (!$hid) {
+            return false;
+        }
         $sql = "SELECT userid,
                          COUNT(type) AS total,
                       SUM(CASE
@@ -491,9 +501,9 @@ class attendance_controller extends common_controller {
                          ELSE 0
                       END) AS vc
                   FROM
-                       mdl_hybridteaching_attendance at
+                       {hybridteaching_attendance} at
                          JOIN
-                       mdl_hybridteaching_session s ON (at.sessionid = s.id)
+                       {hybridteaching_session} s ON (at.sessionid = s.id)
                  WHERE at.hybridteachingid = :hid
                    AND at.visible = 1
               GROUP BY at.userid";
@@ -521,6 +531,19 @@ class attendance_controller extends common_controller {
                 case self::INACTIVE:
                     $att->status == 0 ? $updateatt = 0: $att->status = 0;
                     break;
+                case self::EXEMPT:
+                    $att->exempt == 1 ? $updateatt = 0 : $att->exempt = 1;
+                    $att->status = 3;
+                    break;
+                case self::NOTEXEMPT:
+                    $att->exempt == 0 ? $updateatt = 0 : $att->exempt = 0;
+                    if ($DB->update_record('hybridteaching_attendance', $att)) {
+                        $timeneeded = $DB->get_record('hybridteaching_session', ['id' => $att->sessionid], 'duration')->duration;
+                        $timespent = self::get_user_timespent($attid);
+                        $att->status = self::verify_user_attendance(0, 0, $attid, $timeneeded, $timespent);
+                        $updateatt = 1;
+                    }
+                    break;
             }
             if ($updateatt) {
                 if (!$DB->update_record('hybridteaching_attendance', $att)) {
@@ -545,47 +568,66 @@ class attendance_controller extends common_controller {
         return $errormsg;
     }
 
-    public function visible_sessions($attid, $action) {
+    public function update_session_exempt($attid, $action) {
         global $DB, $USER;
 
         $sessid = $DB->get_record('hybridteaching_attendance', ['id' => $attid], 'sessionid', IGNORE_MISSING)->sessionid;
-        $sessions = $DB->get_records_sql("SELECT id FROM {hybridteaching_attendance} WHERE sessionid = ?", ['sessionid' => $sessid]);
+        $session = $DB->get_record('hybridteaching_session', ['id' => $sessid], 'id');
         $timemodified = (new \DateTime('now', \core_date::get_server_timezone_object()))->getTimestamp();
-        foreach ($sessions as $session) {
-            $session->visible = $action;
-            $session->usermodified = $USER->id;
-            $session->timemodified = $timemodified; 
-            $DB->update_record('hybridteaching_attendance', $session);
+        $session->attexempt = $action;
+        $session->modifiedby = $USER->id;
+        $session->timemodified = $timemodified; 
+        $DB->update_record('hybridteaching_session', $session);
+    }
+
+    public function update_multiple_sessions_exempt($sessionids, $data) {
+        global $DB, $USER;
+        $errormsg = '';
+        $timemodified = (new \DateTime('now', \core_date::get_server_timezone_object()))->getTimestamp();
+        foreach ($sessionids as $sessid) {
+            $updateatt = 1;
+            $session = $DB->get_record('hybridteaching_session', ['id' => $sessid], '*');
+            $session->timemodified = $timemodified;
+            $session->modifiedby = $USER->id; 
+            switch ($data->operation) {
+                case self::SESSIONEXEMPT:
+                    $session->attexempt == 1 ? $updateatt = 0: $session->attexempt = 1;
+                    break;
+                case self::NOTSESSIONEXEMPT:
+                    $session->attexempt == 0 ? $updateatt = 0: $session->attexempt = 0;
+                    break;
+            }
+            if ($updateatt) {
+                if (!$DB->update_record('hybridteaching_session', $session)) {
+                    $errormsg = 'errorupdateattendance';
+                }
+            }
         }
+
+        return $errormsg;
     }
 
     public static function get_user_timespent($attid) : int {
         global $DB;
 
         $attlogs = $DB->get_records('hybridteaching_attend_log', ['attendanceid' => $attid], 'id asc', '*');
-        echo '<br>';
         $timespent = 0;
         foreach($attlogs as $log) {
             $nextlog = next($attlogs);
-            echo '<br>';
             if ($log->action) {
                 if ($nextlog) {
-                    echo '<br>' . $log->id . ' ' . $nextlog->id . ' <br>';
-                    echo '<br>' . $log->timecreated . ' ' . $nextlog->timecreated . ' <br>';
                     $periodspent = $nextlog->timecreated - $log->timecreated;
-                    echo '<br>segundos usados: ' . $periodspent . '<br>';
                     $timespent += $periodspent;
                 }
             }
         }
-        echo '<br><b>Tiempo total: ' . $timespent . ' | ' . helper::get_hours_format($timespent) . '</b><br>';
         return $timespent;
     }
 
     /**
      * @return int return status to set for the user attendance.
      */
-    public static function verify_user_attendance($attid, $timeneeded, $timespent) :mixed  {
+    public static function verify_user_attendance($hybridteaching, $session, $attid, $timeneeded = 0, $timespent = 0) : int  {
         global $DB;
 
         $timeremaining = $timeneeded - $timespent;
@@ -593,17 +635,32 @@ class attendance_controller extends common_controller {
         if ($att->exempt) {
             return 3;
         }
-        var_dump($timeremaining);
         if ($timeremaining > 0) {
             return 0;
         }
         //con restraso
-
-        // return 2;
-
-        // asistencia completa 
-
+        if (!self::get_grace_period($hybridteaching, $session, $att->id)) {
+            return 2;
+        }
+        // asistencia completa.
         return 1;
     }
-    
+
+    public static function get_grace_period($ht, $session, $attid) : bool {
+        global $DB;
+        $intime = true;
+
+        $gracetime = self::hybridteaching_get_needed_time($ht->graceperiod, $ht->graceperiodunit);
+        $graceend = $session->starttime + $gracetime;
+        $sql = "SELECT timecreated
+                     FROM {hybridteaching_attend_log}
+                    WHERE attendanceid = :attid
+                 ORDER BY timecreated ASC
+                    LIMIT 1";
+        $params = ['attid' => $attid];
+        $logtime = $DB->get_record_sql($sql, $params, IGNORE_MISSING)->timecreated;
+        $logtime > $graceend ? $intime = false : true;
+        return $intime;
+    }
+
 }

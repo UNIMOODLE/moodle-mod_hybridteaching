@@ -43,7 +43,6 @@
         $view = $this->_customdata['view'];
         $attcontroller = new attendance_controller();
         $sessioninfo = $attcontroller->hybridteaching_print_session_info($session);
-        echo $sessioninfo;
 
         $attid = optional_param('attid', 1, PARAM_INT);
         $mform->addElement('hidden', 'attid');
@@ -54,35 +53,41 @@
         $mform->setDefault('id', $id);
         $mform->setType('id', PARAM_INT);
 
+        $selectedsessions = array();
         if ($view == 'attendlog') {
             $selecteduser = $this->_customdata['selecteduser'];
-            $attid =optional_param('attid', 0, PARAM_INT);
             $selecteduser ? $attid = $selecteduser :  $selecteduser = $attid;
-         
+
             $mform->addElement('header', 'participant', get_string('participant', 'mod_hybridteaching'));
             $selectedusers = array();
             $sessionusers = $attcontroller->hybridteaching_get_attendance_users_in_session($sessionid);
             if ($sessionusers) {
                 foreach($sessionusers as $sesuser) {
-                    $selectedusers[$sesuser->id] = $sesuser->lastname . ' ' . $sesuser->firstname;
+                    $useratt = $DB->get_record('hybridteaching_attendance', ['userid' => $sesuser->userid,
+                        'sessionid' => $sessionid], 'id, exempt', IGNORE_MISSING);
+                    if ($useratt->exempt) {
+                        $selectedusers[$useratt->id] = $sesuser->lastname . ' ' . $sesuser->firstname .
+                            ' (' . get_string('exemptuser', 'hybridteaching') . ')';
+                    } else {
+                        $selectedusers[$useratt->id] = $sesuser->lastname . ' ' . $sesuser->firstname;
+                    }
                 }
                 $mform->addElement('select', 'selecteduser', get_string('userfor', 'mod_hybridteaching'), $selectedusers);
-                $mform->setDefault('selecteduser', $attid);
+                $mform->setDefault('selecteduser', $selecteduser);
             }
+            $mform->addElement('static',  'description',  get_string('session', 'hybridteaching'), $sessioninfo);
+        } else {
+            $selectedsessions[0] = get_string('allsessions', 'hybridteaching');
         }
 
-        $selectedsessions = array();
-
-        $selectedsessions[0] = get_string('allsessions', 'hybridteaching');
         $mform->addElement('header', 'sessions', get_string('sessions', 'mod_hybridteaching'));
-
         foreach($sessions as $sess) {
             if ($att = $attcontroller->hybridteaching_get_attendance($hybridteaching, $sess)) {
-                $att->visible ? $visible = '' : $visible = get_string('attnotforgrade', 'hybridteaching') ;
+                $att->visible && !$sess['attexempt'] ? $visible = '' : $visible = get_string('attnotforgrade', 'hybridteaching') ;
                 $selectedsessions[$sess['id']] = $sess['name'] . ' | ' . date('l, j \d\e F \d\e Y H:i', $sess['starttime']) . ' ' . $visible;
             }
         }
-        $mform->addElement('select', 'selectedsession', get_string('sessionfor', 'mod_hybridteaching'), $selectedsessions);
+        $mform->addElement('autocomplete', 'selectedsession', get_string('sessionfor', 'mod_hybridteaching'), $selectedsessions);
         if ($sessionid) {
             $selectedsessions[$sessionid] = $session->name;
             $mform->setDefault('selectedsession', $sessionid);

@@ -15,17 +15,18 @@
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
- * Plugin version and other meta-data are defined here.
+ * Code to be executed after the plugin's database scheme has been installed is defined here.
  *
  * @package     mod_hybridteaching
+ * @category    upgrade
  * @copyright   2023 isyc <isyc@example.com>
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-defined('MOODLE_INTERNAL') || die();
+/**
+ * Custom code to be run on installing the plugin.
+ */
+function xmldb_hybridteachstore_sharepoint_install() {
 
-$plugin->component = 'mod_hybridteaching';
-$plugin->release = '0.1.0';
-$plugin->version = 2023031700.13;
-$plugin->requires = 2022041900;
-$plugin->maturity = MATURITY_ALPHA;
+    return true;
+}

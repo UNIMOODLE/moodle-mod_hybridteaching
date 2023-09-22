@@ -7,7 +7,6 @@ class grades {
     const ATTENDED_SESSIONS = 1;
     const PERCENTAJE_ATTENDED_SESSIONS = 2;
     const PERCENTAJE_TOTAL_TIME_ATTENDED_SESSIONS = 3;
-    const MAX_GRADE = 10;
 
     public function hybridteaching_update_users_grade($htid, $userids = array()) {    
         global $DB;

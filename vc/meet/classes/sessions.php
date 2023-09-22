@@ -33,6 +33,10 @@ class sessions {
         return $this->meetsession;
     }
 
+    public function set_session($htsessionid) {
+        $this->meetsession = $this->load_session($htsessionid);
+    }
+
     public function create_unique_session_extended($session, $ht) {
         global $DB;
 
@@ -50,13 +54,13 @@ class sessions {
                 $meetsession->creatoremail = $event->creator->email;
                 $meetsession->eventid = $event->id;
         
-                if (!$session->id = $DB->insert_record('hybridteachvc_meet', $meetsession)) {
+                if (!$meetsession->id = $DB->insert_record('hybridteachvc_meet', $meetsession)) {
                     return false;
                 }
             }
         }
 
-        return $session->id;
+        return $meetsession->id;
     }
     
     public function update_session_extended($data, $ht) {
@@ -84,32 +88,9 @@ class sessions {
             return false;
         }
 
-        googlemeet_delete_events($id);
-
-        $DB->delete_records('hybridteachvc_records', ['googlemeetid' => $id]);
-
         $DB->delete_records('hybridteachvc_meet', array('id' => $id));
 
         return true;
-    }
-
-       /**
-     * Loads a meet instance based on the given instance ID.
-     *
-     * @param int $instanceid The ID of the config to load.
-     * @throws Exception If the SQL query fails.
-     * @return stdClass|false The Meet config record on success, or false on failure.
-     */
-    public function load_meet_config($configid) {
-        global $DB;
-
-        $sql = "SELECT mi.serverurl, mi.sharedsecret, mi.pollinterval
-                  FROM {hybridteaching_configs} hi
-                  JOIN {hybridteachvc_meet_config} mi ON bi.id = hi.subpluginconfigid
-                 WHERE hi.id = :configid AND hi.visible = 1";
-
-        $config = $DB->get_record_sql($sql, ['configid' => $configid]);
-        return $config;
     }
 
     function get_zone_access() {

@@ -96,15 +96,15 @@ if (!empty($sid)) {
 $nexturl = base64_decode($url);
 
 require_login($course->id, true);
-if (!$finishsession) {
+if (!$finishsession && !has_capability('mod/hybridteaching:sessionsfulltable', $PAGE->context)) {
     isset($activesession) ? $sessiontype = $activesession : $sessiontype = $session;
-    
-    $timeparams = ['start' => $sessiontype->starttime, 'end' => $sessiontype->starttime + $sessiontype->duration,
+    $attaction = optional_param('attaction', 1, PARAM_INT);
+        $timeparams = ['start' => $sessiontype->starttime, 'end' => $sessiontype->starttime + $sessiontype->duration,
         'timeneeded' => $hybridteaching->attendanceunit, 'validateunit' => $hybridteaching->attendanceunit];
         if ($hybridteaching->useattendance) {
         $notify = attendance_controller::hybridteaching_set_attendance_log($hybridteaching, $sessiontype, $timeparams, 1);
         if ($notify['ntype'] == 'success') {
-            attendance_controller::hybridteaching_set_attendance($hybridteaching, $sessiontype, 1, 1);
+            attendance_controller::hybridteaching_set_attendance($hybridteaching, $sessiontype, 1, $attaction);
         }
         $url = new moodle_url('/mod/hybridteaching/view.php', ['id' => $id]);
         $notify['ntype'] == 'error' ? redirect($url, get_string($notify['gstring'], 'hybridteaching'), null, $notify['ntype']) :

@@ -30,8 +30,10 @@ echo $OUTPUT->header();
 echo $OUTPUT->heading(get_string('attendance', 'hybridteaching'));
 
 if (has_capability('mod/hybridteaching:sessionsfulltable', $context, $user, $doanything = true)) {
-    echo "<a href='attendance.php?id=".$id."&view=extendedstudentatt&attid=1&editing=1'  class='btn btn-info' role='button'>extendedstudentatt</a>";
-    echo "<a href='attendance.php?id=".$id."&view=sessionattendance&editing=1'  class='btn btn-info' role='button'>sessionattendance</a>";
+    echo "<a href='attendance.php?id=".$id."&view=extendedstudentatt&attid=1'  class='btn btn-info' role='button'>" .
+        get_string('studentsattendance','hybridteaching') . "</a>";
+    echo "<a href='attendance.php?id=".$id."&view=sessionattendance'  class='btn btn-info' role='button'>" .
+        get_string('sessionsattendance','hybridteaching') . "</a>";
 }
 echo $attendancerender->print_attendance_table();
 

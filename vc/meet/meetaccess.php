@@ -35,18 +35,18 @@ if (isset($_GET['code'])) {
     $SESSION->token = $meethandler->client->getAccessToken();
 }
  
-if (isset($SESSION->token)) {
+if (isset($SESSION->token) && $SESSION->token['access_token'] != 0) {
     $meethandler->client->setAccessToken($SESSION->token); 
     if ($meetconfig) {
         $meetconfig->token = json_encode($SESSION->token);
         $DB->update_record('hybridteachvc_meet_config' , $meetconfig);
-        redirect($return, get_string('alreadyloggedmeet', 'hybridteaching'));
+        redirect($return, get_string('alreadyloggedmeet', 'hybridteachvc_meet'));
     }
 }
 
 $htmlBody = '';
 // Check to ensure that the access token was successfully acquired.
-if ($meethandler->client->getAccessToken()) { 
+if ($meethandler->client->getAccessToken() && $meethandler->client->getAccessToken()['access_token'] != 0) { 
     $SESSION->token = $meethandler->client->getAccessToken();
 } else {
     $state = mt_rand();

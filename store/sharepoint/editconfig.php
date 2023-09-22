@@ -23,6 +23,8 @@
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+
+
 require_once('../../../../config.php');
 require_once('editconfig_form.php');
 require_once('../../classes/controller/configs_controller.php');
@@ -31,14 +33,14 @@ require_once('classes/configs.php');
 $type = optional_param('type', "", PARAM_COMPONENT);
 $configid = optional_param('id', 0, PARAM_INT);
 $context = context_system::instance();
-$return = new moodle_url('/admin/settings.php', array('section' => 'hybridteaching_configvcsettings'));
+$return = new moodle_url('/admin/settings.php', array('section' => 'hybridteaching_configstoresettings'));
 require_admin();
 
 if (empty($type)) {
     redirect($return);
 }
 
-$url = new moodle_url('/mod/hybridteaching/vc/teams/editconfig.php');
+$url = new moodle_url('/mod/hybridteaching/store/sharepoint/editconfig.php');
 $PAGE->set_url($url);
 $PAGE->set_context($context);
 $PAGE->set_pagelayout('admin');
@@ -50,17 +52,18 @@ if (!empty($configid)) {
     $hybridconfig->type = $type;
 }
 
-$configcontroller = new configs_controller($hybridconfig, 'hybridteachvc');
+
+$configcontroller = new configs_controller($hybridconfig, 'hybridteachstore');
+
 $config = null;
 if (!empty($configid)) {
     $config = $configcontroller->hybridteaching_load_config($configid);
-    $teamsconfig = configs::load_config($config->subpluginconfigid);
-    unset($teamsconfig->id);
-    $config = (object) array_merge((array) $config, (array) $teamsconfig);
+    $sharepointconfig = configs::load_config($config->subpluginconfigid);
+    unset($sharepointconfig->id);
+    $config = (object) array_merge((array) $config, (array) $sharepointconfig);
 }
 
-$mform = new htteams_config_edit_form(null, array($config, $type));
-
+$mform = new htsharepoint_config_edit_form(null, array($config, $type));
 $message = '';
 $error = '';
 if ($mform->is_cancelled()) {
@@ -73,12 +76,12 @@ if ($mform->is_cancelled()) {
         $configid=$data->id;
     } else {
         $error = $configcontroller->hybridteaching_update_config($data);
-        configs::update_config($data);
+        $configid=configs::update_config($data);
         empty($error) ? $message = 'updatedconfig' : $message = $error;
     }
 
-    //add access code and permissions to teams
-    $url = new moodle_url('./classes/teamsaccess.php',array('id'=>$configid) );
+    //add access code and permissions to sharepoint
+    $url = new moodle_url('./classes/sharepointaccess.php',array('id'=>$configid) );
     redirect($url);
 
 }

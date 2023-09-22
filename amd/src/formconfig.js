@@ -63,16 +63,12 @@ const useSessionsScheduling = (e = ELEMENT_SELECTOR.sessionscheduling()) => {
         sectionsessions.querySelector('#fgroup_id_durationgroup').setAttribute('style', 'display:none');
         sectionsessions.querySelector('#id_duration').value = 0;
         sectionsessions.querySelector('#id_starttime_enabled').checked = 0;
-
-        //sectionsessions.querySelector('#id_undatedsession').disabled = false;
         
     } else {
         sectionsessions.querySelector('#fitem_id_starttime').setAttribute('style', 'display:flex');
         sectionsessions.querySelector('#fgroup_id_durationgroup').setAttribute('style', 'display:flex');
         sectionsessions.querySelector('#fitem_id_starttime').value = 0;
-        sectionsessions.querySelector('#id_undatedsession').checked = 0;
 
-        //sectionsessions.querySelector('#id_undatedsession').disabled = true;
     }
     
 }

@@ -232,7 +232,7 @@ class session_options_form extends moodleform {
         $mform->setType('l', PARAM_INT);
         $mform->addElement('header', 'options', get_string('options', 'mod_hybridteaching'));
         $perpage = array(
-            0 => get_string('donotusepaging', 'attendance'),
+            0 => get_string('donotusepaging', 'mod_hybridteaching'),
             10 => 10,
             25 => 25,
             50 => 50,

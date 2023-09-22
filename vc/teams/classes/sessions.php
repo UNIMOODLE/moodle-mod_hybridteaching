@@ -28,9 +28,9 @@ namespace hybridteachvc_teams;
 defined('MOODLE_INTERNAL') || die();
 
 global $CFG;
-
+use hybridteachingvc_teams;
 require_once($CFG->dirroot.'/mod/hybridteaching/classes/controller/sessions_controller.php');
-require_once($CFG->dirroot.'/mod/hybridteaching/vc/teams/classes/teams_handler.php');
+//require_once($CFG->dirroot.'/mod/hybridteaching/vc/teams/classes/teams_handler.php');
 
 class sessions {
     protected $teamssession;
@@ -51,6 +51,10 @@ class sessions {
         return $this->teamssession;
     }
 
+    public function set_session($htsessionid) {
+        $this->teamssession = $this->load_session($htsessionid);
+    }
+
     /**
      * Creates a new session by calling the Hybrid Web Service's create_meeting function
      * and stores the data returned from it in the hybridteachvc_teams table if the response
@@ -64,40 +68,32 @@ class sessions {
         global $DB;
 
         $teamsconfig = $this->load_teams_config($ht->config);
+        if ($teamsconfig){
+            $teams = new teams_handler($teamsconfig);
+            $response = $teams->createmeeting($session,$ht);
 
-        $teams = new \teams_handler($teamsconfig);
-        $response = $teams->createmeeting($session,$ht);
+            if (isset($response['joinUrl']) && isset($response['meetingCode']) 
+                && isset($response['participants']['organizer']['identity']['user']['id']) && isset($response['id'])) {
+                $teams = new \stdClass();
+                $teams->htsession = $session->id;
+                $teams->meetingid = $response['id'];
+                $teams->meetingcode = $response['meetingCode'];
+                $teams->organizer = $response['participants']['organizer']['identity']['user']['id'];
+                $teams->joinurl = $response['joinUrl'];         
 
-    //load_teams_config: parece similar a lo siguiente
-    //    $o365api = \mod_teamsmeeting\rest\unified::get_o365api($teamsmeeting);            
-    //crear el algún tipo de clase unified
-    
-        /*if($o365api && $o365api->is_working()) {
-            //$tokenallowed = $o365api->checktoken_valid($userid);
-            //$tokenallowed = true;
-            if($o365api->tokenallowed) {
-                $onlinemeeting = $o365api->create_onlinemeeting($teamsmeeting, $groupid);
-            } else {
-            
+                if (!$teams->id = $DB->insert_record('hybridteachvc_teams', $teams)) {
+                return false;
+                }
             }
-        }*/
-
-        /*
-        //crear el teams
-        //if (se ha creado){
-            //populate el registro
-            $teams = ....
-            $teams->id = $DB->insert_record('hybridteachvc_teams', $teams);
-            return true;
         }
-        else{
-            return false;
+        else {
+            //ARREGLAR ESTE MENSAJE
+            return "error, no existe la configuración";
         }
-        */
     }
     
     public function update_session_extended($data) {
-        //no requires action 
+        
     }
 
     /**
@@ -111,9 +107,16 @@ class sessions {
         global $DB;
         $teamsconfig = $this->load_teams_config($configid);      
         $teams = $DB->get_record('hybridteachvc_teams', ['htsession' => $htsession]);
-        //si existe ya la reunión teams, eliminarla
 
-        $DB->delete_records('hybridteachvc_teams', ['htsession' => $htsession]);
+        if ($teams){
+            //si existe ya la reunión teams, eliminarla
+            $teams_handler = new \teams_handler($teamsconfig);
+            $teams_handler->deletemeeting($teams->meetingid);
+
+            $DB->delete_records('hybridteachvc_teams', ['htsession' => $htsession]);
+        }
+
+
     }
 
     /**
@@ -159,7 +162,7 @@ class sessions {
                 'id' => $this->teamssession->id,
                 'ishost' => true,
                 'isaccess' => true,
-                'url' => base64_encode($this->teamssession->url),
+                'url' => base64_encode($this->teamssession->joinurl),
             ];
             return $array;
         } else {

@@ -6,15 +6,18 @@ class meet_handler {
     public function __construct($configmeet) {
         try {         
             $this->createclient($configmeet);
-            $this->client->setApprovalPrompt('consent');
-            $this->client->setAccessType('offline');     
-            $this->client->setAccessToken($configmeet->token);          
-            if ($this->client->getAccessToken()) {               
+                        
+            if (isset($configmeet->token) && $configmeet->token){
+                $this->client->setAccessToken($configmeet->token);          
+            }
+
+            if ($this->client->getAccessToken() && $this->client->getAccessToken()['access_token'] != 0) {
+                $this->client->setApprovalPrompt('consent');
                 if($this->client->isAccessTokenExpired()) {    
                     $this->client->fetchAccessTokenWithRefreshToken($this->client->getRefreshToken());
                     $this->saveToken($configmeet);
                 }
-            }      
+            }
         } catch(Google_Service_Exception $e) {
             print "Caught Google service Exception ".$e->getCode(). " message is ".$e->getMessage();
             print "Stack trace is ".$e->getTraceAsString();
@@ -31,7 +34,7 @@ class meet_handler {
         $this->client->setClientId($configmeet->clientid);
         $this->client->setClientSecret($configmeet->clientsecret);
         $this->client->setScopes(Google_Service_Calendar::CALENDAR);
-        $this->client->setApplicationName(get_string('pluginname','hybridteaching'));
+        $this->client->setApplicationName(get_string('pluginname', 'hybridteaching'));
         $this->client->setAccessType('offline');
         $this->client->setPrompt('consent');
 
@@ -98,7 +101,7 @@ class meet_handler {
     public function saveToken($configmeet) {
         global $DB;
         $configmeet->token = json_encode($this->client->getAccessToken());;
-        $DB->update_record('hybridteachstore_youtube_con',$configmeet);
+        $DB->update_record('hybridteachstore_meet_config', $configmeet);
     }
 }
 

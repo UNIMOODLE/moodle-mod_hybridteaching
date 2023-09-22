@@ -39,7 +39,7 @@ if ($hassiteconfig) {
 
     if ($ADMIN->fulltree) {
         $options = array(
-            0 => get_string('donotusepaging', 'attendance'),
+            0 => get_string('donotusepaging', 'mod_hybridteaching'),
             10 => 10,
             25 => 25,
             50 => 50,

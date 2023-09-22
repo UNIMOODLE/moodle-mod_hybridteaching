@@ -134,4 +134,11 @@ $capabilities = array(
             'user' => CAP_ALLOW,
         ),
     ),
+    'mod/hybridteaching:attendanceregister' => array(
+        'captype' => 'write',
+        'contextlevel' => CONTEXT_COURSE,
+        'archetypes' => array(
+            'student' => CAP_ALLOW,
+        ),
+    ),
 );

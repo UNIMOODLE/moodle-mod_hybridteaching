@@ -57,6 +57,10 @@
                 "jwt",
                 "php"
             ],
+            "support": {
+                "issues": "https://github.com/firebase/php-jwt/issues",
+                "source": "https://github.com/firebase/php-jwt/tree/v5.5.1"
+            },
             "time": "2021-11-08T20:18:51+00:00"
         },
         {
@@ -124,20 +128,24 @@
             "keywords": [
                 "google"
             ],
+            "support": {
+                "issues": "https://github.com/googleapis/google-api-php-client/issues",
+                "source": "https://github.com/googleapis/google-api-php-client/tree/v2.12.1"
+            },
             "time": "2021-12-02T03:34:25+00:00"
         },
         {
             "name": "google/apiclient-services",
-            "version": "v0.311.1",
+            "version": "v0.315.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/googleapis/google-api-php-client-services.git",
-                "reference": "e8816f6708fac9d78ab59ef27a61a08d0af84d1e"
+                "reference": "9fe675be642888cded64be861891901f092ab72d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/googleapis/google-api-php-client-services/zipball/e8816f6708fac9d78ab59ef27a61a08d0af84d1e",
-                "reference": "e8816f6708fac9d78ab59ef27a61a08d0af84d1e",
+                "url": "https://api.github.com/repos/googleapis/google-api-php-client-services/zipball/9fe675be642888cded64be861891901f092ab72d",
+                "reference": "9fe675be642888cded64be861891901f092ab72d",
                 "shasum": ""
             },
             "require": {
@@ -164,7 +172,11 @@
             "keywords": [
                 "google"
             ],
-            "time": "2023-08-06T00:56:12+00:00"
+            "support": {
+                "issues": "https://github.com/googleapis/google-api-php-client-services/issues",
+                "source": "https://github.com/googleapis/google-api-php-client-services/tree/v0.315.0"
+            },
+            "time": "2023-09-10T01:10:37+00:00"
         },
         {
             "name": "google/auth",
@@ -217,26 +229,31 @@
                 "google",
                 "oauth2"
             ],
+            "support": {
+                "docs": "https://googleapis.github.io/google-auth-library-php/main/",
+                "issues": "https://github.com/googleapis/google-auth-library-php/issues",
+                "source": "https://github.com/googleapis/google-auth-library-php/tree/v1.26.0"
+            },
             "time": "2023-04-05T15:11:57+00:00"
         },
         {
             "name": "guzzlehttp/guzzle",
-            "version": "7.7.0",
+            "version": "7.8.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/guzzle/guzzle.git",
-                "reference": "fb7566caccf22d74d1ab270de3551f72a58399f5"
+                "reference": "1110f66a6530a40fe7aea0378fe608ee2b2248f9"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/guzzle/guzzle/zipball/fb7566caccf22d74d1ab270de3551f72a58399f5",
-                "reference": "fb7566caccf22d74d1ab270de3551f72a58399f5",
+                "url": "https://api.github.com/repos/guzzle/guzzle/zipball/1110f66a6530a40fe7aea0378fe608ee2b2248f9",
+                "reference": "1110f66a6530a40fe7aea0378fe608ee2b2248f9",
                 "shasum": ""
             },
             "require": {
                 "ext-json": "*",
-                "guzzlehttp/promises": "^1.5.3 || ^2.0",
-                "guzzlehttp/psr7": "^1.9.1 || ^2.4.5",
+                "guzzlehttp/promises": "^1.5.3 || ^2.0.1",
+                "guzzlehttp/psr7": "^1.9.1 || ^2.5.1",
                 "php": "^7.2.5 || ^8.0",
                 "psr/http-client": "^1.0",
                 "symfony/deprecation-contracts": "^2.2 || ^3.0"
@@ -325,6 +342,10 @@
                 "rest",
                 "web service"
             ],
+            "support": {
+                "issues": "https://github.com/guzzle/guzzle/issues",
+                "source": "https://github.com/guzzle/guzzle/tree/7.8.0"
+            },
             "funding": [
                 {
                     "url": "https://github.com/GrahamCampbell",
@@ -339,7 +360,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2023-05-21T14:04:53+00:00"
+            "time": "2023-08-27T10:20:53+00:00"
         },
         {
             "name": "guzzlehttp/promises",
@@ -404,6 +425,10 @@
             "keywords": [
                 "promise"
             ],
+            "support": {
+                "issues": "https://github.com/guzzle/promises/issues",
+                "source": "https://github.com/guzzle/promises/tree/2.0.1"
+            },
             "funding": [
                 {
                     "url": "https://github.com/GrahamCampbell",
@@ -422,16 +447,16 @@
         },
         {
             "name": "guzzlehttp/psr7",
-            "version": "2.6.0",
+            "version": "2.6.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/guzzle/psr7.git",
-                "reference": "8bd7c33a0734ae1c5d074360512beb716bef3f77"
+                "reference": "be45764272e8873c72dbe3d2edcfdfcc3bc9f727"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/guzzle/psr7/zipball/8bd7c33a0734ae1c5d074360512beb716bef3f77",
-                "reference": "8bd7c33a0734ae1c5d074360512beb716bef3f77",
+                "url": "https://api.github.com/repos/guzzle/psr7/zipball/be45764272e8873c72dbe3d2edcfdfcc3bc9f727",
+                "reference": "be45764272e8873c72dbe3d2edcfdfcc3bc9f727",
                 "shasum": ""
             },
             "require": {
@@ -516,6 +541,10 @@
                 "uri",
                 "url"
             ],
+            "support": {
+                "issues": "https://github.com/guzzle/psr7/issues",
+                "source": "https://github.com/guzzle/psr7/tree/2.6.1"
+            },
             "funding": [
                 {
                     "url": "https://github.com/GrahamCampbell",
@@ -530,7 +559,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2023-08-03T15:06:02+00:00"
+            "time": "2023-08-27T10:13:57+00:00"
         },
         {
             "name": "monolog/monolog",
@@ -618,6 +647,10 @@
                 "logging",
                 "psr-3"
             ],
+            "support": {
+                "issues": "https://github.com/Seldaek/monolog/issues",
+                "source": "https://github.com/Seldaek/monolog/tree/2.9.1"
+            },
             "funding": [
                 {
                     "url": "https://github.com/Seldaek",
@@ -690,6 +723,11 @@
                 "hex2bin",
                 "rfc4648"
             ],
+            "support": {
+                "email": "info@paragonie.com",
+                "issues": "https://github.com/paragonie/constant_time_encoding/issues",
+                "source": "https://github.com/paragonie/constant_time_encoding"
+            },
             "time": "2022-06-14T06:56:20+00:00"
         },
         {
@@ -735,6 +773,11 @@
                 "pseudorandom",
                 "random"
             ],
+            "support": {
+                "email": "info@paragonie.com",
+                "issues": "https://github.com/paragonie/random_compat/issues",
+                "source": "https://github.com/paragonie/random_compat"
+            },
             "time": "2020-10-15T08:29:30+00:00"
         },
         {
@@ -827,6 +870,10 @@
                 "x.509",
                 "x509"
             ],
+            "support": {
+                "issues": "https://github.com/phpseclib/phpseclib/issues",
+                "source": "https://github.com/phpseclib/phpseclib/tree/3.0.21"
+            },
             "funding": [
                 {
                     "url": "https://github.com/terrafrost",
@@ -887,6 +934,9 @@
                 "psr",
                 "psr-6"
             ],
+            "support": {
+                "source": "https://github.com/php-fig/cache/tree/master"
+            },
             "time": "2016-08-06T20:24:11+00:00"
         },
         {
@@ -936,6 +986,9 @@
                 "psr",
                 "psr-18"
             ],
+            "support": {
+                "source": "https://github.com/php-fig/http-client/tree/1.0.2"
+            },
             "time": "2023-04-10T20:12:12+00:00"
         },
         {
@@ -988,6 +1041,9 @@
                 "request",
                 "response"
             ],
+            "support": {
+                "source": "https://github.com/php-fig/http-factory/tree/1.0.2"
+            },
             "time": "2023-04-10T20:10:41+00:00"
         },
         {
@@ -1038,6 +1094,9 @@
                 "request",
                 "response"
             ],
+            "support": {
+                "source": "https://github.com/php-fig/http-message/tree/1.1"
+            },
             "time": "2023-04-04T09:50:52+00:00"
         },
         {
@@ -1085,6 +1144,9 @@
                 "psr",
                 "psr-3"
             ],
+            "support": {
+                "source": "https://github.com/php-fig/log/tree/1.1.4"
+            },
             "time": "2021-05-03T11:20:27+00:00"
         },
         {
@@ -1125,6 +1187,10 @@
                 }
             ],
             "description": "A polyfill for getallheaders.",
+            "support": {
+                "issues": "https://github.com/ralouphie/getallheaders/issues",
+                "source": "https://github.com/ralouphie/getallheaders/tree/develop"
+            },
             "time": "2019-03-08T08:55:37+00:00"
         },
         {
@@ -1175,6 +1241,9 @@
             ],
             "description": "A generic function and convention to trigger deprecation notices",
             "homepage": "https://symfony.com",
+            "support": {
+                "source": "https://github.com/symfony/deprecation-contracts/tree/v2.5.2"
+            },
             "funding": [
                 {
                     "url": "https://symfony.com/sponsor",
@@ -1200,5 +1269,5 @@
     "prefer-lowest": false,
     "platform": [],
     "platform-dev": [],
-    "plugin-api-version": "1.1.0"
+    "plugin-api-version": "2.0.0"
 }

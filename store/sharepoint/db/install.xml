@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<XMLDB PATH="mod/hybridteaching/store/sharepoint/db" VERSION="20230504" COMMENT="XMLDB file for Moodle mod/hybridteaching/store/sharepoint"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="../../../../../lib/xmldb/xmldb.xsd"
+>
+  <TABLES>
+    <TABLE NAME="hybridteachstore_sharepoint" COMMENT="Info about sharepoint store">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="11" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="sessionid" TYPE="int" LENGTH="11" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="code" TYPE="char" LENGTH="60" NOTNULL="true" SEQUENCE="false" COMMENT="The name of the session"/>
+        <FIELD NAME="name" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" COMMENT="The name of the session"/>
+        <FIELD NAME="visible" TYPE="int" LENGTH="1" NOTNULL="false" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="11" NOTNULL="false" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id" COMMENT="The unique id for this Sharepoint store."/>
+      </KEYS>
+    </TABLE>
+
+    <TABLE NAME="hybridteachstore_sharepo_con" COMMENT="Sharepoint configs">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="11" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="tenantid" TYPE="char" LENGTH="100" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="clientid" TYPE="char" LENGTH="100" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="clientsecret" TYPE="char" LENGTH="100" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="useremail" TYPE="char" LENGTH="100" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="subdomain" TYPE="char" LENGTH="100" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="accesstoken" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Access token for Sharepoint account"/>
+        <FIELD NAME="refreshtoken" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Refresh token for Sharepoint account"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id" COMMENT="The unique id for this configs."/>
+      </KEYS>
+    </TABLE>
+  </TABLES>
+</XMLDB>
