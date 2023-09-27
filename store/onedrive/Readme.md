@@ -8,14 +8,20 @@ Obtener: idcliente, idtenant (inquilino), secretclient.
 En la configuración de AZURE:
 
 1. Añadir URI de redirección:
-https://NOMBRE DEL DOMINIO/mod/hybridteaching/store/sharepoint/classes/sharepointaccess.php
+https://NOMBRE DEL DOMINIO/mod/hybridteaching/store/onedrive/classes/onedriveaccess.php
 
 2. Asignar permisos de aplicación:
-permisos de aplicación: Sharepoint / Sites.FullControl.All
+Directory.ReadWrite.All
+Files.ReadWrite.All
+Sites.FullControl.All
+
+
+
 
 3. Asignar permisos delegados:
-permisos delegados: Sharepoint / AllSites.FullControl
-
+    Directory.AccessAsUser.All
+    Directory.ReadWrite.All
+    Sites.ReadWrite.All
 
 
 DOCUMENTACIÓN PARA CONFIGURACIÓN PLUGIN:

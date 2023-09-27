@@ -28,7 +28,7 @@ if (!isset($_GET["code"]) && !isset($_GET["error"]) ){
         'response_type'=>'code',
         'approval_prompt' => 'auto',
         //'client_secret' => $clientSecret,
-        'redirect_uri' => 'https://marian.moodle41.com/mod/hybridteaching/store/sharepoint/classes/test1.php',
+        'redirect_uri' => 'https://marian.moodle41.com/mod/hybridteaching/store/onedrive/classes/test1.php',
         //'response_mode' => 'query',       
         //'grant_type' => 'client_credentials'
     ];
@@ -51,7 +51,7 @@ else if (isset($_GET["code"])){
             'client_id' => $clientId,
             'client_secret' => $clientSecret,
             'grant_type' => 'authorization_code',
-            'redirect_uri' => 'https://marian.moodle41.com/mod/hybridteaching/store/sharepoint/classes/test1.php',
+            'redirect_uri' => 'https://marian.moodle41.com/mod/hybridteaching/store/onedrive/classes/test1.php',
             'code' => $_GET["code"],
             'scope' => 'offline_access user.read', // https://nhb7.sharepoint.com/Sites.FullControl.All'
             // https://nhb7.sharepoint.com/Sites.FullControl.All',
@@ -78,7 +78,7 @@ else if (isset($_GET["code"])){
 $guzzle = new \GuzzleHttp\Client();
 
 $url = 'https://login.microsoftonline.com/' . $tenantId . '/oauth2/v2.0/token';
-echo "<br><br>Accesstoken para sharepoint:<br>";
+echo "<br><br>Accesstoken para onedrive:<br>";
 $tokenderefresco = json_decode($guzzle->post($url, [
     'form_params' => [
         'client_id' => $clientId,
@@ -87,7 +87,7 @@ $tokenderefresco = json_decode($guzzle->post($url, [
         'refresh_token' => $token->refresh_token,
         'scope' => 'offline_access user.read https://nhb7.sharepoint.com/AllSites.FullControl',
         //Sites.FullControl.All',
-        'redirect_uri' => 'https://marian.moodle41.com/mod/hybridteaching/vc/teams/classes/test2.php',
+        'redirect_uri' => 'https://marian.moodle41.com/mod/hybridteaching/store/onedrive/classes/test2.php',
         
         
     ],
@@ -129,7 +129,7 @@ $graphresponse = $graph
 
     
 
-//ACCEDER A SHAREPOINT
+//ACCEDER A ONEDRIVE
         $graphresponse = $graph
         //->setApiVersion("beta")
           //->createRequest("GET", "/me")

@@ -40,7 +40,7 @@ if (empty($type)) {
     redirect($return);
 }
 
-$url = new moodle_url('/mod/hybridteaching/store/sharepoint/editconfig.php');
+$url = new moodle_url('/mod/hybridteaching/store/onedrive/editconfig.php');
 $PAGE->set_url($url);
 $PAGE->set_context($context);
 $PAGE->set_pagelayout('admin');
@@ -58,12 +58,12 @@ $configcontroller = new configs_controller($hybridconfig, 'hybridteachstore');
 $config = null;
 if (!empty($configid)) {
     $config = $configcontroller->hybridteaching_load_config($configid);
-    $sharepointconfig = configs::load_config($config->subpluginconfigid);
-    unset($sharepointconfig->id);
-    $config = (object) array_merge((array) $config, (array) $sharepointconfig);
+    $onedriveconfig = configs::load_config($config->subpluginconfigid);
+    unset($onedriveconfig->id);
+    $config = (object) array_merge((array) $config, (array) $onedriveconfig);
 }
 
-$mform = new htsharepoint_config_edit_form(null, array($config, $type));
+$mform = new htonedrive_config_edit_form(null, array($config, $type));
 $message = '';
 $error = '';
 if ($mform->is_cancelled()) {
@@ -80,8 +80,8 @@ if ($mform->is_cancelled()) {
         empty($error) ? $message = 'updatedconfig' : $message = $error;
     }
 
-    //add access code and permissions to sharepoint
-    $url = new moodle_url('./classes/sharepointaccess.php',array('id'=>$configid) );
+    //add access code and permissions to onedrive
+    $url = new moodle_url('./classes/onedriveaccess.php',array('id'=>$configid) );
     redirect($url);
 
 }

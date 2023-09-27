@@ -651,6 +651,9 @@ class attendance_controller extends common_controller {
         $intime = true;
 
         $gracetime = self::hybridteaching_get_needed_time($ht->graceperiod, $ht->graceperiodunit);
+        if (!$gracetime) {
+            return true;
+        }
         $graceend = $session->starttime + $gracetime;
         $sql = "SELECT timecreated
                      FROM {hybridteaching_attend_log}
@@ -658,7 +661,8 @@ class attendance_controller extends common_controller {
                  ORDER BY timecreated ASC
                     LIMIT 1";
         $params = ['attid' => $attid];
-        $logtime = $DB->get_record_sql($sql, $params, IGNORE_MISSING)->timecreated;
+        $log = $DB->get_record_sql($sql, $params, IGNORE_MISSING);
+        $log ? $logtime = $log->timecreated : $logtime = 0;
         $logtime > $graceend ? $intime = false : true;
         return $intime;
     }

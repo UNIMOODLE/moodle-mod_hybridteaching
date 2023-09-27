@@ -104,7 +104,6 @@ class hybridteaching_attendance_render extends \table_sql implements dynamic_tab
         $params = [];
         $extrasql = [];
         $params['userid'] = $userid;
-        $params['view'] = $view;
         $params['editing'] = $editing;
         $grades = new grades();
         $viewsexclusion = ['studentattendance'];
@@ -115,6 +114,7 @@ class hybridteaching_attendance_render extends \table_sql implements dynamic_tab
             $editing = 0;
             $params['userid'] = $userid;
         }
+        $params['view'] = $view;
         if ($view == 'attendlog' || $view == 'extendedsessionatt') {
             $selectedsession ? $sessionid = $selectedsession : $sessionid = 0;
             $selecteduser ? $attid = $selecteduser : $selecteduser = $attid;

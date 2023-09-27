@@ -111,18 +111,19 @@ class sessions_controller extends common_controller {
             $multiplesess = true;
         } else {
             $session = $this->create_unique_session($data);
-
-            $event = \mod_hybridteaching\event\session_added::create(array(
-                'objectid' => $this->hybridobject->id,
-                'context' => \context_course::instance($this->hybridobject->course),
-                'other' => array(
-                    'multiplesess' => $multiplesess,
-                    'sessid' => $session->id
-                )
-            ));
-    
-            $event->trigger();
         }
+
+        $event = \mod_hybridteaching\event\session_added::create(array(
+            'objectid' => $this->hybridobject->id,
+            'context' => \context_course::instance($this->hybridobject->course),
+            'other' => array(
+                'multiplesess' => $multiplesess,
+                'sessid' => $session->id
+            )
+        ));
+
+        $event->trigger();
+
         return $session;
     }
 

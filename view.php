@@ -147,7 +147,8 @@ if (!$activesession) {
                 $alert = 'alert-danger';
                 break;
         }
-    
+        !isset($status) ? $status = '' : '';
+
         //closedoors
         $closedoors = '';
         $isclosedoors = false;

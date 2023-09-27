@@ -67,10 +67,9 @@ if ($hybridteaching->rotateqr == 1 && $action == 1) {
                 $format = get_string('strftimedatetimeaccurate', 'core_langconfig');
                 $message = "The current server time is: " . userdate(time(), $format). " and this QR Code expired at: ".
                             userdate($rec->expirytime + 2, $format);
-                debugging($message);
             }
         }
-        redirect($url ,get_string('qr_expired', 'hybridteaching'), null, \core\output\notification::NOTIFY_ERROR);
+        redirect($url ,$message, null, \core\output\notification::NOTIFY_ERROR);
     }
 
     //Password access is correct.

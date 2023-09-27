@@ -73,7 +73,7 @@ class updatestores extends \core\task\scheduled_task {
                     $youtubeid = $DB->insert_record('hybridteachstore_youtube',$youtube);
                     //actualizar _session , con el id de _youtube.
                     $storesession=$DB->get_record('hybridteaching_session',['id'=>$store->hsid]);
-                    $storesession->processedrecording=$youtubeid;    //1; //no poner 1, podemos poner el id de subactividad youtube
+                    $storesession->processedrecording=$youtubeid;    //1; //no poner 1 como true, sino que podemos poner el id de subactividad youtube
                     $DB->update_record('hybridteaching_session', $storesession);
 
                     /*delete video from origin download vc moodledata*/

@@ -26,7 +26,7 @@
 /**
  * Custom uninstallation procedure.
  */
-function xmldb_hybridteachstore_sharepoint_uninstall() {
+function xmldb_hybridteachstore_onedrive_uninstall() {
 
     return true;
 }

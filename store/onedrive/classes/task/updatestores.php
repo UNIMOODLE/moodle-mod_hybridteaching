@@ -1,5 +1,5 @@
 <?php 
-namespace hybridteachstore_sharepoint\task;
+namespace hybridteachstore_onedrive\task;
 
 
 defined('MOODLE_INTERNAL') || die();
@@ -12,38 +12,36 @@ class updatestores extends \core\task\scheduled_task {
      * @return string
      */
     public function get_name() {
-        return get_string('updatestores', 'hybridteachstore_sharepoint');
+        return get_string('updatestores', 'hybridteachstore_onedrive');
     }
 
     public function execute() {
         global $DB, $CFG;
 
-        //sessions to get recordings, with sharepoint store method 
-        $sql="SELECT ht.id AS htid,ht.course, hs.id AS hsid, hs.name, hs.userecordvc, hs.processedrecording, hs.storagereference, hc.subpluginconfigid
+        //sessions to get recordings, with onedrive store method 
+        $sql="SELECT ht.id AS htid,ht.course, c.shortname, hs.id AS hsid, hs.name, hs.userecordvc, hs.processedrecording, hs.storagereference, hc.subpluginconfigid
         FROM {hybridteaching_session} hs
         INNER JOIN {hybridteaching} ht ON ht.id=hs.hybridteachingid
         INNER JOIN {hybridteaching_configs} hc ON hs.storagereference=hc.id          
-        WHERE hs.userecordvc=1 AND hc.type='sharepoint' AND hs.processedrecording=0";
+        INNER JOIN {course} c ON c.id=ht.course
+        WHERE hs.userecordvc=1 AND hc.type='onedrive' AND hs.processedrecording=0";
 
-        $storesharepoint=$DB->get_records_sql($sql);
+        $storeonedrive=$DB->get_records_sql($sql);
 
-        var_dump($storesharepoint);
+        var_dump($storeonedrive);
         
-        //3.  subirlas a sharepoint
-        //4. guardar el registro como ya subido a sharepoint
+        //3.  subirlas a onedrive
+        //4. guardar el registro como ya subido a onedrive
         //5. eliminar el archivo (ya procesado) de moodledata.
 
-        foreach ($storesharepoint as $store){
+        foreach ($storeonedrive as $store){
           
             //aquí hay que leer la instancia de store que corresponda. 
             //De momento leemos la guardada con storeinstance
 
-            $configsp=$DB->get_record('hybridteachstore_sharepo_con', array('id'=>$store->subpluginconfigid));
-        
-//aqui conectar con la config de sharepoint, aún no hecho            
-$sharepointclient = new \hybridteachstore_sharepoint\sharepoint_handler($configsp);
-$sharepointclient->upload_recordings();
+            $configonedrive=$DB->get_record('hybridteachstore_sharepo_con', array('id'=>$store->subpluginconfigid));
 
+       
             //$videoPath es el path que se guardará de moodledata en la subactividad de vc (zoom,bbb, meet,...)
             //hay que hacer una estructura donde poder descargar los vídeos antes de subirlos,
 
@@ -55,24 +53,26 @@ $sharepointclient->upload_recordings();
 
             /*repeat while exists file with records for the session, change number*/
             while(file_exists($videopath)){          
-                //aquí subir a sharepoint. Aún no hecho                
-                //$sharepointcode=$sharepointclient->uploadfile($store,$videopath);
 
-                //adaptar esto a sharepoint:
+                //aqui conectar con la config de onedrive        
+                $onedriveclient = new \hybridteachstore_onedrive\onedrive_handler($configonedrive);
+
+                $onedrivecode=$onedriveclient->uploadfile($store,$videopath);
+                //adaptar esto a onedrive:
                 /*                    
-                if ($sharepointcode!=null){ //si ha habido una subida correcta y tenemos algún id:
+                if ($onedrivecode!=null){ //si ha habido una subida correcta y tenemos algún id:
                     
-                        $sharepoint=new  \stdClass();
-                        $sharepoint->sessionid=$store->hsid;
-                        $sharepoint->code=$youtubecode; 
-                        $sharepoint->visible=true;
-                        $sharepoint->timecreated=time();
+                        $onedrive=new  \stdClass();
+                        $onedrive->sessionid=$store->hsid;
+                        $onedrive->code=$youtubecode; 
+                        $onedrive->visible=true;
+                        $onedrive->timecreated=time();
                             
 
-                        $sharepointid = $DB->insert_record('hybridteachstore_sharepoint',$sharepoint);
+                        $onedriveid = $DB->insert_record('hybridteachstore_onedrive',$onedrive);
                         //actualizar _session , con el id de _youtube.
                         $storesession=$DB->get_record('hybridteaching_session',['id'=>$store->hsid]);
-                        $storesession->processedrecording=$sharepointid;    //1; //no poner 1, podemos poner el id de subactividad youtube
+                        $storesession->processedrecording=$onedriveid;    //1; //no poner 1 como true, podemos poner el id de subactividad youtube
                         $DB->update_record('hybridteaching_session', $storesession);
                     
                     //delete video from origin download vc moodledata

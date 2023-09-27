@@ -3,7 +3,7 @@ defined('MOODLE_INTERNAL') || die;
 
 $tasks = array(
     array(
-        'classname' => 'hybridteachstore_sharepoint\task\updatestores',
+        'classname' => 'hybridteachstore_onedrive\task\updatestores',
         'blocking' => 0,
         'minute' => '0',
         'hour' => '*/1',

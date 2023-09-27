@@ -28,7 +28,7 @@ defined('MOODLE_INTERNAL') || die();
 class configs extends configs_controller {
     public static function load_config($configid) {
         global $DB;
-        $data = $DB->get_record('hybridteachstore_sharepo_con', ['id' => $configid]);
+        $data = $DB->get_record('hybridteachstore_onedrive_co', ['id' => $configid]);
         return $data;
     }
     public static function create_config($data) {
@@ -41,7 +41,7 @@ class configs extends configs_controller {
         $records->useremail = $data->useremail;
         $records->timecreated = time();
         $records->createdby = $USER->id;
-        $id=$DB->insert_record('hybridteachstore_sharepo_con', $records);
+        $id=$DB->insert_record('hybridteachstore_onedrive_co', $records);
         return $id;
     }
 
@@ -56,13 +56,13 @@ class configs extends configs_controller {
         $records->useremail = $data->useremail;
         $records->timemodified = time();
         $records->modifiedby = $USER->id;
-        $DB->update_record('hybridteachstore_sharepo_con', $records);
+        $DB->update_record('hybridteachstore_onedrive_co', $records);
         return $records->id;
     }
 
     public static function delete_config($configid) {
         global $DB;
         $configid = ['id' => $configid];
-        $DB->delete_records('hybridteachstore_sharepo_con', $configid);
+        $DB->delete_records('hybridteachstore_onedrive_co', $configid);
     }
 }

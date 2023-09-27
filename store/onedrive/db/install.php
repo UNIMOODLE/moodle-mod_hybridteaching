@@ -26,7 +26,7 @@
 /**
  * Custom code to be run on installing the plugin.
  */
-function xmldb_hybridteachstore_sharepoint_install() {
+function xmldb_hybridteachstore_onedrive_install() {
 
     return true;
 }
