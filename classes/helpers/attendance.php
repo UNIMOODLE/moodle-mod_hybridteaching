@@ -6,6 +6,15 @@ require_once(dirname(__FILE__).'../../../../../config.php');
 require_once(dirname(__FILE__).'/../controller/attendance_controller.php');
 
 class attendance {
+    /**
+     * Calculate session attendance.
+     *
+     * @param $ht The HT object.
+     * @param $sessid The session ID.
+     * @param $groupid The group ID.
+     *
+     * @return array The attendance data including the attendance count, total users, percentage, and a string representation.
+     */
     public static function calculate_session_att($ht, $sessid, $groupid) {
         $attendance_controller = new attendance_controller($ht);
         $attendance = $attendance_controller->count_sess_attendance(['sessionid' => $sessid, 'status' => 1]);

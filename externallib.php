@@ -85,4 +85,35 @@ class hybridteaching_external extends external_api {
     public static function set_attendance_status_returns() {
         // TODO.
     }
+
+    public static function set_session_exempt_parameters() {
+        return new external_function_parameters(
+            array("sessid" => new external_value(PARAM_INT, "sessid"),
+                    'attexempt' => new external_value(PARAM_INT, "attexempt"))
+        );
+    }
+
+
+    public static function set_session_exempt($sessid, $attexempt) {
+        global $DB, $USER;
+
+        $params = self::validate_parameters(
+            self::set_session_exempt_parameters(),
+                array("sessid" => $sessid, 'attexempt' => $attexempt)
+        );
+
+        $session = $DB->get_record('hybridteaching_session', ['id' => $sessid]);
+        $timemodified = (new \DateTime('now', \core_date::get_server_timezone_object()))->getTimestamp();
+        if ($session) {
+            $session->attexempt = $attexempt;
+            $session->modifiedby = $USER->id;
+            $session->timemodified = $timemodified;  
+            $DB->update_record('hybridteaching_session', $session);
+        }
+        return json_encode($session);
+    }
+
+    public static function set_session_exempt_returns() {
+        // TODO.
+    }
 }

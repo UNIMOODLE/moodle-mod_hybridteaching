@@ -36,6 +36,7 @@
         $mform->setDefault('id', $id);
         $mform->setType('id', PARAM_INT);
         
+        $perpageval = $this->_customdata['perpage'];
         $groupmode = groups_get_activity_groupmode($cm);
         $selectgroups = array();
         $selectgroups[0] = get_string('commonsession', 'hybridteaching');
@@ -78,7 +79,7 @@
             1000 => 1000,
         );
         $mform->addElement('select', 'perpage', get_string('sesperpage', 'mod_hybridteaching'), $perpage);
-        $mform->setDefault('perpage', get_config('hybridteaching', 'resultsperpage'));
+        $mform->setDefault('perpage', $perpageval);
     }
 }
 

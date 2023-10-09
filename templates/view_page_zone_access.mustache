@@ -74,11 +74,13 @@
 				{{/hascreatecapability}}
 			
 				{{^hascreatecapability}}
-
+				{{^isfinished}}
 				{{#hasvc}}
 					<button type="submit" class="btn btn-success">{{#str}} joinvc, mod_hybridteaching {{/str}}</button>
 				{{/hasvc}}
+				{{/isfinished}}
 			</form>
+				{{^isfinished}}
 				{{# useattendance}}
 					<form action="./password.php" target="_blank" method="post">
 							<button type="submit" class="btn btn-success">{{# str}} showqrpassword, mod_hybridteaching {{/ str}}</button>
@@ -105,6 +107,7 @@
 							<input type="hidden" name="attaction" value="0">
 						</form>
 				{{/ useattendance}}
+				{{/isfinished}}
 				{{/hascreatecapability}}
 			{{^admreusesession}}
 				{{#hascreatecapability}}

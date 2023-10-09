@@ -85,6 +85,8 @@ class sessions_form extends moodleform {
         $mform->setType('timetype', PARAM_INT);
         $mform->addGroup($duration, 'durationgroup', get_string('duration', 'hybridteaching'), array(' '), false);
         $mform->addRule('durationgroup', null, 'required', null, 'client');
+        
+        $mform->addElement('advcheckbox', 'attexempt', get_string('attexempt', 'hybridteaching'), '', null, array(0, 1));
 
         $mform->addElement('editor', 'description', get_string('description'), array('rows' => 1, 'columns' => 80),
                             array('maxfiles' => EDITOR_UNLIMITED_FILES, 'noclean' => true, 'context' => $modcontext));

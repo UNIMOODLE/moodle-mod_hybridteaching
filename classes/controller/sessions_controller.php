@@ -118,7 +118,7 @@ class sessions_controller extends common_controller {
             'context' => \context_course::instance($this->hybridobject->course),
             'other' => array(
                 'multiplesess' => $multiplesess,
-                'sessid' => $session->id
+                'sessid' => !empty($session) ? $session->id : null
             )
         ));
 
@@ -222,6 +222,13 @@ class sessions_controller extends common_controller {
         return $errormsg;
     }
 
+    /**
+     * Updates multiple sessions.
+     *
+     * @param array $sessids The array of session IDs.
+     * @param mixed $data The data to be updated.
+     * @return string The error message, if any.
+     */
     public function update_multiple_session($sessids, $data) {
         global $DB;
         $errormsg = '';

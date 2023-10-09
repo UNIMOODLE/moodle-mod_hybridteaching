@@ -36,7 +36,6 @@ $attendanceids = optional_param('attendance[]', 0, PARAM_INT);
 $sessionid = optional_param('sessionid', 0, PARAM_INT);
 $view = optional_param('view', 'sessionattendance', PARAM_TEXT);
 $userid = optional_param('userid', null, PARAM_INT);
-$editing = optional_param('editing', 1, PARAM_INT);
 $attid = optional_param('attid', 0, PARAM_INT);
 
 list($course, $cm) = get_course_and_cm_from_cmid($moduleid, 'hybridteaching');
@@ -59,7 +58,6 @@ $returnparams = [
 $return = new moodle_url($CFG->wwwroot . '/mod/hybridteaching/attendance.php', $returnparams);
 $hybridteaching = $DB->get_record('hybridteaching', array('id' => $hybridteachingid), '*', MUST_EXIST);
 $attendancecontroller = new attendance_controller($hybridteaching, 'hybridteaching_attendance');
-$attendancelist = $attendancecontroller->load_attendance();
 $mform = null;
 
 switch ($action) {
@@ -73,41 +71,33 @@ switch ($action) {
         break;
     case 'view':
         if ($view == 'sessionattendance') {
-            $editing == 0 ? redirect ($return = new moodle_url($CFG->wwwroot . '/mod/hybridteaching/attendance.php',
-                array('id' => $moduleid, 'sessionid' => $sessionid, 'view' => 'extendedsessionatt', 'userid' => $userid))) 
-            :
             redirect($return = new moodle_url($CFG->wwwroot . '/mod/hybridteaching/attendance.php',
-                array('id' => $moduleid, 'sessionid' => $sessionid, 'view' => 'extendedsessionatt', 'editing' => 1)));
+                array('id' => $moduleid, 'sessionid' => $sessionid, 'view' => 'extendedsessionatt')));
         }
 
         if ($view == 'extendedsessionatt') {
-            $editing == 0 ? redirect ($return = new moodle_url($CFG->wwwroot . '/mod/hybridteaching/attendance.php',
-                array('id' => $moduleid, 'sessionid' => $sessionid, 'view' => 'attendlog', 'userid' => $userid, 'attid' => $attid))) 
-            :
             redirect($return = new moodle_url($CFG->wwwroot . '/mod/hybridteaching/attendance.php',
-                array('id' => $moduleid, 'sessionid' => $sessionid, 'view' => 'attendlog', 'attid' => $attid, 'editing' => 1)));
+                array('id' => $moduleid, 'sessionid' => $sessionid, 'view' => 'attendlog', 'attid' => $attid)));
         }
 
         if ($view == 'studentattendance') {
-            $editing == 0 ? redirect ($return = new moodle_url($CFG->wwwroot . '/mod/hybridteaching/attendance.php',
-                array('id' => $moduleid, 'sessionid' => $sessionid, 'view' => 'extendedsessionatt',
-                 'userid' => $userid, 'attid' => $attid))) 
-            :
             redirect($return = new moodle_url($CFG->wwwroot . '/mod/hybridteaching/attendance.php',
-                array('id' => $moduleid, 'sessionid' => $sessionid, 'view' => 'extendedsessionatt', 'attid' => $attid, 'editing' => 1)));
+                array('id' => $moduleid, 'sessionid' => $sessionid, 'view' => 'extendedsessionatt', 'attid' => $attid)));
         }
 
         if ($view == 'extendedstudentatt') {
-            $editing == 0 ? redirect ($return = new moodle_url($CFG->wwwroot . '/mod/hybridteaching/attendance.php',
-                array('id' => $moduleid, 'sessionid' => 0, 'view' => 'studentattendance',
-                 'userid' => $userid, 'attid' => $attid))) 
-            :
             redirect($return = new moodle_url($CFG->wwwroot . '/mod/hybridteaching/attendance.php',
                 array('id' => $moduleid, 'sessionid' => 0, 'view' => 'studentattendance', 'attid' => $attid,
-                 'userid' => $userid, 'editing' => 0)));
+                 'userid' => $userid)));
         }
         break;
-        //activar desactivar multiple sessiones de attendance.
+    case 'userinf':
+        redirect($return = new moodle_url($CFG->wwwroot . '/mod/hybridteaching/attendance.php',
+            array('id' => $moduleid, 'sessionid' => 0, 'view' => 'studentattendance', 'attid' => $attid,
+            'userid' => $attendancecontroller::hybridteaching_get_attendance_from_id($attid)->userid)));
+        break;
+
+        //bulk options.
     case 'bulksetattendance':
         $attendsid = optional_param_array('attendance', '', PARAM_SEQUENCE);
         if ($attendsid) {
@@ -115,18 +105,18 @@ switch ($action) {
             $userid = $attendancecontroller->hybridteaching_get_attendance_from_id($attendsid[$useratt])->userid;
             $view == 'studentattendance' ?
             $return = new moodle_url($CFG->wwwroot . '/mod/hybridteaching/attendance.php',
-                array('id' => $moduleid, 'userid' => $userid, 'view' => $view, 'editing' => 1))
+                array('id' => $moduleid, 'userid' => $userid, 'view' => $view))
             :
             $return = new moodle_url($CFG->wwwroot . '/mod/hybridteaching/attendance.php',
-                array('id' => $moduleid, 'sessionid' => $sessionid, 'view' => $view, 'editing' => 1));
+                array('id' => $moduleid, 'sessionid' => $sessionid, 'view' => $view));
     
         } else {
             $view == 'studentattendance' ?
             $return = new moodle_url($CFG->wwwroot . '/mod/hybridteaching/attendance.php',
-                array('id' => $moduleid, 'userid' => $userid, 'view' => $view, 'editing' => 1))
+                array('id' => $moduleid, 'userid' => $userid, 'view' => $view))
             :
             $return = new moodle_url($CFG->wwwroot . '/mod/hybridteaching/attendance.php',
-                array('id' => $moduleid, 'sessionid' => $sessionid, 'view' => $view, 'editing' => 1));
+                array('id' => $moduleid, 'sessionid' => $sessionid, 'view' => $view));
         }
 
         $ids = optional_param('ids', '', PARAM_ALPHANUMEXT);
@@ -163,18 +153,18 @@ switch ($action) {
             $userid = $attendancecontroller->hybridteaching_get_attendance_from_id($attendsid[$useratt])->userid;
             $view == 'studentattendance' ?
             $return = new moodle_url($CFG->wwwroot . '/mod/hybridteaching/attendance.php',
-                array('id' => $moduleid, 'userid' => $userid, 'view' => $view, 'editing' => 1))
+                array('id' => $moduleid, 'userid' => $userid, 'view' => $view))
             :
             $return = new moodle_url($CFG->wwwroot . '/mod/hybridteaching/attendance.php',
-                array('id' => $moduleid, 'sessionid' => $sessionid, 'view' => $view, 'editing' => 1));
+                array('id' => $moduleid, 'sessionid' => $sessionid, 'view' => $view));
     
         } else {
             $view == 'studentattendance' ?
             $return = new moodle_url($CFG->wwwroot . '/mod/hybridteaching/attendance.php',
-                array('id' => $moduleid, 'userid' => $userid, 'view' => $view, 'editing' => 1))
+                array('id' => $moduleid, 'userid' => $userid, 'view' => $view))
             :
             $return = new moodle_url($CFG->wwwroot . '/mod/hybridteaching/attendance.php',
-                array('id' => $moduleid, 'sessionid' => $sessionid, 'view' => $view, 'editing' => 1));
+                array('id' => $moduleid, 'sessionid' => $sessionid, 'view' => $view));
         }
         $ids = optional_param('ids', '', PARAM_ALPHANUMEXT);
         $PAGE->set_title(format_string($hybridteaching->name));
@@ -204,7 +194,7 @@ switch ($action) {
         break;
     case 'bulksetsessionexempt':
         $return = new moodle_url($CFG->wwwroot . '/mod/hybridteaching/attendance.php',
-                array('id' => $moduleid, 'view' => $view, 'editing' => 1));
+                array('id' => $moduleid, 'view' => $view));
         $attendsid = optional_param_array('attendance', '', PARAM_SEQUENCE);
         $ids = optional_param('ids', '', PARAM_ALPHANUMEXT);
 

@@ -35,5 +35,15 @@ $functions = array (
         'ajax' => true,
         'loginrequired' => true,
         'capabilities' => '', //capabilities check in form
+    ),   
+    'mod_hybridteaching_set_session_exempt' => array(
+        'classname' => 'hybridteaching_external',
+        'methodname' => 'set_session_exempt',
+        'classpath' => '/mod/hybridteaching/externallib.php',
+        'description' => 'sets a session exempt for attendance grade',
+        'type' => 'set',
+        'ajax' => true,
+        'loginrequired' => true,
+        'capabilities' => '', //capabilities check in form
     ),
 );

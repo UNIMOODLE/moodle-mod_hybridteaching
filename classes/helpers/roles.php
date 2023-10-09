@@ -310,6 +310,15 @@ class roles {
     }
 
 
+    /**
+     * Count the number of users with a specific role in a given context.
+     *
+     * @param int $roleid The ID of the role to count users for.
+     * @param context $context The context in which to count users.
+     * @param bool $parent (optional) Whether to include parent contexts in the count. Default is false.
+     * @param int|null $group (optional) The ID of the group to filter users by. Default is null.
+     * @return int The number of users with the specified role in the given context.
+     */
     static function count_role_users($roleid, context $context, $parent = false, $group = null) {
         global $DB;
     

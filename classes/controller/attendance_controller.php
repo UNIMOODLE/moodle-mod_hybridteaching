@@ -28,6 +28,7 @@ global $CFG;
 require_once('common_controller.php');
 require_once('sessions_controller.php');
 require_once($CFG->dirroot . '/mod/hybridteaching/classes/helper.php');
+require_once($CFG->dirroot . '/mod/hybridteaching/classes/helpers/grades.php');
 require_once(dirname(__FILE__).'../../../../../config.php');
 
 class attendance_controller extends common_controller {
@@ -48,11 +49,10 @@ class attendance_controller extends common_controller {
      * @return array An array of session objects.
      */
     public function load_attendance($page = 0, $recordsperpage = 0, $params = [], $extraselect = '',
-          $operator = self::OPERATOR_GREATER_THAN, $sort = 'hs.name', $dir = 'ASC', $view = '', $sessionid = 0) {
+          $operator = self::OPERATOR_GREATER_THAN, $sort = 'hs.name', $dir = 'ASC', $view = '',
+          $sessionid = 0, $fname = '', $lname = '') {
         global $DB, $USER;
         $where = '';
-        $groupby = '';
-        $altergroupby = '';
         $groupby = '';
         $altergroupby = '';
         $params = $params + ['hybridteachingid' => $this->hybridobject->id];
@@ -65,35 +65,30 @@ class attendance_controller extends common_controller {
                 $userid = $params['userid'];
                 $where .= 'AND userid = ' . $userid . ' ';
             }
-            if ($params['view'] != 'extendedsessionatt' && $params['view'] != 'sessionattendance') {
-                //$where .= 'AND ha.visible = 1 ';
-             }
-        } 
+        }
         if (isset($params['view'])) {
             $params['view'] == 'extendedstudentatt'  ? $altergroupby .= '  ha.userid ': $groupby = ' ha.sessionid ';
             $params['view'] == 'extendedsessionatt' ? $groupby = ' ha.id ' : '';
         } else {
-            if (!empty($view)) {
-                $view == 'extendedstudentatt' ? $altergroupby .= '  ha.userid ': $groupby = ' ha.sessionid ';
-                $view == 'extendedsessionatt' ? $groupby = ' ha.id ' : '';
-            } else {
-                $groupby = ' ha.id ';
-            }
+            $groupby = ' ha.id ';
         }
-        
+
         if (!empty($extraselect)) {
             $where .= " AND $extraselect";
         }
 
         $sessionid != 0 ? $where .= ' AND sessionid = ' . $sessionid . '' : false;
 
+        !empty($fname) ? $fname = " AND u.firstname like '" . $fname . "%' " : ''; 
+        !empty($lname) ? $lname = " AND u.lastname like '" . $lname . "%' " : ''; 
+
         $sql = 'SELECT ha.id, ha.sessionid, ha.id, hs.name, hs.starttime, hs.duration, hs.typevc, ha.visible, ha.grade,
-                            ha.userid, ha.type, ha.status, ha.connectiontime, (hs.starttime + hs.duration) endtime,
-                            ha.exempt, u.lastname, u.username
+                            ha.userid, CASE WHEN ha.connectiontime = 0 THEN -1 ELSE ha.type END as type, ha.status,
+                            ha.connectiontime, (hs.starttime + hs.duration) endtime, ha.exempt, u.lastname, u.username
                   FROM {hybridteaching_attendance} ha
                   JOIN {hybridteaching_session} hs on (ha.sessionid = hs.id)
                   JOIN {user} u on (u.id = ha.userid)
-                 WHERE ha.hybridteachingid = :hybridteachingid ' . $where . '
+                 WHERE ha.hybridteachingid = :hybridteachingid ' . $where . ' ' . $fname . $lname . '
               GROUP BY' . $groupby .  $altergroupby . 'ORDER BY ' . $sort . ' ' . $dir . ', visible desc';
 
         $attendance = $DB->get_records_sql($sql, $params, $page * $recordsperpage, $recordsperpage);
@@ -116,12 +111,9 @@ class attendance_controller extends common_controller {
             $where = '';
             $params = $params + ['hybridteachingid' => $this->hybridobject->id];
 
-
             if (!empty($params['starttime'])) {
                 $where .= ' AND starttime + duration '.$operator.' :starttime';
             }
-
-
             if (!empty($extraselect)) {
                 $where .= " AND $extraselect";
             }
@@ -136,7 +128,8 @@ class attendance_controller extends common_controller {
                             sum(CASE WHEN type THEN 1 ELSE 0 END) AS vc
                      FROM {hybridteaching_session} hs
                      JOIN {hybridteaching_attendance} ha ON ha.sessionid = hs.id
-                    WHERE ha.hybridteachingid = :hybridteachingid ' . $where . '
+                    WHERE ha.hybridteachingid = :hybridteachingid 
+                      AND ha.connectiontime != 0 ' . $where . '
                  GROUP BY ha.sessionid';
 
             $attendance = $DB->get_records_sql($sql, $params, $page * $recordsperpage, $recordsperpage);
@@ -171,8 +164,19 @@ class attendance_controller extends common_controller {
            return $attendance = $DB->get_record_sql($sql, $params);
     }
 
+    /**
+     * Sets the attendance for a hybrid teaching session.
+     *
+     * @param mixed $hybridteaching The hybrid teaching object.
+     * @param mixed $session The session object.
+     * @param int $status The attendance status. Default is 0.
+     * @param int|null $atttype The attendance type. Default is null.
+     * @param mixed|null $userid The user ID. Default is null.
+     * @throws \Throwable When there is an error inserting or updating the attendance record.
+     * @return mixed The attendance record ID if inserted, true if updated.
+     */
     public static function hybridteaching_set_attendance($hybridteaching, $session, int $status = 0, int $atttype = null, $userid = null) {
-        global $DB, $USER;
+        global $DB, $USER, $PAGE;
 
         if (empty($userid)) {
             $userid = $USER->id;
@@ -206,9 +210,7 @@ class attendance_controller extends common_controller {
         $timespent = self::get_user_timespent($att->id);
         $neededtime = self::hybridteaching_get_needed_time($hybridteaching->validateattendance,
             $hybridteaching->attendanceunit, $session->duration);
-        echo '<br>';
         $status = self::verify_user_attendance($hybridteaching, $session, $att->id, $neededtime, $timespent);
-
         $att->type = $type;
         $att->status = $status;
         $att->usermodified = $USER->id;
@@ -226,15 +228,26 @@ class attendance_controller extends common_controller {
                     'attid' => $att->id
                 )
             ));
-    
+
             $event->trigger();
 
+            $grades = new grades();
+            $grade = round($grades->calc_att_grade_for($hybridteaching, $session->id, $att->id), 2);
+            $DB->set_field('hybridteaching_attendance', 'grade', $grade, ['id' => $att->id]);
             return true;
         } catch (\Throwable $dbexception) {
             throw $dbexception;
         }
     }
 
+    /**
+     * Retrieves the attendance record for a specific hybrid teaching session and user.
+     *
+     * @param object $hybridteaching An object representing the hybrid teaching.
+     * @param mixed $session The session ID or session object.
+     * @param int|null $userid (Optional) The user ID. Defaults to the current user.
+     * @return mixed The attendance record for the specified hybrid teaching session and user.
+     */
     public static function hybridteaching_get_attendance($hybridteaching, $session, $userid = null) {
         global $DB, $USER;
         is_integer($session) ? $sessid = $session : $sessid = false;
@@ -246,8 +259,18 @@ class attendance_controller extends common_controller {
         return $DB->get_record('hybridteaching_attendance', $params, '*', 1, IGNORE_MISSING);
     }
 
+    /**
+     * Retrieves the attendance record from the 'hybridteaching_attendance' table based on the given ID.
+     *
+     * @param int $attid The ID of the attendance record to retrieve. Default value is 1.
+     * @throws Exception If the attendance record does not exist.
+     * @return mixed The attendance record as an object.
+     */
     public static function hybridteaching_get_attendance_from_id($attid = 1) {
         global $DB;
+        if (!$attid) {
+            return false;
+        }
         return $DB->get_record('hybridteaching_attendance', ['id' => $attid], '*', MUST_EXIST);
     }
 
@@ -261,17 +284,33 @@ class attendance_controller extends common_controller {
      * @throws Exception If the database query fails.
      * @return int The number of attendances for the given hybrid teaching object and parameters.
      */
-    public function count_attendance($params = [], $operator = self::OPERATOR_GREATER_THAN) {
-        return count($this->load_attendance(0, 0, $params, '', $operator));
+    public function count_attendance($params = [], $operator = self::OPERATOR_GREATER_THAN, $s, $fname, $lname) {
+        //
+        return count($this->load_attendance(0, 0, $params, '', $operator, 'name', 'asc', '', $s, $fname, $lname));
     }
 
+    /**
+     * Counts the attendance of sessions based on the given parameters.
+     *
+     * @param array $params An array of parameters to filter the attendance records.
+     * @throws None
+     * @return int The number of attendance records.
+     */
     public function count_sess_attendance($params = []) {
         global $DB;
         return count($DB->get_records('hybridteaching_attendance', $params, '', 'id'));
     }
 
+
     /**
-     * 
+     * Sets the attendance log for hybrid teaching.
+     *
+     * @param mixed $hybridteaching description
+     * @param mixed $session description
+     * @param mixed $time description
+     * @param mixed $action description
+     * @throws \Throwable description of exception
+     * @return mixed
      */
     public static function hybridteaching_set_attendance_log($hybridteaching, $session, $time, $action) {
         global $DB, $USER;
@@ -335,14 +374,24 @@ class attendance_controller extends common_controller {
         }
     }
 
-    public static function hybridteaching_get_attendance_logs($attid) {
+    /**
+     * Retrieves the attendance logs for a given attendance ID.
+     *
+     * @param int $attid The ID of the attendance.
+     * @throws \Throwable If there is an error accessing the database.
+     * @return array An array of attendance log records.
+     */
+    public static function hybridteaching_get_attendance_logs($attid, $sort = 'timecreated', $dir = 'ASC') {
         global $DB;
+        if (!$attid) {
+            return false;
+        }
         $sql = "SELECT al.*
                   FROM {hybridteaching_attend_log} al
                   JOIN {hybridteaching_attendance} att
                     ON (al.attendanceid = att.id)
                  WHERE att.id = :attid
-              ORDER BY al.timecreated ASC";
+              ORDER BY al." . $sort . " " . $dir;
         $params = ['attid' => $attid];
         try {
             return $DB->get_records_sql($sql, $params);
@@ -351,6 +400,14 @@ class attendance_controller extends common_controller {
         }
     }
 
+    /**
+     * Retrieves the last attendance log for a given attendance ID and user ID.
+     *
+     * @param int $attid The ID of the attendance.
+     * @param int $userid The ID of the user.
+     * @throws \Throwable When there is an error retrieving the attendance log.
+     * @return mixed The last attendance log record or 0 if not found.
+     */
     public static function hybridteaching_get_last_attend($attid, $userid)  {
         global $DB;
         $sql = "SELECT al.id, al.action
@@ -372,6 +429,14 @@ class attendance_controller extends common_controller {
         }
     }
 
+    /**
+     * Calculates the needed time based on the given time value and unit.
+     *
+     * @param int $timevalue The value of time.
+     * @param int $timeunit The unit of time (0: hours, 1: minutes, 2: seconds, 3: percentage).
+     * @param int $sesstime The session time (default: 0).
+     * @return int The calculated needed time.
+     */
     public static function hybridteaching_get_needed_time($timevalue, $timeunit, $sesstime = 0) : int {
         switch ($timeunit) {
             case 3:
@@ -390,6 +455,12 @@ class attendance_controller extends common_controller {
         return $neededtime;
     }
 
+    /**
+     * Generates a string containing session information for printing.
+     *
+     * @param mixed $session The session object.
+     * @return string The string containing session information.
+     */
     public static function hybridteaching_print_session_info($session) : String {
         if (!$session) {
             return '<h2>' . get_string('allsessions', 'hybridteaching') . '</h2>';
@@ -408,6 +479,38 @@ class attendance_controller extends common_controller {
         return $s;
     }
 
+    public static function hybridteaching_print_attendance_for_user($hid, $user) : String {
+        global $DB, $OUTPUT;
+
+        if (!$hid || !$user) {
+            return '<h2>' . get_string('notattendance', 'hybridteaching') . '</h2>';
+        }
+        $userid = $user->id;
+        $grades = new grades();
+        $ht = $DB->get_record('hybridteaching', ['id' => $hid], '*');
+        $total = $DB->count_records('hybridteaching_attendance', ['hybridteachingid' => $hid, 'userid' => $userid]);
+        $notattended = $DB->count_records('hybridteaching_attendance', ['hybridteachingid' => $hid, 'userid' => $userid, 'connectiontime' => 0]);
+        $validated = $DB->count_records('hybridteaching_attendance', ['hybridteachingid' => $hid, 'userid' => $userid, 'status' => 1]);
+        $exempted = $DB->count_records('hybridteaching_attendance', ['hybridteachingid' => $hid, 'userid' => $userid, 'status' => 3]);
+        $finalgrade = $grades->get_instance_grade_for($ht, $userid);
+        $s = $OUTPUT->user_picture($user) . $user->lastname . ' ' . $user->firstname . '<br>';
+        $s .= get_string('attendedsessions', 'hybridteaching') . ': ';
+        $s .= $total - $notattended;
+        $s .= '/';
+        $s .= $total;
+        $s .= '<br>' . get_string('exempt', 'hybridteaching') . ': ' . $exempted;
+        $s .= '<br>' . get_string('validatedattendance', 'hybridteaching') . ': ' . $validated . '/' . $total;
+        $s .= '<br>' . get_string('finalgrade', 'hybridteaching') . ': ' . round($finalgrade, 2) . '/' . $ht->grade;
+        return $s;
+    }
+
+    /**
+     * Retrieves attendance users in a session.
+     *
+     * @param int $sessionid The ID of the session.
+     * @throws \Throwable When there is an error executing the SQL query.
+     * @return array An array of records containing the attendance users.
+     */
     public static function hybridteaching_get_attendance_users_in_session($sessionid) {
         global $DB;
         $sql = "SELECT att.userid, att.id, u.firstname, u.lastname
@@ -426,6 +529,13 @@ class attendance_controller extends common_controller {
         }
     }
 
+    /**
+     * Retrieves the entry and end times for a given attendance ID.
+     *
+     * @param int $attendanceid The ID of the attendance.
+     * @throws \Throwable If there is an error with the database query.
+     * @return array An associative array containing the entry time, end time, and last action.
+     */
     public static function hybridteaching_get_attendance_entry_end_times($attendanceid) {
         global $DB;
         $sqlentry = "SELECT al.timecreated as entrytime
@@ -440,43 +550,43 @@ class attendance_controller extends common_controller {
                     LIMIT 1";
         $params = ['attid' => $attendanceid];
         try {
-            $DB->get_record_sql($sqlentry, $params) ?
-                $entrytime = $DB->get_record_sql($sqlentry, $params)->entrytime : $entrytime = 0;
-            if ($DB->get_record_sql($sqlend, $params)) {
-                $endlog = $DB->get_record_sql($sqlend, $params);
+            if (!$entrytime = $DB->get_record_sql($sqlentry, $params)->entrytime) {
+                $entrytime = 0;
+            }   
+            if ($endlog = $DB->get_record_sql($sqlend, $params)) {
                 $endtime = $endlog->endtime;
                 $action = $endlog->action;
             } else {
                 $endtime = 0;
                 $action = 0;
             }
-            $entrytime = '';
-            $endtime = '';
-            $action = '';
-            $entryrecord = $DB->get_record_sql($sqlentry, $params);
-            if ($entryrecord !== false) {
-                $entrytime = $entryrecord->entrytime;
-            }
-            
-            // Query for $endlog
-            $endrecord = $DB->get_record_sql($sqlend, $params);
-            if ($endrecord !== false) {
-                $endtime = $endrecord->endtime;
-                $action = $endrecord->action;
-            }
+
             return ['entry' => $entrytime, 'end' => $endtime, 'lastaction' => $action];
         } catch (\Throwable $dbexception) {
             throw $dbexception;
         }
     }
 
-    public static function hybridteaching_get_user_attends($att) {
+    /**
+     * Retrieves the attendance records for a specific user.
+     *
+     * @param object $att The attendance object containing the user ID.
+     * @throws \Throwable Throws an exception if there is an error with the database query.
+     * @return array Returns an array of attendance records for the user.
+     */
+    public static function hybridteaching_get_instance_users($hid) {
         global $DB;
-        $sql = "SELECT att.*
+
+        if (!$hid) {
+            return false;
+        }
+        $sql = "SELECT DISTINCT u.id, u.firstname, u.lastname
                   FROM {hybridteaching_attendance} att
-                 WHERE att.userid = :userid
-              ORDER BY att.id ASC";
-        $params = ['userid' => $att->userid];
+                  JOIN {user} u
+                    ON (u.id = att.userid)
+                 WHERE att.hybridteachingid = :hid
+              ORDER BY u.lastname ASC";
+        $params = ['hid' => $hid];
         try {
             return $DB->get_records_sql($sql, $params);
         } catch (\Throwable $dbexception) {
@@ -484,13 +594,24 @@ class attendance_controller extends common_controller {
         }
     }
 
-    public static function hybridteaching_get_students_participation($hid = '') {
+    /**
+     * Retrieves the students' participation data for a given hybrid teaching session.
+     *
+     * @param string $hid (optional) The hybrid teaching session ID. If not provided, the ID of the current hybrid object will be used.
+     * @throws \Throwable If there is an error executing the SQL query.
+     * @return array Returns an associative array containing the students' participation data. The array is indexed by the user ID and each element contains the total number of participations, the number of participations in classroom sessions, and the number of participations in virtual sessions.
+     */
+    public static function hybridteaching_get_students_participation($hid = '', $sort = 'id', $dir = 'asc', $fname = '', $lname = '') {
         global $DB;
 
         if (!$hid) {
             return false;
         }
-        $sql = "SELECT userid,
+        $sortd = [0 => 'total', 1 => 'vc' , 2 => 'classroom', 3 => 'lastname'];
+        !in_array($sort, $sortd) ? $prefix = 'at.' : $prefix = '';
+        !empty($fname) ? $fname = " AND u.firstname like '" . $fname . "%' " : ''; 
+        !empty($lname) ? $lname = " AND u.lastname like '" . $lname . "%' " : ''; 
+        $sql = "SELECT userid, u.lastname,
                          COUNT(type) AS total,
                       SUM(CASE
                          WHEN type THEN 0
@@ -502,11 +623,15 @@ class attendance_controller extends common_controller {
                       END) AS vc
                   FROM
                        {hybridteaching_attendance} at
-                         JOIN
+                  JOIN
                        {hybridteaching_session} s ON (at.sessionid = s.id)
+                  JOIN {user} u ON (u.id = at.userid)
                  WHERE at.hybridteachingid = :hid
-                   AND at.visible = 1
-              GROUP BY at.userid";
+                   AND at.connectiontime != 0
+                   AND at.visible = 1" .
+                    $fname . $lname . "
+              GROUP BY at.userid
+              ORDER BY " . $prefix . $sort . " " . $dir;
         $param = ['hid' => $hid];
         try {
             return $DB->get_records_sql($sql, $param);
@@ -515,6 +640,14 @@ class attendance_controller extends common_controller {
         }
     }
 
+    /**
+     * Updates multiple attendance records.
+     *
+     * @param array $attids The array of attendance IDs.
+     * @param mixed $data The data used to update the attendance records.
+     * @throws Some_Exception_Class Exception thrown if there is an error updating the attendance records.
+     * @return string The error message, if any.
+     */
     public function update_multiple_attendance($attids, $data) {
         global $DB, $USER;
         $errormsg = '';
@@ -588,7 +721,7 @@ class attendance_controller extends common_controller {
             $updateatt = 1;
             $session = $DB->get_record('hybridteaching_session', ['id' => $sessid], '*');
             $session->timemodified = $timemodified;
-            $session->modifiedby = $USER->id; 
+            $session->modifiedby = $USER->id;
             switch ($data->operation) {
                 case self::SESSIONEXEMPT:
                     $session->attexempt == 1 ? $updateatt = 0: $session->attexempt = 1;
@@ -601,12 +734,23 @@ class attendance_controller extends common_controller {
                 if (!$DB->update_record('hybridteaching_session', $session)) {
                     $errormsg = 'errorupdateattendance';
                 }
+                $attends = $DB->get_records('hybridteaching_attendance', ['sessionid' => $sessid], '', 'id');
+                foreach ($attends as $att) {
+                    $session->attexempt ? $att->visible = 0 : $att->visible = 1;
+                    $DB->update_record('hybridteaching_attendance', $att);
+                }
             }
         }
 
         return $errormsg;
     }
 
+    /**
+     * Retrieves the total time spent by a user in the attendance log.
+     *
+     * @param int $attid The ID of the attendance record.
+     * @return int The total time spent by the user.
+     */
     public static function get_user_timespent($attid) : int {
         global $DB;
 
@@ -646,6 +790,9 @@ class attendance_controller extends common_controller {
         return 1;
     }
 
+    /**
+     * @return bool Returns if the user attendance entry was on time.
+     */
     public static function get_grace_period($ht, $session, $attid) : bool {
         global $DB;
         $intime = true;

@@ -229,7 +229,7 @@ if (!$activesession) {
         $result['admreusesession'] = get_config('hybridteaching', 'reusesession');
         $result['instance'] = $hybridteaching->id;
         $result['useqr'] = $hybridteaching->useqr;
-        $result['usepassword'] = $hybridteaching->studentpassword;
+        $result['usepassword'] = $hybridteaching->studentpassword != '';
         $result['rotateqr'] = $hybridteaching->rotateqr;
         $result['useattendance'] = $hybridteaching->useattendance;
     }

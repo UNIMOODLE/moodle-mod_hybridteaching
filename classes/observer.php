@@ -35,6 +35,12 @@ class mod_hybridteaching_observer {
     public static function attendance_updated(\mod_hybridteaching\event\attendance_updated $event) {
         self::update_users_grade($event->objectid, null, array($event->other['userid']));
     }
+
+    public static function course_module_updated(\core\event\course_module_updated $event) {
+        global $DB;
+        $htid = $DB->get_field('course_modules', 'instance', ['id' => $event->contextinstanceid]);
+        self::update_users_grade($htid);
+    }
     
     private static function update_users_grade($objectid, $sessid = null, $userid = null) {
         $grades = new grades();

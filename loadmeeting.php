@@ -58,6 +58,15 @@ if (!empty($sid)) {
             $url = new moodle_url('/mod/hybridteaching/view.php', ['id' => $id]);
             $url = base64_encode($url);
         } 
+        $event = \mod_hybridteaching\event\session_finished::create(array(
+            'objectid' => $hybridteaching->id,
+            'context' => \context_course::instance($hybridteaching->course),
+            'other' => array(
+                'sessid' => $activesession->id,
+            )
+        ));
+
+        $event->trigger();
     }
 } else {
     if ($hybridteaching->undatedsession) {

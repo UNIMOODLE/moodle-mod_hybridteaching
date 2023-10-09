@@ -171,10 +171,10 @@ class mod_hybridteaching_mod_form extends moodleform_mod {
         // sección Opciones de bloqueo iniciales de la videoconferencia
         $mform->addElement('header', 'sectioninitialstates', get_string('sectioninitialstates','hybridteaching'));
 
-        $mform->addElement('advcheckbox','disablewebcam','',get_string('disablewebcam','hybridteaching'), null, array(0, 1));
+        $mform->addElement('advcheckbox','disablecam','',get_string('disablewebcam','hybridteaching'), null, array(0, 1));
         $mform->setDefault('disablewebcam', 0);
 
-        $mform->addElement('advcheckbox','disablemicro','',get_string('disablemicro','hybridteaching'), null, array(0, 1));
+        $mform->addElement('advcheckbox','disablemic','',get_string('disablemicro','hybridteaching'), null, array(0, 1));
         $mform->setDefault('disablemicro', 0);
 
         $mform->addElement('advcheckbox','disableprivatechat','',get_string('disableprivatechat','hybridteaching'), null, array(0, 1));
@@ -183,7 +183,7 @@ class mod_hybridteaching_mod_form extends moodleform_mod {
         $mform->addElement('advcheckbox','disablepublicchat','',get_string('disablepublicchat','hybridteaching'), null, array(0, 1));
         $mform->setDefault('disablepublicchat', 0);
         
-        $mform->addElement('advcheckbox','disablesharednotes','',get_string('disablesharednotes','hybridteaching'), null, array(0, 1));
+        $mform->addElement('advcheckbox','disablenote','',get_string('disablesharednotes','hybridteaching'), null, array(0, 1));
         $mform->setDefault('disablesharednotes', 0);
 
         $mform->addElement('advcheckbox','hideuserlist','',get_string('hideuserlist','hybridteaching'), null, array(0, 1));

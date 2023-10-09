@@ -81,7 +81,8 @@ class hybridteaching_sessions_render extends \table_sql implements dynamic_table
             'strrecording' => get_string('recording', 'mod_hybridteaching'),
             'strattendance' => get_string('attendance', 'mod_hybridteaching'),
             'strmaterials' => get_string('materials', 'mod_hybridteaching'),
-            'stroptions' => get_string('actions', 'mod_hybridteaching')
+            'stroptions' => get_string('actions', 'mod_hybridteaching'),
+            'attexempt' => get_string('attexempt', 'hybridteaching')
         ];
 
         $sortexclusions = ['strrecording', 'strattendance', 'strmaterials', 'stroptions', 'strstart'];
@@ -187,6 +188,7 @@ class hybridteaching_sessions_render extends \table_sql implements dynamic_table
                 'description' => $session['description'],
                 'date' => $date,
                 'hour' => $hour,
+                'attexempt' => html_writer::checkbox('attexempt[]', $session['attexempt'], $session['attexempt'], '', ['class' => 'attexempt', 'data-id' => $sessionid]),
                 'duration' => !empty($session['duration']) ? helper::get_hours_format($session['duration']) : self::EMPTY,
                 'recordingbutton' => html_writer::start_tag('input', ['type' => 'button', 'value' => get_string('recording', 'mod_hybridteaching')]),
                 'attendance' => $sessatt['sessatt_string'],
@@ -252,6 +254,7 @@ class hybridteaching_sessions_render extends \table_sql implements dynamic_table
                 $columns['strduration'],
                 $columns['strrecording'],
                 $columns['strattendance'],
+                $columns['attexempt'],
                 $columns['strmaterials'],
                 $columns['stroptions']
             ];
@@ -263,6 +266,7 @@ class hybridteaching_sessions_render extends \table_sql implements dynamic_table
                 $columns['strduration'],
                 $columns['strgroup'],
                 $columns['strname'],
+                $columns['attexempt'],
                 $columns['strmaterials'],
                 $columns['stroptions']
             ];
@@ -354,10 +358,10 @@ class hybridteaching_sessions_render extends \table_sql implements dynamic_table
         if ($this->typelist == SESSION_LIST) {
             $row = new html_table_row(array($OUTPUT->render($params['checkbox']), $params['group'], $typealias,
                 $params['name'], $params['date'], $params['duration'], $params['recordingbutton'],
-                $params['attendance'], $params['materials'], $options));
+                $params['attendance'], $params['attexempt'], $params['materials'], $options));
         } else if ($this->typelist == PROGRAM_SESSION_LIST) {
             $row = new html_table_row(array($OUTPUT->render($params['checkbox']), $params['date'], $params['hour'],
-                $params['duration'], $params['group'], $params['name'], $params['materials'], $options));
+                $params['duration'], $params['group'], $params['name'], $params['attexempt'], $params['materials'], $options));
         }
 
         return $row;

@@ -105,7 +105,7 @@ if ($hybridteaching->rotateqr == 1 && $action == 1) {
     }
     redirect($url ,get_string('incorrect_password', 'hybridteaching'), null, \core\output\notification::NOTIFY_ERROR);
 } else {
-    if ($action != 0 ) {
+    if ($action != 0 && $qrpass != $hybridteaching->studentpassword) {
         redirect($url, get_string('incorrect_password', 'hybridteaching'), null, \core\output\notification::NOTIFY_INFO);
     }
     $qrsecret = optional_param('secretqr', null, PARAM_TEXT);
