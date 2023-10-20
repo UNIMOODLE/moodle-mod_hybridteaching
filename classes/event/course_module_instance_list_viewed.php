@@ -2,8 +2,6 @@
 
 namespace mod_hybridteaching\event;
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * The mod_hybridteaching instance list viewed event class.
  */

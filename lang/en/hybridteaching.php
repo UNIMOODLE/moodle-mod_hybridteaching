@@ -96,7 +96,7 @@ $string['sessions'] = 'Sessions';
 $string['import'] = 'Import';
 $string['export'] = 'Export';
 
-$string['hybridteaching:addconfig'] = 'Add new hybrid teaching';
+$string['hybridteaching:addinstance'] = 'Add new hybrid teaching';
 $string['hybridteaching:view'] = 'View hybrid teaching';
 $string['hybridteaching:viewjoinurl'] = 'View join url';
 $string['hybridteaching:programschedule'] = 'View Program schedule';
@@ -104,6 +104,13 @@ $string['hybridteaching:sessions'] = 'View sessions';
 $string['hybridteaching:attendance'] = 'View attendance';
 $string['hybridteaching:import'] = 'Import';
 $string['hybridteaching:export'] = 'Export';
+$string['hybridteaching:downloadrecordings'] = 'Download recordings';
+$string['hybridteaching:manage_recordings'] = 'Manage recordings';
+$string['hybridteaching:record'] = 'Allow recordings';
+$string['hybridteaching:viewallsessions'] = 'Allow view all sessions without group filter';
+$string['hybridteaching:viewhiddenitems'] = 'View hidden items';
+$string['hybridteaching:viewrecordings'] = 'View recordings';
+
 $string['type'] = 'Type';
 $string['order'] = 'Order';
 $string['hideshow'] = 'Show/Hide';
@@ -136,7 +143,7 @@ $string['start'] = 'Start';
 $string['sessionfor'] = 'Session for the group';
 $string['sessiondate'] = 'Session date';
 $string['addsession'] = 'Add session';
-$string['commonsession'] = 'All groups';
+$string['allgroups'] = 'All groups';
 $string['sessiontypehelp'] = 'You can add sessions for all students or for a group of students. Ability to add different types depends on activity group mode.
 
 * In group mode "No groups" you can add only sessions for all students.
@@ -246,6 +253,7 @@ $string['headerconfigstore'] = 'Manage storage extensions';
 $string['storageplugins'] = 'Storage plugins';
 $string['editsession'] = 'Edit session';
 $string['importsessions'] = 'Import sessions';
+$string['export'] = 'Export';
 $string['invalidimportfile'] = 'File format is invalid.';
 $string['processingfile'] = 'Processing file...';
 $string['sessionsgenerated'] = '{$a} sessions were successfully generated';
@@ -305,6 +313,8 @@ $string['sessresultsperpage_desc'] = 'Number of sessions to show per page';
 $string['donotusepaging'] = 'Do not use paging';
 $string['reusesession'] = 'Reuse external session resources';
 $string['reusesession_desc'] = 'If is checked, the session resources will be reused for recurring sessions';
+$string['configsubcategories'] = 'Apply configs for subcategories';
+$string['configsubcategories_desc'] = 'If is checked, the subplugins config will be available for the selected category and its subcategories';
 
 $string['allsessions'] = 'Global - all sessions';
 $string['entrytime'] = 'Entry';
@@ -325,6 +335,7 @@ $string['maxgradeattendance_help'] = 'Calculation mode
 $string['numsess'] = 'Nº sessions';
 $string['percennumatt'] = '% nº attendance';
 $string['percentotaltime'] = '% total time';
+$string['percentage'] = 'Percentaje';
 
 $string['eventsessionadded'] = 'Session added';
 $string['eventsessionviewed'] = 'Session viewed';
@@ -389,3 +400,25 @@ $string['attendanceresumee'] = 'Attendance resumee';
 $string['attendedsessions'] = 'Attended sessions';
 $string['validatedattendance'] = 'Valid attendances';
 $string['finalgrade'] = 'Final grade';
+$string['late'] = 'Late arrival';
+$string['earlyleave'] = 'Leaved early';
+$string['withatt'] = 'With attendance';
+$string['withoutatt'] = 'Without attendance';
+$string['notexempt'] = 'Not exempt';
+$string['nofilter'] = 'No filter';
+$string['vc'] = 'Videoconference';
+
+$string['watchrecording'] = 'Watch recording';
+$string['norecording'] = 'No recording';
+
+$string['entersession'] = 'You can enter the session to register your attendance';
+$string['exitsession'] = 'Your attendance was registered sucesfully, remember to end your attendance when exiting the session';
+$string['hybridteaching:attendancesactions'] = 'Access the attendance actions';
+$string['hybridteaching:attendanceregister'] = 'Register attendance in the session';
+$string['novc'] = 'No use of vc in this session';
+$string['viewstudentinfo'] = 'Student attendance view';
+$string['viewsessioninfo'] = 'Session attendance view';
+$string['nologsfound'] = 'No logs found for the user in this session';
+$string['takensessions'] = 'Taken sessions';
+$string['selectedsessions'] = 'Selected sessions';
+$string['anygroup'] = 'Any group';

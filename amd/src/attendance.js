@@ -51,6 +51,24 @@ define([
                     }
                 };
             }
+            if (document.getElementById('id_attfilter') != null) {
+                document.getElementById('id_attfilter').onchange = function() {
+                    let formPrefix = 'optionsform';
+                    let formElement = document.querySelector('[id^="' + formPrefix + '"]');
+                    if (formElement) {
+                        formElement.submit();
+                    }
+                };
+            }
+            if (document.getElementById('id_groupid') != null) {
+                document.getElementById('id_groupid').onchange = function() {
+                    let formPrefix = 'optionsform';
+                    let formElement = document.querySelector('[id^="' + formPrefix + '"]');
+                    if (formElement) {
+                        formElement.submit();
+                    }
+                };
+            }
             if (document.getElementById('id_selectedsession') != null) {
                 document.getElementById('id_selectedsession').onchange = function() {
                     let formPrefix = 'sessionsform';

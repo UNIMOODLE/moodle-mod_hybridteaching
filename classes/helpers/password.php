@@ -23,6 +23,7 @@
  */
 
 namespace mod_hybridteaching\helpers;
+require_login();
 require_once(dirname(__FILE__).'../../../../../config.php');
 require_once($CFG->libdir.'/tcpdf/tcpdf_barcodes_2d.php'); // Used for generating qrcode.
 use \TCPDF2DBarcode;
@@ -49,7 +50,7 @@ class password {
         echo html_writer::img('data:image/png;base64,' . base64_encode($image), get_string('qrcode', 'hybridteaching'));
         echo '<br>' . ($qrcodeurl);
     }
-    
+
     /**
      * Generate QR code passwords.
      *
@@ -58,15 +59,15 @@ class password {
     public static function hybridteaching_generate_passwords($session) {
         global $DB;
         $password = array();
-    
+
         for ($i = 0; $i < 30; $i++) {
             array_push($password, array("attendanceid" => $session->id,
                 "password" => random_string(), "expirytime" => time() + (15 * $i)));
         }
-    
+
         $DB->insert_records('hybridteaching_session_pwd', $password);
     }
-    
+
     /**
      * Render JS for rotate QR code passwords.
      *
@@ -98,9 +99,9 @@ class password {
             qrCodeRotate.start(' . $session->id . ', document.getElementById("qrcode"), document.getElementById("rotate-time"));
             var cmid = ' . $cm->id . ';
         </script>';
-        
+
     }
-    
+
     /**
      * Return QR code passwords.
      *
@@ -108,7 +109,7 @@ class password {
      */
     public static function hybridteaching_return_passwords($session) {
         global $DB;
-    
+
         $sql = 'SELECT * FROM {hybridteaching_session_pwd} WHERE attendanceid = ? AND expirytime > ? ORDER BY expirytime ASC';
         return json_encode($DB->get_records_sql($sql, ['attendanceid' => $session->id, time()], $strictness = IGNORE_MISSING));
     }

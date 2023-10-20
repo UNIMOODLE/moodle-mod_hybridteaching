@@ -1,28 +1,46 @@
 <?php
+// This file is part of Moodle - https://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
+/**
+ * Display information about all the mod_hybridteaching modules in the requested course.
+ *
+ * @package     mod_hybridteaching
+ * @copyright   2023 isyc <isyc@example.com>
+ * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+namespace hybridteachstore_youtube;
 require_once('../../../../../config.php');
 
 defined('MOODLE_INTERNAL') || die();
 
-require_once './../vendor/autoload.php';
-require_once('./youtube_handler.php');
+require_once('./../vendor/autoload.php');
 
 $configid = optional_param('id', 0, PARAM_INT);
 global $DB;
 
+require_login();
 
-//ESTO VER SI SE PUEDE CAMBIAR POR EL $SESSION GLOBAL DEL MOODLE.
+// ESTO VER SI SE PUEDE CAMBIAR POR EL $SESSION GLOBAL DEL MOODLE.
 
 if (!$configid) {
-    $configid=$_SESSION['configid'];
+    $configid = $_SESSION['configid'];
 }
 $config = $DB->get_record('hybridteachstore_youtube_con', ['id' => $configid]);
 
 
-// Call set_include_path() as needed to point to your client library.
-//set_include_path($_SERVER['DOCUMENT_ROOT'] . '/directory/to/google/api/');
-
- 
 /*
  * You can acquire an OAuth 2.0 client ID and client secret from the
  * {{ Google Cloud Console }} <{{ https://cloud.google.com/console }}>
@@ -31,42 +49,43 @@ $config = $DB->get_record('hybridteachstore_youtube_con', ['id' => $configid]);
  * Please ensure that you have enabled the YouTube Data API for your project.
  */
 
-$youtubeclient = new \youtube_handler($config);
-$client=$youtubeclient->createclient($config);
+$youtubeclient = new youtube_handler($config);
+$client = $youtubeclient->createclient($config);
 $redirect = $CFG->wwwroot.'/mod/hybridteaching/store/youtube/classes/youtubeaccess.php';
-$client=$youtubeclient->setredirecturi($redirect);
-
+$client = $youtubeclient->setredirecturi($redirect);
+$client->setApprovalPrompt('force');
 
 // Define an object that will be used to make all API requests.
-$youtube = new Google_Service_YouTube($client);
- 
+$youtube = new \Google_Service_YouTube($client);
+
 if (isset($_GET['code'])) {
     if (strval($_SESSION['state']) !== strval($_GET['state'])) {
         die('The session state did not match.');
     }
- 
+
     $client->authenticate($_GET['code']);
     $_SESSION['token'] = $client->getAccessToken();
-    $_SESSION['configid']=$configid;
+    $_SESSION['configid'] = $configid;
 }
- 
+
 if (isset($_SESSION['token'])) {
     $client->setAccessToken($_SESSION['token']);
-  /*  echo '<code>' ; var_dump(json_encode($_SESSION['token']));echo  '</code>';
-    echo '<br><br><code>' ; echo json_encode($_SESSION['token']);echo  '</code>';
-*/
-    if ($config){
-        $config->token=json_encode($_SESSION['token']);
-        $DB->update_record('hybridteachstore_youtube_con' ,$config);
+    /*    echo '<code>';
+          var_dump(json_encode($_SESSION['token']));
+          echo '</code>';
+    */
+    if ($config) {
+        $config->token = json_encode($_SESSION['token']);
+        $DB->update_record('hybridteachstore_youtube_con', $config);
         unset($_SESSION['token']);
         unset($_SESSION['configid']);
-        $return = new moodle_url($CFG->wwwroot. '/admin/settings.php?section=hybridteaching_configstoresettings');
+        $return = new \moodle_url($CFG->wwwroot. '/admin/settings.php?section=hybridteaching_configstoresettings');
         redirect($return);
-    } 
+    }
 }
-$htmlBody = '';
+$htmlbody = '';
 // Check to ensure that the access token was successfully acquired.
-if ($client->getAccessToken()) { 
+if ($client->getAccessToken()) {
     $_SESSION['token'] = $client->getAccessToken();
     $_SESSION['configid'] = $configid;
 } else {
@@ -74,12 +93,12 @@ if ($client->getAccessToken()) {
     $client->setState($state);
     $_SESSION['state'] = $state;
     $_SESSION['configid'] = $configid;
- 
-    $authUrl = $client->createAuthUrl();
 
-    $htmlBody = <<<END
+    $authurl = $client->createauthurl();
+
+    $htmlbody = <<<END
   <h3>Authorization Required</h3>
-  <p>You need to <a href="$authUrl">authorise access</a> before proceeding.<p>
+  <p>You need to <a href="$authurl">authorise access</a> before proceeding.<p>
 END;
 }
 ?>
@@ -92,7 +111,7 @@ END;
     <title>Youtube</title>
 </head>
 <body>
-<?php echo $htmlBody?>
+<?php echo $htmlbody?>
 </body>
 </html>
 

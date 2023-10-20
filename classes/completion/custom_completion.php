@@ -1,4 +1,4 @@
-<?php 
+<?php
 
 declare(strict_types=1);
 
@@ -33,7 +33,7 @@ class custom_completion extends activity_custom_completion {
         if (!$hybridteaching = $DB->get_record('hybridteaching', ['id' => $hybridteachingid])) {
             throw new \moodle_exception('Unable to find hybridteaching with id ' . $hybridteachingid);
         }
-        $status=0;
+        $status = 0;
 
 // TO-DO : HACER AQUI LA REGLA PARA CONTAR QUE EL USUARIO HA ASISTIDO A XX SESIONES        
         /*
@@ -75,7 +75,7 @@ class custom_completion extends activity_custom_completion {
      */
     public function get_custom_rule_descriptions(): array {
         $completionattendance = $this->cm->customdata['customcompletionrules']['completionattendance'] ?? 0;
-        
+
         return [
             'completionattendance' => get_string('completiondetail:attendance', 'hybridteaching', $completionattendance),
         ];

@@ -45,7 +45,7 @@ class roles {
 
     /** @var string The hybridteaching moderator role */
     public const ROLE_MODERATOR = 'moderator';
-    
+
     /**
      * Returns user roles in a context.
      *
@@ -67,7 +67,7 @@ class roles {
         return $userroles;
     }
 
-     /**
+    /**
      * Returns guest role wrapped in an array.
      *
      * @return array
@@ -216,14 +216,13 @@ class roles {
      */
     public static function get_participant_list(?stdClass $hybridteaching, context $context): array {
         global $USER;
-        
+
         if ($hybridteaching == null) {
             return self::get_participant_rules_encoded(
                 self::get_participant_list_default($context, $USER->id)
             );
         }
         if (empty($hybridteaching->participants)) {
-            
             $hybridteaching->participants = "[]";
         }
         $rules = json_decode($hybridteaching->participants, true);
@@ -319,9 +318,9 @@ class roles {
      * @param int|null $group (optional) The ID of the group to filter users by. Default is null.
      * @return int The number of users with the specified role in the given context.
      */
-    static function count_role_users($roleid, context $context, $parent = false, $group = null) {
+    public static function count_role_users($roleid, context $context, $parent = false, $group = null) {
         global $DB;
-    
+
         if ($parent) {
             if ($contexts = $context->get_parent_context_ids()) {
                 $parentcontexts = ' OR r.contextid IN ('.implode(',', $contexts).')';
@@ -331,7 +330,7 @@ class roles {
         } else {
             $parentcontexts = '';
         }
-    
+
         if ($roleid) {
             list($rids, $params) = $DB->get_in_or_equal($roleid, SQL_PARAMS_QM);
             $roleselect = "AND r.roleid $rids";
@@ -342,15 +341,15 @@ class roles {
 
         if ($group) {
             $groupjoin   = "JOIN {groups_members} gm ON gm.userid = u.id";
-            $groupselect = " AND gm.groupid = :groupid ";
+            $groupselect = " AND gm.groupid = ? ";
             $params['groupid'] = $group;
         } else {
             $groupjoin   = '';
             $groupselect = '';
         }
-    
+
         array_unshift($params, $context->id);
-    
+
         $sql = "SELECT COUNT(DISTINCT u.id)
                   FROM {role_assignments} r
                   JOIN {user} u ON u.id = r.userid
@@ -359,7 +358,7 @@ class roles {
                        $roleselect
                        $groupselect
                        AND u.deleted = 0";
-    
+
         return $DB->count_records_sql($sql, $params);
     }
 }

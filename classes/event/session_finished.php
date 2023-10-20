@@ -17,7 +17,7 @@ class session_finished extends \core\event\base {
      * Returns non-localised description of what happened.
      *
      * @return string
-     * 
+     *
      */
     public function get_description() {
         return 'User with id ' . $this->userid . ' finished session with id ' .

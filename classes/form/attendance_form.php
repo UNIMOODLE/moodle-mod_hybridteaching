@@ -21,11 +21,12 @@
  * @copyright   2023 isyc <isyc@example.com>
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+defined('MOODLE_INTERNAL') || die;
+require_once($CFG->libdir.'/formslib.php');
 
- require_once($CFG->libdir.'/formslib.php');
- 
- class attendance_options_form extends moodleform {
+class attendance_options_form extends moodleform {
     public function definition() {
+        global $USER;
         $mform = &$this->_form;
 
         $id = $this->_customdata['id'];
@@ -35,13 +36,19 @@
         $mform->addElement('hidden', 'id');
         $mform->setDefault('id', $id);
         $mform->setType('id', PARAM_INT);
-        
+
+        $course = $this->_customdata['course'];
+        $modcontext = context_module::instance($cm->id);
+
         $perpageval = $this->_customdata['perpage'];
         $groupmode = groups_get_activity_groupmode($cm);
-        $selectgroups = array();
-        $selectgroups[0] = get_string('commonsession', 'hybridteaching');
+        $selectgroups = [];
+        $selectgroups[0] = get_string('allgroups', 'hybridteaching');
+        $selectgroups[-1] = get_string('anygroup', 'hybridteaching');
+        $selectfilter = $this->_customdata['selectedfilter'];
         $mform->addElement('header', 'headeraddmultiplesessions', get_string('addmultiplesessions', 'hybridteaching'));
         if ($groupmode == SEPARATEGROUPS || $groupmode == VISIBLEGROUPS) {
+            $groupid = 1;
             if ($groupmode == SEPARATEGROUPS && !has_capability('moodle/site:accessallgroups', $modcontext)) {
                 $groups = groups_get_all_groups($course->id, $USER->id, $cm->groupingid);
             } else {
@@ -65,9 +72,9 @@
         } else {
             $mform->addElement('select', 'groupid', get_string('groups', 'group'), $selectgroups);
         }
-        
+
         $mform->addElement('header', 'options', get_string('options', 'mod_hybridteaching'));
-        $perpage = array(
+        $perpage = [
             0 => get_string('donotusepaging', 'mod_hybridteaching'),
             10 => 10,
             25 => 25,
@@ -77,9 +84,35 @@
             250 => 250,
             500 => 500,
             1000 => 1000,
-        );
+        ];
         $mform->addElement('select', 'perpage', get_string('sesperpage', 'mod_hybridteaching'), $perpage);
         $mform->setDefault('perpage', $perpageval);
+
+        $mform->addElement('header', 'filter', get_string('filter'));
+        $view = $this->_customdata['view'];
+        switch ($view) {
+            case 'sessionattendance':
+                $filter = ['nofilter' => get_string('nofilter', 'hybridteaching'), 'att' => get_string('withatt', 'hybridteaching'),
+                    'notatt' => get_string('withoutatt', 'hybridteaching'), ];
+                break;
+            case 'studentattendance':
+                $filter = ['nofilter' => get_string('nofilter', 'hybridteaching'), 'att' => get_string('withatt', 'hybridteaching'),
+                    'notatt' => get_string('withoutatt', 'hybridteaching'), 'late' => get_string('late', 'hybridteaching'),
+                    'leaved' => get_string('earlyleave', 'hybridteaching'), 'vc' => get_string('vc', 'hybridteaching'),
+                    'classroom' => get_string('classroom', 'hybridteaching'), ];
+                break;
+            case 'extendedsessionatt':
+                $filter = ['nofilter' => get_string('nofilter', 'hybridteaching'), 'att' => get_string('withatt', 'hybridteaching'),
+                    'notatt' => get_string('withoutatt', 'hybridteaching'), 'exempt' => get_string('exempt', 'hybridteaching'),
+                    'notexempt' => get_string('notexempt', 'hybridteaching'), 'late' => get_string('late', 'hybridteaching'),
+                    'leaved' => get_string('earlyleave', 'hybridteaching'), ];
+                break;
+            default:
+                $filter = ['nofilter' => get_string('nofilter', 'hybridteaching')];
+                break;
+        }
+        $mform->addElement('select', 'attfilter',  get_string('filter'), $filter);
+        $selectfilter ? $mform->setDefault('attfilter', $selectfilter) : $mform->setDefault('attfilter', 'nofilter');
     }
 }
 
@@ -94,10 +127,10 @@ class bulk_set_attendance_form extends moodleform {
         $userid = $this->_customdata['userid'];
 
         $mform->addElement('header', 'general', get_string('setattendance', 'hybridteaching'));
-        $options = array(
+        $options = [
             '1' => get_string('activeattendance', 'hybridteaching'),
             '2' => get_string('inactiveattendance', 'hybridteaching'),
-        );
+        ];
         $mform->addElement('select', 'operation', get_string('updateduration', 'hybridteaching'), $options);
         $mform->setType('operation', PARAM_INT);
 
@@ -124,10 +157,10 @@ class bulk_set_exempt_form extends moodleform {
         $userid = $this->_customdata['userid'];
 
         $mform->addElement('header', 'general', get_string('setattendance', 'hybridteaching'));
-        $options = array(
+        $options = [
             '3' => get_string('exemptattendance', 'hybridteaching'),
             '4' => get_string('notexemptattendance', 'hybridteaching'),
-        );
+        ];
         $mform->addElement('select', 'operation', get_string('updateduration', 'hybridteaching'), $options);
         $mform->setType('operation', PARAM_INT);
 
@@ -153,10 +186,10 @@ class bulk_set_session_exempt_form extends moodleform {
         $view = $this->_customdata['view'];
 
         $mform->addElement('header', 'general', get_string('setattendance', 'hybridteaching'));
-        $options = array(
+        $options = [
             '5' => get_string('exemptsessionattendance', 'hybridteaching'),
             '6' => get_string('notexemptsessionattendance', 'hybridteaching'),
-        );
+        ];
         $mform->addElement('select', 'operation', get_string('updateduration', 'hybridteaching'), $options);
         $mform->setType('operation', PARAM_INT);
 

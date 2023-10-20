@@ -33,11 +33,32 @@ defined('MOODLE_INTERNAL') || die();
  */
 
 function xmldb_hybridteaching_upgrade($oldversion) { 
+    global $DB, $CFG;
+    $dbman = $DB->get_manager(); // Loads ddl manager and xmldb classes.
 
-    // For further information please read {@link https://docs.moodle.org/dev/Upgrade_API}.
-    //
-    // You will also have to create the db/install.xml file by using the XMLDB Editor.
-    // Documentation for the XMLDB Editor can be found at {@link https://docs.moodle.org/dev/XMLDB_editor}.
+    if ($oldversion < '2023031700.16') {
+
+        // Define field category to be added to hybridteaching_configs.
+        $table = new xmldb_table('hybridteaching_configs');
+        $field = new xmldb_field('category', XMLDB_TYPE_INTEGER, '11', null, null, null, null, 'subpluginconfigid');
+
+        // Conditionally launch add field category.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        $table = new xmldb_table('hybridteaching_session');
+
+        if ($oldversion < 2023031700.16) {
+            $field = new xmldb_field('vcreference', XMLDB_TYPE_INTEGER, '11', null, null, null, null, 'userecordvc');
+            if (!$dbman->field_exists($table, $field)) {
+                $dbman->add_field($table, $field);
+            }
+        }
+
+        // Hybridteaching savepoint reached.
+        upgrade_mod_savepoint(true, '2023031700.16', 'hybridteaching');
+    }
 
     return true;
 }

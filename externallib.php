@@ -116,4 +116,35 @@ class hybridteaching_external extends external_api {
     public static function set_session_exempt_returns() {
         // TODO.
     }
+
+    public static function get_display_actions_parameters() {
+        return new external_function_parameters(
+            array("sessionid" => new external_value(PARAM_INT, "sessionid"),
+                    'userid' => new external_value(PARAM_INT, "userid"))
+        );
+    }
+
+
+    public static function get_display_actions($sessionid, $userid) {
+        global $DB, $USER;
+
+        $params = self::validate_parameters(
+            self::get_display_actions_parameters(), ["sessionid" => $sessionid, 'userid' => $userid]
+        );
+        $actions = [];
+        $att = $DB->get_record('hybridteaching_attendance', ['sessionid' => $sessionid, 'userid' => $userid], '*', IGNORE_MISSING);
+        $att ? $log = $DB->get_records('hybridteaching_attend_log', ['attendanceid' => $att->id],
+            'timecreated DESC', 'action', 0, 1, IGNORE_MISSING) : $log = false;
+        if ($att && $log && !empty($log[1])) {
+            $actions['buttons'] = 'exit';
+            return json_encode($actions);
+        }
+        $actions['buttons'] = 'enter';
+        is_siteadmin($USER) ? $actions['admin'] = true : $actions['admin'] = false;
+        return json_encode($actions);
+    }
+
+    public static function get_display_actions_returns() {
+        // TODO.
+    }
 }

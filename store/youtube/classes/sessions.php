@@ -1,5 +1,4 @@
 <?php
-
 // This file is part of Moodle - https://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -23,38 +22,24 @@
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-use function Symfony\Component\DependencyInjection\Loader\Configurator\param;
+ namespace hybridteachstore_youtube;
 
 defined('MOODLE_INTERNAL') || die();
 
 global $CFG;
 
-require_once($CFG->dirroot.'/mod/hybridteaching/classes/controller/sessions_controller.php');
-require_once($CFG->dirroot.'/mod/hybridteaching/store/youtube/classes/webservice.php');
 
+class sessions  {
 
-class sessions extends sessions_controller {
-
-    public function create_session($data) {
+    public function get_recording($processedrecording){
         global $DB;
-
-      
-        return $response;
-    }
-    
-    public function update_session($data) {
-
-    }
-
-
-    public function delete_session($id) {
+        $object = $DB->get_record('hybridteachstore_youtube', ['id' => $processedrecording]);
+        $url="";
+        if ($object) {
+            $url="https://www.youtube.com/watch?v=".$object->code;
+        }
+        return $url;
     }
 
 
-    public function delete_all_sessions($moduleinstance) {
-    }
-
-    function populate_htyoutube_from_response($module, $response) {
-
-    }
 }

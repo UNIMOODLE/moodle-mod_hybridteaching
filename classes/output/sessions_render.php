@@ -120,8 +120,14 @@ class hybridteaching_sessions_render extends \table_sql implements dynamic_table
             $params = $params + ['starttime' => time()];
         }
 
+        if (!has_capability('mod/hybridteaching:viewhiddenitems', $this->context)) {
+            $visibleitems = " visible = :visible ";
+            $params = $params + ['visible' => 1];
+            !empty($extrasql) ? $extrasql = $extrasql . ' AND ' . $visibleitems : $extrasql = $extrasql . $visibleitems;
+        }
+
         $groupmode = groups_get_activity_groupmode($this->cm);
-        if (!has_capability('mod/hybridteaching:sessionsfulltable', $this->context) && $groupmode == SEPARATEGROUPS) {
+        if (!has_capability('mod/hybridteaching:viewallsessions', $this->context) && $groupmode == SEPARATEGROUPS) {
             list($extragroup, $paramsgroup) = $this->get_group_filter();
             $params = $params + $paramsgroup;
             !empty($extrasql) ? $extrasql = $extrasql . ' AND ' . $extragroup : $extrasql = $extrasql . $extragroup;
@@ -168,29 +174,60 @@ class hybridteaching_sessions_render extends \table_sql implements dynamic_table
             $sessatt = [];
             $sessatt['sessatt_string'] = '';
             if ($this->hybridteaching->useattendance) {
-                $cache_key = $sessionid . '_' . $session['groupid'];
-                $sessatt = $cache->get($cache_key);
+                $cachekey = $sessionid . '_' . $session['groupid'];
+                $sessatt = $cache->get($cachekey);
 
                 if ($sessatt === false) {
                     $this->hybridteaching->context = $this->context;
                     $this->hybridteaching->coursecontext = $this->coursecontext;
                     $sessatt = attendance::calculate_session_att($this->hybridteaching, $sessionid, $session['groupid']);
-                    $cache->set($cache_key, $sessatt);
+                    $cache->set($cachekey, $sessatt);
+                }
+            }
+
+            // Get recordings.
+
+            $recordingbutton = get_string('norecording', 'mod_hybridteaching');    
+            if (has_capability('mod/hybridteaching:viewrecordings', $this->context)) {
+                if ($session['userecordvc'] == 1 && $session['processedrecording'] >= 0) {
+                    if ($session['storagereference'] > 0) {
+                        $classstorage = sessions_controller::get_subpluginstorage_class($session['storagereference']);
+                        $config = helper::subplugin_config_exists($session['storagereference'], 'store');
+
+                        if ($config) {
+                            sessions_controller::require_subplugin_store($classstorage['type']);
+                            $classname = $classstorage['classname'];
+                            $sessionrecording = new $classname();
+                            $urlrecording = $sessionrecording->get_recording($session['processedrecording']);
+                            $recordingbutton = html_writer::link($urlrecording, get_string('watchrecording', 'mod_hybridteaching'), ['target' => '_blank', 'class' => 'btn btn-secondary']);
+                        }
+                    } else if ($session['storagereference'] == -1) {
+                    // For use case to BBB or a videconference type storage.
+                        $config = helper::subplugin_config_exists($session['vcreference'], 'vc');
+                        if ($config) {
+                            sessions_controller::require_subplugin_session($session['typevc']);
+                            $classname = sessions_controller::get_subplugin_class($session['typevc']);
+                            $sessionrecording = new $classname($session['id']);
+                            $urlrecording = $sessionrecording->get_recording($session['id']);
+                        }
+                    }
                 }
             }
 
             $body = [
                 'class' => '',
                 'sessionid' => $session['id'],
-                'group' => $session['groupid'] == 0 ? get_string('commonsession', 'hybridteaching') : groups_get_group($session['groupid'])->name,
+                'group' => $session['groupid'] == 0 ? get_string('allgroups', 'hybridteaching') 
+                    : groups_get_group($session['groupid'])->name,
                 'name' => $session['name'],
                 'typevc' => $session['typevc'],
                 'description' => $session['description'],
                 'date' => $date,
                 'hour' => $hour,
-                'attexempt' => html_writer::checkbox('attexempt[]', $session['attexempt'], $session['attexempt'], '', ['class' => 'attexempt', 'data-id' => $sessionid]),
+                'attexempt' => html_writer::checkbox('attexempt[]', $session['attexempt'], 
+                    $session['attexempt'], '', ['class' => 'attexempt', 'data-id' => $sessionid]),
                 'duration' => !empty($session['duration']) ? helper::get_hours_format($session['duration']) : self::EMPTY,
-                'recordingbutton' => html_writer::start_tag('input', ['type' => 'button', 'value' => get_string('recording', 'mod_hybridteaching')]),
+                'recordingbutton' => $recordingbutton,
                 'attendance' => $sessatt['sessatt_string'],
                 'materials' => 'Recursos',
                 'enabled' => $session['visible'],
@@ -218,7 +255,7 @@ class hybridteaching_sessions_render extends \table_sql implements dynamic_table
             $table->data[] = $row;
         }
 
-        // add filters
+        // add filters.
         $sfiltering->display_add();
         $sfiltering->display_active();
         $optionsform->display();
@@ -231,7 +268,7 @@ class hybridteaching_sessions_render extends \table_sql implements dynamic_table
         $sessiontable .= html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'h', 'value' => $hybridteachingid]);
         $sessiontable .= html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'id', 'value' => $id]);
         $sessiontable .= html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'l', 'value' => $this->typelist]);
-        $return .= html_writer::tag('form', $sessiontable, array('method' => 'post', 
+        $return .= html_writer::tag('form', $sessiontable, array('method' => 'post',
             'action' => '/mod/hybridteaching/classes/action/session_action.php'));
         $baseurl = new moodle_url('/mod/hybridteaching/sessions.php', array('id' => $id, 'l' => $this->typelist, 
             'sort' => $sort, 'dir' => $dir, 'perpage' => $perpage));
@@ -246,15 +283,16 @@ class hybridteaching_sessions_render extends \table_sql implements dynamic_table
         $header = [];
         if ($this->typelist == SESSION_LIST) {
             $header = [
-                $OUTPUT->render($columns['mastercheckbox']),
+                (has_capability('mod/hybridteaching:sessionsfulltable', $this->context)) 
+                    ? $OUTPUT->render($columns['mastercheckbox']) : '',
                 $columns['strgroup'],
                 (has_capability('mod/hybridteaching:sessionsfulltable', $this->context)) ? $columns['strtype'] : '',
                 $columns['strname'],
                 $columns['strdate'],
                 $columns['strduration'],
-                $columns['strrecording'],
-                $columns['strattendance'],
-                $columns['attexempt'],
+                (has_capability('mod/hybridteaching:viewrecordings', $this->context)) ? $columns['strrecording'] : '',
+                (has_capability('mod/hybridteaching:sessionsfulltable', $this->context)) ? $columns['strattendance'] : '',
+                (has_capability('mod/hybridteaching:sessionsfulltable', $this->context)) ? $columns['attexempt'] : '',
                 $columns['strmaterials'],
                 $columns['stroptions']
             ];
@@ -353,12 +391,23 @@ class hybridteaching_sessions_render extends \table_sql implements dynamic_table
                 $typealias = self::EMPTY;
             }
         }
-        
+
         $row = '';
         if ($this->typelist == SESSION_LIST) {
-            $row = new html_table_row(array($OUTPUT->render($params['checkbox']), $params['group'], $typealias,
-                $params['name'], $params['date'], $params['duration'], $params['recordingbutton'],
-                $params['attendance'], $params['attexempt'], $params['materials'], $options));
+            $row = new html_table_row(
+                array(
+                    (has_capability('mod/hybridteaching:sessionsfulltable', $this->context)) 
+                        ? $OUTPUT->render($params['checkbox']) : '', 
+                    $params['group'],
+                    $typealias,
+                    $params['name'],
+                    $params['date'],
+                    $params['duration'],
+                    (has_capability('mod/hybridteaching:viewrecordings', $this->context)) ? $params['recordingbutton'] : '',
+                    (has_capability('mod/hybridteaching:sessionsfulltable', $this->context)) ? $params['attendance'] : '',
+                    (has_capability('mod/hybridteaching:sessionsfulltable', $this->context)) ? $params['attexempt'] : '',
+                    $params['materials'],
+                    $options));
         } else if ($this->typelist == PROGRAM_SESSION_LIST) {
             $row = new html_table_row(array($OUTPUT->render($params['checkbox']), $params['date'], $params['hour'],
                 $params['duration'], $params['group'], $params['name'], $params['attexempt'], $params['materials'], $options));

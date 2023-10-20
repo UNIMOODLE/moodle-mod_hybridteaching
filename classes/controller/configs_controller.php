@@ -23,6 +23,8 @@
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+use core\oauth2\rest;
+
 defined('MOODLE_INTERNAL') || die();
 
 require_once('common_controller.php');
@@ -71,6 +73,7 @@ class configs_controller extends common_controller {
         $config->configname = $data->configname;
         $config->type = $this->hybridobject->type;
         $config->subplugintype = $this->splugindir;
+        $config->category = $data->category;
         $config->version = $plugin->version;
         $config->visible = 1;
         $config->timecreated = time();
@@ -95,6 +98,7 @@ class configs_controller extends common_controller {
         $config = new stdClass();
         $config->id = $data->id;
         $config->configname = $data->configname;
+        $config->category = $data->category;
         $config->timemodified = time();
         $config->modifiedby = $USER->id;
         if (!$DB->update_record('hybridteaching_configs', $config)) {
@@ -143,11 +147,9 @@ class configs_controller extends common_controller {
             }
         }
 
-        //comprobar aquí, además, que la configuracion pertenece a la categoría del curso: 
-        //parámetro que se recibe del $courseid
         $conditions = '';
         if (isset($params['visible'])) {
-            $conditions = ' AND hi.visible = ' . $params['visible'];
+            $conditions .= ' AND hi.visible = ?';
         }
 
         $inparams = [];
@@ -156,10 +158,29 @@ class configs_controller extends common_controller {
             [$insql, $inparams] = $DB->get_in_or_equal($subtypes);
         }
 
-        $sql = "SELECT *
+        if (!empty($params)) {
+            $inparams = array_merge($inparams, $params);
+        }
+
+        $categoriescond = $this->get_categories_conditions($params);
+        $incategories = '';
+        $categoriesparams = [];
+        if (!empty($categoriescond)) {
+            $incategories = $categoriescond['conditions'];
+            $categoriesparams = $categoriescond['inparams'];
+
+            if (!empty($categoriesparams)) {
+                unset($inparams['category']);
+                $inparams = array_merge($inparams, $categoriesparams);
+            }
+        }
+
+        $sql = "SELECT hi.*
                   FROM {hybridteaching_configs} hi
-                 WHERE hi.type $insql $conditions
-              ORDER BY visible DESC, sortorder, id";
+            LEFT JOIN {course_categories} c
+                    ON hi.category = c.id
+                 WHERE hi.type $insql $conditions $incategories
+              ORDER BY hi.visible DESC, hi.sortorder, hi.id";
         $configs = $DB->get_records_sql($sql, $inparams);
         $configsarray = json_decode(json_encode($configs), true);
 
@@ -171,8 +192,8 @@ class configs_controller extends common_controller {
      *
      * @return array the config select list
      */
-    public function hybridteaching_get_configs_select() {
-        $configs = $this->hybridteaching_get_configs(['visible' => 1]);
+    public function hybridteaching_get_configs_select($coursecategory) {
+        $configs = $this->hybridteaching_get_configs(['visible' => 1, 'category' => $coursecategory]);
         $configselect = [];
         foreach ($configs as $config) {
             $configselect[$config['id']."-".$config['type']] = $config['configname']." (".$config['type'].")";
@@ -180,7 +201,67 @@ class configs_controller extends common_controller {
         return $configselect;
     }
 
+    /**
+     * Retrieves the subplugin directory based on the given type.
+     *
+     * @param string $type The type of the subplugin.
+     * @return string The subplugin directory.
+     */
     public static function get_subplugin_dir($type) {
         return substr($type, strlen("hybridteach"));
+    }
+
+    /**
+     * Retrieves the conditions and inparams for filtering categories.
+     *
+     * @param array $params An array of parameters for filtering categories.
+     *                      Supported keys:
+     *                      - category: The category to filter by.
+     * @return array Returns an array containing the conditions and inparams for filtering categories.
+     *               The array has the following keys:
+     *               - conditions: The SQL conditions for filtering categories.
+     *               - inparams: An array of values to be used as parameters in the SQL conditions.
+     */
+    public function get_categories_conditions($params) {
+        $conditions = '';
+        $inparams = [];
+
+        if (isset($params['category'])) {
+            if (get_config('hybridteaching', 'configsubcategories')) {
+                $conditionscategory = $this->get_subcategories($params['category']);
+                $conditions .= " AND category " . $conditionscategory['insql'];
+                $inparams = $inparams + $conditionscategory['inparams'];
+            } else {
+                $conditions .= " AND (category = ? OR category = ?)";
+                $inparams = [$params['category'], "0"];
+            }
+        }
+
+        return ['conditions' => $conditions, 'inparams' => $inparams];
+    }
+
+    /**
+     * Retrieves the sql and params from subcategories for a given category.
+     *
+     * @param mixed $category The ID of the category.
+     * @throws Some_Exception_Class A description of the exception that can be thrown.
+     * @return array An array containing the SQL and parameters for retrieving the subcategories.
+     */
+    public function get_subcategories($category) {
+        global $DB;
+
+        if (!empty($category)) {
+            $params = ['id' => $category, 'visible' => 1];
+            $path = $DB->get_field('course_categories', 'path', $params);
+            $superiorcategories = strpos($path, $category);
+            if ($superiorcategories !== false) {
+                $superiorcategories = substr($path, 1, $superiorcategories + strlen($category));
+                $patharray = explode("/", $superiorcategories);
+                // Add all option.
+                array_push($patharray, "0");
+                [$insql, $inparams] = $DB->get_in_or_equal($patharray);
+                return ['insql' => $insql, 'inparams' => $inparams];
+            }
+        }
     }
 }

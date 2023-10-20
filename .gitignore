@@ -1,6 +1,3 @@
-/store/youtube/vendor
 /store/youtube/composer.lock
-/vc/teams/vendor
 /vc/teams/composer.lock
-/store/onedrive/vendor
 /store/onedrive/composer.lock

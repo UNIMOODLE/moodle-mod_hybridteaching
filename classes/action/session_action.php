@@ -44,7 +44,6 @@ $context = context_module::instance($cm->id);
 $PAGE->set_context($context);
 $PAGE->set_cm($cm, $course);
 
-//require_sesskey();
 require_login();
 
 $returnparams = [
@@ -84,7 +83,7 @@ switch ($action) {
 
         $formparams = compact('sesslist', 'cm', 'hybridteaching', 'slist');
         $sessionrender = new hybridteaching_sessions_render($hybridteaching, $slist);
-        $mform = ($action === 'bulkupdateduration') ? new bulk_update_duration_form($url, $formparams) 
+        $mform = ($action === 'bulkupdateduration') ? new bulk_update_duration_form($url, $formparams)
             : new bulk_update_starttime_form($url, $formparams);
 
         if ($mform->is_cancelled()) {

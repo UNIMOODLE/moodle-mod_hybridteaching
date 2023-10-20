@@ -96,7 +96,7 @@ $string['sessions'] = 'Sesiones';
 $string['import'] = 'Importar';
 $string['export'] = 'Exportar';
 
-$string['hybridteaching:addconfig'] = 'Añade una nueva docencia híbrida';
+$string['hybridteaching:addinstance'] = 'Añade una nueva docencia híbrida';
 $string['hybridteaching:view'] = 'Ver docencia híbrida';
 $string['hybridteaching:viewjoinurl'] = 'Ver url de inicio';
 $string['hybridteaching:programschedule'] = 'Programación de docencia híbrida';
@@ -104,6 +104,13 @@ $string['hybridteaching:sessions'] = 'Ver sesiones';
 $string['hybridteaching:attendance'] = 'Ver asistencia';
 $string['hybridteaching:import'] = 'Importar';
 $string['hybridteaching:export'] = 'Exportar';
+$string['hybridteaching:downloadrecordings'] = 'Descargar grabaciones';
+$string['hybridteaching:manage_recordings'] = 'Administrar grabaciones';
+$string['hybridteaching:record'] = 'Permitir grabaciones';
+$string['hybridteaching:viewallsessions'] = 'Permitir ver todas las sesiones sin filtro de grupo';
+$string['hybridteaching:viewhiddenitems'] = 'Ver elementos ocultos';
+$string['hybridteaching:viewrecordings'] = 'Ver grabaciones';
+
 $string['type'] = 'Tipo';
 $string['order'] = 'Ordenar';
 $string['hideshow'] = 'Ocultar/Mostrar';
@@ -137,7 +144,7 @@ $string['start'] = 'Inicio';
 $string['sessionfor'] = 'Sesión para el grupo';
 $string['sessiondate'] = 'Fecha de la sesión';
 $string['addsession'] = 'Añadir sesión';
-$string['commonsession'] = 'Todos los grupos';
+$string['allgroups'] = 'Todos los grupos';
 $string['sessiontypehelp'] = 'Puedes añadir sesiones para todos los alumnos o para un grupo de alumnos. 
 La posibilidad de añadir diferentes tipos depende del modo de grupo de la actividad.
   * En el modo de grupo "Sin grupos" sólo puede añadir sesiones para todos los estudiantes.
@@ -286,6 +293,7 @@ $string['videoconference'] = 'Vconf';
 $string['classroom'] = 'Aula';
 
 $string['importsessions'] = 'Importar sesiones';
+$string['export'] = 'Exportar';
 $string['invalidimportfile'] = 'El formato del archivo no es correcto.';
 $string['processingfile'] = 'Procesando archivo...';
 $string['sessionsgenerated'] = '{$a} sesiones generadas con éxito';
@@ -294,6 +302,8 @@ $string['sessresultsperpage_desc'] = 'Número de sesiones por página';
 $string['donotusepaging'] = 'No usar paginación';
 $string['reusesession'] = 'Reutilizar recursos externos de sesiones';
 $string['reusesession_desc'] = 'Si está marcado, se reutilizarán los recursos de sesiones recurrentes';
+$string['configsubcategories'] = 'Aplicar configuración para subcategorías';
+$string['configsubcategories_desc'] = 'Si está marcado, la configuración de los subplugins estará disponible para la categoría seleccionada y sus subcategorías';
 
 $string['allsessions'] = 'Global - todas las sesiones';
 $string['entrytime'] = 'Entrada';
@@ -312,6 +322,7 @@ $string['maxgradeattendance_help'] = 'Modo de cálculo
 $string['numsess'] = 'Nº sesiones';
 $string['percennumatt'] = '% nº asistencia';
 $string['percentotaltime'] = '% tiempo total';
+$string['percentage'] = 'Porcentaje';
 
 $string['eventsessionadded'] = 'Sesión añadida';
 $string['eventsessionviewed'] = 'Sesión vista';
@@ -377,3 +388,25 @@ $string['attendanceresumee'] = 'Resumen de asistencia';
 $string['attendedsessions'] = 'Sesiones atendidas';
 $string['validatedattendance'] = 'Asistencias validas';
 $string['finalgrade'] = 'Nota final';
+$string['late'] = 'Llegada tardía';
+$string['earlyleave'] = 'Abandono temprano';
+$string['withatt'] = 'Con asistencia';
+$string['withoutatt'] = 'Sin asistencia';
+$string['notexempt'] = 'No exento';
+$string['nofilter'] = 'Sin filtro';
+$string['vc'] = 'Videoconferencia';
+
+$string['watchrecording'] = 'Ver grabación';
+$string['norecording'] = 'Sin grabación';
+
+$string['entersession'] = 'Puede entrar a la sesión para marcar su asistencia';
+$string['exitsession'] = 'Se ha registrado su asistencia recuerde terminar su asistencia al acabar la sesión';
+$string['hybridteaching:attendancesactions'] = 'Acceso a las acciones en la vista de asistencia';
+$string['hybridteaching:attendanceregister'] = 'Permiso para registrar asistencia en la sesión';
+$string['novc'] = 'Sesión sin uso de videoconferencia';
+$string['viewstudentinfo'] = 'Asistencia estudiante';
+$string['viewsessioninfo'] = 'Asistencia sesión';
+$string['nologsfound'] = 'No se encontraron registros para el usuario en la sesión';
+$string['takensessions'] = 'Sesiones realizadas';
+$string['selectedsessions'] = 'Sessiones seleccionadas';
+$string['anygroup'] = 'Cualquier grupo';

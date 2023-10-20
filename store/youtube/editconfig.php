@@ -1,5 +1,4 @@
 <?php
-
 // This file is part of Moodle - https://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -23,8 +22,6 @@
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-
-
 require_once('../../../../config.php');
 require_once('editconfig_form.php');
 require_once('../../classes/controller/configs_controller.php');
@@ -33,7 +30,7 @@ require_once('classes/configs.php');
 $type = optional_param('type', "", PARAM_COMPONENT);
 $configid = optional_param('id', 0, PARAM_INT);
 $context = context_system::instance();
-$return = new moodle_url('/admin/settings.php', array('section' => 'hybridteaching_configstoresettings'));
+$return = new moodle_url ('/admin/settings.php', ['section' => 'hybridteaching_configstoresettings']);
 require_admin();
 
 if (empty($type)) {
@@ -47,7 +44,7 @@ $PAGE->set_pagelayout('admin');
 
 $hybridconfig = new stdClass();
 if (!empty($configid)) {
-    $hybridconfig = $DB->get_record('hybridteaching_configs', array('id' => $configid), '*', MUST_EXIST);
+    $hybridconfig = $DB->get_record('hybridteaching_configs', ['id' => $configid], '*', MUST_EXIST);
 } else {
     $hybridconfig->type = $type;
 }
@@ -63,7 +60,7 @@ if (!empty($configid)) {
     $config = (object) array_merge((array) $config, (array) $youtubeconfig);
 }
 
-$mform = new htyoutube_config_edit_form(null, array($config, $type));
+$mform = new htyoutube_config_edit_form(null, [$config, $type]);
 $message = '';
 $error = '';
 if ($mform->is_cancelled()) {
@@ -73,20 +70,23 @@ if ($mform->is_cancelled()) {
         $data->id = configs::create_config($data);
         $error = $configcontroller->hybridteaching_create_config($data, $type);
         empty($error) ? $message = 'createdconfig' : $message = $error;
-        $configid=$data->id;
+        $configid = $data->id;
     } else {
         $error = $configcontroller->hybridteaching_update_config($data);
-        $configid=configs::update_config($data);
+        $configid = configs::update_config($data);
         empty($error) ? $message = 'updatedconfig' : $message = $error;
     }
-    $return = new moodle_url('/admin/settings.php', array('section' => 'hybridteaching_configstoresettings',
-        'message' => $message));
+    $return = new moodle_url('/admin/settings.php',
+        [
+            'section' => 'hybridteaching_configstoresettings',
+            'message' => $message,
+        ],
+    );
 
-    //add access code and permissions to youtube
-    $url = new moodle_url('./classes/youtubeaccess.php',array('id'=>$configid) );
-    redirect($url);        
+    // Add access code and permissions to youtube.
+    $url = new moodle_url('./classes/youtubeaccess.php', ['id' => $configid] );
+    redirect($url);
 
-    //redirect($return);
 }
 
 $PAGE->set_heading($SITE->fullname);

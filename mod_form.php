@@ -82,8 +82,8 @@ class mod_hybridteaching_mod_form extends moodleform_mod {
         $mform->addHelpButton('userecordvc', 'userecordvc', 'hybridteaching');
 
         $vcconfigscontroller = new configs_controller(null, 'hybridteachvc');
-        $configs = $vcconfigscontroller->hybridteaching_get_configs_select('curso');
-        $mform->addElement('select','typevc',get_string('typevc', 'hybridteaching'),$configs);    
+        $configs = $vcconfigscontroller->hybridteaching_get_configs_select($this->_course->category);
+        $mform->addElement('select', 'typevc', get_string('typevc', 'hybridteaching'), $configs);    
         
         // NUEVAS SECCIONES PERSONALIZADAS:
 

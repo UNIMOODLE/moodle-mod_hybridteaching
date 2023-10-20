@@ -1,5 +1,7 @@
 <?php
 
+defined('MOODLE_INTERNAL') || die();
+
 require_once($CFG->dirroot.'/mod/hybridteaching/classes/filters/lib.php');
 
 class session_filter_date extends session_filter_type {

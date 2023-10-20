@@ -8,8 +8,8 @@
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="11" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="sessionid" TYPE="int" LENGTH="11" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
-        <FIELD NAME="code" TYPE="char" LENGTH="60" NOTNULL="true" SEQUENCE="false" COMMENT="The code of the session"/>
-        <FIELD NAME="name" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" COMMENT="The name of the session"/>
+        <FIELD NAME="weburl" TYPE="text" NOTNULL="true" SEQUENCE="false" COMMENT="The weburl access of the session"/>
+        <FIELD NAME="downloadurl" TYPE="text" NOTNULL="true" SEQUENCE="false" COMMENT="The downloadurl  of the session"/>
         <FIELD NAME="visible" TYPE="int" LENGTH="1" NOTNULL="false" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="timecreated" TYPE="int" LENGTH="11" NOTNULL="false" SEQUENCE="false"/>
       </FIELDS>

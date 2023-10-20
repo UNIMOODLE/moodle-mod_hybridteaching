@@ -52,7 +52,7 @@
 </div>
 	{{#isundatedsession}}
 		<div id="zoneaccess">		
-			<form action="./loadmeeting.php" target="{{target}}" onsubmit="{{onsubmit}}">
+			<form action="./loadmeeting.php" target="{{target}}" onsubmit="{{onsubmit}}" id="joinvc">
 				<input type="hidden" name="id" value="{{id}}">
 				<input type="hidden" name="s" value="{{s}}">
 				<input type="hidden" name="url" value="{{url}}">
@@ -67,52 +67,75 @@
 						{{/hasvc}}
 					</form>
 						{{# useattendance}}
-							
+							{{# useqr}}
+								<form action="./password.php" target="_blank" method="post" id="showqr">
+								<button type="submit" class="btn btn-success">{{# str}} showqrpassword, mod_hybridteaching {{/ str}}</button>
+								<input type="hidden" name="instance" value="{{instance}}">
+								</form>
+							{{/ useqr}}
+							{{# rotateqr}}
+								{{^ useqr}}
+								<form action="./password.php" target="_blank" method="post" id="showqr">
+								<button type="submit" class="btn btn-success">{{# str}} showqrpassword, mod_hybridteaching {{/ str}}</button>
+								<input type="hidden" name="instance" value="{{instance}}">
+								</form>
+								{{/ useqr}}
+							{{/ rotateqr}}
+							{{# usepassword}}
+								{{^ useqr}}{{^ rotateqr}}
+								<form action="./password.php" target="_blank" method="post" id="showqr">
+								<button type="submit" class="btn btn-success">{{# str}} showqrpassword, mod_hybridteaching {{/ str}}</button>
+								<input type="hidden" name="instance" value="{{instance}}">
+								</form>
+								{{/ rotateqr}}{{/ useqr}}
+							{{/ usepassword}}
 						{{/ useattendance}}
 					{{/isfinished}}
 			</form>
 				{{/hascreatecapability}}
 			
 				{{^hascreatecapability}}
-				{{^isfinished}}
-				{{#hasvc}}
-					<button type="submit" class="btn btn-success">{{#str}} joinvc, mod_hybridteaching {{/str}}</button>
-				{{/hasvc}}
-				{{/isfinished}}
+					{{^isfinished}}
+						{{#hasvc}}
+							{{#hasjoinurlcapability}}
+								<button type="submit" class="btn btn-success">{{#str}} joinvc, mod_hybridteaching {{/str}}</button>
+							{{/hasjoinurlcapability}}
+						{{/hasvc}}
+					{{/isfinished}}
 			</form>
-				{{^isfinished}}
-				{{# useattendance}}
-					<form action="./password.php" target="_blank" method="post">
-							<button type="submit" class="btn btn-success">{{# str}} showqrpassword, mod_hybridteaching {{/ str}}</button>
-							<input type="hidden" name="instance" value="{{instance}}">
-					</form>
-					<br>
-					{{^ rotateqr}}
-						{{# usepassword}}
-							<div class="btn btn-lg btn-secondary">
-								<form action="./passwordaccess.php" target="_self" method="post">
-									<label for="qrpass">{{# str}} attendwithpassword, mod_hybridteaching {{/ str}}</label>
-									<input type="password" name="qrpass" value=""><br>
-									<br><button type="submit" class="btn btn-dark">{{# str}} markattendance, mod_hybridteaching {{/ str}}</button>
-									<input type="hidden" name="id" value="{{instance}}">
-									<input type="hidden" name="attaction" value="1">
-								</form><br>
-							</div>
-						{{/ usepassword}}
-					{{/ rotateqr}}
+					{{^isfinished}}
+						{{# useattendance}}
+							<form action="./password.php" target="_blank" method="post" id="showqr">
+									<button type="submit" class="btn btn-success">{{# str}} showqrpassword, mod_hybridteaching {{/ str}}</button>
+									<input type="hidden" name="instance" value="{{instance}}">
+							</form>
+							<br>
+							{{^ rotateqr}}
+								{{# usepassword}}
+									<form action="./passwordaccess.php" target="_self" method="post" id="registeratt">
+										<div class="btn btn-lg btn-secondary">
+											<label for="qrpass">{{# str}} attendwithpassword, mod_hybridteaching {{/ str}}</label>
+											<input type="password" name="qrpass" value=""><br>
+											<br><button type="submit" class="btn btn-dark">{{# str}} markattendance, mod_hybridteaching {{/ str}}</button>
+											<input type="hidden" name="id" value="{{instance}}">
+											<input type="hidden" name="attaction" value="1">
+										</div>
+									</form><br>
+								{{/ usepassword}}
+							{{/ rotateqr}}
 					
-						<form action="./passwordaccess.php" target="_self" method="post">
-							<br><button type="submit" class="btn btn-danger">{{# str}} finishattend, mod_hybridteaching {{/ str}}</button>
-							<input type="hidden" name="id" value="{{instance}}">
-							<input type="hidden" name="attaction" value="0">
-						</form>
-				{{/ useattendance}}
-				{{/isfinished}}
+							<form action="./passwordaccess.php" target="_self" method="post" id="finishatt">
+								<br><button type="submit" class="btn btn-danger">{{# str}} finishattend, mod_hybridteaching {{/ str}}</button>
+								<input type="hidden" name="id" value="{{instance}}">
+								<input type="hidden" name="attaction" value="0">
+							</form>
+						{{/ useattendance}}
+					{{/isfinished}}
 				{{/hascreatecapability}}
 			{{^admreusesession}}
 				{{#hascreatecapability}}
 					{{^isfinished}}
-						<form action="./loadmeeting.php">
+						<form action="./loadmeeting.php" id="finishsession">
 							<input type="hidden" name="id" value="{{id}}">
 							<input type="hidden" name="s" value="{{s}}">
 							<input type="hidden" name="url" value="{{url}}">
@@ -133,7 +156,7 @@
 			{{#hascreatecapability}}
 				{{^isfinished}}
 					{{#hasvc}}
-						<form action="./loadmeeting.php" target="_blank">
+						<form action="./loadmeeting.php" target="_blank" id="joinvc">
 							<button type="submit" class="btn btn-success">Comenzar reunión</button>
 							<input type="hidden" name="id" value="{{id}}">
 							<input type="hidden" name="s" value="{{s}}">
@@ -141,40 +164,60 @@
 						</form>
 					{{/hasvc}}
 					{{# useattendance}}
-						
+							{{# useqr}}
+								<form action="./password.php" target="_blank" method="post" id="showqr">
+								<button type="submit" class="btn btn-success">{{# str}} showqrpassword, mod_hybridteaching {{/ str}}</button>
+								<input type="hidden" name="instance" value="{{instance}}">
+								</form>
+							{{/ useqr}}
+							{{# rotateqr}}
+								{{^ useqr}}
+								<form action="./password.php" target="_blank" method="post" id="showqr">
+								<button type="submit" class="btn btn-success">{{# str}} showqrpassword, mod_hybridteaching {{/ str}}</button>
+								<input type="hidden" name="instance" value="{{instance}}">
+								</form>
+								{{/ useqr}}
+							{{/ rotateqr}}
+							{{# usepassword}}
+								{{^ useqr}}{{^ rotateqr}}
+								<form action="./password.php" target="_blank" method="post" id="showqr">
+								<button type="submit" class="btn btn-success">{{# str}} showqrpassword, mod_hybridteaching {{/ str}}</button>
+								<input type="hidden" name="instance" value="{{instance}}">
+								</form>
+								<br>
+
+								{{/ rotateqr}}{{/ useqr}}
+							{{/ usepassword}}
 					{{/ useattendance}}
 				{{/isfinished}}
 			{{/hascreatecapability}}
 			{{^hascreatecapability}}
 				{{^isfinished}}
-					{{#hasvc}}
-						<form action="./loadmeeting.php" target="_blank">
-							<input type="hidden" name="id" value="{{id}}">
-							<input type="hidden" name="s" value="{{s}}">
-							<input type="hidden" name="url" value="{{url}}">
-							<button type="submit" class="btn btn-success">{{#str}} joinvc, mod_hybridteaching {{/str}}</button>
-						</form>
-					{{/hasvc}}
+					{{#hasjoinurlcapability}}
+						{{#hasvc}}
+							<form action="./loadmeeting.php" target="_blank" id="joinvc">
+								<input type="hidden" name="id" value="{{id}}">
+								<input type="hidden" name="s" value="{{s}}">
+								<input type="hidden" name="url" value="{{url}}">
+								<button type="submit" class="btn btn-success">{{#str}} joinvc, mod_hybridteaching {{/str}}</button>
+							</form><br>
+						{{/hasvc}}
+					{{/hasjoinurlcapability}}
 					{{# useattendance}}
-						<form action="./password.php" target="_blank" method="post">
-							<button type="submit" class="btn btn-success">{{# str}} showqrpassword, mod_hybridteaching {{/ str}}</button>
-							<input type="hidden" name="instance" value="{{instance}}">
-						</form>
-						<br>
-						{{^ rotateqr}}
-							{{# usepassword}}
-								<div class="btn btn-lg btn-secondary">
-									<form action="./passwordaccess.php" target="_self" method="post">
-										<label for="qrpass">{{# str}} attendwithpassword, mod_hybridteaching {{/ str}}</label>
-										<input type="password" name="qrpass" value=""><br>
-										<br><button type="submit" class="btn btn-dark">{{# str}} markattendance, mod_hybridteaching {{/ str}}</button>
-										<input type="hidden" name="id" value="{{instance}}">
-										<input type="hidden" name="attaction" value="1">
-									</form><br>
-								</div>
-							{{/ usepassword}}
-						{{/ rotateqr}}
-						<form action="./passwordaccess.php" target="_self" method="post">
+					{{^ rotateqr}}
+						{{# usepassword}}
+						<form action="./passwordaccess.php" target="_self" method="post" id="registeratt">
+							<div class="btn btn-lg btn-secondary">
+								<label for="qrpass">{{# str}} attendwithpassword, mod_hybridteaching {{/ str}}</label>
+								<input type="password" name="qrpass" value=""><br>
+								<br><button type="submit" class="btn btn-dark">{{# str}} markattendance, mod_hybridteaching {{/ str}}</button>
+								<input type="hidden" name="id" value="{{instance}}">
+								<input type="hidden" name="attaction" value="1">
+							</div>
+						</form><br>
+						{{/ usepassword}}
+					{{/ rotateqr}}
+						<form action="./passwordaccess.php" target="_self" method="post" id="finishatt">
 							<br><button type="submit" class="btn btn-danger">{{# str}} finishattend, mod_hybridteaching {{/ str}}</button>
 							<input type="hidden" name="id" value="{{instance}}">
 							<input type="hidden" name="attaction" value="0">
@@ -185,7 +228,7 @@
 			{{^admreusesession}}
 				{{#hascreatecapability}}
 					{{^isfinished}}
-						<form action="./loadmeeting.php">
+						<form action="./loadmeeting.php" id="finishsession">
 							<input type="hidden" name="id" value="{{id}}">
 							<input type="hidden" name="s" value="{{s}}">
 							<input type="hidden" name="url" value="{{url}}">

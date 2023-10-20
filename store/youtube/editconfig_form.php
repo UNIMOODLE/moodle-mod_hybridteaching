@@ -1,5 +1,4 @@
 <?php
-
 // This file is part of Moodle - https://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -45,11 +44,19 @@ class htyoutube_config_edit_form extends moodleform {
         $mform->addElement('hidden', 'type');
         $mform->addElement('hidden', 'subpluginconfigid');
         $mform->addElement('text', 'configname', get_string('configname', 'hybridteaching'));
+        $categories = core_course_category::get_all();
+        $options[0] = get_string('all');
+        foreach ($categories as $category) {
+            $options[$category->id] = $category->name;
+        }
+
+        $mform->addElement('select', 'category', get_string('categories'), $options);
 
         $mform->setType('id', PARAM_INT);
         $mform->setType('type', PARAM_COMPONENT);
         $mform->setType('subpluginconfigid', PARAM_INT);
         $mform->setType('configname', PARAM_TEXT);
+        $mform->setType('category', PARAM_INT);
 
         $mform->setDefault('type', get_string($type, 'hybridteachstore_'.$type));
 

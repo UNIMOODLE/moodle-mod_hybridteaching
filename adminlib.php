@@ -93,13 +93,14 @@ class hybridteaching_admin_plugins_configs extends admin_setting {
         $strdown = get_string('down');
         $strname = get_string('name');
         $strtype = get_string('type', 'mod_hybridteaching');
+        $strcategories = get_string('categories');
         $section = optional_param('section', '', PARAM_COMPONENT);
         $message = optional_param('message', 0, PARAM_COMPONENT);
 
         $return = $OUTPUT->box_start('generalbox hybridteachingpluginsconfigs');
 
         $table = new html_table();
-        $table->head = array($strname, $strtype, $strversion, $strorder, $stroptions);
+        $table->head = array($strname, $strtype, $strcategories, $strversion, $strorder, $stroptions);
         $table->colclasses = array('leftalign', 'leftalign', 'centeralign',
             'centeralign', 'centeralign', 'centeralign', 'centeralign');
         $table->id = 'hybridteachingpluginsconfigs';
@@ -124,6 +125,8 @@ class hybridteaching_admin_plugins_configs extends admin_setting {
             $enabled = $config['visible'];
             $configid = $config['id'];
             $configname = $config['configname'];
+            $categoryname = !empty($config['category']) ? $DB->get_field('course_categories', 'name', array('id' => $config['category'])) : get_string('all');
+            $configcategories = $categoryname;
             $configversion = $config['version'];
             $configtype = $config['type'];
             $configtypealias = get_string('alias', $this->splugintype.'_'.$config['type']);
@@ -168,7 +171,7 @@ class hybridteaching_admin_plugins_configs extends admin_setting {
             );
 
             // Add a row to the table.
-            $row = new html_table_row(array($configname, $configtypealias, $configversion, $updown, $options));
+            $row = new html_table_row(array($configname, $configtypealias, $configcategories, $configversion, $updown, $options));
             if (!empty($class)) {
                 $row->attributes['class'] = $class;
             }

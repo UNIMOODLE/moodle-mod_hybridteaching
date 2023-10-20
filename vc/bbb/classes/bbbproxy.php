@@ -202,15 +202,15 @@ class bbbproxy extends proxy_base {
      */
     public function get_meeting_recording($meetingid){
         $data = [
-            'meetingID' => $meetingid,
+            'meetingID' => $meetingid, 
+//'496909493508781bb144e696513a1b492ef0d940', 
             'state' => 'published,unpublished,processed, processing, deleted',  //comprobar si las processed hay que descargarlas tb o no
         ];
-        $recordingurl= $this->action_url_config('getRecordings', $data);
-        
+        $recordingurl = $this->action_url_config('getRecordings', $data);
+        $recordingid = '';
         $curl = new curl();
         $xml = $curl->get($recordingurl);
-        self::assert_returned_xml($xml);
-
+        self::assert_returned_xml($xml);           
         if ($xml != null){
             if (isset($xml->recordings->recording->recordID)){
                 $recordingid=(string) $xml->recordings->recording->recordID;

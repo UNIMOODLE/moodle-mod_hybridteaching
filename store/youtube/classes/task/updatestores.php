@@ -1,10 +1,30 @@
-<?php 
+<?php
+// This file is part of Moodle - https://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+
+/**
+ * Display information about all the mod_hybridteaching modules in the requested course.
+ *
+ * @package     mod_hybridteaching
+ * @copyright   2023 isyc <isyc@example.com>
+ * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
 namespace hybridteachstore_youtube\task;
 
-
-defined('MOODLE_INTERNAL') || die();
-
-
+use hybridteachstore_youtube\youtube_handler;
 
 class updatestores extends \core\task\scheduled_task {
 
@@ -20,71 +40,56 @@ class updatestores extends \core\task\scheduled_task {
     public function execute() {
         global $DB, $CFG;
         require_once($CFG->dirroot . '/mod/hybridteaching/store/youtube/classes/youtube_handler.php');
-        //sessions to get
-        //1.  obtener las sesiones de las que descargar grabaciones, que tengan el método de almacenamiento de youtube
-        $sql="SELECT ht.id AS htid,ht.course, hs.id AS hsid, hs.name, hs.userecordvc, hs.processedrecording, hs.storagereference, hc.subpluginconfigid
-        FROM {hybridteaching_session} hs
-        INNER JOIN {hybridteaching} ht ON ht.id=hs.hybridteachingid
-        INNER JOIN {hybridteaching_configs} hc ON hs.storagereference=hc.id          
-        WHERE hs.userecordvc=1 AND hc.type='youtube' AND hs.processedrecording=0";
+        // Sessions to get
+        // 1. Obtain the sessions from which to download recordings, which have the YouTube storage method.
+        $sql = "SELECT ht.id AS htid,ht.course, hs.id AS hsid, hs.name, hs.userecordvc,";
+        $sql .= " hs.processedrecording, hs.storagereference, hc.subpluginconfigid";
+        $sql .= " FROM {hybridteaching_session} hs";
+        $sql .= " INNER JOIN {hybridteaching} ht ON ht.id=hs.hybridteachingid";
+        $sql .= " INNER JOIN {hybridteaching_configs} hc ON hs.storagereference=hc.id";
+        $sql .= " WHERE hs.userecordvc=1 AND hc.type='youtube' AND hs.processedrecording=0";
 
-        $storesyoutube=$DB->get_records_sql($sql);
+        $storesyoutube = $DB->get_records_sql($sql);
 
-        //2.  descargarlas utilizando el método adecuado de cada subplugin, descargarlas en moodledata
-        //este paso 2 hecho en otra task del subplugin de vc, que descargue automa´ticamentene moodledata, 
-        //y luego esta task que suba de moodledata a youtube.
-        //3.  subirlas a youtube
-        //4. guardar el registro como ya subido a youtube
-        //5. eliminar el archivo (ya procesado) de moodledata.
+        // 3. Upload to youtube.
+        // 4. Save the record as already uploaded to youtube.
+        // 5. delete the file (already processed) from moodledata.
 
-        foreach ($storesyoutube as $store){
-          
-            //aquí hay que leer la instancia de store que corresponda. 
-            //De momento leemos la guardada con storeinstance
+        foreach ($storesyoutube as $store) {
 
-            $configyt=$DB->get_record('hybridteachstore_youtube_con', array('id'=>$store->subpluginconfigid));
-            $youtubeclient = new \youtube_handler($configyt);
+            // Read the store instance config.
+            $configyt = $DB->get_record('hybridteachstore_youtube_con', ['id' => $store->subpluginconfigid]);
+            $youtubeclient = new youtube_handler($configyt);
             $redirect = $CFG->wwwroot . '/admin/cli/scheduled_task.php';
             $youtubeclient->setredirecturi($redirect);
 
-            //$videoPath es el path que se guardará de moodledata en la subactividad de vc (zoom,bbb)
-            //hay que hacer una estructura donde poder descargar los vídeos antes de subirlos,
-            //no se pueden traspasar directamente porque no se permite por los vc (ojalá se pudiera...)
+            // Path that will be saved from moodledata in the vc subactivity (zoom,bbb,...).
 
-            //comprobar si una sesión tuviera varios archivos de grabación, se añade entonces como -1.mp4, -2.mp4,.....
-            //Con zoom se guardan en mp4. Comprobar la extensión de los otros sistemas de videoconferencia por si hubiera que hacer comprobaciones
-            $path = $CFG->dataroot.'/repository/hybridteaching/'.$store->course.'/'.$store->htid.'-'.$store->hsid;
-            $videopath=$path.'-1.mp4';
-            $number=1;
+            $path = $CFG->dataroot.'/repository/hybridteaching/'.$store->course.'/';
+            $files = glob ($path.'*');
 
-            /*repeat while exists file with records for the session, change number*/
-            while(file_exists($videopath)){          
-                $youtubecode=$youtubeclient->uploadfile($store,$videopath);
+            foreach ($files as $videopath) {
 
-                if ($youtubecode!=null){ //si ha habido una subida correcta y tenemos el youtube code:
-                    //guardar id y registro de youtube, tipo "jj_6Ic7N8Dg"
-                    $youtube=new  \stdClass();
-                    $youtube->sessionid=$store->hsid;
-                    $youtube->code=$youtubecode; 
-                    $youtube->visible=true;
-                    $youtube->timecreated=time();
-                        
+                $youtubecode = $youtubeclient->uploadfile ($store, $videopath);
 
-                    $youtubeid = $DB->insert_record('hybridteachstore_youtube',$youtube);
-                    //actualizar _session , con el id de _youtube.
-                    $storesession=$DB->get_record('hybridteaching_session',['id'=>$store->hsid]);
-                    $storesession->processedrecording=$youtubeid;    //1; //no poner 1 como true, sino que podemos poner el id de subactividad youtube
+                if ($youtubecode != null) { // If there has been a correct upload and we have the YouTube code:
+                    // Save youtube id and record, type "jj_6Ic7N8Dg".
+                    $youtube = new  \stdClass();
+                    $youtube->sessionid = $store->hsid;
+                    $youtube->code = $youtubecode;
+                    $youtube->visible = true;
+                    $youtube->timecreated = time();
+
+                    $youtubeid = $DB->insert_record('hybridteachstore_youtube', $youtube);
+                    // Update _session, with the youtube id.
+                    $storesession = $DB->get_record('hybridteaching_session', ['id' => $store->hsid]);
+                    $storesession->processedrecording = $youtubeid;
                     $DB->update_record('hybridteaching_session', $storesession);
 
-                    /*delete video from origin download vc moodledata*/
+                    // Delete video from origin download vc moodledata.
                     unlink ($videopath);
                 }
-
-                //change number for the record for session
-                $number++;
-                $videopath=$path.'-'.$number.'.mp4';
             };
-
         }
     }
 }

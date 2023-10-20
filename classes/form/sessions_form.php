@@ -1,5 +1,7 @@
 <?php
 
+defined('MOODLE_INTERNAL') || die();
+
 require_once($CFG->libdir.'/formslib.php');
 
 class sessions_form extends moodleform {
@@ -15,7 +17,7 @@ class sessions_form extends moodleform {
         $modcontext = context_module::instance($cm->id);
         if (!empty($session)) {
             $defopts = array('maxfiles' => EDITOR_UNLIMITED_FILES, 'noclean' => true, 'context' => $modcontext);
-            $session = file_prepare_standard_editor($session, 'description', 
+            $session = file_prepare_standard_editor($session, 'description',
                 $defopts, $modcontext, 'mod_hybridteaching', 'session', $session->sessionid);
         }
 
@@ -24,7 +26,7 @@ class sessions_form extends moodleform {
         } else {
             $headertitle = get_string('editsession', 'hybridteaching');
         }
-        
+
         $mform->addElement('header', 'general', get_string('addsession', 'hybridteaching'));
 
         $mform->addElement('text', 'name', get_string('sessionname', 'hybridteaching'));
@@ -45,7 +47,7 @@ class sessions_form extends moodleform {
 
         $groupmode = groups_get_activity_groupmode($cm);
         $selectgroups = array();
-        $selectgroups[0] = get_string('commonsession', 'hybridteaching');
+        $selectgroups[0] = get_string('allgroups', 'hybridteaching');
         if ($groupmode == SEPARATEGROUPS || $groupmode == VISIBLEGROUPS) {
             if ($groupmode == SEPARATEGROUPS && !has_capability('moodle/site:accessallgroups', $modcontext)) {
                 $groups = groups_get_all_groups($course->id, $USER->id, $cm->groupingid);
@@ -57,7 +59,7 @@ class sessions_form extends moodleform {
                     $selectgroups[$group->id] = $group->name;
                 }
                 if ($groupmode == SEPARATEGROUPS) {
-                    array_shift($selectgroups);
+                    //array_shift($selectgroups);
                 }
                 $mform->addElement('select', 'groupid', get_string('sessionfor', 'hybridteaching'), $selectgroups);
             } else {
@@ -85,7 +87,7 @@ class sessions_form extends moodleform {
         $mform->setType('timetype', PARAM_INT);
         $mform->addGroup($duration, 'durationgroup', get_string('duration', 'hybridteaching'), array(' '), false);
         $mform->addRule('durationgroup', null, 'required', null, 'client');
-        
+    
         $mform->addElement('advcheckbox', 'attexempt', get_string('attexempt', 'hybridteaching'), '', null, array(0, 1));
 
         $mform->addElement('editor', 'description', get_string('description'), array('rows' => 1, 'columns' => 80),
@@ -101,9 +103,7 @@ class sessions_form extends moodleform {
         if (empty($session)) {
             // For multiple sessions.
             $mform->addElement('header', 'headeraddmultiplesessions', get_string('addmultiplesessions', 'hybridteaching'));
-            /*if (!empty($pluginconfig->multisessionexpanded)) {
-                $mform->setExpanded('headeraddmultiplesessions');
-            }*/
+
             $mform->addElement('checkbox', 'addmultiply', '', get_string('repeatasfollows', 'hybridteaching'));
             $mform->addHelpButton('addmultiply', 'createmultiplesessions', 'hybridteaching');
 
@@ -120,7 +120,7 @@ class sessions_form extends moodleform {
             if ($CFG->calendar_startwday !== '0') { // Week start from sunday.
                 $sdays[] =& $mform->createElement('checkbox', 'Sun', '', get_string('sunday', 'calendar'));
             }
-            $mform->addGroup($sdays, 'sdays', get_string('repeaton', 'hybridteaching'), 
+            $mform->addGroup($sdays, 'sdays', get_string('repeaton', 'hybridteaching'),
                 array('&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'), true);
             $mform->disabledIf('sdays', 'addmultiply', 'notchecked');
 

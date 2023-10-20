@@ -26,7 +26,7 @@ use stdClass;
  *
  * @package   mod_hybridteaching
  */
-class hybridteaching_proxy{
+class hybridteaching_proxy {
     /**
      * Helper for getting the owner userid of a hybridteaching instance.
      *

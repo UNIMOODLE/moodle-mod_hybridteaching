@@ -1,5 +1,4 @@
 <?php
-
 // This file is part of Moodle - https://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -23,8 +22,6 @@
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-defined('MOODLE_INTERNAL') || die();
-
 class configs extends configs_controller {
     public static function load_config($configid) {
         global $DB;
@@ -39,7 +36,7 @@ class configs extends configs_controller {
         $records->emaillicense = $data->emaillicense;
         $records->timecreated = time();
         $records->createdby = $USER->id;
-        $id=$DB->insert_record('hybridteachstore_youtube_con', $records);
+        $id = $DB->insert_record('hybridteachstore_youtube_con', $records);
         return $id;
     }
 

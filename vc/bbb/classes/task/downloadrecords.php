@@ -53,6 +53,7 @@ class downloadrecords extends \core\task\scheduled_task {
                     //save processedrecording in hybridteaching_session=0: ready to upload to store
                     $session = $DB->get_record('hybridteaching_session', array('id' => $session->hsid));
                     $session->processedrecording=0;
+                    $session->storagereference=-1;
                     $DB->update_record('hybridteaching_session',$session);
                 }
                 

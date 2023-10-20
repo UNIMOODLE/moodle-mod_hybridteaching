@@ -160,7 +160,7 @@ class sessions {
 
     }
 
-    function get_zone_access() {
+    public function get_zone_access() {
         //ESTA FUNCION NO NECESITA NINGÚN $hybridteachingid
         //PORQUE YA ESTÁ INICIALIZADA EN EL CONSTRUCTOR CON SU SESSION, 
         //NO ES NECESARIO NINGÚN id DE ACTIVIDAD     
@@ -206,5 +206,20 @@ class sessions {
             } else {
                 return null;
             }
+    }
+
+
+    public function get_recording (){
+        $bbbconfig = $this->load_bbb_config_from_session();
+        $bbbproxy=new bbbproxy($bbbconfig);
+
+        $url='';
+        $response=$bbbproxy->get_url_recording_by_recordid($this->bbbsession->recordingid);
+        if ($response['returncode'] == 'SUCCESS') {
+            if ($response['recordingid']!='') {
+                $url = $response['recordingid'];
+            }
+        }
+        return $url;
     }
 }

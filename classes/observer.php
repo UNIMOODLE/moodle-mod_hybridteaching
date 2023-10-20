@@ -1,17 +1,18 @@
 <?php
 
+defined('MOODLE_INTERNAL') || die();
+
 require_once(dirname(__FILE__).'/helpers/grades.php');
 require_once(dirname(__FILE__).'/controller/attendance_controller.php');
 
 class mod_hybridteaching_observer {
     public static function session_finished(\mod_hybridteaching\event\session_finished $event) {
         // Revisar si hay students que no tienen attendance en la session (en ese caso crearla)
-        // Actualizar la asistencia de los usuarios
+        // Actualizar la asistencia de los usuarios.
         self::update_users_grade($event->objectid, $event->other['sessid']);
     }
-    
-    public static function session_joined(\mod_hybridteaching\event\session_joined $event) {
 
+    public static function session_joined(\mod_hybridteaching\event\session_joined $event) {
     }
 
     public static function session_added(\mod_hybridteaching\event\session_added $event) {
@@ -20,18 +21,16 @@ class mod_hybridteaching_observer {
         }
         self::update_users_grade($event->objectid);
     }
-    
+
     public static function session_updated(\mod_hybridteaching\event\session_updated $event) {
-    
     }
-    
+
     public static function session_deleted(\mod_hybridteaching\event\session_deleted $event) {
-        // Delete attendance provisional
         global $DB;
         $DB->delete_records('hybridteaching_attendance', ['sessionid' => $event->other['sessid']]);
         self::update_users_grade($event->objectid);
     }
-    
+
     public static function attendance_updated(\mod_hybridteaching\event\attendance_updated $event) {
         self::update_users_grade($event->objectid, null, array($event->other['userid']));
     }
@@ -41,7 +40,7 @@ class mod_hybridteaching_observer {
         $htid = $DB->get_field('course_modules', 'instance', ['id' => $event->contextinstanceid]);
         self::update_users_grade($htid);
     }
-    
+
     private static function update_users_grade($objectid, $sessid = null, $userid = null) {
         $grades = new grades();
         $grades->hybridteaching_update_users_grade($objectid, $userid);
@@ -59,6 +58,5 @@ class mod_hybridteaching_observer {
         foreach ($usersid as $userid) {
             attendance_controller::hybridteaching_set_attendance($ht, $session, 0, null, $userid);
         }
-        
     }
 }

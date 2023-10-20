@@ -21,11 +21,11 @@
  * @copyright   2023 isyc <isyc@example.com>
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+defined('MOODLE_INTERNAL') || die;
+require_once($CFG->libdir.'/formslib.php');
+require_once($CFG->dirroot . '/mod/hybridteaching/classes/controller/attendance_controller.php');
 
- require_once($CFG->libdir.'/formslib.php');
- require_once($CFG->dirroot . '/mod/hybridteaching/classes/controller/attendance_controller.php');
-
- class attuserfilter_options_form extends moodleform {
+class attuserfilter_options_form extends moodleform {
     public function definition() {
         global $OUTPUT;
 
@@ -39,18 +39,22 @@
         $mform->addElement('hidden', 'id');
         $mform->setDefault('id', $id);
         $mform->setType('id', PARAM_INT);
-        
+
         $attcontroller = new attendance_controller();
         $fname = $this->_customdata['fname'];
         $lname = $this->_customdata['lname'];
         $view = $this->_customdata['view'];
         $sort = $this->_customdata['sort'];
         $dir = $this->_customdata['dir'];
+        $groupid = $this->_customdata['groupid'];
 
         $perpage = $this->_customdata['perpage'];
         $selectedsession = $this->_customdata['sessid'];
+        $attfilter = $this->_customdata['attfilter'];
+
         $url = new moodle_url($CFG->wwwroot . '/mod/hybridteaching/attendance.php?view=' .
-        $view . '&sessionid=' . $selectedsession . '&sort=' . $sort . '&dir=' . $dir . '&perpage=' . $perpage,
+            $view . '&sessionid=' . $selectedsession . '&sort=' . $sort . '&dir=' . $dir .
+            '&perpage=' . $perpage . '&attfilter=' . $attfilter . '&groupid=' . $groupid,
             ['id' => $id, 'att' => $attid, 'fname' => $fname, 'lname' => $lname]);
 
         $mform->addElement('header', 'userfilter', get_string('user'));

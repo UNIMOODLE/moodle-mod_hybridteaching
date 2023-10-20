@@ -1,14 +1,12 @@
 <?php
 
-if (!defined('MOODLE_INTERNAL')) {
-    die('Direct access to this script is forbidden.');    ///  It must be included from a Moodle page
-}
+defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->libdir . '/formslib.php');
 require_once($CFG->libdir . '/csvlib.class.php');
 
 class sessions_import_form extends moodleform {
-    function definition() {
+    public function definition() {
         $mform =& $this->_form;
         $data  = $this->_customdata;
 

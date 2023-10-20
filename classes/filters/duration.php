@@ -1,5 +1,7 @@
 <?php
 
+defined('MOODLE_INTERNAL') || die();
+
 require_once($CFG->dirroot.'/mod/hybridteaching/classes/filters/lib.php');
 
 class session_filter_duration extends session_filter_type {
@@ -127,11 +129,11 @@ class session_filter_duration extends session_filter_type {
                 $res = "$field = :$name";
                 $params[$name] = $value;
                 break;
-            case 1: // More than
+            case 1: // More than.
                 $res = "$field > :$name";
                 $params[$name] = $value;
                 break;
-            case 2: // Less than
+            case 2: // Less than.
                 $res = "$field < :$name";
                 $params[$name] = $value;
                 break;

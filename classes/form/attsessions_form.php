@@ -21,12 +21,12 @@
  * @copyright   2023 isyc <isyc@example.com>
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+defined('MOODLE_INTERNAL') || die;
+require_once($CFG->libdir.'/formslib.php');
+require_once($CFG->dirroot . '/mod/hybridteaching/classes/controller/sessions_controller.php');
+require_once($CFG->dirroot . '/mod/hybridteaching/classes/controller/attendance_controller.php');
 
- require_once($CFG->libdir.'/formslib.php');
- require_once($CFG->dirroot . '/mod/hybridteaching/classes/controller/sessions_controller.php');
- require_once($CFG->dirroot . '/mod/hybridteaching/classes/controller/attendance_controller.php');
-
- class attsessions_options_form extends moodleform {
+class attsessions_options_form extends moodleform {
     public function definition() {
         global $CFG, $USER, $DB;
         $mform = &$this->_form;
@@ -34,37 +34,29 @@
         $id = $this->_customdata['id'];
         $cm = get_coursemodule_from_id('hybridteaching', $id,  0,  false,  MUST_EXIST);
         $hid = $this->_customdata['hid'];
-        $hybridteaching = $DB->get_record('hybridteaching', array('id' => $hid), '*', MUST_EXIST);
+        $hybridteaching = $DB->get_record('hybridteaching', ['id' => $hid], '*', MUST_EXIST);
         $selectedsession = $this->_customdata['selectedsession'];
-        $selectedsession ? $sessionid = $selectedsession :  $sessionid = $this->_customdata['sessionid'];
+        $selectedsession ? $sessionid = $selectedsession : $sessionid = $this->_customdata['sessionid'];
         $sessioncontroller = new sessions_controller($hybridteaching);
         $session = $sessioncontroller->get_session($sessionid);
         $sessions = $sessioncontroller->load_sessions();
         $view = $this->_customdata['view'];
         $attcontroller = new attendance_controller();
         $sessioninfo = $attcontroller->hybridteaching_print_session_info($session);
-
-        $attid = optional_param('attid', 1, PARAM_INT);
-        $mform->addElement('hidden', 'attid');
-        $mform->setDefault('attid', $attid);
-        $mform->setType('attid', PARAM_INT);
-
         $mform->addElement('hidden', 'id');
         $mform->setDefault('id', $id);
         $mform->setType('id', PARAM_INT);
 
-        $selectedsessions = array();
+        $selectedsessions = [];
         if ($view == 'attendlog') {
             $selecteduser = $this->_customdata['selecteduser'];
-            $selecteduser ? $attid = $selecteduser :  $selecteduser = $attid;
-
             $mform->addElement('header', 'participant', get_string('participant', 'mod_hybridteaching'));
-            $selectedusers = array();
+            $selectedusers = [];
             $sessionusers = $attcontroller->hybridteaching_get_attendance_users_in_session($sessionid);
             if ($sessionusers) {
-                foreach($sessionusers as $sesuser) {
+                foreach ($sessionusers as $sesuser) {
                     $useratt = $DB->get_record('hybridteaching_attendance', ['userid' => $sesuser->userid,
-                        'sessionid' => $sessionid], 'id, exempt', IGNORE_MISSING);
+                        'sessionid' => $sessionid, ], 'id, exempt', IGNORE_MISSING);
                     if ($useratt->exempt) {
                         $selectedusers[$useratt->id] = $sesuser->lastname . ' ' . $sesuser->firstname .
                             ' (' . get_string('exemptuser', 'hybridteaching') . ')';
@@ -81,10 +73,11 @@
         }
 
         $mform->addElement('header', 'sessions', get_string('sessions', 'mod_hybridteaching'));
-        foreach($sessions as $sess) {
-            if ($att = $attcontroller->hybridteaching_get_attendance($hybridteaching, $sess)) {
-                $att->visible && !$sess['attexempt'] ? $visible = '' : $visible = get_string('attnotforgrade', 'hybridteaching') ;
-                $selectedsessions[$sess['id']] = $sess['name'] . ' | ' . date('l, j \d\e F \d\e Y H:i', $sess['starttime']) . ' ' . $visible;
+        foreach ($sessions as $sess) {
+            if ($att = $attcontroller->hybridteaching_get_attendance($sess)) {
+                $att->visible && !$sess['attexempt'] ? $visible = '' : $visible = get_string('attnotforgrade', 'hybridteaching');
+                $selectedsessions[$sess['id']] = $sess['name'] . ' | ' . date('l, j \d\e F \d\e Y H:i', $sess['starttime']) .
+                    ' ' . $visible;
             }
         }
         $mform->addElement('autocomplete', 'selectedsession', get_string('sessionfor', 'mod_hybridteaching'), $selectedsessions);
@@ -94,5 +87,7 @@
         } else {
             $mform->setDefault('selectedsession', 0);
         }
+        $view == 'extendedsessionatt' ? $mform->addElement('static',  'description',
+            get_string('session', 'hybridteaching'), $sessioninfo) : '';
     }
 }

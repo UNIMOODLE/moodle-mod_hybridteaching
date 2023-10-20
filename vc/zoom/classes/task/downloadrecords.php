@@ -40,7 +40,7 @@ class downloadrecords extends \core\task\scheduled_task {
             $folder_file=$folder."/".$session->htid."-".$session->hsid;
 
             $zoomconfig = $sessionconfig->load_zoom_config($session->config);
-            $service = new \webservice($zoomconfig); 
+            $service = new webservice($zoomconfig); 
             $response = $service->get_meeting_recordings($session->meetingid);
 
             if ($response != false) {

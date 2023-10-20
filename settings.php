@@ -30,7 +30,7 @@ require_once($CFG->dirroot . '/mod/hybridteaching/adminlib.php');
 $settings = null;
 if ($hassiteconfig) {
     $ADMIN->add('modsettings', new admin_category('hybridteaching', new lang_string('pluginname', 'mod_hybridteaching')));
-    $generalsettings = new admin_settingpage('hybridteaching_generalsettings',
+    $generalsettings = new admin_settingpage($section,
         new lang_string('generalconfig', 'mod_hybridteaching'));
     $vcsettings = new admin_settingpage('hybridteaching_configvcsettings',
         new lang_string('configsvcconfig', 'mod_hybridteaching'));
@@ -55,6 +55,9 @@ if ($hassiteconfig) {
     
         $generalsettings->add(new admin_setting_configcheckbox('hybridteaching/reusesession',
             get_string('reusesession', 'hybridteaching'), get_string('reusesession_desc', 'hybridteaching'), 0));
+
+        $generalsettings->add(new admin_setting_configcheckbox('hybridteaching/configsubcategories',
+            get_string('configsubcategories', 'hybridteaching'), get_string('configsubcategories_desc', 'hybridteaching'), 0));
 
         $vcsettings->add(new admin_setting_heading(
             'headerconfigvc',

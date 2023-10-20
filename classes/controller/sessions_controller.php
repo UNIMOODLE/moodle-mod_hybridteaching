@@ -102,7 +102,8 @@ class sessions_controller extends common_controller {
         $data->duration = self::calculate_duration($data->duration, $data->timetype);
         $data->userecordvc = $this->hybridobject->userecordvc;
         if ($data->userecordvc == 1) {
-            $data->processedrecording =- 1;
+            $data->processedrecording = -1;
+            $data->vcreference = $this->hybridobject->config;
         }
 
         $multiplesess = false;
@@ -234,7 +235,7 @@ class sessions_controller extends common_controller {
         $errormsg = '';
 
         foreach ($sessids as $sessid) {
-            $session = $DB->get_record('hybridteaching_session', ['id' => $sessid]); 
+            $session = $DB->get_record('hybridteaching_session', ['id' => $sessid]);
             if (!empty($data->duration) && !empty($data->timetype)) {
                 switch ($data->operation) {
                     case self::EQUAL:
@@ -249,8 +250,8 @@ class sessions_controller extends common_controller {
                             self::calculate_duration($data->duration, $data->timetype);
                         break;
                 }
-            } 
-            
+            }
+
             if (!empty($data->starttime) && !empty($data->timetype)) {
                 switch ($data->operation) {
                     case self::REDUCE:
@@ -270,7 +271,7 @@ class sessions_controller extends common_controller {
 
             if (!empty($session->typevc)) {
                 $classname = $this->get_subplugin_class($session->typevc);
-                $subpluginsession = new $classname();             
+                $subpluginsession = new $classname();
                 $subpluginsession->update_session_extended($session, $this->hybridobject);
             }
         }
@@ -310,7 +311,7 @@ class sessions_controller extends common_controller {
         ));
 
         $event->trigger();
-        
+
         return $errormsg;
     }
 
@@ -325,7 +326,7 @@ class sessions_controller extends common_controller {
 
         $sessiontype = $DB->get_field('hybridteaching_session', 'typevc', array('id' => $this->hybridobject->id));
         if (!empty($sessiontype) && $this->existssubplugin) {
-            $sessionsht = $DB->get_records('hybridteaching_session', 
+            $sessionsht = $DB->get_records('hybridteaching_session',
                 array('hybridteachingid' => $this->hybridobject->id), '', 'id');
             $classname = $this->get_subplugin_class($sessiontype);
             $subpluginsession = new $classname();
@@ -367,7 +368,7 @@ class sessions_controller extends common_controller {
 
         $sql = "SELECT *
                   FROM {hybridteaching_session} AS hs
-                 WHERE hs.hybridteachingid = :id 
+                 WHERE hs.hybridteachingid = :id
                    $datefilter
                    AND (hs.isfinished = 0 OR hs.isfinished IS NULL)
               ORDER BY hs.starttime LIMIT 1";
@@ -389,8 +390,8 @@ class sessions_controller extends common_controller {
         global $DB;
 
         $sql = "SELECT *
-                  FROM {hybridteaching_session} AS hs
-                 WHERE hs.hybridteachingid = :id 
+                  FROM {hybridteaching_session} hs
+                 WHERE hs.hybridteachingid = :id
                    AND hs.starttime < UNIX_TIMESTAMP()
                    AND hs.isfinished = 1
               ORDER BY hs.starttime DESC LIMIT 1";
@@ -427,7 +428,7 @@ class sessions_controller extends common_controller {
         } else if ($timetype == self::HOUR_TIMETYPE) {
             return $duration * HOURSECS;
         } else {
-            // Invalid timetype, return 0
+            // Invalid timetype, return 0.
             return 0;
         }
     }
@@ -460,7 +461,7 @@ class sessions_controller extends common_controller {
             $session->description = '';
             $session->descriptionformat = 0;
         }
-        
+
         return $session;
     }
 
@@ -477,7 +478,7 @@ class sessions_controller extends common_controller {
         $session->visible = 1;
         $session->timecreated = time();
         $session->createdby = $USER->id;
-        
+
         return $session;
     }
 
@@ -514,26 +515,61 @@ class sessions_controller extends common_controller {
     }
 
     /**
-    * Save session storage config id
-    *
-    * @param object The session object to calculate to save.
-    */
-    public static function savestorage($session){
+     * Includes the required subplugin session file for the specified typevc.
+     *
+     * @param string $typevc the type of VC to require the session file for
+     */
+    public static function require_subplugin_store($typevc) {
+        global $CFG;
+        require_once($CFG->dirroot.'/mod/hybridteaching/store/'.$typevc.'/classes/sessions.php');
+    }
 
-        //FALTA CALCULAR CON LA SELECCION DE CURSOS DE LA CONFIGURACIÓN
 
-        //calculate storage
+
+    /**
+     * Save session storage config id.
+     *
+     * @param object The session object to calculate to save.
+     */
+    public static function savestorage($session) {
+
+        //FALTA CALCULAR CON LA SELECCION DE CURSOS DE LA CONFIGURACIÓN.
+
+        //calculate storage.
         global $DB;
-        $sql= 'SELECT id FROM {hybridteaching_configs}
-            WHERE subplugintype=:type AND visible=1
+        $sql = 'SELECT id FROM {hybridteaching_configs}
+            WHERE subplugintype = :type AND visible = 1
             ORDER BY sortorder, id
             LIMIT 1';
-        $record=$DB->get_record_sql($sql,['type' => 'storage']);
+        $record = $DB->get_record_sql($sql, ['type' => 'storage']);
 
-        //save storage in session
-        if ($record){
-            $session->storagereference=$record->id;
-            $DB->update_record('hybridteaching_session',$session);
+        //save storage in session.
+        if ($record) {
+            $session->storagereference = $record->id;
+            $DB->update_record('hybridteaching_session', $session);
+        }
+    }
+
+    /**
+     * Get type of storage by storagereference
+     *
+     * @param int The storagereference to get the type.
+     */
+    public static function get_subpluginstorage_class($storagereference) {
+        global $DB;
+        $sql = 'SELECT type FROM {hybridteaching_configs}
+            WHERE id = :storagereference AND subplugintype = "store"';
+        $object = $DB->get_record_sql($sql, ['storagereference' => $storagereference]);
+
+        if ($object->type) {
+            $classname = '\hybridteachstore_' . $object->type . '\sessions';
+            $result = [
+                'classname' => $classname,
+                'type' => $object->type,
+            ];
+            return $result;
+        } else {
+            return null;
         }
     }
 }

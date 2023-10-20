@@ -23,8 +23,6 @@
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-defined('MOODLE_INTERNAL') || die();
-
 class common_controller {
     const OPERATOR_GREATER_THAN = ">";
     const OPERATOR_LESS_THAN = "<";

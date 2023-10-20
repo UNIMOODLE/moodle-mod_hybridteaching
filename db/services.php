@@ -46,4 +46,14 @@ $functions = array (
         'loginrequired' => true,
         'capabilities' => '', //capabilities check in form
     ),
+    'mod_hybridtaeching_get_display_actions' => array(
+        'classname' => 'hybridteaching_external',
+        'methodname' => 'get_display_actions',
+        'classpath' => '/mod/hybridteaching/externallib.php',
+        'description' => 'gets the actions to display for students in the view view',
+        'type' => 'read',
+        'ajax' => true,
+        'loginrequired' => true,
+        'capabilities' => '', //capabilities check in form
+    ),
 );

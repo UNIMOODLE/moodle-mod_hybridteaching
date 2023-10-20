@@ -1,5 +1,7 @@
 <?php
 
+defined('MOODLE_INTERNAL') || die();
+
 require_once($CFG->dirroot.'/mod/hybridteaching/classes/filters/text.php');
 require_once($CFG->dirroot.'/mod/hybridteaching/classes/filters/duration.php');
 require_once($CFG->dirroot.'/mod/hybridteaching/classes/filters/date.php');
@@ -21,7 +23,7 @@ class session_filtering {
         global $SESSION;
 
         $id = required_param('id', PARAM_INT);
-        $slist = required_param('l', PARAM_INT);
+        $slist = optional_param('l', 1, PARAM_INT);
 
         if (!isset($SESSION->session_filtering)) {
             $SESSION->session_filtering = array();
@@ -87,7 +89,8 @@ class session_filtering {
         // Rebuild the forms if filters data was processed.
         if ($adddata || $activedata) {
             $_POST = []; // Reset submitted data.
-            $this->_addform = new session_add_filter_form($baseurl, ['fields' => $this->_fields, 'extraparams' => $extraparams]);
+            $this->_addform = new session_add_filter_form($baseurl, 
+                ['fields' => $this->_fields, 'extraparams' => $extraparams]);
             $this->_activeform = new session_active_filter_form($baseurl, ['fields' => $this->_fields, 'extraparams' => $extraparams]);
         }
     }
@@ -116,7 +119,7 @@ class session_filtering {
                 }
                 $choices = array();
                 if (has_capability('mod/hybridteaching:sessionsfulltable', $context) || $groupmode != SEPARATEGROUPS) {
-                    $choices[0] = get_string('commonsession', 'hybridteaching');
+                    $choices[0] = get_string('allgroups', 'hybridteaching');
                 }
                 if (!empty($groups)) {
                     foreach ($groups as $group) {
@@ -124,9 +127,9 @@ class session_filtering {
                     }
                 }
                 return new session_filter_select('groupid', get_string('groups'), $advanced, 'groupid', $choices);
-            case 'starttime': 
+            case 'starttime':
                 return new session_filter_date('starttime', get_string('date'), $advanced, 'starttime');
-            case 'duration': 
+            case 'duration':
                 return new session_filter_duration('duration', get_string('duration', 'mod_hybridteaching'),
                     $advanced, 'duration');
             default:

@@ -17,7 +17,7 @@ class session_added extends \core\event\base {
      * Returns non-localised description of what happened.
      *
      * @return string
-     * 
+     *
      */
     public function get_description() {
         if (isset($this->other['multiplesess']) && empty($this->other['multiplesess'])) {

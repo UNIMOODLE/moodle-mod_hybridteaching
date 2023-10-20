@@ -1,4 +1,4 @@
-group,name,starttime,duration
-group1,Session name1,2023-07-24 18:00,60
-group2,Session name2,2023-07-25 12:00,45
+group,name,starttime,duration,timetype,attexempt,description,repeaton,repeatevery,repeatuntil
+group1,Session name1,2023-07-24 18:00,60,1,1,Description,Mon|Sun,1,2023-08-24
+group2,Session name2,2023-07-25 12:00,2,2,0,,Fri|Sat,2,2023-08-24
 All groups,Session name3,2023-07-26 9:00,30

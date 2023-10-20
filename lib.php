@@ -81,7 +81,7 @@ function hybridteaching_add_instance($moduleinstance, $mform = null) {
     /*processedrecording: 
         -1: must process with vc
         0: processed and downloaded with vc, ready to upload to storage
-        1: uploaded to storage
+        >1: uploaded to storage
     */
     if ($moduleinstance->userecordvc == 1) {
         $moduleinstance->processedrecording = -1;
