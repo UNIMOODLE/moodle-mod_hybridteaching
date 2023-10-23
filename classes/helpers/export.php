@@ -92,8 +92,8 @@ class export {
 
         echo implode(";", $this->table->headers)."\n";
         foreach ($this->table->body as $row) {
-            /*$line = implode(";", get_object_vars($row));
-            echo $line."\n";*/
+            $line = implode(";", get_object_vars($row));
+            echo $line."\n";
         }
         die;
     }
