@@ -33,9 +33,10 @@ if ($exportform->is_cancelled()) {
 } else if ($data = $exportform->get_data()) {
     require_sesskey();
     $data->context = $context;
+    $filename = get_string('modulenameu', 'hybridteaching') . '_' . date('Ymd');
     $exporter = new mod_hybridteaching\helpers\export($data);
-    $exporter->export($hybridteaching);
-    redirect($url);
+    $exporter->export($filename, $data->format);
+    exit;
 }
 
 

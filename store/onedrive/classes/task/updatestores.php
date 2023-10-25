@@ -61,7 +61,7 @@ class updatestores extends \core\task\scheduled_task {
                 if ($response!=null){ 
                     $onedrive=new  \stdClass();
                     $onedrive->sessionid=$store->hsid;
-                    $onedrive->weburl=$response['weburl']; 
+                    $onedrive->weburl = $store->shortname.'/'.$store->name.'.mp4';
                     $onedrive->downloadurl=$response['downloadurl']; 
                     $onedrive->visible=true;
                     $onedrive->timecreated=time();

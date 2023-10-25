@@ -27,6 +27,7 @@ defined('MOODLE_INTERNAL') || die();
 
 $string['pluginname'] = 'Hybrid teaching';
 $string['modulename'] = 'Hybrid teaching';
+$string['modulenameu'] = 'Hybrid_teaching';
 $string['modulenameplural'] = 'Hybrid teaching';
 $string['hybridteachingname'] = 'Name';
 $string['pluginadministration'] = 'Hybridteaching administration';
@@ -422,3 +423,4 @@ $string['nologsfound'] = 'No logs found for the user in this session';
 $string['takensessions'] = 'Taken sessions';
 $string['selectedsessions'] = 'Selected sessions';
 $string['anygroup'] = 'Any group';
+$string['withoutgroup'] = 'Without group';

@@ -73,11 +73,9 @@ class export_form extends \moodleform {
         $mform->addElement('date_selector', 'sessionenddate', get_string('endofperiod', 'attendance'));
         $mform->disabledIf('sessionenddate', 'includeallsessions', 'checked');
 
-        /*$formatoptions = array('excel' => get_string('downloadexcel', 'attendance'),
+        $formatoptions = array('excel' => get_string('downloadexcel', 'attendance'),
                                'ooo' => get_string('downloadooo', 'attendance'),
-                               'text' => get_string('downloadtext', 'attendance'));*/
-
-        $formatoptions = array('text' => get_string('downloadtext', 'attendance'));
+                               'text' => get_string('downloadtext', 'attendance'));
         $mform->addElement('select', 'format', get_string('format'), $formatoptions);
 
         $submitstring = get_string('ok');

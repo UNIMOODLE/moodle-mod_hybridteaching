@@ -31,9 +31,23 @@ global $CFG;
 
 class sessions  {
 
-    public function get_recording($processedrecording){
+    public function load_config($storagereference) {
         global $DB;
-        $object = $DB->get_record('hybridteachstore_pumukit', ['id' => $processedrecording]);
+
+        $sql = "SELECT * 
+        FROM {hybridteachstore_pumukit_con} pu
+        INNER JOIN {hybridteaching_configs} htc ON htc.subpluginconfigid=pu.id
+            WHERE htc.id=:storagereference";
+
+        $config = $DB->get_record_sql ($sql, ['storagereference' => $storagereference]);
+        return $config;
+    }
+
+    public function get_recording($processedrecording, $storagereference, $htid, $sid){
+        global $DB;
+        $config = $this->load_config($storagereference);
+        
+        //$object = $DB->get_record('hybridteachstore_pumukit', ['id' => $processedrecording]);
         $url="";
         // Aquí lo necesario para poder visualizar el vídeo de pumukit, devolver una url de visualización.
         /*if ($object->weburl) {

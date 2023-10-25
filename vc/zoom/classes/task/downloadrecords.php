@@ -29,15 +29,15 @@ class downloadrecords extends \core\task\scheduled_task {
             INNER JOIN {hybridteachvc_zoom} zoom ON zoom.htsession=hs.id
             INNER JOIN {hybridteaching} ht ON ht.id=hs.hybridteachingid
             WHERE hs.typevc="zoom" AND hs.userecordvc=1 AND hs.processedrecording=-1';
-        $download=$DB->get_records_sql($sql);
-        
+        $download = $DB->get_records_sql($sql);
+
         foreach ($download as $session){
             $folder=$CFG->dataroot."/repository/hybridteaching/".$session->course;
             if (!file_exists($folder)) {
                 mkdir($folder, 0777, true);
             }
 
-            $folder_file=$folder."/".$session->htid."-".$session->hsid;
+            $folder_file = $folder."/".$session->htid."-".$session->hsid;
 
             $zoomconfig = $sessionconfig->load_zoom_config($session->config);
             $service = new webservice($zoomconfig); 
@@ -67,12 +67,11 @@ class downloadrecords extends \core\task\scheduled_task {
                           fputs($file, $response);
                           fclose($file);
                   
-                          //save processedrecording in hybridteaching_session=0: ready to upload to store
+                          // Save processedrecording in hybridteaching_session=0: ready to upload to store.
                           $session = $DB->get_record('hybridteaching_session', array('id' => $session->hsid));
                           $session->processedrecording=0;
                           $DB->update_record('hybridteaching_session',$session);
-
-
+                          
                         }                       
                     }
                 }

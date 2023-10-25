@@ -127,7 +127,8 @@ class hybridteaching_attendance_render extends \table_sql implements dynamic_tab
         if ($view == 'attendlog' || $view == 'extendedsessionatt') {
             $selectedsession ? $sessionid = $selectedsession : $sessionid = 0;
             $selecteduser ? $attid = $selecteduser : $selecteduser = $attid;
-            $selectedstudent = $attendancecontroller::hybridteaching_get_attendance_from_id($selecteduser)->userid;
+            $selecteduser ? 
+            $selectedstudent = $attendancecontroller::hybridteaching_get_attendance_from_id($selecteduser)->userid : '';
             $sessoptionsformparams = [
                 'id' => $id,
                 'hid' => $hybridteachingid,
@@ -139,12 +140,12 @@ class hybridteaching_attendance_render extends \table_sql implements dynamic_tab
             if ($view == 'attendlog') {
                 $sessionoptions = new attsessions_options_form($CFG->wwwroot . '/mod/hybridteaching/attendance.php?view=' .
                     'attendlog' . '&selectedsession=' . $selectedsession . '&attid=' . $selecteduser . '&sort=' . $sort .
-                    '&dir=' . $dir . '&groupid=' . $groupid, $sessoptionsformparams);
+                    '&dir=' . $dir . '&groupid=' . $group, $sessoptionsformparams);
             } else {
                 $sessionoptions = new attsessions_options_form($CFG->wwwroot . '/mod/hybridteaching/attendance.php?view=' .
                     'extendedsessionatt' . '&selectedsession=' . $selectedsession .
                     '&sort=' . $sort . '&dir=' . $dir . '&fname=' . $fname . '&lname=' . $lname . '&perpage=' .
-                    $perpage . '&attfilter=' . $selectedfilter . '&groupid=' . $groupid, $sessoptionsformparams);
+                    $perpage . '&attfilter=' . $selectedfilter . '&groupid=' . $group, $sessoptionsformparams);
             }
         }
         if ($view == 'studentattendance' && has_capability('mod/hybridteaching:sessionsfulltable',
@@ -160,7 +161,7 @@ class hybridteaching_attendance_render extends \table_sql implements dynamic_tab
             $attusrfilter = new attuserfilter_options_form($CFG->wwwroot . '/mod/hybridteaching/attendance.php?',
                 ['id' => $id, 'att' => $attid, 'fname' => $fname, 'lname' => $lname, 'hid' => $hybridteachingid,
                     'view' => $view, 'sessid' => $selectedsession, 'sort' => $sort, 'dir' => $dir,
-                    'perpage' => $perpage, 'attfilter' => $selectedfilter, 'groupid' => $groupid ]);
+                    'perpage' => $perpage, 'attfilter' => $selectedfilter, 'groupid' => $group ]);
         }
         $view == 'sessionattendance' ? $sortexclusions = ['stroptions', 'strclassroom', 'strvc'] : '';
         $view == 'extendedstudentatt' ? $sortexclusions = ['stroptions', 'strgrade'] : '';
@@ -242,12 +243,12 @@ class hybridteaching_attendance_render extends \table_sql implements dynamic_tab
                     has_capability('mod/hybridteaching:sessionsfulltable', $this->context, $user = $USER->id) ?
                     $sessionoptions->display() : '';
                 }
-                echo '<br><h2>' . get_string('nologsfound', 'mod/hybridteaching') . '<h2>';
-                $return .= html_writer::tag('a', get_string('viewstudentinfo', 'mod/hybridteaching'),
+                echo '<br><h2>' . get_string('nologsfound', 'mod_hybridteaching') . '<h2>';
+                $return .= html_writer::tag('a', get_string('viewstudentinfo', 'mod_hybridteaching'),
                     ['href' => 'attendance.php?id='.$id.'&view=studentattendance&userid='.
                     $selectedstudent . '', 'class' => 'btn btn-primary', ]);
                 $returntosession ?
-                $return .= html_writer::tag('a', get_string('viewsessioninfo', 'mod/hybridteaching'),
+                $return .= html_writer::tag('a', get_string('viewsessioninfo', 'mod_hybridteaching'),
                     ['href' => 'attendance.php?id='.$id.'&view=extendedsessionatt&sessionid=' .
                 $sessionid.'', 'class' => 'btn btn-primary', ]) : '';
                 $return .= $OUTPUT->box_end();
@@ -295,11 +296,11 @@ class hybridteaching_attendance_render extends \table_sql implements dynamic_tab
                 $return .= html_writer::tag('span', get_string('sessiondate', 'hybridteaching') . ' ' .
                     get_string('noduration', 'hybridteaching'));
                 $return .= html_writer::empty_tag('br');
-                $return .= html_writer::tag('a', get_string('viewstudentinfo', 'mod/hybridteaching'),
+                $return .= html_writer::tag('a', get_string('viewstudentinfo', 'mod_hybridteaching'),
                     ['href' => 'attendance.php?id='.$id.'&view=studentattendance&userid='.
                     $selectedstudent. '', 'class' => 'btn btn-primary', ]);
                 $returntosession ?
-                    $return .= html_writer::tag('a', get_string('viewsessioninfo', 'mod/hybridteaching'),
+                    $return .= html_writer::tag('a', get_string('viewsessioninfo', 'mod_hybridteaching'),
                         ['href' => 'attendance.php?id='.$id.'&view=extendedsessionatt&sessionid=' .
                     $sessionid.'', 'class' => 'btn btn-primary', ]) : '';
                 $return .= $OUTPUT->box_end();
@@ -311,11 +312,11 @@ class hybridteaching_attendance_render extends \table_sql implements dynamic_tab
             $return .= html_writer::tag('span', get_string('participationtime', 'hybridteaching') .
                 ': ' . helper::get_hours_format($connectiontime) . ' ' . $participantpercent . '%' );
             $return .= html_writer::empty_tag('br');
-            $return .= html_writer::tag('a', get_string('viewstudentinfo', 'mod/hybridteaching'),
+            $return .= html_writer::tag('a', get_string('viewstudentinfo', 'mod_hybridteaching'),
                 ['href' => 'attendance.php?id='.$id.'&view=studentattendance&userid='.
                 $selectedstudent . '', 'class' => 'btn btn-primary', ]);
             $returntosession ?
-                $return .= html_writer::tag('a', get_string('viewsessioninfo', 'mod/hybridteaching'),
+                $return .= html_writer::tag('a', get_string('viewsessioninfo', 'mod_hybridteaching'),
                     ['href' => 'attendance.php?id='.$id.'&view=extendedsessionatt&sessionid=' .
                 $sessionid.'', 'class' => 'btn btn-primary', ]) : '';
             $attendancetable .= html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'h', 'value' => $hybridteachingid]);
@@ -534,7 +535,7 @@ class hybridteaching_attendance_render extends \table_sql implements dynamic_tab
                 }
                 $table->data[] = $row;
             } else {
-                $table->data[] = '';
+                $table->data[] = [];
             }
         }
         // Add filters.

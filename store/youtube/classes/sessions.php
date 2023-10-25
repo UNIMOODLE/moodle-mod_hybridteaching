@@ -31,7 +31,7 @@ global $CFG;
 
 class sessions  {
 
-    public function get_recording($processedrecording){
+    public function get_recording($processedrecording, $storagereference, $htid, $sid){
         global $DB;
         $object = $DB->get_record('hybridteachstore_youtube', ['id' => $processedrecording]);
         $url="";
@@ -40,6 +40,5 @@ class sessions  {
         }
         return $url;
     }
-
 
 }

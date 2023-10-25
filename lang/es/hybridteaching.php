@@ -27,6 +27,7 @@ defined('MOODLE_INTERNAL') || die();
 
 $string['pluginname'] = 'Docencia Híbrida';
 $string['modulename'] = 'Docencia híbrida';
+$string['modulenameu'] = 'Docencia_hibrida';
 $string['modulenameplural'] = 'Docencia híbrida';
 $string['hybridteachingname'] = 'Nombre';
 $string['pluginadministration'] = 'Administración Docencia híbrida';
@@ -410,3 +411,4 @@ $string['nologsfound'] = 'No se encontraron registros para el usuario en la sesi
 $string['takensessions'] = 'Sesiones realizadas';
 $string['selectedsessions'] = 'Sessiones seleccionadas';
 $string['anygroup'] = 'Cualquier grupo';
+$string['withoutgroup'] = 'Sin grupo';

@@ -160,10 +160,10 @@ class attendance_controller extends common_controller {
             $userid = $attendancelist;
         }
 
-        $params = ['hybridteachingid' => $this->hybridobject->id];
+        $params = ['userid' => $userid];
         $sql = 'SELECT *
                     FROM {user}
-                    WHERE id =' . $userid . '';
+                    WHERE id = :userid';
         return $attendance = $DB->get_record_sql($sql, $params);
     }
 
@@ -473,8 +473,8 @@ class attendance_controller extends common_controller {
         $s .= get_string('group') . ': ';
         $session->groupid == 0 ? $s .= get_string('commonattendance', 'hybridteaching') :
             $s .= groups_get_group($session->groupid)->name;
-        $s .= '<br>' . get_string('typevc', 'mod/hybridteaching') . ': ';
-        $session->typevc != '' ? $s .= $session->typevc : $s .= get_string('novc', 'mod/hybridteaching');
+        $s .= '<br>' . get_string('typevc', 'mod_hybridteaching') . ': ';
+        $session->typevc != '' ? $s .= $session->typevc : $s .= get_string('novc', 'mod_hybridteaching');
         $s .= '<br>' . get_string('sessionstarttime', 'hybridteaching') . ': ' . date('H:i:s', $session->starttime);
         ($session->starttime + $session->duration) == $session->starttime ?
             $s .= '<br>' . get_string('sessionendtime', 'hybridteaching') . ': ' .  get_string('noduration', 'hybridteaching')
@@ -560,8 +560,10 @@ class attendance_controller extends common_controller {
                     LIMIT 1";
         $params = ['attid' => $attendanceid];
         try {
-            if (!$entrytime = $DB->get_record_sql($sqlentry, $params)->entrytime) {
+            if (!$DB->get_record_sql($sqlentry, $params)) {
                 $entrytime = 0;
+            } else {
+                $entrytime = $DB->get_record_sql($sqlentry, $params)->entrytime;
             }
             if ($endlog = $DB->get_record_sql($sqlend, $params)) {
                 $endtime = $endlog->endtime;
@@ -674,10 +676,10 @@ class attendance_controller extends common_controller {
             $att->usermodified = $USER->id;
             switch ($data->operation) {
                 case self::ACTIVE:
-                    $att->status == 1 ? $updateatt = 0 : $att->status = 1;
+                    $att->status == 1 || $att->exempt == 1 ? $updateatt = 0 : $att->status = 1;
                     break;
                 case self::INACTIVE:
-                    $att->status == 0 ? $updateatt = 0 : $att->status = 0;
+                    $att->status == 0 || $att->exempt == 1 ? $updateatt = 0 : $att->status = 0;
                     break;
                 case self::EXEMPT:
                     $att->exempt == 1 ? $updateatt = 0 : $att->exempt = 1;

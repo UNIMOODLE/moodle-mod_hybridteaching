@@ -191,5 +191,52 @@ class onedrive_handler{
     return $response;
 
   }
+
+
+  public function get_urlrecording($processedrecording){    
+    global $DB;
+    require_once __DIR__ . '/../vendor/autoload.php'; 
+    $this->refreshtoken();
+
+    $graph = new Graph();  
+    $graph->setAccessToken($this->config->accesstoken);  
+
+    $url = '';
+
+    $record = $DB->get_record('hybridteachstore_onedrive', ['id' => $processedrecording]);
+    if (!isset($record->weburl)){
+      return $url;
+    }  
+
+    try{
+
+      $path='/me/drive/root:/'.get_string('hybridteaching','hybridteachstore_onedrive').'/'.$record->weburl;
+      $graphresponse = $graph
+      ->createRequest("GET", $path)
+      ->setReturnType(Model\DriveItem::class)
+      ->execute();
+
+      // Get the id of the video item.
+      $htitemid = $graphresponse->getId();
+
+      $path = '/me/drive/items/'.$htitemid.'/preview';
+            $graphresponse = $graph
+            ->createRequest("POST", $path)
+            ->setReturnType(Model\DriveItem::class)
+            ->execute();
+
+      $element = json_decode(json_encode($graphresponse), true);
+
+      if (isset($element['getUrl'])){
+        $url = $element['getUrl'];
+      }
+
+    } catch(\Throwable $e) {
+
+    }
+
+    return $url;
+
+  }
  
 }

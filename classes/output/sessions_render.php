@@ -61,7 +61,7 @@ class hybridteaching_sessions_render extends \table_sql implements dynamic_table
      * @return string
      */
     public function print_sessions_table() {
-        global $OUTPUT, $DB, $PAGE;
+        global $OUTPUT, $CFG, $DB, $PAGE;
 
         $id = required_param('id', PARAM_INT);
         $hybridteachingid = optional_param('h', 0, PARAM_INT);
@@ -198,7 +198,7 @@ class hybridteaching_sessions_render extends \table_sql implements dynamic_table
                             sessions_controller::require_subplugin_store($classstorage['type']);
                             $classname = $classstorage['classname'];
                             $sessionrecording = new $classname();
-                            $urlrecording = $sessionrecording->get_recording($session['processedrecording']);
+                            $urlrecording = $CFG->wwwroot . '/mod/hybridteaching/loadrecording.php?cid='.$this->hybridteaching->course.'&sid='.$session['id'].'&id='.$this->cm->id;
                             $recordingbutton = html_writer::link($urlrecording, get_string('watchrecording', 'mod_hybridteaching'), ['target' => '_blank', 'class' => 'btn btn-secondary']);
                         }
                     } else if ($session['storagereference'] == -1) {

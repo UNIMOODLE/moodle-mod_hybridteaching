@@ -22,7 +22,7 @@
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
- namespace hybridteachstore_onedrive;
+namespace hybridteachstore_onedrive;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -31,13 +31,25 @@ global $CFG;
 
 class sessions  {
 
-    public function get_recording($processedrecording){
+    public function load_config($storagereference) {
         global $DB;
-        $object = $DB->get_record('hybridteachstore_onedrive', ['id' => $processedrecording]);
-        $url="";
-        if ($object->weburl) {
-            $url = $object->weburl;
-        }
+
+        $sql = "SELECT * 
+        FROM {hybridteachstore_onedrive_co} od
+        INNER JOIN {hybridteaching_configs} htc ON htc.subpluginconfigid=od.id
+            WHERE htc.id=:storagereference";
+
+        $config = $DB->get_record_sql ($sql, ['storagereference' => $storagereference]);
+        return $config;
+    }
+
+    public function get_recording($processedrecording, $storagereference,  $htid, $sid) {
+        $config = $this->load_config($storagereference);
+
+        $recording = new \hybridteachstore_onedrive\onedrive_handler($config);
+        //$url = $recording->get_urlrecording ($processedrecording /*, $htid, $sid*/);
+        $url = $recording->get_urlrecording ($processedrecording);
         return $url;
     }
+
 }

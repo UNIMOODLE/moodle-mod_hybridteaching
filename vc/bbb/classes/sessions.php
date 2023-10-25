@@ -150,14 +150,13 @@ class sessions {
     public function load_bbb_config_from_session(){
         global $DB;
         $sql = "SELECT h.config
-                FROM mdl_hybridteaching h
-                JOIN mdl_hybridteaching_session hs ON hs.hybridteachingid=h.id
+                FROM {hybridteaching} h
+                JOIN {hybridteaching_session} hs ON hs.hybridteachingid=h.id
                 WHERE hs.id=:htsession";
 
         $configpartial = $DB->get_record_sql($sql, ['htsession' => $this->bbbsession->htsession]);
         $config = $this->load_bbb_config($configpartial->config);
         return $config;
-
     }
 
     public function get_zone_access() {

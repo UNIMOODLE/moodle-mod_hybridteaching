@@ -43,8 +43,8 @@ class attendance_options_form extends moodleform {
         $perpageval = $this->_customdata['perpage'];
         $groupmode = groups_get_activity_groupmode($cm);
         $selectgroups = [];
-        $selectgroups[0] = get_string('allgroups', 'hybridteaching');
         $selectgroups[-1] = get_string('anygroup', 'hybridteaching');
+        $selectgroups[0] = get_string('allgroups', 'hybridteaching');
         $selectfilter = $this->_customdata['selectedfilter'];
         $mform->addElement('header', 'headeraddmultiplesessions', get_string('addmultiplesessions', 'hybridteaching'));
         if ($groupmode == SEPARATEGROUPS || $groupmode == VISIBLEGROUPS) {
@@ -59,7 +59,7 @@ class attendance_options_form extends moodleform {
                     $selectgroups[$group->id] = $group->name;
                 }
                 if ($groupmode == SEPARATEGROUPS) {
-                    array_shift($selectgroups);
+                    //array_shift($selectgroups);
                 }
                 $mform->addElement('select', 'groupid', get_string('sessionfor', 'hybridteaching'), $selectgroups);
             } else {

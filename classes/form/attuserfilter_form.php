@@ -27,7 +27,7 @@ require_once($CFG->dirroot . '/mod/hybridteaching/classes/controller/attendance_
 
 class attuserfilter_options_form extends moodleform {
     public function definition() {
-        global $OUTPUT;
+        global $OUTPUT, $CFG;
 
         $mform = &$this->_form;
         $mform->_attributes['id'] = 'attuserfilter' . substr($mform->_attributes['id'], 6);
@@ -47,6 +47,7 @@ class attuserfilter_options_form extends moodleform {
         $sort = $this->_customdata['sort'];
         $dir = $this->_customdata['dir'];
         $groupid = $this->_customdata['groupid'];
+        $attid = $this->_customdata['att'];
 
         $perpage = $this->_customdata['perpage'];
         $selectedsession = $this->_customdata['sessid'];

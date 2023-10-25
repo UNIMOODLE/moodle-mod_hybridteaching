@@ -8,8 +8,8 @@ require_once($CFG->dirroot . '/mod/hybridteaching/classes/controller/attendance_
 
 class grades {
     const ATTENDED_SESSIONS = 1;
-    const PERCENTAJE_ATTENDED_SESSIONS = 2;
-    const PERCENTAJE_TOTAL_TIME_ATTENDED_SESSIONS = 3;
+    const PERCENTAGE_ATTENDED_SESSIONS = 2;
+    const PERCENTAGE_TOTAL_TIME_ATTENDED_SESSIONS = 3;
 
     /**
      * Updates the grades of users in the hybrid teaching module.
@@ -78,10 +78,10 @@ class grades {
             case self::ATTENDED_SESSIONS:
                 return $this->calc_grade_by_attended_sess($ht, $userid);
                 break;
-            case self::PERCENTAJE_ATTENDED_SESSIONS:
+            case self::PERCENTAGE_ATTENDED_SESSIONS:
                 return $this->calc_grade_by_attended_sess_per($ht, $userid);
                 break;
-            case self::PERCENTAJE_TOTAL_TIME_ATTENDED_SESSIONS:
+            case self::PERCENTAGE_TOTAL_TIME_ATTENDED_SESSIONS:
                 return $this->calc_grade_by_attended_sess_time_per($ht, $userid);
                 break;
         }
@@ -121,8 +121,15 @@ class grades {
 
         $usergrade = 0;
         $maxgradeper = $ht->maxgradeattendance / 100;
-        $attendancetomaxgrade = round($DB->count_records('hybridteaching_session',
-            array('hybridteachingid' => $ht->id, 'attexempt' => 0)) * $maxgradeper);
+        $sql = "SELECT count(ha.id)
+                  FROM {hybridteaching_attendance} ha
+            INNER JOIN {hybridteaching_session} hs ON ha.sessionid = hs.id
+                 WHERE ha.userid = :userid
+                   AND ha.hybridteachingid = :hybridteachingid
+                   AND ha.status != :status
+                   AND hs.attexempt = :attexempt";
+        $params = ['userid' => $userid, 'hybridteachingid' => $ht->id, 'status' => 3, 'attexempt' => 0];
+        $attendancetomaxgrade = round($DB->count_records_sql($sql, $params) * $maxgradeper);
 
         $userattendance = $this->count_user_att($ht, $userid);
 
