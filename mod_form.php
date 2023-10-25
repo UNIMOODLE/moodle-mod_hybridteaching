@@ -307,24 +307,26 @@ class mod_hybridteaching_mod_form extends moodleform_mod {
         return $data;
     }
 
-    function data_preprocessing(&$default_values){
+    function data_preprocessing(&$default_values) {
         global $DB;
 
         // Set up the completion checkboxes which aren't part of standard data.
         // We also make the default value (if you turn on the checkbox) for those
         // numbers to be 1, this will not apply unless checkbox is ticked.
-        $default_values['completionattendanceenabled']=
-            !empty($default_values['completionattendance']) ? 1 : 0;
+        $default_values['completionattendanceenabled'] = !empty($default_values['completionattendance']) ? 1 : 0;
+        
         if(empty($default_values['completionattendance'])) {
-            $default_values['completionattendance']=1;
+            $default_values['completionattendance'] = 1;
         }
 
         //Merge typevc and instance: get the correct value at typevc. 
         //Ex: 2-bbb or 1-zoom
-        $content=$DB->get_record('hybridteaching',['id'=>$this->_instance]);
-        if ($content && $content->usevideoconference){
-            $typevc=$content->config."-".$content->typevc;
-            $default_values['typevc'] = $typevc;
+        if (!empty($this->_instance)) {
+            $content = $DB->get_record('hybridteaching', ['id' => $this->_instance]);
+            if ($content && $content->usevideoconference) {
+                $typevc = $content->config."-".$content->typevc;
+                $default_values['typevc'] = $typevc;
+            }
         }
     }
 
