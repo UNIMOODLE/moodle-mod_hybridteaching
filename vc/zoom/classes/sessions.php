@@ -1,5 +1,4 @@
 <?php
-
 // This file is part of Moodle - https://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -15,12 +14,21 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
+// Project implemented by the "Recovery, Transformation and Resilience Plan.
+// Funded by the European Union - Next GenerationEU".
+//
+// Produced by the UNIMOODLE University Group: Universities of
+// Valladolid, Complutense de Madrid, UPV/EHU, León, Salamanca,
+// Illes Balears, Valencia, Rey Juan Carlos, La Laguna, Zaragoza, Málaga,
+// Córdoba, Extremadura, Vigo, Las Palmas de Gran Canaria y Burgos.
+
 /**
- * Display information about all the mod_hybridteaching modules in the requested course.
- *
- * @package     mod_hybridteaching
- * @copyright   2023 isyc <isyc@example.com>
- * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * Display information about all the mod_hybridteaching modules in the requested course. *
+ * @package    mod_hybridteaching
+ * @copyright  2023 Proyecto UNIMOODLE
+ * @author     UNIMOODLE Group (Coordinator) <direccion.area.estrategia.digital@uva.es>
+ * @author     ISYC <soporte@isyc.com>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 namespace hybridteachvc_zoom;
@@ -51,7 +59,7 @@ class sessions {
     public function set_session($htsessionid) {
         $this->zoomsession = $this->load_session($htsessionid);
     }
-    
+
     /**
      * Creates a unique session extended for a Zoom meeting config.
      *
@@ -86,7 +94,7 @@ class sessions {
         $errormsg = '';
         $zoomconfig = $this->load_zoom_config($ht->config);
         $zoom = $DB->get_record('hybridteachvc_zoom', ['htsession' => $data->id]);
-        //if is created zoom, change in zoom with webservice
+        // If is created zoom, change in zoom with webservice.
         if ($zoom) {
             $zoom = (object) array_merge((array) $zoom, (array) $data);
             $service = new \hybridteachvc_zoom\webservice($zoomconfig);
@@ -120,9 +128,9 @@ class sessions {
      * @param mixed $response stdClass object containing Zoom API response data
      * @return stdClass $newzoom stdClass object containing relevant data
      */
-    public function populate_htzoom_from_response($data, $response) {        
+    public function populate_htzoom_from_response($data, $response) {
         $newzoom = new \stdClass();
-        $newzoom->htsession = $data->id;   //session id
+        $newzoom->htsession = $data->id;
         $newzoom->meetingid = $response->id;
         $newzoom->hostid = $response->host_id;
         $newzoom->hostemail = $response->host_email;
@@ -156,22 +164,6 @@ class sessions {
     }
 
     public function get_zone_access() {
-        //comprobar si el rol es para iniciar reunión o para entrar a reunión
-        //y mandamos la url de acceso (o bien starturl o bien joinurl)
-        //starturl o join url, según sea hospedador o participante
-
-        //aqui antes también comprobar que el plugin de tipo $type existe, está instalado y activo
-        
-        /*
-        if ($vc){
-            //si hospedador:
-            $nexturl = new moodle_url($vc->starturl);
-            //si participante
-            $nexturl = new moodle_url($vc->joinurl);
-        }
-        */
-
-
         if ($this->zoomsession) {
             $array = [
                 'id' => $this->zoomsession->id,

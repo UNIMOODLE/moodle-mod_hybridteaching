@@ -14,31 +14,38 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
+// Project implemented by the "Recovery, Transformation and Resilience Plan.
+// Funded by the European Union - Next GenerationEU".
+//
+// Produced by the UNIMOODLE University Group: Universities of
+// Valladolid, Complutense de Madrid, UPV/EHU, León, Salamanca,
+// Illes Balears, Valencia, Rey Juan Carlos, La Laguna, Zaragoza, Málaga,
+// Córdoba, Extremadura, Vigo, Las Palmas de Gran Canaria y Burgos.
+
 /**
- * Display information about all the mod_hybridteaching modules in the requested course.
- *
- * @package     mod_hybridteaching
- * @copyright   2023 isyc <isyc@example.com>
- * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * Display information about all the mod_hybridteaching modules in the requested course. *
+ * @package    mod_hybridteaching
+ * @copyright  2023 Proyecto UNIMOODLE
+ * @author     UNIMOODLE Group (Coordinator) <direccion.area.estrategia.digital@uva.es>
+ * @author     ISYC <soporte@isyc.com>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
- namespace hybridteachstore_youtube;
+namespace hybridteachstore_youtube;
 
-defined('MOODLE_INTERNAL') || die();
+class sessions {
 
-global $CFG;
-
-
-class sessions  {
-
-    public function get_recording($processedrecording, $storagereference, $htid, $sid){
+    public function get_recording($processedrecording, $storagereference, $htid, $sid) {
         global $DB;
         $object = $DB->get_record('hybridteachstore_youtube', ['id' => $processedrecording]);
-        $url="";
+        $url = "";
         if ($object) {
-            $url="https://www.youtube.com/watch?v=".$object->code;
+            $url = "https://www.youtube.com/watch?v=".$object->code;
         }
         return $url;
     }
 
+    public function delete_session_extended($htsession, $configid) {
+
+    }
 }

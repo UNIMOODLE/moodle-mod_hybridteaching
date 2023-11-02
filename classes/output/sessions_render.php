@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - https://moodle.org/
+// This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -12,15 +12,23 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
+// Project implemented by the "Recovery, Transformation and Resilience Plan.
+// Funded by the European Union - Next GenerationEU".
+//
+// Produced by the UNIMOODLE University Group: Universities of
+// Valladolid, Complutense de Madrid, UPV/EHU, León, Salamanca,
+// Illes Balears, Valencia, Rey Juan Carlos, La Laguna, Zaragoza, Málaga,
+// Córdoba, Extremadura, Vigo, Las Palmas de Gran Canaria y Burgos.
 
 /**
- * Plugin administration pages are defined here.
- *
- * @package     mod_hybridteaching
- * @category    admin
- * @copyright   2023 isyc <isyc@example.com>
- * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * Display information about all the mod_hybridteaching modules in the requested course. *
+ * @package    mod_hybridteaching
+ * @copyright  2023 Proyecto UNIMOODLE
+ * @author     UNIMOODLE Group (Coordinator) <direccion.area.estrategia.digital@uva.es>
+ * @author     ISYC <soporte@isyc.com>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 defined('MOODLE_INTERNAL') || die();
@@ -82,7 +90,7 @@ class hybridteaching_sessions_render extends \table_sql implements dynamic_table
             'strattendance' => get_string('attendance', 'mod_hybridteaching'),
             'strmaterials' => get_string('materials', 'mod_hybridteaching'),
             'stroptions' => get_string('actions', 'mod_hybridteaching'),
-            'attexempt' => get_string('attexempt', 'hybridteaching')
+            'attexempt' => get_string('attexempt', 'hybridteaching'),
         ];
 
         $sortexclusions = ['strrecording', 'strattendance', 'strmaterials', 'stroptions', 'strstart'];
@@ -135,25 +143,28 @@ class hybridteaching_sessions_render extends \table_sql implements dynamic_table
 
         $optionsformparams = [
             'id' => $id,
-            'l' => $this->typelist
+            'l' => $this->typelist,
         ];
         $optionsform = new session_options_form(null, $optionsformparams);
 
         $return = $OUTPUT->box_start('generalbox');
+        $baseurl = new moodle_url('/mod/hybridteaching/sessions.php', ['id' => $id, 'l' => $this->typelist,
+            'sort' => $sort, 'dir' => $dir, 'perpage' => $perpage]);
 
         $table = new html_table();
         $table->head = $this->get_table_header($columns);
-        $table->colclasses = array('leftalign', 'leftalign', 'centeralign',
-            'centeralign', 'centeralign', 'centeralign', 'centeralign');
+        $table->colclasses = ['leftalign', 'leftalign', 'centeralign',
+            'centeralign', 'centeralign', 'centeralign', 'centeralign', ];
         $table->id = 'hybridteachingsessions';
         $table->attributes['class'] = 'sessionstable generaltable';
-        $table->data = array();
+        $table->data = [];
 
-        $url = new moodle_url('/mod/hybridteaching/classes/action/session_action.php', array('sesskey' => sesskey()));
+        $url = new moodle_url('/mod/hybridteaching/classes/action/session_action.php', ['sesskey' => sesskey()]);
         $sessioncontroller = new sessions_controller($this->hybridteaching);
         $operator = $this->get_operator();
         $sessionslist = $sessioncontroller->load_sessions($page, $perpage, $params, $extrasql, $operator, $sort, $dir);
         $sessionscount = $sessioncontroller->count_sessions($params, $operator);
+        $return .= $OUTPUT->paging_bar($sessionscount, $page, $perpage, $baseurl);
 
         $returnurl = new moodle_url('/mod/hybridteaching/sessions.php?id='.$this->cm->id.'&l='.$this->typelist);
         $cache = cache::make('mod_hybridteaching', 'sessatt');
@@ -187,7 +198,7 @@ class hybridteaching_sessions_render extends \table_sql implements dynamic_table
 
             // Get recordings.
 
-            $recordingbutton = get_string('norecording', 'mod_hybridteaching');    
+            $recordingbutton = get_string('norecording', 'mod_hybridteaching');
             if (has_capability('mod/hybridteaching:viewrecordings', $this->context)) {
                 if ($session['userecordvc'] == 1 && $session['processedrecording'] >= 0) {
                     if ($session['storagereference'] > 0) {
@@ -198,15 +209,17 @@ class hybridteaching_sessions_render extends \table_sql implements dynamic_table
                             sessions_controller::require_subplugin_store($classstorage['type']);
                             $classname = $classstorage['classname'];
                             $sessionrecording = new $classname();
-                            $urlrecording = $CFG->wwwroot . '/mod/hybridteaching/loadrecording.php?cid='.$this->hybridteaching->course.'&sid='.$session['id'].'&id='.$this->cm->id;
-                            $recordingbutton = html_writer::link($urlrecording, get_string('watchrecording', 'mod_hybridteaching'), ['target' => '_blank', 'class' => 'btn btn-secondary']);
+                            $urlrecording = $CFG->wwwroot . '/mod/hybridteaching/loadrecording.php?cid='.
+                                $this->hybridteaching->course.'&sid='.$session['id'].'&id='.$this->cm->id;
+                            $recordingbutton = html_writer::link($urlrecording, get_string('watchrecording',
+                                'mod_hybridteaching'), ['target' => '_blank', 'class' => 'btn btn-secondary']);
                         }
                     } else if ($session['storagereference'] == -1) {
-                    // For use case to BBB or a videconference type storage.
+                        // For use case to BBB or a videconference type storage.
                         $config = helper::subplugin_config_exists($session['vcreference'], 'vc');
                         if ($config) {
                             sessions_controller::require_subplugin_session($session['typevc']);
-                            $classname = sessions_controller::get_subplugin_class($session['typevc']);
+                            $classname = sessions_controller::get_subpluginvc_class($session['typevc']);
                             $sessionrecording = new $classname($session['id']);
                             $urlrecording = $sessionrecording->get_recording($session['id']);
                         }
@@ -217,14 +230,14 @@ class hybridteaching_sessions_render extends \table_sql implements dynamic_table
             $body = [
                 'class' => '',
                 'sessionid' => $session['id'],
-                'group' => $session['groupid'] == 0 ? get_string('allgroups', 'hybridteaching') 
+                'group' => $session['groupid'] == 0 ? get_string('allgroups', 'hybridteaching')
                     : groups_get_group($session['groupid'])->name,
                 'name' => $session['name'],
                 'typevc' => $session['typevc'],
                 'description' => $session['description'],
                 'date' => $date,
                 'hour' => $hour,
-                'attexempt' => html_writer::checkbox('attexempt[]', $session['attexempt'], 
+                'attexempt' => html_writer::checkbox('attexempt[]', $session['attexempt'],
                     $session['attexempt'], '', ['class' => 'attexempt', 'data-id' => $sessionid]),
                 'duration' => !empty($session['duration']) ? helper::get_hours_format($session['duration']) : self::EMPTY,
                 'recordingbutton' => $recordingbutton,
@@ -236,12 +249,12 @@ class hybridteaching_sessions_render extends \table_sql implements dynamic_table
                     'name' => 'session[]',
                     'classes' => 'm-1',
                     'checked' => false,
-                    'value' => $sessionid
-                ])
+                    'value' => $sessionid,
+                ]),
             ];
 
             $hybridteachingid = empty($hybridteaching) ? $this->cm->instance : $hybridteachingid;
-            $params = array('sid' => $sessionid, 'h' => $hybridteachingid, 'id' => $id, 'l' => $slist);
+            $params = ['sid' => $sessionid, 'h' => $hybridteachingid, 'id' => $id, 'l' => $slist];
             $urledit = '/mod/hybridteaching/programsessions.php?id='.$this->cm->id .'&s='.$sessionid;
 
             $options = $this->get_table_options($body, $params, $url, $urledit);
@@ -255,7 +268,7 @@ class hybridteaching_sessions_render extends \table_sql implements dynamic_table
             $table->data[] = $row;
         }
 
-        // add filters.
+        // Add filters.
         $sfiltering->display_add();
         $sfiltering->display_active();
         $optionsform->display();
@@ -268,10 +281,8 @@ class hybridteaching_sessions_render extends \table_sql implements dynamic_table
         $sessiontable .= html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'h', 'value' => $hybridteachingid]);
         $sessiontable .= html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'id', 'value' => $id]);
         $sessiontable .= html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'l', 'value' => $this->typelist]);
-        $return .= html_writer::tag('form', $sessiontable, array('method' => 'post',
-            'action' => '/mod/hybridteaching/classes/action/session_action.php'));
-        $baseurl = new moodle_url('/mod/hybridteaching/sessions.php', array('id' => $id, 'l' => $this->typelist, 
-            'sort' => $sort, 'dir' => $dir, 'perpage' => $perpage));
+        $return .= html_writer::tag('form', $sessiontable, ['method' => 'post',
+            'action' => '/mod/hybridteaching/classes/action/session_action.php']);
         $return .= $OUTPUT->paging_bar($sessionscount, $page, $perpage, $baseurl);
         $return .= $OUTPUT->box_end();
 
@@ -283,7 +294,7 @@ class hybridteaching_sessions_render extends \table_sql implements dynamic_table
         $header = [];
         if ($this->typelist == SESSION_LIST) {
             $header = [
-                (has_capability('mod/hybridteaching:sessionsfulltable', $this->context)) 
+                (has_capability('mod/hybridteaching:sessionsfulltable', $this->context))
                     ? $OUTPUT->render($columns['mastercheckbox']) : '',
                 $columns['strgroup'],
                 (has_capability('mod/hybridteaching:sessionsfulltable', $this->context)) ? $columns['strtype'] : '',
@@ -294,7 +305,7 @@ class hybridteaching_sessions_render extends \table_sql implements dynamic_table
                 (has_capability('mod/hybridteaching:sessionsfulltable', $this->context)) ? $columns['strattendance'] : '',
                 (has_capability('mod/hybridteaching:sessionsfulltable', $this->context)) ? $columns['attexempt'] : '',
                 $columns['strmaterials'],
-                $columns['stroptions']
+                $columns['stroptions'],
             ];
         } else if ($this->typelist == PROGRAM_SESSION_LIST) {
             $header = [
@@ -306,7 +317,7 @@ class hybridteaching_sessions_render extends \table_sql implements dynamic_table
                 $columns['strname'],
                 $columns['attexempt'],
                 $columns['strmaterials'],
-                $columns['stroptions']
+                $columns['stroptions'],
             ];
         }
         return $header;
@@ -340,32 +351,32 @@ class hybridteaching_sessions_render extends \table_sql implements dynamic_table
 
         $class = '';
         if ($body['enabled']) {
-            $visible = html_writer::link(new moodle_url($url, array_merge($params, array('action' => 'disable'))),
-                $OUTPUT->pix_icon('t/hide', get_string('disable'), 'moodle', array('class' => 'iconsmall')));
+            $visible = html_writer::link(new moodle_url($url, array_merge($params, ['action' => 'disable'])),
+                $OUTPUT->pix_icon('t/hide', get_string('disable'), 'moodle', ['class' => 'iconsmall']));
         } else {
-            $visible = html_writer::link(new moodle_url($url, array_merge($params, array('action' => 'enable'))),
-                $OUTPUT->pix_icon('t/show', get_string('enable'), 'moodle', array('class' => 'iconsmall')));
+            $visible = html_writer::link(new moodle_url($url, array_merge($params, ['action' => 'enable'])),
+                $OUTPUT->pix_icon('t/show', get_string('enable'), 'moodle', ['class' => 'iconsmall']));
             $class = 'dimmed_text';
         }
 
         $edit = html_writer::link(new moodle_url($urledit),
-            $OUTPUT->pix_icon('t/edit', get_string('edit'), 'moodle', array('class' => 'iconsmall')));
+            $OUTPUT->pix_icon('t/edit', get_string('edit'), 'moodle', ['class' => 'iconsmall']));
 
-        $delete = html_writer::link(new moodle_url($url, array_merge($params, array('action' => 'delete'))),
-            $OUTPUT->pix_icon('t/delete', get_string('delete'), 'moodle', array('class' => 'iconsmall')),
-            array('onclick' => 'if (!confirm("'.get_string('deleteconfirm', 'mod_hybridteaching', $body['name']).'"))
-            { return false; }')
+        $delete = html_writer::link(new moodle_url($url, array_merge($params, ['action' => 'delete'])),
+            $OUTPUT->pix_icon('t/delete', get_string('delete'), 'moodle', ['class' => 'iconsmall']),
+            ['onclick' => 'if (!confirm("'.get_string('deleteconfirm', 'mod_hybridteaching', $body['name']).'"))
+            { return false; }', ]
         );
 
         $info = html_writer::link(new moodle_url(''),
-            $OUTPUT->pix_icon('docs', get_string('actions', 'mod_hybridteaching'), 'moodle', array('class' => 'iconsmall')));
+            $OUTPUT->pix_icon('docs', get_string('actions', 'mod_hybridteaching'), 'moodle', ['class' => 'iconsmall']));
 
         $record = html_writer::link(new moodle_url(''),
             $OUTPUT->pix_icon('i/messagecontentvideo', get_string('actions', 'mod_hybridteaching'),
-                'moodle', array('class' => 'iconsmall')));
+                'moodle', ['class' => 'iconsmall']));
 
         $attendance = html_writer::link(new moodle_url(''),
-            $OUTPUT->pix_icon('i/unchecked', get_string('actions', 'mod_hybridteaching'), 'moodle', array('class' => 'iconsmall')));
+            $OUTPUT->pix_icon('i/unchecked', get_string('actions', 'mod_hybridteaching'), 'moodle', ['class' => 'iconsmall']));
 
         $options = [
             'visible' => $visible,
@@ -374,7 +385,7 @@ class hybridteaching_sessions_render extends \table_sql implements dynamic_table
             'delete' => $delete,
             'info' => $info,
             'record' => $record,
-            'attendance' => $attendance
+            'attendance' => $attendance,
         ];
 
         return $options;
@@ -395,9 +406,9 @@ class hybridteaching_sessions_render extends \table_sql implements dynamic_table
         $row = '';
         if ($this->typelist == SESSION_LIST) {
             $row = new html_table_row(
-                array(
-                    (has_capability('mod/hybridteaching:sessionsfulltable', $this->context)) 
-                        ? $OUTPUT->render($params['checkbox']) : '', 
+                [
+                    (has_capability('mod/hybridteaching:sessionsfulltable', $this->context))
+                        ? $OUTPUT->render($params['checkbox']) : '',
                     $params['group'],
                     $typealias,
                     $params['name'],
@@ -407,10 +418,10 @@ class hybridteaching_sessions_render extends \table_sql implements dynamic_table
                     (has_capability('mod/hybridteaching:sessionsfulltable', $this->context)) ? $params['attendance'] : '',
                     (has_capability('mod/hybridteaching:sessionsfulltable', $this->context)) ? $params['attexempt'] : '',
                     $params['materials'],
-                    $options));
+                    $options, ]);
         } else if ($this->typelist == PROGRAM_SESSION_LIST) {
-            $row = new html_table_row(array($OUTPUT->render($params['checkbox']), $params['date'], $params['hour'],
-                $params['duration'], $params['group'], $params['name'], $params['attexempt'], $params['materials'], $options));
+            $row = new html_table_row([$OUTPUT->render($params['checkbox']), $params['date'], $params['hour'],
+                $params['duration'], $params['group'], $params['name'], $params['attexempt'], $params['materials'], $options, ]);
         }
 
         return $row;
@@ -418,7 +429,7 @@ class hybridteaching_sessions_render extends \table_sql implements dynamic_table
 
     public function get_column_name($column) {
         switch ($column) {
-            case 'strgroup': 
+            case 'strgroup':
                 return 'groupid';
                 break;
             case 'strtype':
@@ -447,32 +458,32 @@ class hybridteaching_sessions_render extends \table_sql implements dynamic_table
     }
 
     public function get_bulk_options_select() {
-        $selectactionparams = array(
+        $selectactionparams = [
             'id' => 'sessionid',
             'class' => 'ml-2',
             'data-action' => 'toggle',
             'data-togglegroup' => 'sessions-table',
             'data-toggle' => 'action',
-            'disabled' => 'disabled'
-        );
+            'disabled' => 'disabled',
+        ];
 
         if ($this->typelist == SESSION_LIST) {
             $options = [
-                'bulkdelete' => get_string('deletesessions', 'hybridteaching')
+                'bulkdelete' => get_string('deletesessions', 'hybridteaching'),
             ];
         } else if ($this->typelist == PROGRAM_SESSION_LIST) {
             $options = [
                 'bulkupdateduration' => get_string('updatesesduration', 'hybridteaching'),
                 'bulkupdatestarttime' => get_string('updatesesstarttime', 'hybridteaching'),
-                'bulkdelete' => get_string('deletesessions', 'hybridteaching')
+                'bulkdelete' => get_string('deletesessions', 'hybridteaching'),
             ];
         }
 
-        $attributes = array(
+        $attributes = [
             'type'  => 'submit',
             'name'  => 'go',
             'value' => get_string('go', 'hybridteaching'),
-            'class' => 'btn btn-secondary');
+            'class' => 'btn btn-secondary', ];
         $submitb = html_writer::empty_tag('input', $attributes);
 
         $label = html_writer::tag('label', get_string("withselectedsessions", 'hybridteaching'),
@@ -492,7 +503,7 @@ class hybridteaching_sessions_render extends \table_sql implements dynamic_table
             'strname' => get_string('name'),
             'strdate' => get_string('date'),
             'strstart' => get_string('start', 'mod_hybridteaching'),
-            'strduration' => get_string('duration', 'mod_hybridteaching')
+            'strduration' => get_string('duration', 'mod_hybridteaching'),
         ];
 
         $return = $OUTPUT->heading(get_string('withselectedsessions', 'mod_hybridteaching'));
@@ -500,11 +511,11 @@ class hybridteaching_sessions_render extends \table_sql implements dynamic_table
 
         $table = new html_table();
         $table->head = $columns;
-        $table->colclasses = array('leftalign', 'leftalign', 'centeralign',
-            'centeralign', 'centeralign', 'centeralign', 'centeralign');
+        $table->colclasses = ['leftalign', 'leftalign', 'centeralign',
+            'centeralign', 'centeralign', 'centeralign', 'centeralign', ];
         $table->id = 'hybridteachingsessions';
         $table->attributes['class'] = 'sessionstable generaltable';
-        $table->data = array();
+        $table->data = [];
 
         $sessioncontroller = new sessions_controller($this->hybridteaching);
         $sessionslist = $sessioncontroller->load_sessions(0, 0, $params, $extrasql);
@@ -521,7 +532,7 @@ class hybridteaching_sessions_render extends \table_sql implements dynamic_table
                 'name' => $session['name'],
                 'date' => $date,
                 'hour' => $hour,
-                'duration' => helper::get_hours_format($session['duration'])
+                'duration' => helper::get_hours_format($session['duration']),
             ];
 
             // Add a row to the table.
@@ -545,6 +556,6 @@ class hybridteaching_sessions_render extends \table_sql implements dynamic_table
 
         [$insql, $params] = $DB->get_in_or_equal($grouparray, SQL_PARAMS_NAMED, 'groupid');
         $extrasql = 'groupid ' . $insql;
-        return array($extrasql, $params);
+        return [$extrasql, $params];
     }
 }

@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - https://moodle.org/
+// This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -12,24 +12,34 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
+// Project implemented by the "Recovery, Transformation and Resilience Plan.
+// Funded by the European Union - Next GenerationEU".
+//
+// Produced by the UNIMOODLE University Group: Universities of
+// Valladolid, Complutense de Madrid, UPV/EHU, León, Salamanca,
+// Illes Balears, Valencia, Rey Juan Carlos, La Laguna, Zaragoza, Málaga,
+// Córdoba, Extremadura, Vigo, Las Palmas de Gran Canaria y Burgos.
 
 /**
- * Code that is executed before the tables and data are dropped during the plugin uninstallation.
- *
- * @package     mod_hybridteaching
- * @category    upgrade
- * @copyright   2023 isyc <isyc@example.com>
- * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * Display information about all the mod_hybridteaching modules in the requested course. *
+ * @package    mod_hybridteaching
+ * @copyright  2023 Proyecto UNIMOODLE
+ * @author     UNIMOODLE Group (Coordinator) <direccion.area.estrategia.digital@uva.es>
+ * @author     ISYC <soporte@isyc.com>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 /**
  * Custom uninstallation procedure.
  */
 function xmldb_hybridteachvc_zoom_uninstall() {
-
-    //eliminar aquí las instancias guardadas en hybridteaching_configs
-    //global $DB;
-    //$DB->delete_records('hybridteaching_configs',['type'=>'hybridteachvc_zoom']);
+    delete_subplugin_configs();
     return true;
+}
+
+function delete_subplugin_configs() {
+    global $DB;
+    $DB->delete_records('hybridteaching_configs', array('type' => get_string('zoom', 'hybridteachvc_zoom')));
 }

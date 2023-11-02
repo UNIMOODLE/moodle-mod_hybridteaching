@@ -19,8 +19,6 @@ namespace hybridteachvc_bbb;
 use mod_bigbluebuttonbn\local\proxy\proxy_base;
 use mod_bigbluebuttonbn\local\proxy\curl;
 
-defined('MOODLE_INTERNAL') || die();
-
 class bbbproxy extends proxy_base {
     /**
      * Minimum poll interval for remote bigbluebutton server in seconds.
@@ -40,7 +38,7 @@ class bbbproxy extends proxy_base {
      *
     */
     public function __construct($bbbinstance) {
-        $this->bbbinstance = $bbbinstance;  //api with credentials, url...
+        $this->bbbinstance = $bbbinstance;  // Api with credentials, url...
     }
 
     /**
@@ -86,12 +84,12 @@ class bbbproxy extends proxy_base {
             'internalMeetingID' => (string) $xml->internalMeetingID,
             'attendeePW' => (string) $xml->attendeePW,
             'moderatorPW' => (string) $xml->moderatorPW,
-            'createTime' => (string) $xml->createTime
+            'createTime' => (string) $xml->createTime,
         ];
     }
 
-    public function end_meeting($meetingid,$modpw){
-        $xml = $this->fetch_endpoint_xml_config('end',['meetingID' => $meetingid, 'password' => $modpw]);
+    public function end_meeting($meetingid, $modpw) {
+        $xml = $this->fetch_endpoint_xml_config('end', ['meetingID' => $meetingid, 'password' => $modpw]);
         self::assert_returned_xml($xml, ['meetingid' => $meetingid]);
     }
 
@@ -110,7 +108,6 @@ class bbbproxy extends proxy_base {
         }, array_keys($metadata)), $metadata);
 
         $params = http_build_query($data + $metadata, '', '&');
-        //echo $baseurl.$params.'&checksum=' . sha1($action . $params . $this->sanitized_secret_config());
         return $baseurl . $params . '&checksum=' . sha1($action . $params . $this->sanitized_secret_config());
     }
 
@@ -120,7 +117,7 @@ class bbbproxy extends proxy_base {
      * @return string
      */
     protected function sanitized_url_config() {
-        //$serverurl = trim(config::get('server_url'));
+        // $serverurl = trim(config::get('server_url'));
         $serverurl = trim($this->bbbinstance->serverurl);
         if (PHPUNIT_TEST) {
             $serverurl = (new moodle_url(TEST_MOD_BIGBLUEBUTTONBN_MOCK_SERVER))->out(false);
@@ -169,9 +166,9 @@ class bbbproxy extends proxy_base {
         $data = [
             'meetingID' => $meetingid,
             'fullName' => $username,
-            //'password' => $pw,   //deprecado, no es necesario ya que se pasa el rol
+            // 'password' => $pw,   //deprecado, no es necesario ya que se pasa el rol
             'logoutURL' => $logouturl,
-            'role' => $role
+            'role' => $role,
         ];
 
         if (!is_null($configtoken)) {
@@ -200,20 +197,21 @@ class bbbproxy extends proxy_base {
      *
      * @param meetingid $meetingid
      */
-    public function get_meeting_recording($meetingid){
+    public function get_meeting_recording($meetingid) {
         $data = [
-            'meetingID' => $meetingid, 
-//'496909493508781bb144e696513a1b492ef0d940', 
-            'state' => 'published,unpublished,processed, processing, deleted',  //comprobar si las processed hay que descargarlas tb o no
+            'meetingID' => $meetingid,
+            // '496909493508781bb144e696513a1b492ef0d940',
+            'state' => 'published, unpublished,processed, processing, deleted',
+            // Comprobar si las processed hay que descargarlas tb o no.
         ];
         $recordingurl = $this->action_url_config('getRecordings', $data);
         $recordingid = '';
         $curl = new curl();
         $xml = $curl->get($recordingurl);
-        self::assert_returned_xml($xml);           
-        if ($xml != null){
-            if (isset($xml->recordings->recording->recordID)){
-                $recordingid=(string) $xml->recordings->recording->recordID;
+        self::assert_returned_xml($xml);
+        if ($xml != null) {
+            if (isset($xml->recordings->recording->recordID)) {
+                $recordingid = (string) $xml->recordings->recording->recordID;
             }
         }
         return [
@@ -223,24 +221,24 @@ class bbbproxy extends proxy_base {
     }
 
      /**
-     * Get meeting recording by recordingid
-     *
-     * @param recordingid $recordingid
-     */
-    public function get_url_recording_by_recordid($recordingid){
+      * Get meeting recording by recordingid
+      *
+      * @param recordingid $recordingid
+      */
+    public function get_url_recording_by_recordid($recordingid) {
         $data = [
             'recordingID' => $recordingid,
             'state' => 'published,unpublished,processed',
         ];
-        $recordingurl= $this->action_url_config('getRecordings', $data);
-        
+        $recordingurl = $this->action_url_config('getRecordings', $data);
+
         $curl = new curl();
         $xml = $curl->get($recordingurl);
         self::assert_returned_xml($xml);
 
-        if ($xml != null){
-            if (isset($xml->recordings->recording->playback->format->url)){
-                $recordingurl=(string) $xml->recordings->recording->playback->format->url;
+        if ($xml != null) {
+            if (isset($xml->recordings->recording->playback->format->url)) {
+                $recordingurl = (string) $xml->recordings->recording->playback->format->url;
             }
         }
         return [
@@ -248,7 +246,7 @@ class bbbproxy extends proxy_base {
             'recordingid' => $recordingurl,
         ];
     }
-    
+
 
 
     /**
@@ -279,11 +277,11 @@ class bbbproxy extends proxy_base {
         if (!$xml || $xml->returncode != 'SUCCESS') {
             return null;
         }
-    
+
         if (!isset($xml->version)) {
             return null;
         }
-    
+
         $serverversion = (string) $xml->version;
         return (double) $serverversion;
     }
@@ -320,7 +318,7 @@ class bbbproxy extends proxy_base {
             self::get_server_not_available_message(),
             \core\notification::ERROR
         );
-        //redirect(self::get_server_not_available_url($instance));
+        // redirect(self::get_server_not_available_url($instance));
     }
 
     /**
@@ -331,14 +329,14 @@ class bbbproxy extends proxy_base {
     public static function get_server_not_available_message(): string {
         global $USER;
 
-//AÑADIR AQUI EL MENSAJE DEPENDIENDO DEL ROL DENTRO DE LA INSTANCIA
-// UN MENSAJE DISTINTO SI ES ADMIN, SI ES MODERADOR O SI ES ESTUDIANTE
+        // AÑADIR AQUI EL MENSAJE DEPENDIENDO DEL ROL DENTRO DE LA INSTANCIA
+        // UN MENSAJE DISTINTO SI ES ADMIN, SI ES MODERADOR O SI ES ESTUDIANTE.
 
         if (is_siteadmin($USER->id)) {
             return get_string('view_error_unable_join', 'mod_bigbluebuttonbn');
-        /*} else if ($USER->is_moderator()) {
-            return get_string('view_error_unable_join_teacher', 'mod_bigbluebuttonbn');
-        */            
+            /*} else if ($USER->is_moderator()) {
+                return get_string('view_error_unable_join_teacher', 'mod_bigbluebuttonbn');
+             */
         } else {
             return get_string('view_error_unable_join_student', 'mod_bigbluebuttonbn');
         }
@@ -352,15 +350,15 @@ class bbbproxy extends proxy_base {
      */
     public static function get_server_not_available_url($instance): string {
 
-//AÑADIR AQUI EL MENSAJE DEPENDIENDO DEL ROL DENTRO DE LA INSTANCIA
-// UN MENSAJE DISTINTO SI ES ADMIN, SI ES MODERADOR O SI ES ESTUDIANTE
+        // AÑADIR AQUI EL MENSAJE DEPENDIENDO DEL ROL DENTRO DE LA INSTANCIA
+        // UN MENSAJE DISTINTO SI ES ADMIN, SI ES MODERADOR O SI ES ESTUDIANTE.
 
         global $USER;
         if (is_siteadmin($USER->id)) {
             return new moodle_url('/admin/settings.php', ['section' => 'modsettingbigbluebuttonbn']);
-        /*} else if ($instance->is_moderator()) {
-            return new moodle_url('/course/view.php', ['id' => $instance->get_course_id()]);
-        */
+            /*} else if ($instance->is_moderator()) {
+                return new moodle_url('/course/view.php', ['id' => $instance->get_course_id()]);
+            */
         } else {
             return new moodle_url('/course/view.php', ['id' => $instance->get_course_id()]);
         }

@@ -1,5 +1,4 @@
 <?php
-
 // This file is part of Moodle - https://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -15,12 +14,21 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
+// Project implemented by the "Recovery, Transformation and Resilience Plan.
+// Funded by the European Union - Next GenerationEU".
+//
+// Produced by the UNIMOODLE University Group: Universities of
+// Valladolid, Complutense de Madrid, UPV/EHU, León, Salamanca,
+// Illes Balears, Valencia, Rey Juan Carlos, La Laguna, Zaragoza, Málaga,
+// Córdoba, Extremadura, Vigo, Las Palmas de Gran Canaria y Burgos.
+
 /**
- * Display information about all the mod_hybridteaching modules in the requested course.
- *
- * @package     mod_hybridteaching
- * @copyright   2023 isyc <isyc@example.com>
- * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * Display information about all the mod_hybridteaching modules in the requested course. *
+ * @package    mod_hybridteaching
+ * @copyright  2023 Proyecto UNIMOODLE
+ * @author     UNIMOODLE Group (Coordinator) <direccion.area.estrategia.digital@uva.es>
+ * @author     ISYC <soporte@isyc.com>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 namespace hybridteachvc_bbb;
@@ -65,7 +73,7 @@ class sessions {
      * is not false.
      *
      * @param mixed $session the data to be passed to the create_meeting function
-     * @throws 
+     * @throws
      * @return mixed the response from the create_meeting function
      */
     public function create_unique_session_extended($session, $ht) {
@@ -74,20 +82,19 @@ class sessions {
         $bbbconfig = $this->load_bbb_config($ht->config);
 
         $meeting = new meeting($bbbconfig);
-        $response = $meeting->create_meeting($session,$ht);
+        $response = $meeting->create_meeting($session, $ht);
 
-        if (isset($response['returncode']) && $response['returncode']=='SUCCESS'){
-            $bbb = $this->populate_htbbb_from_response($session,$response);
-            $bbb->id = $DB->insert_record('hybridteachvc_bbb', $bbb);        
+        if (isset($response['returncode']) && $response['returncode'] == 'SUCCESS') {
+            $bbb = $this->populate_htbbb_from_response($session, $response);
+            $bbb->id = $DB->insert_record('hybridteachvc_bbb', $bbb);
             return true;
-        }
-        else {
+        } else {
             return false;
         }
     }
-    
+
     public function update_session_extended($data) {
-        //no requires action 
+        // No requires action.
     }
 
     /**
@@ -99,7 +106,7 @@ class sessions {
      */
     public function delete_session_extended($htsession, $configid) {
         global $DB;
-        $bbbconfig = $this->load_bbb_config($configid);      
+        $bbbconfig = $this->load_bbb_config($configid);
         $bbb = $DB->get_record('hybridteachvc_bbb', ['htsession' => $htsession]);
         $meeting = new meeting($bbbconfig);
         $meeting->end_meeting($bbb->meetingid, $bbb->moderatorpass);
@@ -114,9 +121,9 @@ class sessions {
      * @param mixed $response stdClass object containing BBB API response data
      * @return stdClass $newbbb stdClass object containing relevant data
      */
-    public function populate_htbbb_from_response($data, $response) {        
+    public function populate_htbbb_from_response($data, $response) {
         $newbbb = new \stdClass();
-        $newbbb->htsession = $data->id;   //session id
+        $newbbb->htsession = $data->id;   // Session id.
         $newbbb->meetingid = $response['meetingID'];
         $newbbb->moderatorpass = $response['moderatorPW'];
         $newbbb->viewerpass = $response['attendeePW'];
@@ -126,12 +133,12 @@ class sessions {
     }
 
         /**
-     * Loads a BBB config based on the given config ID.
-     *
-     * @param int $configid The ID of the config to load.
-     * @throws Exception If the SQL query fails.
-     * @return stdClass|false The Zoom config record on success, or false on failure.
-     */
+         * Loads a BBB config based on the given config ID.
+         *
+         * @param int $configid The ID of the config to load.
+         * @throws Exception If the SQL query fails.
+         * @return stdClass|false The Zoom config record on success, or false on failure.
+         */
     public function load_bbb_config($configid) {
         global $DB;
 
@@ -144,10 +151,10 @@ class sessions {
         return $config;
     }
 
-    //carga la configuración de isntancia desde el htsession
-    // (ya inicializado con el constructor)
+    // Carga la configuración de isntancia desde el htsession
+    // (ya inicializado con el constructor).
 
-    public function load_bbb_config_from_session(){
+    public function load_bbb_config_from_session() {
         global $DB;
         $sql = "SELECT h.config
                 FROM {hybridteaching} h
@@ -160,62 +167,61 @@ class sessions {
     }
 
     public function get_zone_access() {
-        //ESTA FUNCION NO NECESITA NINGÚN $hybridteachingid
-        //PORQUE YA ESTÁ INICIALIZADA EN EL CONSTRUCTOR CON SU SESSION, 
-        //NO ES NECESARIO NINGÚN id DE ACTIVIDAD     
-        //la info ya está cargada del constructor
+        // ESTA FUNCION NO NECESITA NINGÚN $hybridteachingid
+        // PORQUE YA ESTÁ INICIALIZADA EN EL CONSTRUCTOR CON SU SESSION,
+        // NO ES NECESARIO NINGÚN id DE ACTIVIDAD
+        // la info ya está cargada del constructor.
 
-        //aquÍ solo calcular los datos necesarios de la zona de acceso
-        //comprobar si el rol es para iniciar reunión o para entrar a reunión
-        //y mandamos la url de acceso (o bien starturl o bien joinurl)
-        //starturl o join url, según sea hospedador o participante
-
+        // AquÍ solo calcular los datos necesarios de la zona de acceso
+        // comprobar si el rol es para iniciar reunión o para entrar a reunión
+        // y mandamos la url de acceso (o bien starturl o bien joinurl)
+        // starturl o join url, según sea hospedador o participante.
 
             global $USER;
 
-            if ($this->bbbsession) {
-                $bbbconfig = $this->load_bbb_config_from_session();
-                $bbbproxy=new bbbproxy($bbbconfig);
+        if ($this->bbbsession) {
+            $bbbconfig = $this->load_bbb_config_from_session();
+            $bbbproxy = new bbbproxy($bbbconfig);
 
-                //COMO BBB NO TIENE SALA DE ESPERA AL MODERADOR, HAY QUE SIMULARLA EN BBB:
+            // COMO BBB NO TIENE SALA DE ESPERA AL MODERADOR, HAY QUE SIMULARLA EN BBB:.
 
-                //comprobar aquí si es moderator o viewer.
-                //Si es admin o moderador, poder entrar.
-                //Si es viewer, comprobar si está activa la opción de waitmoderator. 
-                    //Si es así, sacar un msj de "esperando al moderador". 
-                    //Si no, poder entrar.
+            // Comprobar aquí si es moderator o viewer.
+            // Si es admin o moderador, poder entrar.
+            // Si es viewer, comprobar si está activa la opción de waitmoderator.
+                // Si es así, sacar un msj de "esperando al moderador".
+                // Si no, poder entrar.
 
-                $url=$bbbproxy->get_join_url(
-                    $this->bbbsession->meetingid,
-                    $USER->username,
-                    'https://www.urldelogout',   ///comprobar
-                    'MODERATOR',     //aqui VIEWER or MODERATOR. Según sea admin o moderator, o viewer
-                    null, //un token
-                    $USER->id,
-                    $this->bbbsession->createtime  
-                );
+            $url = $bbbproxy->get_join_url(
+                $this->bbbsession->meetingid,
+                $USER->username,
+                'https://www.urldelogout',   // Comprobar.
+                'MODERATOR',     // Aqui VIEWER or MODERATOR. Según sea admin o moderator, o viewer.
+                null, // Un token.
+                $USER->id,
+                $this->bbbsession->createtime
+            );
 
-                $array = [
-                    'id' => $this->bbbsession->id,
-                    'ishost' => true,
-                    'isaccess' => true,
-                    'url' => base64_encode($url),
-                ];
-                return $array;
-            } else {
-                return null;
-            }
+            $array = [
+                'id' => $this->bbbsession->id,
+                'ishost' => true,
+                'isaccess' => true,
+                'url' => base64_encode($url),
+            ];
+            return $array;
+        } else {
+            return null;
+        }
     }
 
 
-    public function get_recording (){
+    public function get_recording () {
         $bbbconfig = $this->load_bbb_config_from_session();
-        $bbbproxy=new bbbproxy($bbbconfig);
+        $bbbproxy = new bbbproxy($bbbconfig);
 
-        $url='';
-        $response=$bbbproxy->get_url_recording_by_recordid($this->bbbsession->recordingid);
+        $url = '';
+        $response = $bbbproxy->get_url_recording_by_recordid($this->bbbsession->recordingid);
         if ($response['returncode'] == 'SUCCESS') {
-            if ($response['recordingid']!='') {
+            if ($response['recordingid'] != '') {
                 $url = $response['recordingid'];
             }
         }

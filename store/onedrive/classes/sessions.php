@@ -14,12 +14,21 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
+// Project implemented by the "Recovery, Transformation and Resilience Plan.
+// Funded by the European Union - Next GenerationEU".
+//
+// Produced by the UNIMOODLE University Group: Universities of
+// Valladolid, Complutense de Madrid, UPV/EHU, León, Salamanca,
+// Illes Balears, Valencia, Rey Juan Carlos, La Laguna, Zaragoza, Málaga,
+// Córdoba, Extremadura, Vigo, Las Palmas de Gran Canaria y Burgos.
+
 /**
- * Display information about all the mod_hybridteaching modules in the requested course.
- *
- * @package     mod_hybridteaching
- * @copyright   2023 isyc <isyc@example.com>
- * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * Display information about all the mod_hybridteaching modules in the requested course. *
+ * @package    mod_hybridteaching
+ * @copyright  2023 Proyecto UNIMOODLE
+ * @author     UNIMOODLE Group (Coordinator) <direccion.area.estrategia.digital@uva.es>
+ * @author     ISYC <soporte@isyc.com>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 namespace hybridteachstore_onedrive;
@@ -29,12 +38,12 @@ defined('MOODLE_INTERNAL') || die();
 global $CFG;
 
 
-class sessions  {
+class sessions {
 
     public function load_config($storagereference) {
         global $DB;
 
-        $sql = "SELECT * 
+        $sql = "SELECT *
         FROM {hybridteachstore_onedrive_co} od
         INNER JOIN {hybridteaching_configs} htc ON htc.subpluginconfigid=od.id
             WHERE htc.id=:storagereference";
@@ -47,9 +56,12 @@ class sessions  {
         $config = $this->load_config($storagereference);
 
         $recording = new \hybridteachstore_onedrive\onedrive_handler($config);
-        //$url = $recording->get_urlrecording ($processedrecording /*, $htid, $sid*/);
+        // $url = $recording->get_urlrecording ($processedrecording /*, $htid, $sid*/);
         $url = $recording->get_urlrecording ($processedrecording);
         return $url;
     }
 
+    public function delete_session_extended($htsession, $configid) {
+
+    }
 }

@@ -1,4 +1,18 @@
 <?php
+// This file is part of Moodle - https://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -45,7 +59,7 @@ class session_filter_select extends session_filter_type {
      * @param moodleform $mform a MoodleForm object to setup
      */
     public function setup_form(&$mform) {
-        $choices = array('' => get_string('anyvalue', 'filters')) + $this->_options;
+        $choices = ['' => get_string('anyvalue', 'filters')] + $this->_options;
         $mform->addElement('select', $this->_name, $this->_label, $choices);
         if ($this->_advanced) {
             $mform->setAdvanced($this->_name);
@@ -61,7 +75,7 @@ class session_filter_select extends session_filter_type {
         $field = $this->_name;
 
         if (property_exists($formdata, $field) && $formdata->$field !== '') {
-            return array('value' => (string)$formdata->$field);
+            return ['value' => (string)$formdata->$field];
         }
 
         return false;
@@ -77,12 +91,12 @@ class session_filter_select extends session_filter_type {
         $name = 'ex_simpleselect'.$counter++;
 
         $value = $data['value'];
-        $params = array();
+        $params = [];
         $field = $this->_field;
         if ($value == '') {
             return '';
         }
-        return array("$field=:$name", array($name => $value));
+        return ["$field=:$name", [$name => $value]];
     }
 
     /**

@@ -1,4 +1,18 @@
 <?php
+// This file is part of Moodle - https://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -30,9 +44,9 @@ class session_filter_duration extends session_filter_type {
      * @return array of comparison operators
      */
     public function get_operators() {
-        return array(0 => get_string('equalto', 'mod_hybridteaching'),
+        return [0 => get_string('equalto', 'mod_hybridteaching'),
                      1 => get_string('morethan', 'mod_hybridteaching'),
-                     2 => get_string('lessthan', 'mod_hybridteaching'));
+                     2 => get_string('lessthan', 'mod_hybridteaching'), ];
     }
 
     /**
@@ -41,8 +55,8 @@ class session_filter_duration extends session_filter_type {
      * @return array The unit time array.
      */
     public function get_unit_time() {
-        return array(1 => get_string('minutes'),
-                     2 => get_string('hours'));
+        return [1 => get_string('minutes'),
+                     2 => get_string('hours'), ];
     }
 
     /**
@@ -50,7 +64,7 @@ class session_filter_duration extends session_filter_type {
      * @param object $mform a MoodleForm object to setup
      */
     public function setup_form(&$mform) {
-        $objs = array();
+        $objs = [];
         $objs['select'] = $mform->createElement('select', $this->_name.'_op', null, $this->get_operators());
         $objs['text'] = $mform->createElement('text', $this->_name, null);
         $objs['selecttime'] = $mform->createElement('select', $this->_name.'_time', null, $this->get_unit_time());
@@ -98,7 +112,7 @@ class session_filter_duration extends session_filter_type {
                     $fieldvalue = $fieldvalue * HOURSECS;
                 }
             }
-            return array('operator' => (int)$formdata->$operator, 'value' => $fieldvalue, 'unittime' => $formdata->$unittime);
+            return ['operator' => (int)$formdata->$operator, 'value' => $fieldvalue, 'unittime' => $formdata->$unittime];
         }
 
         return false;
@@ -118,7 +132,7 @@ class session_filter_duration extends session_filter_type {
         $value    = $data['value'];
         $field    = $this->_field;
 
-        $params = array();
+        $params = [];
 
         if ($operator != 5 && $value === '') {
             return '';
@@ -140,7 +154,7 @@ class session_filter_duration extends session_filter_type {
             default:
                 return '';
         }
-        return array($res, $params);
+        return [$res, $params];
     }
 
     /**

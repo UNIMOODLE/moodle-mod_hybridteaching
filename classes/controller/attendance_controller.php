@@ -74,9 +74,10 @@ class attendance_controller extends common_controller {
         } else {
             $groupby = ' ha.id ';
         }
-        $params['groupid'] > 0? $where .= ' AND hs.groupid = ' . $params['groupid'] : '';
-        $params['groupid'] == 0 ? $where .= ' AND hs.groupid = 0' : '';
-
+        if (isset($params['groupid'])) {
+            $params['groupid'] > 0 ? $where .= ' AND hs.groupid = ' . $params['groupid'] : '';
+            $params['groupid'] == 0 ? $where .= ' AND hs.groupid = 0' : '';
+        }
         if (!empty($extraselect)) {
             $where .= " AND $extraselect";
         }
@@ -182,6 +183,14 @@ class attendance_controller extends common_controller {
             int $atttype = null, $userid = null) {
         global $DB, $USER, $PAGE;
 
+        if (!empty($session) && is_number($session)) {
+            $session = $DB->get_record('hybridteaching_session', ['id' => $session]);
+        }
+
+        if (empty($hybridteaching) || empty($session)) {
+            return false;
+        }
+
         if (empty($userid)) {
             $userid = $USER->id;
         }
@@ -191,6 +200,10 @@ class attendance_controller extends common_controller {
             if ($atttype === null) {
                 $atttype = $att->type;
             }
+        }
+
+        if (is_int($session)) {
+            $session = $DB->get_record('hybridteaching_session', ['id' => $session]);
         }
         $timenow = (new \DateTime('now', \core_date::get_server_timezone_object()))->getTimestamp();
         $atttype === null ? $type = $hybridteaching->usevideoconference : $type = $atttype;
@@ -425,7 +438,9 @@ class attendance_controller extends common_controller {
             $r = $DB->get_record_sql($sql, $params);
             if ($r) {
                 return $r;
-            }return 0;
+            }
+
+            return 0;
         } catch (\Throwable $dbexception) {
             throw $dbexception;
         }
@@ -521,7 +536,7 @@ class attendance_controller extends common_controller {
      * @throws \Throwable When there is an error executing the SQL query.
      * @return array An array of records containing the attendance users.
      */
-    public static function hybridteaching_get_attendance_users_in_session($sessionid) {
+    public static function hybridteaching_get_attendance_users_in_session($sessionid, $hid) {
         global $DB;
         $sql = "SELECT att.userid, att.id, u.firstname, u.lastname
                   FROM {hybridteaching_attendance} att
@@ -530,8 +545,9 @@ class attendance_controller extends common_controller {
                   JOIN {user} u
                     ON (u.id = att.userid)
                  WHERE s.id = :sessionid
+                   AND att.hybridteachingid = :hid
               ORDER BY u.lastname ASC";
-        $params = ['sessionid' => $sessionid];
+        $params = ['sessionid' => $sessionid, 'hid' => $hid];
         try {
             return $DB->get_records_sql($sql, $params);
         } catch (\Throwable $dbexception) {
@@ -798,11 +814,17 @@ class attendance_controller extends common_controller {
             ['id' => $session], '*', IGNORE_MISSING) : '';
         $timeremaining = $timeneeded - $timespent;
         $att = self::hybridteaching_get_attendance_from_id($attid);
+        empty($session) ? $attexempt = 0 : $attexempt = $session->attexempt;
         // Exempt.
-        if ($att->exempt || $session->attexempt) {
+        if ($att->exempt || $attexempt) {
             return 3;
         }
-        if ($timeremaining > 0) {
+
+        if ($timespent == 0) {
+            return 0;
+        }
+
+        if ($timeremaining > 0 || $timeneeded == 0) {
             // Late arrive.
             if (!self::user_attendance_in_grace_period($hybridteaching, $session, $att->id)) {
                 return 2;
@@ -810,6 +832,10 @@ class attendance_controller extends common_controller {
             // Early leave.
             if (self::user_attendance_early_leave($session, $att)) {
                 return 4;
+            }
+
+            if ($timeneeded < $timespent) {
+                return 1;
             }
             // Not valid attendance.
             return 0;
@@ -828,8 +854,9 @@ class attendance_controller extends common_controller {
     public static function user_attendance_in_grace_period($ht, $session, $attid) : bool {
         global $DB;
         $intime = true;
-
+        empty($ht) ? $gracetime = 0 :
         $gracetime = self::hybridteaching_get_needed_time($ht->graceperiod, $ht->graceperiodunit);
+        $logtime = 0;
         if (!$gracetime) {
             return true;
         }
@@ -839,8 +866,11 @@ class attendance_controller extends common_controller {
         } else {
             $graceend = $session->starttime + $gracetime;
         }
-        $log = $DB->get_record('hybridteaching_attend_log', ['attendanceid' => $attid], 'timecreated', 'ASC', 1, IGNORE_MISSING);
-        $log ? $logtime = $log->timecreated : $logtime = 0;
+        $log = $DB->get_records('hybridteaching_attend_log', ['attendanceid' => $attid],
+            'timecreated ASC', 'attendanceid, timecreated', 0, 1, IGNORE_MISSING);
+        if (isset($log[$attid])) {
+            $log[$attid] ? $logtime = $log[$attid]->timecreated : '';
+        }
         $logtime > $graceend ? $intime = false : '';
         return $intime;
     }
@@ -922,10 +952,24 @@ class attendance_controller extends common_controller {
         $useringroup = false;
         $sessgroup = $DB->get_field('hybridteaching_session', 'groupid', ['id' => $sessid], IGNORE_MISSING);
         if ($sessgroup) {
-            $DB->get_record('groups_members', ['groupid' => $sessgroup, 'userid' => $userid], IGNORE_MISSING) ? $useringroup = true : '';
+            $DB->get_record('groups_members', ['groupid' => $sessgroup, 'userid' => $userid],
+                IGNORE_MISSING) ? $useringroup = true : '';
         } else {
             $useringroup = true;
         }
         return $useringroup;
+    }
+
+    public function attendances_uses_groups($attendances) : int {
+        global $DB;
+
+        $usesattendance = 0;
+        foreach ($attendances as $att) {
+            if (!$usesattendance) {
+                $sessiongroup = $DB->get_field('hybridteaching_session', 'groupid', ['id' => $att['sessionid']], IGNORE_MISSING);
+                $sessiongroup ? $usesattendance = 1 : '';
+            }
+        }
+        return $usesattendance;
     }
 }

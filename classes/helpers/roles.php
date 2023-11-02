@@ -192,12 +192,12 @@ class roles {
         $data = [
             'all' => [
                 'name' => get_string('mod_form_field_participant_list_type_all', 'hybridteaching'),
-                'children' => []
+                'children' => [],
             ],
         ];
         $data['role'] = [
             'name' => get_string('mod_form_field_participant_list_type_role', 'hybridteaching'),
-            'children' => self::get_roles_select($context, true)
+            'children' => self::get_roles_select($context, true),
         ];
         $data['user'] = [
             'name' => get_string('mod_form_field_participant_list_type_user', 'hybridteaching'),
@@ -255,14 +255,14 @@ class roles {
                     $participantlist[] = [
                         'selectiontype' => 'user',
                         'selectionid' => (string) $ownerid,
-                        'role' => self::ROLE_MODERATOR];
+                        'role' => self::ROLE_MODERATOR, ];
                 }
                 continue;
             }
             $participantlist[] = [
                 'selectiontype' => 'role',
                 'selectionid' => $defaultrule,
-                'role' => self::ROLE_MODERATOR];
+                'role' => self::ROLE_MODERATOR, ];
         }
         return $participantlist;
     }
@@ -335,7 +335,7 @@ class roles {
             list($rids, $params) = $DB->get_in_or_equal($roleid, SQL_PARAMS_QM);
             $roleselect = "AND r.roleid $rids";
         } else {
-            $params = array();
+            $params = [];
             $roleselect = '';
         }
 

@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - https://moodle.org/
+// This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -12,15 +12,23 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
+// Project implemented by the "Recovery, Transformation and Resilience Plan.
+// Funded by the European Union - Next GenerationEU".
+//
+// Produced by the UNIMOODLE University Group: Universities of
+// Valladolid, Complutense de Madrid, UPV/EHU, León, Salamanca,
+// Illes Balears, Valencia, Rey Juan Carlos, La Laguna, Zaragoza, Málaga,
+// Córdoba, Extremadura, Vigo, Las Palmas de Gran Canaria y Burgos.
 
 /**
- * Plugin strings are defined here.
- *
- * @package     mod_hybridteaching
- * @category    string
- * @copyright   2023 isyc <isyc@isyc.com>
- * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * Display information about all the mod_hybridteaching modules in the requested course. *
+ * @package    mod_hybridteaching
+ * @copyright  2023 Proyecto UNIMOODLE
+ * @author     UNIMOODLE Group (Coordinator) <direccion.area.estrategia.digital@uva.es>
+ * @author     ISYC <soporte@isyc.com>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 defined('MOODLE_INTERNAL') || die();
@@ -146,7 +154,7 @@ $string['sessionfor'] = 'Sesión para el grupo';
 $string['sessiondate'] = 'Fecha de la sesión';
 $string['addsession'] = 'Añadir sesión';
 $string['allgroups'] = 'Todos los grupos';
-$string['sessiontypehelp'] = 'Puedes añadir sesiones para todos los alumnos o para un grupo de alumnos. 
+$string['sessiontypehelp'] = 'Puedes añadir sesiones para todos los alumnos o para un grupo de alumnos.
 La posibilidad de añadir diferentes tipos depende del modo de grupo de la actividad.
   * En el modo de grupo "Sin grupos" sólo puede añadir sesiones para todos los estudiantes.
   * En el modo de grupo "Grupos separados" puede añadir sólo sesiones para un grupo de estudiantes.
@@ -181,7 +189,7 @@ $string['nosubplugin'] = 'El tipo de videoconferencia es incorrecto. Contacte co
 $string['noconfig'] = 'No existe la configuración de videoconferencia seleccionada. Contacte con su adminstrador';
 
 $string['status_progress'] = 'Sesión en progreso';
-$string['status_finished'] ='Esta sesión ha finalizado';
+$string['status_finished'] = 'Esta sesión ha finalizado';
 $string['status_start'] = 'La sesión comenzará próximamente';
 $string['status_ready'] = 'La sesión está lista. Puede entrar ahora.';
 $string['status_undated'] = 'Puede crear una sesión recurrente';

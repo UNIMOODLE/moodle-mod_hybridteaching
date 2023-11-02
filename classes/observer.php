@@ -1,4 +1,18 @@
 <?php
+// This file is part of Moodle - https://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -32,7 +46,7 @@ class mod_hybridteaching_observer {
     }
 
     public static function attendance_updated(\mod_hybridteaching\event\attendance_updated $event) {
-        self::update_users_grade($event->objectid, null, array($event->other['userid']));
+        self::update_users_grade($event->objectid, null, [$event->other['userid']]);
     }
 
     public static function course_module_updated(\core\event\course_module_updated $event) {
@@ -51,8 +65,8 @@ class mod_hybridteaching_observer {
 
     private static function create_empty_attendance($objectid, $sessid) {
         global $DB;
-        $session = $DB->get_record('hybridteaching_session', array('id' => $sessid));
-        $ht = $DB->get_record('hybridteaching', array('id' => $session->hybridteachingid));
+        $session = $DB->get_record('hybridteaching_session', ['id' => $sessid]);
+        $ht = $DB->get_record('hybridteaching', ['id' => $session->hybridteachingid]);
         $coursecontext = context_course::instance($ht->course);
         $usersid = array_keys(get_role_users(5, $coursecontext, false, '', null, false, $session->groupid));
         foreach ($usersid as $userid) {

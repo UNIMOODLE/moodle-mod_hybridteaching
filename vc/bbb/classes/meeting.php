@@ -1,13 +1,27 @@
 <?php
+// This file is part of Moodle - https://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 namespace hybridteachvc_bbb;
 
-//use mod_bigbluebuttonbn\local\proxy\bigbluebutton_proxy;
+// use mod_bigbluebuttonbn\local\proxy\bigbluebutton_proxy;
 use mod_bigbluebuttonbn\plugin;
 use hybridteachvc_bbb\bbbproxy;
 
 
-class meeting  {
+class meeting {
 
     protected $bbbinstance;
 
@@ -15,9 +29,9 @@ class meeting  {
      * Constructor for the meeting object.
      *
      * @param  $data
-    */
+     */
     public function __construct($bbbinstance) {
-        $this->bbbinstance = $bbbinstance;  //api with credentials, url...
+        $this->bbbinstance = $bbbinstance;  // Api with credentials, url...
     }
 
     /**
@@ -25,19 +39,19 @@ class meeting  {
      *
      * @return array
      */
-    public function create_meeting ($session,$ht) {
-        $bbbproxy=new bbbproxy($this->bbbinstance);
-        $bbbproxy->require_working_server();   
+    public function create_meeting ($session, $ht) {
+        $bbbproxy = new bbbproxy($this->bbbinstance);
+        $bbbproxy->require_working_server();
         $data = $this->create_meeting_data($session, $ht);
         $metadata = $this->create_meeting_metadata($session, $ht);
-        //$presentation = $this->instance->get_presentation_for_bigbluebutton_upload(); // The URL must contain nonce.
-        //$presentationname = $presentation['name'] ?? null;
-        //$presentationurl = $presentation['url'] ?? null;
-        $presentationname=null;
-        $presentationurl=null;
-        
-        $response = $bbbproxy->create_meeting($data, $metadata, $presentationname, $presentationurl,$this->bbbinstance);
-      
+        // $presentation = $this->instance->get_presentation_for_bigbluebutton_upload(); // The URL must contain nonce.
+        // $presentationname = $presentation['name'] ?? null;
+        // $presentationurl = $presentation['url'] ?? null;
+        $presentationname = null;
+        $presentationurl = null;
+
+        $response = $bbbproxy->create_meeting($data, $metadata, $presentationname, $presentationurl, $this->bbbinstance);
+
         // New recording management: Insert a recordingID that corresponds to the meeting created.
         /*if ($this->instance->is_recorded()) {
             $recording = new recording(0, (object) [
@@ -60,16 +74,15 @@ class meeting  {
      */
     protected function create_meeting_data($session, $ht) {
 
-        $meetingid=meeting::get_unique_meetingid_seed();
+        $meetingid = self::get_unique_meetingid_seed();
         $moderatorpass = plugin::random_password(12);
         $viewerpass = plugin::random_password(12, $moderatorpass);
 
-
-        $data = ['meetingID' =>$meetingid,
+        $data = ['meetingID' => $meetingid,
                 'name' => \mod_bigbluebuttonbn\plugin::html2text($session->name, 64),
                 'attendeePW' => $viewerpass,
                 'moderatorPW' => $moderatorpass,
-            //    'logoutURL' => $this->instance->get_logout_url()->out(false),
+            // 'logoutURL' => $this->instance->get_logout_url()->out(false),
         ];
 
         /*
@@ -89,17 +102,17 @@ class meeting  {
 
         $data['duration'] = $session->duration;
         $data['record'] = $ht->userecordvc ? 'true' : 'false';
-        if ($data['record'] == 'true' ){
+        if ($data['record'] == 'true' ) {
             if ($ht->initialrecord) {
-                $data['autoStartRecording'] = 'true';    
+                $data['autoStartRecording'] = 'true';
             }
             $data['allowStartStopRecording'] = $ht->hiderecordbutton ? 'false' : 'true';
         }
         $data['muteOnStart'] = 'true';
-        if ($ht->userslimit > 0){
+        if ($ht->userslimit > 0) {
             $data['maxParticipants'] = $ht->userslimit;
         }
-        
+
         $data['lockSettingsDisableCam'] = $ht->disablecam ? 'true' : 'false';
         $data['lockSettingsDisableMic'] = $ht->disablemic ? 'true' : 'false';
         $data['lockSettingsDisablePrivateChat'] = $ht->disableprivatechat ? 'true' : 'false';
@@ -107,7 +120,7 @@ class meeting  {
         $data['lockSettingsDisableNotes'] = $ht->disablenote ? 'true' : 'false';
         $data['lockSettingsHideUserList'] = $ht->hideuserlist ? 'true' : 'false';
         $data['lockSettingsLockOnJoin'] = $ht->ignorelocksettings ? 'false' : 'true';
-        if ($ht->blockroomdesign){
+        if ($ht->blockroomdesign) {
             $data['disabledFeatures'] = 'layouts';
         }
 
@@ -134,15 +147,15 @@ class meeting  {
             'bbb-context-name' => trim(html_to_text($ht->name, 0)),
             'bbb-context-label' => trim(html_to_text($ht->name, 0)),
             'bbb-recording-name' => plugin::html2text($ht->name, 64),
-            'bbb-recording-description' => plugin::html2text($session->description,64),
+            'bbb-recording-description' => plugin::html2text($session->description, 64),
         ];
 
-        //REVISAR: esta parte probablemente se eliminará. 
-        //SEGURAMENTE LO HAREMOS CON UN CRON PARA DESCARGAR LAS GRABACIONES ACTIVAS, DE SIMILAR MANERA QUE CON ZOOM.
-        //OJO: CON LA API NO HAY OPCIÓN DIRECTA PARA DESCARGAR UNA GRABACIÓN
-            //https://www.youtube.com/watch?v=n1NbII0bH40&t=1219s
-        //revisar /classes/recordings.php, función sync_pending_recordings_from_server
-        
+        // REVISAR: esta parte probablemente se eliminará.
+        // SEGURAMENTE LO HAREMOS CON UN CRON PARA DESCARGAR LAS GRABACIONES ACTIVAS, DE SIMILAR MANERA QUE CON ZOOM.
+        // OJO: CON LA API NO HAY OPCIÓN DIRECTA PARA DESCARGAR UNA GRABACIÓN
+        // https://www.youtube.com/watch?v=n1NbII0bH40&t=1219s
+        // Revisar /classes/recordings.php, función sync_pending_recordings_from_server.
+
         // Special metadata for recording processing.
         /*
         if ((boolean) config::get('recordingstatus_enabled')) {
@@ -166,17 +179,17 @@ class meeting  {
 
     /**
      * Send an end meeting message to BBB server
-    */
+     */
     public function end_meeting($meetingid, $moderatorpassword) {
-        $bbbproxy=new bbbproxy($this->bbbinstance);
-        $bbbproxy->end_meeting($meetingid,$moderatorpassword);
+        $bbbproxy = new bbbproxy($this->bbbinstance);
+        $bbbproxy->end_meeting($meetingid, $moderatorpassword);
 
     }
 
 
-    //SE PODRÍA ADAPTAR ESTO PARA:
+    // SE PODRÍA ADAPTAR ESTO PARA:
     // SI AL HACER get_join_url EN bbbproxy.php NO ESTÁ EL MEET CREADO, ENTONCES SE CREA.
-    //HABRÍA QUE ACTUALIZAR/INSERTAR EN mdl_hybridteachvc_bbb EL REGISTRO 
+    // HABRÍA QUE ACTUALIZAR/INSERTAR EN mdl_hybridteachvc_bbb EL REGISTRO.
     /**
      * Helper to join a meeting.
      *
@@ -201,8 +214,8 @@ class meeting  {
     /*
     * Get meeting recordings
     */
-    public function get_meeting_recordings($meetingid){
-        $bbbproxy=new bbbproxy($this->bbbinstance);
+    public function get_meeting_recordings($meetingid) {
+        $bbbproxy = new bbbproxy($this->bbbinstance);
         return $bbbproxy->get_meeting_recording($meetingid);
 
     }
@@ -227,7 +240,7 @@ class meeting  {
      *
      * @return stdClass
      */
-    public function get_origin_data()  {
+    public function get_origin_data() {
         global $CFG;
 
         $parsedurl = parse_url($CFG->wwwroot);

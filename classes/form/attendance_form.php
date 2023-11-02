@@ -46,31 +46,29 @@ class attendance_options_form extends moodleform {
         $selectgroups[-1] = get_string('anygroup', 'hybridteaching');
         $selectgroups[0] = get_string('allgroups', 'hybridteaching');
         $selectfilter = $this->_customdata['selectedfilter'];
-        $mform->addElement('header', 'headeraddmultiplesessions', get_string('addmultiplesessions', 'hybridteaching'));
-        if ($groupmode == SEPARATEGROUPS || $groupmode == VISIBLEGROUPS) {
-            $groupid = 1;
-            if ($groupmode == SEPARATEGROUPS && !has_capability('moodle/site:accessallgroups', $modcontext)) {
-                $groups = groups_get_all_groups($course->id, $USER->id, $cm->groupingid);
-            } else {
-                $groups = groups_get_all_groups($course->id, 0, $cm->groupingid);
+        $groupexception = $this->_customdata['groupexception'];
+        if (has_capability('mod/hybridteaching:sessionsfulltable', $modcontext)) {
+            if ($groupmode == SEPARATEGROUPS || $groupmode == VISIBLEGROUPS || $groupexception) {
+                $mform->addElement('header', 'headeraddmultiplesessions', get_string('addmultiplesessions', 'hybridteaching'));
+                $groupid = 1;
+                if ($groupmode == SEPARATEGROUPS && !has_capability('moodle/site:accessallgroups', $modcontext)) {
+                    $groups = groups_get_all_groups($course->id, $USER->id, $cm->groupingid);
+                } else {
+                    $groups = groups_get_all_groups($course->id, 0, $cm->groupingid);
+                }
+                if ($groups) {
+                    foreach ($groups as $group) {
+                        $selectgroups[$group->id] = $group->name;
+                    }
+                    $mform->addElement('select', 'groupid', get_string('sessionfor', 'hybridteaching'), $selectgroups);
+                } else {
+                    $mform->addElement('static', 'groupid', get_string('sessionfor', 'hybridteaching'),
+                                      get_string('nogroups', 'hybridteaching'));
+                    if ($groupmode == SEPARATEGROUPS) {
+                        return;
+                    }
+                }
             }
-            if ($groups) {
-                foreach ($groups as $group) {
-                    $selectgroups[$group->id] = $group->name;
-                }
-                if ($groupmode == SEPARATEGROUPS) {
-                    //array_shift($selectgroups);
-                }
-                $mform->addElement('select', 'groupid', get_string('sessionfor', 'hybridteaching'), $selectgroups);
-            } else {
-                $mform->addElement('static', 'groupid', get_string('sessionfor', 'hybridteaching'),
-                                  get_string('nogroups', 'hybridteaching'));
-                if ($groupmode == SEPARATEGROUPS) {
-                    return;
-                }
-            }
-        } else {
-            $mform->addElement('select', 'groupid', get_string('groups', 'group'), $selectgroups);
         }
 
         $mform->addElement('header', 'options', get_string('options', 'mod_hybridteaching'));

@@ -1,43 +1,56 @@
 <?php
+// This file is part of Moodle - https://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 require_once('../../../../../config.php');
 
 defined('MOODLE_INTERNAL') || die();
-
-require_once __DIR__ . '/../vendor/autoload.php'; 
+require_login();
+require_once(__DIR__ . '/../vendor/autoload.php');
 
 $configid = optional_param('id', 0, PARAM_INT);
 global $DB;
 if (!$configid) {
-    $configid=$_SESSION['configid'];
+    $configid = $_SESSION['configid'];
 }
 $config = $DB->get_record('hybridteachstore_onedrive_co', ['id' => $configid]);
 
-//VER SI SE PUEDE CAMBIAR POR EL $SESSION GLOBAL DEL MOODLE.
-if (!isset($_GET["code"]) && !isset($_GET["error"]) ){   
+// VER SI SE PUEDE CAMBIAR POR EL $SESSION GLOBAL DEL MOODLE.
+if (!isset($_GET["code"]) && !isset($_GET["error"]) ) {
 
-    $_SESSION['configid']=$configid;
+    $_SESSION['configid'] = $configid;
 
     $url = 'https://login.microsoftonline.com/' . $config->tenantid. '/oauth2/v2.0/authorize';
 
     $redirect = $CFG->wwwroot.'/mod/hybridteaching/store/onedrive/classes/onedriveaccess.php';
-    $params="client_id=".$config->clientid;
-    $params.="&scope=offline_access+files.readwrite.all";
-    
-    $params.="&response_type=code&approval_prompt=auto&redirect_uri=".$redirect;
-    $auth_redirect_url = $url. '?' . $params;
-    
-    header('Location: ' . $auth_redirect_url);
-}
-elseif (isset($_GET["error"])){
+    $params = "client_id=".$config->clientid;
+    $params .= "&scope=offline_access+files.readwrite.all";
+
+    $params .= "&response_type=code&approval_prompt=auto&redirect_uri=".$redirect;
+    $authredirecturl = $url. '?' . $params;
+
+    header('Location: ' . $authredirecturl);
+} else if (isset($_GET["error"])) {
     echo "Error handler activated:\n\n";
-    var_dump($_GET);  //Debug print 
-}else if (isset($_GET["code"])){
-     //obtener tokens y finalizar la parte de autenticación
+    var_dump($_GET);  // Debug print.
+} else if (isset($_GET["code"])) {
+     // Obtener tokens y finalizar la parte de autenticación.
      $guzzle = new \GuzzleHttp\Client();
 
      $url = 'https://login.microsoftonline.com/' . $config->tenantid . '/oauth2/v2.0/token';
-     
+
      $token = json_decode($guzzle->post($url, [
          'form_params' => [
              'client_id' => $config->clientid,
@@ -45,24 +58,23 @@ elseif (isset($_GET["error"])){
              'grant_type' => 'authorization_code',
              'redirect_uri' => $CFG->wwwroot.'/mod/hybridteaching/store/onedrive/classes/onedriveaccess.php',
              'code' => $_GET["code"],
-             //'scope' => 'offline_access files.readwrite.all'
+             // 'scope' => 'offline_access files.readwrite.all'
          ],
      ])->getBody()->getContents());
 
-     //AQUI GUARDAR ACCESS_TOKEN Y REFRESH_TOKEN
-     if (isset($token->access_token) && isset($token->refresh_token)){
-        $config->accesstoken=$token->access_token;
-        $config->refreshtoken=$token->refresh_token;
-        $DB->update_record('hybridteachstore_onedrive_co' ,$config);
+     // AQUI GUARDAR ACCESS_TOKEN Y REFRESH_TOKEN.
+    if (isset($token->access_token) && isset($token->refresh_token)) {
+        $config->accesstoken = $token->access_token;
+        $config->refreshtoken = $token->refresh_token;
+        $DB->update_record('hybridteachstore_onedrive_co', $config);
 
         unset($_SESSION['configid']);
-        
+
         $return = new moodle_url($CFG->wwwroot. '/admin/settings.php?section=hybridteaching_configstoresettings');
         redirect($return);
-    }
-    else {
+    } else {
         echo "Error";
     }
-    
-     
+
+
 }

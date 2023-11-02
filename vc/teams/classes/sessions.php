@@ -1,5 +1,4 @@
 <?php
-
 // This file is part of Moodle - https://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -15,12 +14,21 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
+// Project implemented by the "Recovery, Transformation and Resilience Plan.
+// Funded by the European Union - Next GenerationEU".
+//
+// Produced by the UNIMOODLE University Group: Universities of
+// Valladolid, Complutense de Madrid, UPV/EHU, León, Salamanca,
+// Illes Balears, Valencia, Rey Juan Carlos, La Laguna, Zaragoza, Málaga,
+// Córdoba, Extremadura, Vigo, Las Palmas de Gran Canaria y Burgos.
+
 /**
- * Display information about all the mod_hybridteaching modules in the requested course.
- *
- * @package     mod_hybridteaching
- * @copyright   2023 isyc <isyc@example.com>
- * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * Display information about all the mod_hybridteaching modules in the requested course. *
+ * @package    mod_hybridteaching
+ * @copyright  2023 Proyecto UNIMOODLE
+ * @author     UNIMOODLE Group (Coordinator) <direccion.area.estrategia.digital@uva.es>
+ * @author     ISYC <soporte@isyc.com>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 namespace hybridteachvc_teams;
@@ -28,9 +36,8 @@ namespace hybridteachvc_teams;
 defined('MOODLE_INTERNAL') || die();
 
 global $CFG;
-use hybridteachingvc_teams;
+
 require_once($CFG->dirroot.'/mod/hybridteaching/classes/controller/sessions_controller.php');
-//require_once($CFG->dirroot.'/mod/hybridteaching/vc/teams/classes/teams_handler.php');
 
 class sessions {
     protected $teamssession;
@@ -61,39 +68,37 @@ class sessions {
      * is not false.
      *
      * @param mixed $session the data to be passed to the create_meeting function
-     * @throws 
+     * @throws
      * @return mixed the response from the create_meeting function
      */
     public function create_unique_session_extended($session, $ht) {
         global $DB;
 
         $teamsconfig = $this->load_teams_config($ht->config);
-        if ($teamsconfig){
+        if ($teamsconfig) {
             $teams = new teams_handler($teamsconfig);
-            $response = $teams->createmeeting($session,$ht);
+            $response = $teams->createmeeting($session, $ht);
 
-            if (isset($response['joinUrl']) && isset($response['meetingCode']) 
+            if (isset($response['joinUrl']) && isset($response['meetingCode'])
                 && isset($response['participants']['organizer']['identity']['user']['id']) && isset($response['id'])) {
                 $teams = new \stdClass();
                 $teams->htsession = $session->id;
                 $teams->meetingid = $response['id'];
                 $teams->meetingcode = $response['meetingCode'];
                 $teams->organizer = $response['participants']['organizer']['identity']['user']['id'];
-                $teams->joinurl = $response['joinUrl'];         
+                $teams->joinurl = $response['joinUrl'];
 
                 if (!$teams->id = $DB->insert_record('hybridteachvc_teams', $teams)) {
-                return false;
+                    return false;
                 }
             }
-        }
-        else {
-            //ARREGLAR ESTE MENSAJE
-            return "error, no existe la configuración";
+        } else {
+            return false;
         }
     }
-    
+
     public function update_session_extended($data) {
-        
+
     }
 
     /**
@@ -105,40 +110,20 @@ class sessions {
      */
     public function delete_session_extended($htsession, $configid) {
         global $DB;
-        $teamsconfig = $this->load_teams_config($configid);      
+        $teamsconfig = $this->load_teams_config($configid);
         $teams = $DB->get_record('hybridteachvc_teams', ['htsession' => $htsession]);
 
-        if ($teams){
-            //si existe ya la reunión teams, eliminarla
-            $teams_handler = new \teams_handler($teamsconfig);
-            $teams_handler->deletemeeting($teams->meetingid);
+        if ($teams) {
+            // If exists meeting, delete it.
+            $teamshandler = new teams_handler($teamsconfig);
+            $teamshandler->deletemeeting($teams->meetingid);
 
             $DB->delete_records('hybridteachvc_teams', ['htsession' => $htsession]);
         }
-
-
     }
 
     /**
-     * Populates a new stdClass object with relevant data from a BBB API response and returns it.
-     *
-     * @param mixed $data stdClass object containing htsession data
-     * @param mixed $response stdClass object containing BBB API response data
-     * @return stdClass $newbbb stdClass object containing relevant data
-     */
-    public function populate_htteams_from_response($data, $response) {        
-        $newteams = new \stdClass();
-        /*$newteams->htsession = $data->id;   //session id
-        $newteams->meetingid = $response['meetingID'];
-        //.....
-        $newteams->createtime = $response['createTime'];
-        */
-        return $newteams;
-
-    }
-
-    /**
-     * Loads a BBB config based on the given config ID.
+     * Loads a Teams config based on the given config ID.
      *
      * @param int $configid The ID of the config to load.
      * @throws Exception If the SQL query fails.
@@ -147,16 +132,16 @@ class sessions {
     public function load_teams_config($configid) {
         global $DB;
 
-        $sql = "SELECT tc.*
+        $sql = 'SELECT tc.*
                   FROM {hybridteaching_configs} hc
                   JOIN {hybridteachvc_teams_config} tc ON tc.id = hc.subpluginconfigid
-                 WHERE hc.id = :configid AND hc.visible = 1";
+                 WHERE hc.id = :configid AND hc.visible = 1';
 
         $config = $DB->get_record_sql($sql, ['configid' => $configid]);
         return $config;
     }
 
-    function get_zone_access() {
+    public function get_zone_access() {
         if ($this->teamssession) {
             $array = [
                 'id' => $this->teamssession->id,

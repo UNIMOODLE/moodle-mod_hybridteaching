@@ -23,11 +23,13 @@
  */
 
 namespace mod_hybridteaching\helpers;
-require_login();
+
+defined('MOODLE_INTERNAL') || die();
 require_once(dirname(__FILE__).'../../../../../config.php');
+require_login();
 require_once($CFG->libdir.'/tcpdf/tcpdf_barcodes_2d.php'); // Used for generating qrcode.
-use \TCPDF2DBarcode;
-use \html_writer;
+use TCPDF2DBarcode;
+use html_writer;
 class password {
 
     /**
@@ -58,11 +60,11 @@ class password {
      */
     public static function hybridteaching_generate_passwords($session) {
         global $DB;
-        $password = array();
+        $password = [];
 
         for ($i = 0; $i < 30; $i++) {
-            array_push($password, array("attendanceid" => $session->id,
-                "password" => random_string(), "expirytime" => time() + (15 * $i)));
+            array_push($password, ["attendanceid" => $session->id,
+                "password" => random_string(), "expirytime" => time() + (15 * $i), ]);
         }
 
         $DB->insert_records('hybridteaching_session_pwd', $password);
@@ -79,13 +81,13 @@ class password {
         echo html_writer::tag('script', '',
             [
                 'src' => 'js/qrcode/qrcode.min.js',
-                'type' => 'text/javascript'
+                'type' => 'text/javascript',
             ]
         );
         echo html_writer::tag('script', '',
             [
                 'src' => 'js/password/rotateQR.js',
-                'type' => 'text/javascript'
+                'type' => 'text/javascript',
             ]
         );
         echo html_writer::div('', '', ['id' => 'qrcode']); // Div to display qr code.

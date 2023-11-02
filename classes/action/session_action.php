@@ -14,12 +14,21 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
+// Project implemented by the "Recovery, Transformation and Resilience Plan.
+// Funded by the European Union - Next GenerationEU".
+//
+// Produced by the UNIMOODLE University Group: Universities of
+// Valladolid, Complutense de Madrid, UPV/EHU, León, Salamanca,
+// Illes Balears, Valencia, Rey Juan Carlos, La Laguna, Zaragoza, Málaga,
+// Córdoba, Extremadura, Vigo, Las Palmas de Gran Canaria y Burgos.
+
 /**
- * Display information about all the mod_hybridteaching modules in the requested course.
- *
- * @package     mod_hybridteaching
- * @copyright   2023 isyc <isyc@example.com>
- * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * Display information about all the mod_hybridteaching modules in the requested course. *
+ * @package    mod_hybridteaching
+ * @copyright  2023 Proyecto UNIMOODLE
+ * @author     UNIMOODLE Group (Coordinator) <direccion.area.estrategia.digital@uva.es>
+ * @author     ISYC <soporte@isyc.com>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 define('NO_OUTPUT_BUFFERING', true);
@@ -37,7 +46,7 @@ $slist = optional_param('l', 1, PARAM_INT);
 
 list($course, $cm) = get_course_and_cm_from_cmid($moduleid, 'hybridteaching');
 
-$hybridteaching = $DB->get_record('hybridteaching', array('id' => $cm->instance), '*', MUST_EXIST);
+$hybridteaching = $DB->get_record('hybridteaching', ['id' => $cm->instance], '*', MUST_EXIST);
 $url = new moodle_url('/mod/hybridteaching/classes/action/session_action.php');
 $PAGE->set_url($url);
 $context = context_module::instance($cm->id);
@@ -52,7 +61,7 @@ $returnparams = [
 ];
 
 $return = new moodle_url('/mod/hybridteaching/sessions.php', $returnparams);
-$hybridteaching = $DB->get_record('hybridteaching', array('id' => $hybridteachingid), '*', MUST_EXIST);
+$hybridteaching = $DB->get_record('hybridteaching', ['id' => $hybridteachingid], '*', MUST_EXIST);
 $sessioncontroller = new sessions_controller($hybridteaching, 'hybridteaching_session');
 $sessionslist = $sessioncontroller->load_sessions();
 $mform = null;
@@ -134,9 +143,9 @@ switch ($action) {
         }
 
         $sessionsids = implode('_', $sessid);
-        $params = array('action' => 'bulkdelete', 'session' => $sessionsids,
+        $params = ['action' => 'bulkdelete', 'session' => $sessionsids,
                         'confirm' => 1, 'sesskey' => sesskey(), 'id' => $moduleid,
-                        'l' => $slist, 'h' => $hybridteachingid);
+                        'l' => $slist, 'h' => $hybridteachingid, ];
 
         $url = new moodle_url('/mod/hybridteaching/classes/action/session_action.php', $params);
         echo $OUTPUT->header();

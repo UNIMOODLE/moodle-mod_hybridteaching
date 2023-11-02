@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - https://moodle.org/
+// This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -12,15 +12,25 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
+// Project implemented by the "Recovery, Transformation and Resilience Plan.
+// Funded by the European Union - Next GenerationEU".
+//
+// Produced by the UNIMOODLE University Group: Universities of
+// Valladolid, Complutense de Madrid, UPV/EHU, León, Salamanca,
+// Illes Balears, Valencia, Rey Juan Carlos, La Laguna, Zaragoza, Málaga,
+// Córdoba, Extremadura, Vigo, Las Palmas de Gran Canaria y Burgos.
 
 /**
- * Library of interface functions and constants.
- *
- * @package     mod_hybridteaching
- * @copyright   2023 isyc <isyc@example.com>
- * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * Display information about all the mod_hybridteaching modules in the requested course. *
+ * @package    mod_hybridteaching
+ * @copyright  2023 Proyecto UNIMOODLE
+ * @author     UNIMOODLE Group (Coordinator) <direccion.area.estrategia.digital@uva.es>
+ * @author     ISYC <soporte@isyc.com>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+
 
 use mod_hybridteaching\plugininfo\hybridteachvc;
 
@@ -43,10 +53,10 @@ function hybridteaching_supports($feature) {
         case FEATURE_GRADE_HAS_GRADE:
         case FEATURE_GROUPS:
         case FEATURE_GROUPINGS:
-        //case FEATURE_MOD_PURPOSE
-                // MOD_PURPOSE_COMMUNICATION
-        //FEATURE_BACKUP_MOODLE2
-        //case FEATURE_ADVANCED_GRADING:
+            // ...case FEATURE_MOD_PURPOSE
+            // MOD_PURPOSE_COMMUNICATION
+        case FEATURE_BACKUP_MOODLE2:
+            // ...case FEATURE_ADVANCED_GRADING:
             return true;
         default:
             return null;
@@ -76,9 +86,9 @@ function hybridteaching_add_instance($moduleinstance, $mform = null) {
         $moduleinstance->config = 0;
         $moduleinstance->typevc = '';
     }
-    
+
     /*if session recording is used, userecordvc, the recording must be processed with processedrecording*/
-    /*processedrecording: 
+    /*processedrecording:
         -1: must process with vc
         0: processed and downloaded with vc, ready to upload to storage
         >1: uploaded to storage
@@ -95,12 +105,18 @@ function hybridteaching_add_instance($moduleinstance, $mform = null) {
     $moduleinstance->id = $DB->insert_record('hybridteaching', $moduleinstance);
     if (!$moduleinstance->sessionscheduling && !empty($moduleinstance->id)) {
         require_once($CFG->dirroot.'/mod/hybridteaching/classes/controller/sessions_controller.php');
-        $sessions = new sessions_controller($moduleinstance);
-        $sessions->create_session($moduleinstance);
+        $sessioncontroller = new sessions_controller($moduleinstance);
+        $session = (object) $sessioncontroller->create_session($moduleinstance);
+
+        if (!empty($moduleinstance->typevc) && !empty($moduleinstance->usevideoconference)) {
+            $classname = sessions_controller::get_subpluginvc_class($moduleinstance->typevc);
+            $sessionvc = new $classname($session->id);
+            $sessionvc->create_unique_session_extended($session, $moduleinstance);
+        }
     }
 
     hybridteaching_grade_item_update($moduleinstance);
-    
+
     return $moduleinstance->id;
 }
 
@@ -135,14 +151,14 @@ function hybridteaching_update_instance($moduleinstance, $mform = null) {
         $moduleinstance->undatedsession = 0;
     }
 
-    //if there is not sessionscheduling, change time in the unique session
-    $hadsessionsscheduling = $DB->get_field('hybridteaching', 'sessionscheduling', array('id' => $moduleinstance->id));
+    // If there is not sessionscheduling, change time in the unique session.
+    $hadsessionsscheduling = $DB->get_field('hybridteaching', 'sessionscheduling', ['id' => $moduleinstance->id]);
     if ($moduleinstance->sessionscheduling == 0 && $hadsessionsscheduling == 1) {
         require_once($CFG->dirroot.'/mod/hybridteaching/classes/controller/sessions_controller.php');
         $session = new sessions_controller($moduleinstance);
         $session->update_session($moduleinstance);
     }
-    
+
     if (!$DB->update_record('hybridteaching', $moduleinstance)) {
         return false;
     }
@@ -161,22 +177,22 @@ function hybridteaching_update_instance($moduleinstance, $mform = null) {
 function hybridteaching_delete_instance($id) {
     global $CFG, $DB;
 
-    $existshybrid = $DB->get_record('hybridteaching', array('id' => $id));
+    $existshybrid = $DB->get_record('hybridteaching', ['id' => $id]);
     if (!$existshybrid) {
         return false;
     }
-    
-    //opción "Usar programación de sesiones" está sin marcar
+
+    // Opción "Usar programación de sesiones" está sin marcar.
     if (!$existshybrid->sessionscheduling && $existshybrid->typevc != '') {
-        require_once($CFG->dirroot.'/mod/hybridteaching/classes/controller/sessions_controller.php');    
+        require_once($CFG->dirroot.'/mod/hybridteaching/classes/controller/sessions_controller.php');
         $sessions = new sessions_controller($existshybrid);
         $sessions->delete_all_sessions();
     }
 
-    $DB->delete_records('hybridteaching', array('id' => $id));
+    $DB->delete_records('hybridteaching', ['id' => $id]);
 
-    //TO-DO: repasar estas funciones para ver cómo incluirlas
-    //hybridteaching_calendar_item_delete($hybridteaching);
+    // TO-DO: repasar estas funciones para ver cómo incluirlas
+    // hybridteaching_calendar_item_delete($hybridteaching);.
     hybridteaching_grade_item_delete($existshybrid);
 
     return true;
@@ -198,7 +214,7 @@ function hybridteaching_delete_instance($id) {
  * @return string[].
  */
 function hybridteaching_get_file_areas($course, $cm, $context) {
-    return array();
+    return [];
 }
 
 /**
@@ -236,7 +252,7 @@ function hybridteaching_get_file_info($browser, $areas, $course, $cm, $context, 
  * @param bool $forcedownload Whether or not force download.
  * @param array $options Additional options affecting the file serving.
  */
-function hybridteaching_pluginfile($course, $cm, $context, $filearea, $args, $forcedownload, $options = array()) {
+function hybridteaching_pluginfile($course, $cm, $context, $filearea, $args, $forcedownload, $options = []) {
     global $DB, $CFG;
 
     if ($context->contextlevel != CONTEXT_MODULE) {
@@ -263,7 +279,6 @@ function hybridteaching_get_coursemodule_info($coursemodule) {
     global $DB;
 
     $dbparams = ['id' => $coursemodule->instance];
-    
 
     $fields = 'id, name, intro, introformat, completionattendance';
     if (!$hybridteaching = $DB->get_record('hybridteaching', $dbparams, $fields)) {
@@ -280,7 +295,7 @@ function hybridteaching_get_coursemodule_info($coursemodule) {
 
     // Populate the custom completion rules as key => value pairs, but only if the completion mode is 'automatic'.
     if ($coursemodule->completion == COMPLETION_TRACKING_AUTOMATIC) {
-        //$result->customdata['customcompletionrules']['completioncalculation'] = $hybridteaching->completioncalculation;
+        // ...$result->customdata['customcompletionrules']['completioncalculation'] = $hybridteaching->completioncalculation;
         $result->customdata['customcompletionrules']['completionattendance'] = $hybridteaching->completionattendance;
     }
 
@@ -324,7 +339,7 @@ function mod_hybridteaching_get_completion_active_rule_descriptions($cm) {
 function hybridteaching_scale_used_anywhere($scaleid) {
     global $DB;
 
-    if ($scaleid and $DB->record_exists('hybridteaching', array('grade'=>-$scaleid))) {
+    if ($scaleid && $DB->record_exists('hybridteaching', ['grade' => -$scaleid])) {
         return true;
     } else {
         return false;
@@ -338,11 +353,11 @@ function hybridteaching_scale_used_anywhere($scaleid) {
  * @param array $grades optional array/object of grade(s); 'reset' means reset grades in gradebook
  * @return int 0 if ok, error code otherwise
  */
-function hybridteaching_grade_item_update($hybridteaching, $grades = null) {    
+function hybridteaching_grade_item_update($hybridteaching, $grades = null) {
     global $CFG;
     require_once($CFG->libdir.'/gradelib.php');
 
-    $params = array('itemname' => $hybridteaching->name, 'idnumber' => $hybridteaching->cmidnumber);
+    $params = ['itemname' => $hybridteaching->name, 'idnumber' => $hybridteaching->cmidnumber];
 
     if ($hybridteaching->grade > 0) {
         $params['gradetype'] = GRADE_TYPE_VALUE;
@@ -360,7 +375,8 @@ function hybridteaching_grade_item_update($hybridteaching, $grades = null) {
         $grades = null;
     }
 
-    return grade_update('mod/hybridteaching', $hybridteaching->course, 'mod', 'hybridteaching', $hybridteaching->id, 0, $grades, $params);
+    return grade_update('mod/hybridteaching', $hybridteaching->course, 'mod',
+        'hybridteaching', $hybridteaching->id, 0, $grades, $params);
 }
 
 /**
@@ -374,7 +390,7 @@ function hybridteaching_grade_item_delete($hybridteaching) {
     require_once($CFG->libdir.'/gradelib.php');
 
     return grade_update('mod/hybridteaching', $hybridteaching->course, 'mod', 'hybridteaching',
-        $hybridteaching->id, 0, null, array('deleted' => 1));
+        $hybridteaching->id, 0, null, ['deleted' => 1]);
 }
 
 /**
@@ -391,35 +407,35 @@ function hybridteaching_extend_settings_navigation(settings_navigation $settings
     $cm = $settingsnav->get_page()->cm;
     $nodes = [];
 
-    $hassessionsscheduling=$DB->get_field('hybridteaching','sessionscheduling',array('id' => $cm->instance));
+    $hassessionsscheduling = $DB->get_field('hybridteaching', 'sessionscheduling', ['id' => $cm->instance]);
     if (has_capability('mod/hybridteaching:sessions', $context)) {
         $nodes[] = ['url' => new moodle_url('/mod/hybridteaching/sessions.php', ['id' => $cm->id, 'l' => SESSION_LIST]),
-                    'title' => get_string('sessions', 'hybridteaching')];
+                    'title' => get_string('sessions', 'hybridteaching'), ];
     }
 
     if (has_capability('mod/hybridteaching:attendance', $context)) {
         $nodes[] = ['url' => new moodle_url('/mod/hybridteaching/attendance.php', ['id' => $cm->id]),
-                    'title' => get_string('attendance', 'hybridteaching')];
+                    'title' => get_string('attendance', 'hybridteaching'), ];
     }
 
-
     if (has_capability('mod/hybridteaching:programschedule', $context)) {
-        //mostrar solo pestaña de "Programación de sesiones" solo si esta VC tiene marcada la opción de "usar programación de sesiones"
-        $hassessionsscheduling=$DB->get_field('hybridteaching','sessionscheduling',array('id' => $cm->instance));
-        if ($hassessionsscheduling){
+        // Mostrar solo pestaña de "Programación de sesiones" solo si esta VC
+        // ...tiene marcada la opción de "usar programación de sesiones".
+        $hassessionsscheduling = $DB->get_field('hybridteaching', 'sessionscheduling', ['id' => $cm->instance]);
+        if ($hassessionsscheduling) {
             $nodes[] = ['url' => new moodle_url('/mod/hybridteaching/sessions.php', ['id' => $cm->id, 'l' => PROGRAM_SESSION_LIST]),
-                        'title' => get_string('programschedule', 'hybridteaching')];
+                        'title' => get_string('programschedule', 'hybridteaching'), ];
         }
     }
 
     if (has_capability('mod/hybridteaching:import', $context)) {
         $nodes[] = ['url' => new moodle_url('/mod/hybridteaching/import.php', ['id' => $cm->id]),
-                    'title' => get_string('import', 'hybridteaching')];
+                    'title' => get_string('import', 'hybridteaching'), ];
     }
 
     if (has_capability('mod/hybridteaching:export', $context)) {
         $nodes[] = ['url' => new moodle_url('/mod/hybridteaching/export.php', ['id' => $cm->id]),
-                    'title' => get_string('export', 'hybridteaching')];
+                    'title' => get_string('export', 'hybridteaching'), ];
     }
 
     foreach ($nodes as $node) {

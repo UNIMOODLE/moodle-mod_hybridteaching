@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - https://moodle.org/
+// This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -12,15 +12,23 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
+// Project implemented by the "Recovery, Transformation and Resilience Plan.
+// Funded by the European Union - Next GenerationEU".
+//
+// Produced by the UNIMOODLE University Group: Universities of
+// Valladolid, Complutense de Madrid, UPV/EHU, León, Salamanca,
+// Illes Balears, Valencia, Rey Juan Carlos, La Laguna, Zaragoza, Málaga,
+// Córdoba, Extremadura, Vigo, Las Palmas de Gran Canaria y Burgos.
 
 /**
- * Plugin administration pages are defined here.
- *
- * @package     mod_hybridteaching
- * @category    admin
- * @copyright   2023 isyc <isyc@example.com>
- * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * Display information about all the mod_hybridteaching modules in the requested course. *
+ * @package    mod_hybridteaching
+ * @copyright  2023 Proyecto UNIMOODLE
+ * @author     UNIMOODLE Group (Coordinator) <direccion.area.estrategia.digital@uva.es>
+ * @author     ISYC <soporte@isyc.com>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 defined('MOODLE_INTERNAL') || die();
@@ -127,8 +135,8 @@ class hybridteaching_attendance_render extends \table_sql implements dynamic_tab
         if ($view == 'attendlog' || $view == 'extendedsessionatt') {
             $selectedsession ? $sessionid = $selectedsession : $sessionid = 0;
             $selecteduser ? $attid = $selecteduser : $selecteduser = $attid;
-            $selecteduser ? 
-            $selectedstudent = $attendancecontroller::hybridteaching_get_attendance_from_id($selecteduser)->userid : '';
+            $selecteduser ?
+                $selectedstudent = $attendancecontroller::hybridteaching_get_attendance_from_id($selecteduser)->userid : '';
             $sessoptionsformparams = [
                 'id' => $id,
                 'hid' => $hybridteachingid,
@@ -161,7 +169,7 @@ class hybridteaching_attendance_render extends \table_sql implements dynamic_tab
             $attusrfilter = new attuserfilter_options_form($CFG->wwwroot . '/mod/hybridteaching/attendance.php?',
                 ['id' => $id, 'att' => $attid, 'fname' => $fname, 'lname' => $lname, 'hid' => $hybridteachingid,
                     'view' => $view, 'sessid' => $selectedsession, 'sort' => $sort, 'dir' => $dir,
-                    'perpage' => $perpage, 'attfilter' => $selectedfilter, 'groupid' => $group ]);
+                    'perpage' => $perpage, 'attfilter' => $selectedfilter, 'groupid' => $group, ]);
         }
         $view == 'sessionattendance' ? $sortexclusions = ['stroptions', 'strclassroom', 'strvc'] : '';
         $view == 'extendedstudentatt' ? $sortexclusions = ['stroptions', 'strgrade'] : '';
@@ -212,11 +220,9 @@ class hybridteaching_attendance_render extends \table_sql implements dynamic_tab
             'view' => $view,
             'selectedfilter' => $selectedfilter,
             'course' => $COURSE,
+            'groupexception' => 0,
         ];
-        $optionsform = new attendance_options_form($CFG->wwwroot . '/mod/hybridteaching/attendance.php?view=' .
-             $view . '&sessionid=' . $sessionid . '&userid=' . $selecteduser . '&sort=' . $sort . '&dir=' .
-             $dir . '&fname=' . $fname . '&lname=' . $lname . '&groupid=' . $group, $optionsformparams);
-        $params['groupid'] = $group; 
+        $params['groupid'] = $group;
         $return = $OUTPUT->box_start('generalbox');
 
         $table = new html_table();
@@ -238,7 +244,8 @@ class hybridteaching_attendance_render extends \table_sql implements dynamic_tab
         if ($view == 'attendlog') {
             $att = $attendancecontroller->hybridteaching_get_attendance_from_id($attid);
             $att->sessionid != $sessionid ? $att = $attendancecontroller->hybridteaching_get_attendance($sessionid) : '';
-            if (!$logs = $attendancecontroller->hybridteaching_get_attendance_logs($att->id, $sort, $dir)) {
+            $logs = $attendancecontroller->hybridteaching_get_attendance_logs($att->id, $sort, $dir);
+            if (!$logs) {
                 if (isset($sessionoptions)) {
                     has_capability('mod/hybridteaching:sessionsfulltable', $this->context, $user = $USER->id) ?
                     $sessionoptions->display() : '';
@@ -435,6 +442,23 @@ class hybridteaching_attendance_render extends \table_sql implements dynamic_tab
         $attendancelist = $attendancecontroller->load_attendance($page, $perpage, $params, $extrasql,
             $operator, $sort, $dir, $view, $sessionid, $fname, $lname);
         $attendanceassist = $attendancecontroller->load_attendance_assistance($params, $extrasql, $operator);
+        $view == 'studentattendance' ? $baseurl = new moodle_url('/mod/hybridteaching/attendance.php?view=' .
+            $view, ['id' => $id, 'sort' => $sort, 'dir' => $dir, 'perpage' => $perpage,
+            'sessionid' => $sessionid, 'userid' => $selecteduser, 'fname' => $fname, 'lname' => $lname,
+            'attfilter' => $selectedfilter, ])
+        :
+        $baseurl = new moodle_url('/mod/hybridteaching/attendance.php?view=' . $view, ['id' => $id,
+            'sort' => $sort, 'dir' => $dir, 'perpage' => $perpage, 'sessionid' => $sessionid, 'fname' => $fname,
+            'lname' => $lname, 'attfilter' => $selectedfilter, ]);
+            $return .= $OUTPUT->paging_bar($attendancecount, $page, $perpage, $baseurl);
+        $groupmode ? $usegroup = 1 : $usegroup = 0;
+        if (!$groupmode) {
+            $groupmode = $attendancecontroller->attendances_uses_groups($attendancelist);
+            if (!$groupmode && ($view == 'studentattendance' || $view == 'sessionattendance')) {
+                unset($table->head[1]);
+                $optionsformparams['groupexception'] = $groupmode;
+            }
+        }
         foreach ($attendancelist as $attendance) {
             $session = $sessionscontroller->get_session($attendance['sessionid']);
             $date = $session->starttime;
@@ -482,11 +506,15 @@ class hybridteaching_attendance_render extends \table_sql implements dynamic_tab
                 $attendance['type'] == 0 ? $atttype = get_string('classroom', 'hybridteaching') :
                     $atttype = get_string('videoconference', 'hybridteaching');
             }
+            $groupbody = '';
+            if ($groupmode) {
+                $session->groupid == 0 ? $groupbody = get_string('commonattendance', 'hybridteaching') :
+                    $groupbody = groups_get_group($session->groupid)->name;
+            }
             $body = [
                 'class' => '',
                 'attendanceid' => $attendance['id'],
-                'group' => $session->groupid == 0 ? get_string('commonattendance', 'hybridteaching') :
-                     groups_get_group($session->groupid)->name,
+                'group' => $groupbody,
                 'name' => $session->name,
                 'username' => $sessionsuser->firstname . ' ' . $sessionsuser->lastname . ' ' . $userpicture,
                 'date' => $date,
@@ -542,6 +570,9 @@ class hybridteaching_attendance_render extends \table_sql implements dynamic_tab
         if (isset($attresumee)) {
             $attresumee->display();
         }
+        $optionsform = new attendance_options_form($CFG->wwwroot . '/mod/hybridteaching/attendance.php?view=' .
+            $view . '&sessionid=' . $sessionid . '&userid=' . $selecteduser . '&sort=' . $sort . '&dir=' .
+            $dir . '&fname=' . $fname . '&lname=' . $lname . '&groupid=' . $group, $optionsformparams);
         $optionsform->display();
         if (isset($sessionoptions) && $editing) {
             $sessionoptions->display();
@@ -559,15 +590,6 @@ class hybridteaching_attendance_render extends \table_sql implements dynamic_tab
         $return .= html_writer::tag('form', $attendancetable, ['method' => 'post',
             'action' => $CFG->wwwroot . '/mod/hybridteaching/classes/action/attendance_action.php?view=' .
             $view . '&sessionid=' . $sessionid, ]);
-        $baseurl = new moodle_url('/mod/hybridteaching/attendance.php?view=' . $view, ['id' => $id,
-            'sort' => $sort, 'dir' => $dir, 'perpage' => $perpage, 'sessionid' => $sessionid, 'fname' => $fname,
-            'lname' => $lname, 'attfilter' => $selectedfilter, ]);
-
-        $view == 'studentattendance' ? $baseurl = new moodle_url('/mod/hybridteaching/attendance.php?view=' .
-            $view, ['id' => $id, 'sort' => $sort, 'dir' => $dir, 'perpage' => $perpage,
-            'sessionid' => $sessionid, 'userid' => $selecteduser, 'fname' => $fname, 'lname' => $lname,
-            'attfilter' => $selectedfilter, ]) : false;
-
         $return .= $OUTPUT->paging_bar($attendancecount, $page, $perpage, $baseurl);
         $return .= $OUTPUT->box_end();
         return $return;
@@ -795,11 +817,24 @@ class hybridteaching_attendance_render extends \table_sql implements dynamic_tab
         $sesname = '';
         switch($tableview) {
             case 'sessionattendance':
+                if (!$params['group']) {
+                    $row = new html_table_row([$OUTPUT->render($params['checkbox']),
+                    $params['name'], $params['date'], $params['duration'], $params['classroom'], $params['vc'],
+                        $options, ]);
+                    break;
+                }
                 $row = new html_table_row([$OUTPUT->render($params['checkbox']), $params['group'],
                 $params['name'], $params['date'], $params['duration'], $params['classroom'], $params['vc'],
-                 $options, ]);
+                    $options, ]);
                 break;
             case 'studentattendance':
+                if (!$params['group']) {
+                    $row = new html_table_row([has_capability('mod/hybridteaching:sessionsfulltable', $this->context) ?
+                    $OUTPUT->render($params['checkbox']) : '',
+                        $params['name'], $params['date'], $params['duration'], $params['type'], $params['attendance'],
+                        $params['grade'], $options, ]);
+                    break;
+                }
                 $row = new html_table_row([has_capability('mod/hybridteaching:sessionsfulltable', $this->context) ?
                         $OUTPUT->render($params['checkbox']) : '', $params['group'],
                     $params['name'], $params['date'], $params['duration'], $params['type'], $params['attendance'],

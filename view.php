@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - https://moodle.org/
+// This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -12,18 +12,25 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
+// Project implemented by the "Recovery, Transformation and Resilience Plan.
+// Funded by the European Union - Next GenerationEU".
+//
+// Produced by the UNIMOODLE University Group: Universities of
+// Valladolid, Complutense de Madrid, UPV/EHU, León, Salamanca,
+// Illes Balears, Valencia, Rey Juan Carlos, La Laguna, Zaragoza, Málaga,
+// Córdoba, Extremadura, Vigo, Las Palmas de Gran Canaria y Burgos.
 
 /**
- * Prints an instance of mod_hybridteaching.
- *
- * @package     mod_hybridteaching
- * @copyright   2023 isyc <isyc@example.com>
- * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * Display information about all the mod_hybridteaching modules in the requested course. *
+ * @package    mod_hybridteaching
+ * @copyright  2023 Proyecto UNIMOODLE
+ * @author     UNIMOODLE Group (Coordinator) <direccion.area.estrategia.digital@uva.es>
+ * @author     ISYC <soporte@isyc.com>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-
-//use mod_hybridteaching\output\view_page;
 
 require(__DIR__ . '/../../config.php');
 require_once(__DIR__ . '/lib.php');
@@ -36,9 +43,9 @@ $h = optional_param('h', 0, PARAM_INT);
 
 if ($id) {
     list ($course, $cm) = get_course_and_cm_from_cmid($id, 'hybridteaching');
-    $hybridteaching = $DB->get_record('hybridteaching', array('id' => $cm->instance), '*', MUST_EXIST);
+    $hybridteaching = $DB->get_record('hybridteaching', ['id' => $cm->instance], '*', MUST_EXIST);
 } else if ($h) {
-    $hybridteaching = $DB->get_record('hybridteaching', array('id' => $h), '*', MUST_EXIST);
+    $hybridteaching = $DB->get_record('hybridteaching', ['id' => $h], '*', MUST_EXIST);
     list ($course, $cm) = get_course_and_cm_from_instance($h,  'teamsmeeting');
 }
 if (!isset($cm) || !$cm) {
@@ -54,7 +61,7 @@ global $USER;
 $completion = new completion_info($course);
 $completion->set_module_viewed($cm);
 
-$urlparams = array('id' => $cm->id, 'h' => $hybridteaching->id);
+$urlparams = ['id' => $cm->id, 'h' => $hybridteaching->id];
 $url = new moodle_url('/mod/hybridteaching/view.php', $urlparams);
 
 $PAGE->set_url($url);
@@ -118,8 +125,12 @@ if (!$activesession) {
                         $status = get_string('status_undated_wait', 'mod_hybridteaching');
                     }
                 } else {
-                    $status = get_string('status_ready', 'mod_hybridteaching');
-                    $viewupdate = true;
+                    $status = get_string('status_start', 'mod_hybridteaching');
+                    if ($activesession->starttime < time()) {
+                        $isprogress = true;
+                        $status = get_string('status_ready', 'mod_hybridteaching');
+                        $viewupdate = true;
+                    }
                 }
                 $alert = 'alert-info';
                 break;
@@ -133,7 +144,6 @@ if (!$activesession) {
                 $status = get_string('status_start', 'mod_hybridteaching');
                 $isstart = true;
                 $alert = 'alert-info';
-                $viewupdate = true;
                 break;
             case $timeend < time():
                 $status = get_string('status_finished', 'mod_hybridteaching');
@@ -145,7 +155,7 @@ if (!$activesession) {
             ? $PAGE->requires->js_call_amd('mod_hybridteaching/view', 'init', [$activesession->id, $USER->id]) : '';
         !isset($status) ? $status = '' : '';
 
-        //closedoors
+        // Closedoors.
         $closedoors = '';
         $isclosedoors = false;
         $closedoorstime = 0;

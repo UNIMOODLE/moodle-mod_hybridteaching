@@ -1,5 +1,5 @@
 <?php
-// This file is part of the Zoom plugin for Moodle - http://moodle.org/
+// This file is part of Moodle - https://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -12,7 +12,24 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+// along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+
+// Project implemented by the "Recovery, Transformation and Resilience Plan.
+// Funded by the European Union - Next GenerationEU".
+//
+// Produced by the UNIMOODLE University Group: Universities of
+// Valladolid, Complutense de Madrid, UPV/EHU, León, Salamanca,
+// Illes Balears, Valencia, Rey Juan Carlos, La Laguna, Zaragoza, Málaga,
+// Córdoba, Extremadura, Vigo, Las Palmas de Gran Canaria y Burgos.
+
+/**
+ * Display information about all the mod_hybridteaching modules in the requested course. *
+ * @package    mod_hybridteaching
+ * @copyright  2023 Proyecto UNIMOODLE
+ * @author     UNIMOODLE Group (Coordinator) <direccion.area.estrategia.digital@uva.es>
+ * @author     ISYC <soporte@isyc.com>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 
 
 namespace hybridteachvc_zoom;
@@ -26,7 +43,7 @@ require_once($CFG->dirroot.'/lib/filelib.php');
 
 // Some plugins already might include this library, like mod_bigbluebuttonbn.
 // Hacky, but need to create whitelist of plugins that might have JWT library.
-// NOTE: Remove file_exists checks and the JWT library in mod when versions prior to Moodle 3.7 is no longer supported
+// NOTE: Remove file_exists checks and the JWT library in mod when versions prior to Moodle 3.7 is no longer supported.
 if (!class_exists('Firebase\JWT\JWT')) {
     if (file_exists($CFG->dirroot.'/lib/php-jwt/src/JWT.php')) {
         require_once($CFG->dirroot.'/lib/php-jwt/src/JWT.php');
@@ -62,17 +79,11 @@ class webservice {
     protected $accountid;
 
     /**
-     * host ID
-     * @var string
-     */
-    //protected $hostid;
-
-    /**
      * email license
      * @var string
      */
     protected $emaillicense;
-       
+
     /**
      * API base URL.
      * @var string
@@ -96,17 +107,14 @@ class webservice {
      * @throws \moodle_exception Moodle exception is thrown for missing config settings.
      */
     public function __construct($zoomconfig) {
+        try {
+            $this->accountid = $zoomconfig->accountid;
+            $this->clientid = $zoomconfig->clientid;
+            $this->clientsecret = $zoomconfig->clientsecret;
+            $this->emaillicense = $zoomconfig->emaillicense;
 
-        try{
-            $this->accountid=$zoomconfig->accountid;
-            $this->clientid=$zoomconfig->clientid;
-            $this->clientsecret=$zoomconfig->clientsecret;
-            //$this->hostid=$zoomconfig->hostid;
-            $this->emaillicense=$zoomconfig->emaillicense;
-  
             // Get and remember the API URL.
             $this->apiurl = HTZOOM_API_URL;
-            
         } catch (\moodle_exception $exception) {
             throw new \moodle_exception('errorwebservice', 'htzoom', '', $exception->getMessage());
         }
@@ -125,7 +133,7 @@ class webservice {
     protected function make_curl_call(&$curl, $method, $url, $data) {
         return $curl->$method($url, $data);
     }
-    
+
     /**
      * Gets a curl object in order to make API calls. This function was created
      * to enable unit testing for the webservice class.
@@ -134,7 +142,7 @@ class webservice {
     protected function get_curl_object() {
         return new \curl();
     }
-    
+
     /**
      * Makes a REST call.
      *
@@ -162,8 +170,6 @@ class webservice {
         }
 
         $rawresponse = $this->make_curl_call($curl, $method, $url, $data);
-        
-        //$response = call_user_func_array(array($curl, $method), array($path, $data));
 
         if ($curl->get_errno()) {
             throw new \moodle_exception('errorwebservice', 'htzoom', '', $curl->error);
@@ -172,10 +178,11 @@ class webservice {
         $response = json_decode($rawresponse);
 
         $httpstatus = $curl->get_info()['http_code'];
-        
+
         if ($httpstatus >= 400) {
             if ($response) {
-                throw new \moodle_exception('errorwebservice', 'htzoom', '', get_string('errorwebservice', 'hybridteachvc_zoom',$response->message) );
+                throw new \moodle_exception('errorwebservice', 'htzoom', '',
+                    get_string('errorwebservice', 'hybridteachvc_zoom', $response->message));
             } else {
                 throw new \moodle_exception('errorwebservice', 'htzoom', '', "HTTP Status $httpstatus");
             }
@@ -186,7 +193,7 @@ class webservice {
 
 
     public function _make_call_download($path, $data = array(), $method = 'get') {
- 
+
         $url = $path;
         $method = strtolower($method);
         $curl = new \curl();
@@ -199,12 +206,11 @@ class webservice {
         $curl->setHeader('Accept: application/json');
 
         if ($method != 'get') {
-            //$curl->setHeader('Content-Type: application/json');
             $data = is_array($data) ? json_encode($data) : $data;
         }
 
         $rawresponse = $this->make_curl_call($curl, $method, $url, $data);
-    
+
         if ($curl->get_errno()) {
             throw new \moodle_exception('errorwebservice', 'htzoom', '', $curl->error);
         }
@@ -293,7 +299,6 @@ class webservice {
         return $founduser;
     }
 
-    
     /**
      * Gets roles
      *
@@ -315,9 +320,8 @@ class webservice {
         }
         return $foundroles;
     }
-    
-    
-    public function get_users(){
+
+    public function get_users() {
         $founduser = false;
         $url = 'users/';
 
@@ -332,8 +336,7 @@ class webservice {
         }
         return $foundusers;
     }
-    
-    
+
     /**
      * Converts a zoom object from database format to API format.
      *
@@ -345,7 +348,7 @@ class webservice {
      * @todo Add functionality for 'alternative_hosts' => $zoom->option_alternative_hosts in $data['settings']
      * @todo Make UCLA data fields and API data fields match?
      */
-    protected function _database_to_api($zoom,$ht) {
+    protected function _database_to_api($zoom, $ht) {
         global $CFG;
 
         $data = array(
@@ -357,18 +360,17 @@ class webservice {
             $data['timezone'] = date_default_timezone_get();
         }
 
-
-        /*ESTA OPCION DE auto_recording NO FUNCIONA EN LA API CORRECTAMENTE
-         SE ACTIVA/DESACTIVA DESDE LA CUENTA, NO DESDE LA REUNION:
-         si la cuenta lo tiene activado, se activa
-         Si la cuenta lo tiene desactivado, se queda desactivado, 
-         no funciona auto_recording.
-        Comprobar más adelante por si lo hubieran arreglado en la api
+        /*  ESTA OPCION DE auto_recording NO FUNCIONA EN LA API CORRECTAMENTE
+            SE ACTIVA/DESACTIVA DESDE LA CUENTA, NO DESDE LA REUNION:
+            si la cuenta lo tiene activado, se activa
+            Si la cuenta lo tiene desactivado, se queda desactivado,
+            no funciona auto_recording.
+            Comprobar más adelante por si lo hubieran arreglado en la api.
          */
-        if (isset($ht->initialrecord) && $ht->initialrecord==1){
+        if (isset($ht->initialrecord) && $ht->initialrecord == 1) {
             $data['auto_recording'] = HTZOOM_RECORDING_CLOUD;
         }
-        if (isset($ht->userecordvc) && $ht->userecordvc==0) {
+        if (isset($ht->userecordvc) && $ht->userecordvc == 0) {
             $data['auto_recording'] = HTZOOM_RECORDING_DISABLED;
         }
 
@@ -384,15 +386,14 @@ class webservice {
             $data['settings']['join_before_host'] = ! (bool) ($ht->waitmoderator);
         }
 
-        if (isset($ht->disablecam)){
+        if (isset($ht->disablecam)) {
             $data['settings']['host_video'] = (bool)!$ht->disablecam;
             $data['settings']['participant_video'] = (bool)!$ht->disablecam;
         }
 
-        if (isset($ht->disablemic)){
-            $data['settings']['mute_upon_entry']=(bool)$ht->disablemic;
+        if (isset($ht->disablemic)) {
+            $data['settings']['mute_upon_entry'] = (bool)$ht->disablemic;
         }
-       
 
         return $data;
     }
@@ -404,13 +405,11 @@ class webservice {
      * @param stdClass $zoom The meeting to create.
      * @return stdClass The call response.
      */
-    public function create_meeting($zoom,$ht) {
+    public function create_meeting($zoom, $ht) {
         $zoom->undatedsession = $ht->undatedsession;
-
         $url = 'users/'.$this->emaillicense.'/meetings';
-        $response=$this->_make_call($url, $this->_database_to_api($zoom,$ht), 'post');
+        $response = $this->_make_call($url, $this->_database_to_api($zoom, $ht), 'post');
         return $response;
-
     }
 
     /**
@@ -419,11 +418,10 @@ class webservice {
      * @param stdClass $zoom The meeting to update.
      * @return void
      */
-    public function update_meeting($zoom,$ht) {
+    public function update_meeting($zoom, $ht) {
         $zoom->undatedsession = $ht->undatedsession;
-
         $url = 'meetings/' . $zoom->meetingid;
-        $this->_make_call($url, $this->_database_to_api($zoom,$ht), 'patch');
+        $this->_make_call($url, $this->_database_to_api($zoom, $ht), 'patch');
     }
 
     /**
@@ -455,50 +453,17 @@ class webservice {
         }
         return $response;
     }
-    
-    /**INICIO ISYC:
-     *Obtiene las grabaciones de una reunión.
-     * 
-     * @param int $id The meeting_id of the meeting or webinar to retrieve.
-     * @return stdClass Información sobre las grabaciones de un meeting.
+
+    /**
+     * Retrieves the meeting recordings for a given ID.
+     *
+     * @param int $id The ID of the meeting.
+     * @throws \moodle_exception If an error occurs during the API call.
+     * @return mixed The response from the API call.
      */
-    public function get_meeting_recordings($id){
-        //$url = 'meetings/'.$id."/recordings";
+    public function get_meeting_recordings($id) {
         $url = 'meetings/'.$id.'/recordings?include_fields=download_access_token';
-        
-        $response = null;
-        try {
-            $response = $this->_make_call($url);
-        } catch (\moodle_exception $error) {
-        }
-        return $response;
-    }
-    
-    public function get_meeting_recordingsettings($id){
-        $url = 'meetings/' . $id . '/recordings/settings';
-        $response = null;
-        try{
-            $response = $this->_make_call($url);
-        } catch (\moodle_exception $error) {
-        }
-        return $response;
 
-    }
-
-    public function get_past_meetings_uuid($id){
-        $url = '/past_meetings/'.$id.'/configs';
-        $response = null;
-        try{
-            $response = $this->_make_call($url);
-        } catch (\moodle_exception $error) {
-        }
-        return $response;
-    }
-    
-    /*
-    //pruebas inicio isyc
-    public function get_users_recordings($userid){
-        $url = 'users/'.$userid."/recordings";
         $response = null;
         try {
             $response = $this->_make_call($url);
@@ -507,8 +472,43 @@ class webservice {
         }
         return $response;
     }
-    //fin pruebas isyc
-    */
+
+    /**
+     * Retrieves the recording settings for a specific meeting.
+     *
+     * @param int $id The ID of the meeting.
+     * @throws \moodle_exception If an error occurs while making the API call.
+     * @return mixed The response from the API call.
+     */
+    public function get_meeting_recordingsettings($id) {
+        $url = 'meetings/' . $id . '/recordings/settings';
+        $response = null;
+        try {
+            $response = $this->_make_call($url);
+        } catch (\moodle_exception $error) {
+            throw $error;
+        }
+        return $response;
+
+    }
+
+    /**
+     * Retrieves the UUID of past meetings.
+     *
+     * @param int $id The ID of the meeting to retrieve UUID for.
+     * @throws \moodle_exception If an error occurs while making the API call.
+     * @return mixed The response from the API call.
+     */
+    public function get_past_meetings_uuid($id) {
+        $url = '/past_meetings/'.$id.'/configs';
+        $response = null;
+        try {
+            $response = $this->_make_call($url);
+        } catch (\moodle_exception $error) {
+            throw $error;
+        }
+        return $response;
+    }
 
     /**
      * Retrieve ended meetings report for a specified user and period. Handles multiple pages.
@@ -600,39 +600,38 @@ class webservice {
     }
 
 
-    //crea  un meeting en función de la licencia que ha solicitado el usuario al crear la actividad zoom
-    //se modifica zoom->host_id en función del correo de la licencia
-    public function create_meeting_calendar($ht,$zoom) {
+    /**
+     * Creates a meeting calendar.
+     *
+     * @param mixed $ht The ht parameter description.
+     * @param mixed $zoom The zoom parameter description.
+     * @throws \moodle_exception The exception thrown.
+     * @return mixed The return value description.
+     */
+    public function create_meeting_calendar($ht, $zoom) {
 
         $zoomuserid = false;
-        $service = new mod_hybridteaching_webservice();
+        $service = new webservice($zoom);
         try {
-            //obtenemos (con la api) el usuario seleccionado de la licencia
             $zoomuser = $service->get_user($zoom->licencia);
             if ($zoomuser !== false) {
                 $zoomuserid = $zoomuser->id;
-                //asignamos el id del zoom user seleccionado en la licencia
-                $zoom->host_id=$zoomuserid;
-            }
-            else{
-                $zoom->host_id=false;
+                $zoom->host_id = $zoomuserid;
+            } else {
+                $zoom->host_id = false;
                 return false;
             }
         } catch (\moodle_exception $error) {
             throw $error;
         }
 
-
-        if ($zoom->host_id!=false){ //si hemos obtenido usuario correcto:
+        if ($zoom->host_id != false) {
             $url = "users/$zoom->host_id/" . (isset($zoom->webinar) && $zoom->webinar ? 'webinars' : 'meetings');
-
             return $this->_make_call($url, $this->_database_to_api($zoom, $ht), 'post');
         }
-
     }
 
-
-     /**
+    /**
      * Get group's list.
      *
      * @return array An array of users.
@@ -643,16 +642,20 @@ class webservice {
         return $grupos;
     }
 
-    //obtener miembros del grupo guardado en la config
-    ///groups/{groupId}/members
-    public function get_group_members(){
-        $idgroup=get_config('isyczoomav', 'idgroup');
+
+    /**
+     * Retrieves the members of a group.
+     *
+     * @throws Some_Exception_Class If an error occurs while making the API call.
+     * @return array The array of group members.
+     */
+    public function get_group_members() {
+        $idgroup = get_config('isyczoomav', 'idgroup');
         $groupmembers = $this->_make_paginated_call('groups/'.$idgroup."/members", null, 'members');
         return $groupmembers;
     }
-    
-    
-     /**
+
+    /**
      * Returns a server to server oauth access token, good for 1 hour.
      *
      * @throws \moodle_exception
@@ -662,8 +665,7 @@ class webservice {
         $token = $this->oauth();
         return $token;
     }
-    
-    
+
     /**
      * Stores token and expiration in cache, returns token from OAuth call.
      *
@@ -694,7 +696,8 @@ class webservice {
             $token = $response->access_token;
             return $token;
         } else {
-            throw new \moodle_exception('errorwebservice', 'htzoom', '', get_string('zoomerr_no_access_token', 'hybridteachvc_zoom'));
+            throw new \moodle_exception('errorwebservice', 'htzoom', '',
+                get_string('zoomerr_no_access_token', 'hybridteachvc_zoom'));
         }
     }
 

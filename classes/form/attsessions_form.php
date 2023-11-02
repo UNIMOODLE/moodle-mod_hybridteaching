@@ -52,11 +52,11 @@ class attsessions_options_form extends moodleform {
             $selecteduser = $this->_customdata['selecteduser'];
             $mform->addElement('header', 'participant', get_string('participant', 'mod_hybridteaching'));
             $selectedusers = [];
-            $sessionusers = $attcontroller->hybridteaching_get_attendance_users_in_session($sessionid);
+            $sessionusers = $attcontroller->hybridteaching_get_attendance_users_in_session($sessionid, $hid);
             if ($sessionusers) {
                 foreach ($sessionusers as $sesuser) {
                     $useratt = $DB->get_record('hybridteaching_attendance', ['userid' => $sesuser->userid,
-                        'sessionid' => $sessionid, ], 'id, exempt', IGNORE_MISSING);
+                        'sessionid' => $sessionid, 'hybridteachingid' => $hid, ], 'id, exempt', IGNORE_MISSING);
                     if ($useratt->exempt) {
                         $selectedusers[$useratt->id] = $sesuser->lastname . ' ' . $sesuser->firstname .
                             ' (' . get_string('exemptuser', 'hybridteaching') . ')';

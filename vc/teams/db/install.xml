@@ -12,6 +12,7 @@
         <FIELD NAME="meetingcode" TYPE="char" LENGTH="30" NOTNULL="false" SEQUENCE="false" COMMENT="meeting code"/>
         <FIELD NAME="organizer" TYPE="char" LENGTH="50" NOTNULL="false" SEQUENCE="false" COMMENT="organizer user id"/>
         <FIELD NAME="joinurl" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="The join URL"/>
+        <FIELD NAME="recordingid" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Recording id"/>        
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>

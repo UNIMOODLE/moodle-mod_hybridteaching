@@ -1,4 +1,18 @@
 <?php
+// This file is part of Moodle - https://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -26,14 +40,14 @@ class session_filtering {
         $slist = optional_param('l', 1, PARAM_INT);
 
         if (!isset($SESSION->session_filtering)) {
-            $SESSION->session_filtering = array();
+            $SESSION->session_filtering = [];
         }
 
         if (empty($fieldnames)) {
-            $fieldnames = array('groupid' => 0, 'starttime' => 1, 'duration' => 1);
+            $fieldnames = ['groupid' => 0, 'starttime' => 1, 'duration' => 1];
         }
 
-        $this->_fields  = array();
+        $this->_fields  = [];
 
         foreach ($fieldnames as $fieldname => $advanced) {
             if ($field = $this->get_field($fieldname, $advanced)) {
@@ -44,7 +58,7 @@ class session_filtering {
         $extraparams = ['id' => $id, 'l' => $slist];
         // Fist the new filter form.
         $this->_addform = new session_add_filter_form($baseurl,
-            array('fields' => $this->_fields, 'extraparams' => $extraparams));
+            ['fields' => $this->_fields, 'extraparams' => $extraparams]);
         if ($adddata = $this->_addform->get_data()) {
             // Clear previous filters.
             if (!empty($adddata->replacefilters)) {
@@ -58,7 +72,7 @@ class session_filtering {
                     continue; // Nothing new.
                 }
                 if (!array_key_exists($fname, $SESSION->session_filtering)) {
-                    $SESSION->session_filtering[$fname] = array();
+                    $SESSION->session_filtering[$fname] = [];
                 }
                 $SESSION->session_filtering[$fname][] = $data;
             }
@@ -66,10 +80,10 @@ class session_filtering {
 
         // Now the active filters.
         $this->_activeform = new session_active_filter_form($baseurl,
-            array('fields' => $this->_fields, 'extraparams' => $extraparams));
+            ['fields' => $this->_fields, 'extraparams' => $extraparams]);
         if ($activedata = $this->_activeform->get_data()) {
             if (!empty($activedata->removeall)) {
-                $SESSION->session_filtering = array();
+                $SESSION->session_filtering = [];
 
             } else if (!empty($activedata->removeselected) && !empty($activedata->filter)) {
                 foreach ($activedata->filter as $fname => $instances) {
@@ -89,9 +103,10 @@ class session_filtering {
         // Rebuild the forms if filters data was processed.
         if ($adddata || $activedata) {
             $_POST = []; // Reset submitted data.
-            $this->_addform = new session_add_filter_form($baseurl, 
+            $this->_addform = new session_add_filter_form($baseurl,
                 ['fields' => $this->_fields, 'extraparams' => $extraparams]);
-            $this->_activeform = new session_active_filter_form($baseurl, ['fields' => $this->_fields, 'extraparams' => $extraparams]);
+            $this->_activeform = new session_active_filter_form($baseurl,
+                ['fields' => $this->_fields, 'extraparams' => $extraparams]);
         }
     }
 
@@ -117,7 +132,7 @@ class session_filtering {
                 } else if ($groupmode == SEPARATEGROUPS) {
                     $groups = groups_get_all_groups($course->id, $USER->id, $cm->groupingid);
                 }
-                $choices = array();
+                $choices = [];
                 if (has_capability('mod/hybridteaching:sessionsfulltable', $context) || $groupmode != SEPARATEGROUPS) {
                     $choices[0] = get_string('allgroups', 'hybridteaching');
                 }
@@ -146,7 +161,7 @@ class session_filtering {
     public function get_sql_filter($extra='', array $params=null) {
         global $SESSION;
 
-        $sqls = array();
+        $sqls = [];
         if ($extra != '') {
             $sqls[] = $extra;
         }
@@ -167,10 +182,10 @@ class session_filtering {
         }
 
         if (empty($sqls)) {
-            return array('', array());
+            return ['', []];
         } else {
             $sqls = implode(' AND ', $sqls);
-            return array($sqls, $params);
+            return [$sqls, $params];
         }
     }
 

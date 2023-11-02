@@ -1,3 +1,5 @@
 /store/youtube/composer.lock
 /vc/teams/composer.lock
 /store/onedrive/composer.lock
+/tests/behat/README.md
+/.vscode/settings.json

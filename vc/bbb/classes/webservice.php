@@ -31,7 +31,6 @@ class webservice {
      */
     public function __construct() {
 
-        
-      }
+    }
 
 }

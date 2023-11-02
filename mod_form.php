@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - https://moodle.org/
+// This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -12,15 +12,25 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
+// Project implemented by the "Recovery, Transformation and Resilience Plan.
+// Funded by the European Union - Next GenerationEU".
+//
+// Produced by the UNIMOODLE University Group: Universities of
+// Valladolid, Complutense de Madrid, UPV/EHU, León, Salamanca,
+// Illes Balears, Valencia, Rey Juan Carlos, La Laguna, Zaragoza, Málaga,
+// Córdoba, Extremadura, Vigo, Las Palmas de Gran Canaria y Burgos.
 
 /**
- * The main mod_hybridteaching configuration form.
- *
- * @package     mod_hybridteaching
- * @copyright   2023 isyc <isyc@example.com>
- * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * Display information about all the mod_hybridteaching modules in the requested course. *
+ * @package    mod_hybridteaching
+ * @copyright  2023 Proyecto UNIMOODLE
+ * @author     UNIMOODLE Group (Coordinator) <direccion.area.estrategia.digital@uva.es>
+ * @author     ISYC <soporte@isyc.com>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+
 use mod_hybridteaching\helpers\roles;
 defined('MOODLE_INTERNAL') || die();
 
@@ -50,7 +60,7 @@ class mod_hybridteaching_mod_form extends moodleform_mod {
         $mform->addElement('header', 'sectiongeneral', get_string('general', 'form'));
 
         // Adding the standard "name" field.
-        $mform->addElement('text', 'name', get_string('hybridteachingname', 'mod_hybridteaching'), array('size' => '64'));
+        $mform->addElement('text', 'name', get_string('hybridteachingname', 'mod_hybridteaching'), ['size' => '64']);
 
         if (!empty($CFG->formatstringstriptags)) {
             $mform->setType('name', PARAM_TEXT);
@@ -60,55 +70,56 @@ class mod_hybridteaching_mod_form extends moodleform_mod {
 
         $mform->addRule('name', null, 'required', null, 'client');
         $mform->addRule('name', get_string('maximumchars', '', 255), 'maxlength', 255, 'client');
-        
+
         $this->standard_intro_elements();
 
-        // Configuración principal de tipo de videoconferencia, registrar asistencias, otros settings de opciones comunes
+        // Configuración principal de tipo de videoconferencia, registrar asistencias, otros settings de opciones comunes.
 
-        // registro de asistencia de estudiantes
-        $mform->addElement('advcheckbox','useattendance','',get_string('useattendance','hybridteaching'),null, array(0, 1));
+        // Registro de asistencia de estudiantes.
+        $mform->addElement('advcheckbox', 'useattendance', '', get_string('useattendance', 'hybridteaching'), null, [0, 1]);
         $mform->setDefault('useattendance', 1);
         $mform->addHelpButton('useattendance', 'useattendance', 'hybridteaching');
 
-        // usar acceso por videoconferencia
-        $mform->addElement('advcheckbox','usevideoconference','',get_string('usevideoconference','hybridteaching'),null, array(0, 1));
+        // Usar acceso por videoconferencia.
+        $mform->addElement('advcheckbox', 'usevideoconference', '', get_string('usevideoconference',
+            'hybridteaching'), null, [0, 1]);
         $mform->setDefault('usevideoconference', 0);
         $mform->addHelpButton('usevideoconference', 'usevideoconference', 'hybridteaching');
 
-// TO-DO ISYC: COMPROBAR SI SE PERMITEN GRABACIONES A NIVEL DE SETTINGS
-        // si se permiten grabaciones 
-        $mform->addElement('advcheckbox','userecordvc','',get_string('userecordvc','hybridteaching'),null, array(0, 1));
+        // TO-DO ISYC: COMPROBAR SI SE PERMITEN GRABACIONES A NIVEL DE SETTINGS.
+        // Si se permiten grabaciones.
+        $mform->addElement('advcheckbox', 'userecordvc', '', get_string('userecordvc', 'hybridteaching'), null, [0, 1]);
         $mform->setDefault('userecordvc', 0);
         $mform->addHelpButton('userecordvc', 'userecordvc', 'hybridteaching');
 
         $vcconfigscontroller = new configs_controller(null, 'hybridteachvc');
         $configs = $vcconfigscontroller->hybridteaching_get_configs_select($this->_course->category);
-        $mform->addElement('select', 'typevc', get_string('typevc', 'hybridteaching'), $configs);    
-        
-        // NUEVAS SECCIONES PERSONALIZADAS:
+        $mform->addElement('select', 'typevc', get_string('typevc', 'hybridteaching'), $configs);
 
-        $mform->addElement('header', 'sectionsessions', get_string('sectionsessions','hybridteaching'));
+        // NUEVAS SECCIONES PERSONALIZADAS:.
 
-        $mform->addElement('advcheckbox','sessionscheduling','',get_string('sessionscheduling','hybridteaching'), null, array(0, 1));
+        $mform->addElement('header', 'sectionsessions', get_string('sectionsessions', 'hybridteaching'));
+
+        $mform->addElement('advcheckbox', 'sessionscheduling', '', get_string('sessionscheduling', 'hybridteaching'), null, [0, 1]);
         $mform->setDefault('sessionscheduling', 0);
 
-        $mform->addElement('advcheckbox','undatedsession','',get_string('undatedsession','hybridteaching'), null, array(0, 1));
+        $mform->addElement('advcheckbox', 'undatedsession', '', get_string('undatedsession', 'hybridteaching'), null, [0, 1]);
         $mform->setDefault('undatedsession', 0);
 
-        $mform->addElement('date_time_selector', 'starttime', get_string('starttime', 'hybridteaching'),array('optional'=>true));
+        $mform->addElement('date_time_selector', 'starttime', get_string('starttime', 'hybridteaching'), ['optional' => true]);
 
         /*$mform->addElement('duration', 'duration', get_string('duration', 'hybridteaching'), array('optional' => false));
         $mform->setDefault('duration', array('number' => 1, 'timeunit' => 3600));*/
         $duration[] = &$mform->createElement('text', 'duration', get_string('duration', 'hybridteaching'));
         $mform->setType('duration', PARAM_INT);
 
-        $options = array(
+        $options = [
             '1' => get_string('minutes'),
-            '2' => get_string('hours')
-        );
+            '2' => get_string('hours'),
+        ];
         $duration[] = &$mform->createElement('select', 'timetype', '', $options);
         $mform->setType('timetype', PARAM_INT);
-        $mform->addGroup($duration, 'durationgroup', get_string('duration', 'hybridteaching'), array(' '), false);
+        $mform->addGroup($duration, 'durationgroup', get_string('duration', 'hybridteaching'), [' '], false);
 
         $course = $this->_course;
         $context = context_course::instance($course->id);
@@ -122,115 +133,112 @@ class mod_hybridteaching_mod_form extends moodleform_mod {
 
         $PAGE->requires->js_call_amd('mod_hybridteaching/modform', 'init');
 
-        $this->hybridteaching_mform_insert_roles_access_mapping($mform,$participantlist);
+        $this->hybridteaching_mform_insert_roles_access_mapping($mform, $participantlist);
 
-        
-        $mform->addElement('header', 'sectionsessionaccess', get_string('sectionsessionaccess','hybridteaching'));
-// TO-DO ISYC: ESTAS OPCIONES DEPENDEN DE SI LA VC LO PERMITE O NO.
-// HAY QUE REVISAR SI SE PERMITE. SI NO SE PERMITE, HAY QUE DESACTIVAR Y SACAR UN MSJ SEGÚN 1ª PANTALLA DE PAG 12
+        $mform->addElement('header', 'sectionsessionaccess', get_string('sectionsessionaccess', 'hybridteaching'));
+        // TO-DO ISYC: ESTAS OPCIONES DEPENDEN DE SI LA VC LO PERMITE O NO.
+        // HAY QUE REVISAR SI SE PERMITE. SI NO SE PERMITE, HAY QUE DESACTIVAR Y SACAR UN MSJ SEGÚN 1ª PANTALLA DE PAG 12.
 
-        $mform->addElement('advcheckbox','waitmoderator','',get_string('waitmoderator','hybridteaching'), null, array(0, 1));
+        $mform->addElement('advcheckbox', 'waitmoderator', '', get_string('waitmoderator', 'hybridteaching'), null, [0, 1]);
         $mform->setDefault('waitmoderator', 0);
 
-        $units=[get_string('hours'),
+        $units = [get_string('hours'),
                 get_string('minutes'),
-                get_string('seconds')
+                get_string('seconds'),
         ];
-        $mform->addGroup(array(
-                $mform->createElement('text', 'advanceentrycount', '', array('size'=> 5)),
+        $mform->addGroup([
+                $mform->createElement('text', 'advanceentrycount', '', ['size' => 5]),
                 $mform->createElement('select', 'advanceentryunit', '', $units),
-                ), 'advanceentry', get_string('advanceentry', 'hybridteaching'), ' ', false);
+                ], 'advanceentry', get_string('advanceentry', 'hybridteaching'), ' ', false);
         $mform->addHelpButton('advanceentry', 'advanceentry', 'hybridteaching');
         $mform->setType('advanceentrycount', PARAM_INT);
 
-        $mform->addGroup(array(
-                $mform->createElement('text', 'closedoorscount', '', array('size'=> 5)),
+        $mform->addGroup([
+                $mform->createElement('text', 'closedoorscount', '', ['size' => 5]),
                 $mform->createElement('select', 'closedoorsunit', '', $units),
-                ), 'closedoors', get_string('closedoors', 'hybridteaching'), ' ', false);
+                ], 'closedoors', get_string('closedoors', 'hybridteaching'), ' ', false);
         $mform->addHelpButton('closedoors', 'closedoors', 'hybridteaching');
         $mform->setType('closedoorscount', PARAM_INT);
-        
 
-        $mform->addElement('text', 'userslimit', get_string('userslimit','hybridteaching'), array('size'=> 6));
+        $mform->addElement('text', 'userslimit', get_string('userslimit', 'hybridteaching'), ['size' => 6]);
         $mform->addHelpButton('userslimit', 'userslimit', 'hybridteaching');
         $mform->setType('userslimit', PARAM_INT);
 
-        $mform->addGroup(array(
-            $mform->createElement('text', 'graceperiod', '', array('size'=> 10)),
+        $mform->addGroup([
+            $mform->createElement('text', 'graceperiod', '', ['size' => 10]),
             $mform->createElement('select', 'graceperiodunit', '', $units),
-            ), 'graceperiod', get_string('graceperiod', 'hybridteaching'), ' ', false);
+            ], 'graceperiod', get_string('graceperiod', 'hybridteaching'), ' ', false);
         $mform->addHelpButton('graceperiod', 'graceperiod', 'hybridteaching');
         $mform->setType('graceperiod', PARAM_INT);
 
-// TO-DO ISYC: AÑADIR AQUI OPCIONES ESPECÍFICAS DEL SUBPLUGIN SELECCIONADO EN LA SECCIÓN GENERAL
-        $mform->addElement('text', 'recordatorio', 'AÑADIR AQUÍ OPCIONES PROPIAS SEGÚN CADA SUBPLUGIN DE VIDEOCONFERENCIA', array('size'=> 6));
+        // TO-DO ISYC: AÑADIR AQUI OPCIONES ESPECÍFICAS DEL SUBPLUGIN SELECCIONADO EN LA SECCIÓN GENERAL.
+        $mform->addElement('text', 'recordatorio', 'AÑADIR AQUÍ OPCIONES PROPIAS SEGÚN CADA SUBPLUGIN DE VIDEOCONFERENCIA',
+            ['size' => 6]);
         $mform->setType('recordatorio', PARAM_RAW);
 
+        // Sección Opciones de bloqueo iniciales de la videoconferencia.
+        $mform->addElement('header', 'sectioninitialstates', get_string('sectioninitialstates', 'hybridteaching'));
 
-
-        // sección Opciones de bloqueo iniciales de la videoconferencia
-        $mform->addElement('header', 'sectioninitialstates', get_string('sectioninitialstates','hybridteaching'));
-
-        $mform->addElement('advcheckbox','disablecam','',get_string('disablewebcam','hybridteaching'), null, array(0, 1));
+        $mform->addElement('advcheckbox', 'disablecam', '', get_string('disablewebcam', 'hybridteaching'), null, [0, 1]);
         $mform->setDefault('disablewebcam', 0);
 
-        $mform->addElement('advcheckbox','disablemic','',get_string('disablemicro','hybridteaching'), null, array(0, 1));
+        $mform->addElement('advcheckbox', 'disablemic', '', get_string('disablemicro', 'hybridteaching'), null, [0, 1]);
         $mform->setDefault('disablemicro', 0);
 
-        $mform->addElement('advcheckbox','disableprivatechat','',get_string('disableprivatechat','hybridteaching'), null, array(0, 1));
+        $mform->addElement('advcheckbox', 'disableprivatechat', '',
+            get_string('disableprivatechat', 'hybridteaching'), null, [0, 1]);
         $mform->setDefault('disableprivatechat', 0);
 
-        $mform->addElement('advcheckbox','disablepublicchat','',get_string('disablepublicchat','hybridteaching'), null, array(0, 1));
+        $mform->addElement('advcheckbox', 'disablepublicchat', '', get_string('disablepublicchat', 'hybridteaching'), null, [0, 1]);
         $mform->setDefault('disablepublicchat', 0);
-        
-        $mform->addElement('advcheckbox','disablenote','',get_string('disablesharednotes','hybridteaching'), null, array(0, 1));
+
+        $mform->addElement('advcheckbox', 'disablenote', '', get_string('disablesharednotes', 'hybridteaching'), null, [0, 1]);
         $mform->setDefault('disablesharednotes', 0);
 
-        $mform->addElement('advcheckbox','hideuserlist','',get_string('hideuserlist','hybridteaching'), null, array(0, 1));
+        $mform->addElement('advcheckbox', 'hideuserlist', '', get_string('hideuserlist', 'hybridteaching'), null, [0, 1]);
         $mform->setDefault('hideuserlist', 0);
 
-        $mform->addElement('advcheckbox','blockroomdesign','',get_string('blockroomdesign','hybridteaching'), null, array(0, 1));
+        $mform->addElement('advcheckbox', 'blockroomdesign', '', get_string('blockroomdesign', 'hybridteaching'), null, [0, 1]);
         $mform->setDefault('blockroomdesign', 0);
 
-        $mform->addElement('advcheckbox','ignorelocksettings','',get_string('ignorelocksettings','hybridteaching'), null, array(0, 1));
+        $mform->addElement('advcheckbox', 'ignorelocksettings', '',
+            get_string('ignorelocksettings', 'hybridteaching'), null, [0, 1]);
         $mform->setDefault('ignorelocksettings', 0);
-        
 
+        // Sección Opciones de grabación.
+        $mform->addElement('header', 'sectionrecording', get_string('sectionrecording', 'hybridteaching'));
+        // TO-DO ISYC: solo visible y activa esta sección si se ha seleccionado Permitir grabaciones de videoconferencia.
 
-        // sección Opciones de grabación
-        $mform->addElement('header', 'sectionrecording', get_string('sectionrecording','hybridteaching'));
-// TO-DO ISYC: solo visible y activa esta sección si se ha seleccionado Permitir grabaciones de videoconferencia
-
-        $mform->addElement('advcheckbox','initialrecord','',get_string('initialrecord','hybridteaching'), null, array(0, 1));
+        $mform->addElement('advcheckbox', 'initialrecord', '', get_string('initialrecord', 'hybridteaching'), null, [0, 1]);
         $mform->setDefault('initialrecord', 0);
 
-        $mform->addElement('advcheckbox','hiderecordbutton','',get_string('hiderecordbutton','hybridteaching'), null, array(0, 1));
+        $mform->addElement('advcheckbox', 'hiderecordbutton', '', get_string('hiderecordbutton', 'hybridteaching'), null, [0, 1]);
         $mform->setDefault('hiderecordbutton', 0);
 
-        $mform->addElement('advcheckbox','showpreviewrecord','',get_string('showpreviewrecord','hybridteaching'), null, array(0, 1));
+        $mform->addElement('advcheckbox', 'showpreviewrecord', '', get_string('showpreviewrecord', 'hybridteaching'), null, [0, 1]);
         $mform->setDefault('showpreviewrecord', 0);
 
-        $mform->addElement('advcheckbox','downloadrecords','',get_string('downloadrecords','hybridteaching'), null, array(0, 1));
+        $mform->addElement('advcheckbox', 'downloadrecords', '', get_string('downloadrecords', 'hybridteaching'), null, [0, 1]);
         $mform->setDefault('downloadrecords', 0);
 
-        $mform->addElement('header', 'sectionattendance', get_string('sectionattendance','hybridteaching'));
+        $mform->addElement('header', 'sectionattendance', get_string('sectionattendance', 'hybridteaching'));
 
-        $units=[get_string('hours'),
+        $units = [get_string('hours'),
             get_string('minutes'),
             get_string('seconds'),
-            get_string('totalduration', 'hybridteaching')
+            get_string('totalduration', 'hybridteaching'),
         ];
-        $mform->addGroup(array(
-            $mform->createElement('text', 'validateattendance', '', array('size'=> 5)),
+        $mform->addGroup([
+            $mform->createElement('text', 'validateattendance', '', ['size' => 5]),
             $mform->createElement('select', 'attendanceunit', '', $units),
-            ), 'attendance', get_string('validateattendance', 'hybridteaching'), ' ', false);
-        $mform->addHelpButton('attendance', 'attendance', 'hybridteaching'); 
-        $mform->setType('validateattendance', PARAM_INT);      
+            ], 'attendance', get_string('validateattendance', 'hybridteaching'), ' ', false);
+        $mform->addHelpButton('attendance', 'attendance', 'hybridteaching');
+        $mform->setType('validateattendance', PARAM_INT);
 
-        $mform->addElement('advcheckbox', 'useqr', '', get_string('useqr', 'hybridteaching'), null, array(0, 1));
+        $mform->addElement('advcheckbox', 'useqr', '', get_string('useqr', 'hybridteaching'), null, [0, 1]);
         $mform->setDefault('useqr', 1);
         $mform->disabledif('useqr', 'rotateqr', 'checked');
-        $mform->addElement('advcheckbox','rotateqr','',get_string('rotateqr','hybridteaching'), null, array(0, 1));
+        $mform->addElement('advcheckbox', 'rotateqr', '', get_string('rotateqr', 'hybridteaching'), null, [0, 1]);
         $mform->setDefault('rotateqr', 0);
         $mform->addElement('hidden', 'rotateqrsecret', '');
         $mform->setDefault('rotateqrsecret', random_string(8));
@@ -243,20 +251,22 @@ class mod_hybridteaching_mod_form extends moodleform_mod {
 
         // Add standard grading elements.
         $this->standard_grading_coursemodule_elements();
-        $maxgradeattendance[] = &$mform->createElement('text', 'maxgradeattendance', get_string('maxgradeattendance', 'hybridteaching'));
+        $maxgradeattendance[] = &$mform->createElement('text', 'maxgradeattendance',
+            get_string('maxgradeattendance', 'hybridteaching'));
         $mform->setType('maxgradeattendance', PARAM_INT);
 
-        $options = array(
+        $options = [
             '1' => get_string('numsess', 'hybridteaching'),
             '2' => get_string('percennumatt', 'hybridteaching'),
             '3' => get_string('percentotaltime', 'hybridteaching'),
-        );
+        ];
         $maxgradeattendance[] = &$mform->createElement('select', 'maxgradeattendanceunit', '', $options);
         $mform->setType('maxgradeattendanceunit', PARAM_INT);
-        $mform->addGroup($maxgradeattendance, 'maxgradeattendancegroup', get_string('maxgradeattendance', 'hybridteaching'), array(' '), false);
+        $mform->addGroup($maxgradeattendance, 'maxgradeattendancegroup',
+            get_string('maxgradeattendance', 'hybridteaching'), [' '], false);
         $mform->addHelpButton('maxgradeattendancegroup', 'maxgradeattendance', 'hybridteaching');
 
-        //$mform->setDefault('grade', false);
+        // $mform->setDefault('grade', false);
 
         // Add standard elements.
         $this->standard_coursemodule_elements();
@@ -271,18 +281,20 @@ class mod_hybridteaching_mod_form extends moodleform_mod {
      *
      * @category completion
      * @return array List of added element names, or names of wrapping group elements.
-    */
+     */
 
     public function add_completion_rules() {
 
         $mform = $this->_form;
-    
+
         $group = [
-            $mform->createElement('checkbox', 'completionattendanceenabled', '', get_string('completionattendance', 'hybridteaching')),
+            $mform->createElement('checkbox', 'completionattendanceenabled', '',
+                get_string('completionattendance', 'hybridteaching')),
             $mform->createElement('text', 'completionattendance', '', ['size' => 5]),
         ];
         $mform->setType('completionattendance', PARAM_INT);
-        $mform->addGroup($group, 'completionattendancegroup', get_string('completionattendancegroup','hybridteaching'), [' '], false);
+        $mform->addGroup($group, 'completionattendancegroup',
+            get_string('completionattendancegroup', 'hybridteaching'), [' '], false);
         $mform->disabledIf('completionattendance', 'completionattendanceenabled', 'notchecked');
 
         return ['completionattendancegroup'];
@@ -292,40 +304,40 @@ class mod_hybridteaching_mod_form extends moodleform_mod {
         return (!empty($data['completionattendanceenabled']) && $data['completionattendance'] != 0);
     }
 
-    function get_data() {
+    public function get_data() {
         $data = parent::get_data();
         if (!$data) {
             return $data;
         }
         if (!empty($data->completionunlocked)) {
-            // Turn off completion settings if the checkboxes aren't ticked
-            $autocompletion = !empty($data->completion) && $data->completion==COMPLETION_TRACKING_AUTOMATIC;
+            // Turn off completion settings if the checkboxes aren't ticked.
+            $autocompletion = !empty($data->completion) && $data->completion == COMPLETION_TRACKING_AUTOMATIC;
             if (empty($data->completionattendanceenabled) || !$autocompletion) {
-            $data->completionattendance = 0;
+                $data->completionattendance = 0;
             }
         }
         return $data;
     }
 
-    function data_preprocessing(&$default_values) {
+    public function data_preprocessing(&$defaultvalues) {
         global $DB;
 
         // Set up the completion checkboxes which aren't part of standard data.
         // We also make the default value (if you turn on the checkbox) for those
         // numbers to be 1, this will not apply unless checkbox is ticked.
-        $default_values['completionattendanceenabled'] = !empty($default_values['completionattendance']) ? 1 : 0;
-        
-        if(empty($default_values['completionattendance'])) {
-            $default_values['completionattendance'] = 1;
+        $defaultvalues['completionattendanceenabled'] = !empty($defaultvalues['completionattendance']) ? 1 : 0;
+
+        if (empty($defaultvalues['completionattendance'])) {
+            $defaultvalues['completionattendance'] = 1;
         }
 
-        //Merge typevc and instance: get the correct value at typevc. 
-        //Ex: 2-bbb or 1-zoom
+        // Merge typevc and instance: get the correct value at typevc.
+        // Ex: 2-bbb or 1-zoom.
         if (!empty($this->_instance)) {
             $content = $DB->get_record('hybridteaching', ['id' => $this->_instance]);
             if ($content && $content->usevideoconference) {
                 $typevc = $content->config."-".$content->typevc;
-                $default_values['typevc'] = $typevc;
+                $defaultvalues['typevc'] = $typevc;
             }
         }
     }
@@ -333,16 +345,16 @@ class mod_hybridteaching_mod_form extends moodleform_mod {
 
 
      /**
-     * Function for showing the block for setting participant roles.
-     *
-     * @param MoodleQuickForm $mform
-     * @param array $participantlist
-     * @return void
-     */
+      * Function for showing the block for setting participant roles.
+      *
+      * @param MoodleQuickForm $mform
+      * @param array $participantlist
+      * @return void
+      */
     private function hybridteaching_mform_insert_roles_access_mapping(MoodleQuickForm &$mform, array $participantlist): void {
         global $OUTPUT;
         $participantselection = roles::get_participant_selection_data();
-        $mform->addElement('header', 'sectionaudience', get_string('sectionaudience','hybridteaching'));
+        $mform->addElement('header', 'sectionaudience', get_string('sectionaudience', 'hybridteaching'));
         $mform->addElement('hidden', 'participants', json_encode($participantlist));
         $mform->setType('participants', PARAM_TEXT);
         $selectiontype = new single_select(new moodle_url(qualified_me()),
@@ -368,5 +380,5 @@ class mod_hybridteaching_mod_form extends moodleform_mod {
         $mform->addElement('static', 'static_participant_list',
             get_string('mod_form_field_participant_list', 'hybridteaching'), $html);
     }
-   
+
 }

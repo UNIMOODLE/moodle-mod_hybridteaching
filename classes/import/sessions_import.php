@@ -1,4 +1,18 @@
 <?php
+// This file is part of Moodle - https://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -11,10 +25,10 @@ class sessions_import {
     protected $error = '';
 
     /** @var array $sessions The sessions info */
-    protected $sessions = array();
+    protected $sessions = [];
 
     /** @var array $mappings The mappings info */
-    protected $mappings = array();
+    protected $mappings = [];
 
     /** @var int The id of the csv import */
     protected $importid = 0;
@@ -23,7 +37,7 @@ class sessions_import {
     protected $importer = null;
 
     /** @var array $foundheaders */
-    protected $foundheaders = array();
+    protected $foundheaders = [];
 
     /** @var bool $useprogressbar Control whether importing should use progress bars or not. */
     protected $useprogressbar = false;
@@ -172,7 +186,7 @@ class sessions_import {
 
         $this->foundheaders = $this->importer->get_columns();
         $this->useprogressbar = $useprogressbar;
-        $sessions = array();
+        $sessions = [];
         $rowcount = 1;
 
         while ($row = $this->importer->next()) {
@@ -200,7 +214,7 @@ class sessions_import {
                 $starttime = DateTime::createFromFormat('Y-m-d H:i',
                 $this->get_column_data($row, $mapping['starttime']))->getTimestamp();
                 if ($starttime === false) {
-                    notify_controller::notify_problem(get_string('formaterror:importsessionstarttime', 
+                    notify_controller::notify_problem(get_string('formaterror:importsessionstarttime',
                         'hybridteaching', $rowcount++));
                     continue;
                 }
@@ -215,7 +229,7 @@ class sessions_import {
                 if (is_number($duration)) {
                     $session->duration = $duration;
                 } else {
-                    notify_controller::notify_problem(get_string('formaterror:importsessionduration', 
+                    notify_controller::notify_problem(get_string('formaterror:importsessionduration',
                         'hybridteaching', $rowcount++));
                     continue;
                 }
@@ -225,7 +239,7 @@ class sessions_import {
             }
 
             $timetype = $this->get_column_data($row, $mapping['timetype']);
-            if (!empty($timetype) && ($timetype == sessions_controller::MINUTE_TIMETYPE || 
+            if (!empty($timetype) && ($timetype == sessions_controller::MINUTE_TIMETYPE ||
                 $timetype == sessions_controller::HOUR_TIMETYPE)) {
                 $session->timetype = $timetype;
             } else {
@@ -314,7 +328,7 @@ class sessions_import {
         $sessioncontroller = new sessions_controller($hybridteaching);
 
         foreach ($this->sessions as $session) {
-            $groupids = array();
+            $groupids = [];
             // Translate group names to group IDs. They are unique per course.
 
             if (is_array($session->groups)) {
@@ -324,7 +338,7 @@ class sessions_import {
                         if ($groupname === 'All groups') {
                             $groupids[] = 0;
                         } else {
-                            notify_controller::notify_problem(get_string('error:sessionunknowngroup', 
+                            notify_controller::notify_problem(get_string('error:sessionunknowngroup',
                                 'hybridteaching', $groupname));
                         }
                     } else {
@@ -369,7 +383,7 @@ class sessions_import {
             'groupid' => $session->groupid,
             'name' => $session->name,
             'starttime' => $session->starttime,
-            'duration' => $session->duration
+            'duration' => $session->duration,
         ];
         if ($DB->record_exists('hybridteaching_session', $check)) {
             return true;

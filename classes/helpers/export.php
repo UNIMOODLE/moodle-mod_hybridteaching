@@ -1,4 +1,18 @@
 <?php
+// This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace mod_hybridteaching\helpers;
 
@@ -80,7 +94,7 @@ class export {
         } else {
             $sessions = $this->get_sessions_dates([
                 'sessionstartdate' => $data->sessionstartdate,
-                'sessionenddate' => $data->sessionenddate]);
+                'sessionenddate' => $data->sessionenddate, ]);
         }
 
         return $sessions;
@@ -110,7 +124,7 @@ class export {
 
         $allgroups = get_string('allgroups', 'hybridteaching');
 
-        $sql = "SELECT hs.id, 
+        $sql = "SELECT hs.id,
                        IF(hs.groupid = 0, CONCAT(from_unixtime(hs.starttime), ' - ', '$allgroups'),
                         IF (g.id IS NOT NULL, CONCAT(from_unixtime(hs.starttime), ' - ', 'g.name'), '-')) AS dategroup
                   FROM {hybridteaching_session} hs
@@ -166,7 +180,7 @@ class export {
         return $body;
     }
 
-    public function export($filename, $format) {    
+    public function export($filename, $format) {
         if ($format === 'text') {
             $this->export_text($filename);
         } else {
@@ -199,8 +213,8 @@ class export {
             $takensess = 0;
             foreach ($this->sessions as $session) {
                 foreach ($attbysess as $att) {
-                    $attParts = explode(",", $att);
-                    if ($attParts[0] == $session && $attParts[1] != 0) {
+                    $attparts = explode(",", $att);
+                    if ($attparts[0] == $session && $attparts[1] != 0) {
                         $takensess++;
                     }
                 }
@@ -218,13 +232,13 @@ class export {
             foreach ($this->sessions as $session) {
                 $status = 0;
                 foreach ($attbysess as $att) {
-                    $attParts = explode(",", $att);
-                    if ($attParts[0] == $session) {
-                        $status = $attParts[1];
+                    $attparts = explode(",", $att);
+                    if ($attparts[0] == $session) {
+                        $status = $attparts[1];
                         break;
                     }
                 }
-        
+
                 $line .= ";" . $status;
             }
             echo $line."\n";
@@ -259,12 +273,12 @@ class export {
         // Format types.
         $formatbc = $workbook->add_format();
         $formatbc->set_bold(1);
-    
+
         $myxls->write(0, 0, get_string('course'), $formatbc);
         $myxls->write(0, 1, $this->course);
         $myxls->write(1, 0, get_string('group'), $formatbc);
         $myxls->write(1, 1, $this->group);
-    
+
         $row = 3;
         $column = 0;
         foreach ($this->table->headers as $cell) {
@@ -284,8 +298,8 @@ class export {
             $takensess = 0;
             foreach ($this->sessions as $session) {
                 foreach ($attbysess as $att) {
-                    $attParts = explode(",", $att);
-                    if ($attParts[0] == $session && $attParts[1] != 0) {
+                    $attparts = explode(",", $att);
+                    if ($attparts[0] == $session && $attparts[1] != 0) {
                         $takensess++;
                     }
                 }
@@ -302,13 +316,13 @@ class export {
             foreach ($this->sessions as $session) {
                 $status = 0;
                 foreach ($attbysess as $att) {
-                    $attParts = explode(",", $att);
-                    if ($attParts[0] == $session) {
-                        $status = $attParts[1];
+                    $attparts = explode(",", $att);
+                    if ($attparts[0] == $session) {
+                        $status = $attparts[1];
                         break;
                     }
                 }
-        
+
                 $rowtable->$session = $status;
             }
 

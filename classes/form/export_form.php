@@ -17,6 +17,7 @@
 
 namespace mod_hybridteaching\form;
 
+defined('MOODLE_INTERNAL') || die();
 require_once($CFG->libdir.'/formslib.php');
 
 class export_form extends \moodleform {
@@ -51,7 +52,7 @@ class export_form extends \moodleform {
         $namefields = $userfieldsapi->get_sql('u', false, '', '', false)->selects;
 
         $allusers = get_enrolled_users($modcontext, 'mod/hybridteaching:attendanceregister', 0, 'u.id,'.$namefields);
-        $userlist = array();
+        $userlist = [];
         foreach ($allusers as $user) {
             $userlist[$user->id] = fullname($user);
         }
@@ -73,9 +74,9 @@ class export_form extends \moodleform {
         $mform->addElement('date_selector', 'sessionenddate', get_string('endofperiod', 'attendance'));
         $mform->disabledIf('sessionenddate', 'includeallsessions', 'checked');
 
-        $formatoptions = array('excel' => get_string('downloadexcel', 'attendance'),
+        $formatoptions = ['excel' => get_string('downloadexcel', 'attendance'),
                                'ooo' => get_string('downloadooo', 'attendance'),
-                               'text' => get_string('downloadtext', 'attendance'));
+                               'text' => get_string('downloadtext', 'attendance'), ];
         $mform->addElement('select', 'format', get_string('format'), $formatoptions);
 
         $submitstring = get_string('ok');

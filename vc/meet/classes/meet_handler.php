@@ -1,24 +1,55 @@
 <?php
+// This file is part of Moodle - https://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+
+// Project implemented by the "Recovery, Transformation and Resilience Plan.
+// Funded by the European Union - Next GenerationEU".
+//
+// Produced by the UNIMOODLE University Group: Universities of
+// Valladolid, Complutense de Madrid, UPV/EHU, León, Salamanca,
+// Illes Balears, Valencia, Rey Juan Carlos, La Laguna, Zaragoza, Málaga,
+// Córdoba, Extremadura, Vigo, Las Palmas de Gran Canaria y Burgos.
+
+/**
+ * Display information about all the mod_hybridteaching modules in the requested course. *
+ * @package    mod_hybridteaching
+ * @copyright  2023 Proyecto UNIMOODLE
+ * @author     UNIMOODLE Group (Coordinator) <direccion.area.estrategia.digital@uva.es>
+ * @author     ISYC <soporte@isyc.com>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
 
 class meet_handler {
-   public $client;
+    public $client;
 
     public function __construct($configmeet) {
-        try {         
+        try {
             $this->createclient($configmeet);
-                        
-            if (isset($configmeet->token) && $configmeet->token){
-                $this->client->setAccessToken($configmeet->token);          
+            if (isset($configmeet->token) && $configmeet->token) {
+                $this->client->setAccessToken($configmeet->token);
             }
 
             if ($this->client->getAccessToken() && $this->client->getAccessToken()['access_token'] != 0) {
                 $this->client->setApprovalPrompt('consent');
-                if($this->client->isAccessTokenExpired()) {    
+                if ($this->client->isAccessTokenExpired()) {
                     $this->client->fetchAccessTokenWithRefreshToken($this->client->getRefreshToken());
-                    $this->saveToken($configmeet);
+                    $this->save_token($configmeet);
                 }
             }
-        } catch(Google_Service_Exception $e) {
+        } catch (Google_Service_Exception $e) {
             print "Caught Google service Exception ".$e->getCode(). " message is ".$e->getMessage();
             print "Stack trace is ".$e->getTraceAsString();
         }catch (Exception $e) {
@@ -28,7 +59,7 @@ class meet_handler {
     }
 
     public function createclient($configmeet) {
-        require_once (__DIR__.'/../vendor/autoload.php');
+        require_once(__DIR__.'/../vendor/autoload.php');
 
         $this->client = new Google_Client();
         $this->client->setClientId($configmeet->clientid);
@@ -38,7 +69,7 @@ class meet_handler {
         $this->client->setAccessType('offline');
         $this->client->setPrompt('consent');
 
-        return $this->client;    
+        return $this->client;
     }
 
     public function setredirecturi($url) {
@@ -51,7 +82,7 @@ class meet_handler {
 
         $service = new Google_Service_Calendar($this->client);
         $calendarid = 'primary';
-        
+
         $sessionstart = new \DateTime();
         $sessionstart->setTimestamp($meet->starttime);
 
@@ -87,18 +118,18 @@ class meet_handler {
             )
         ));
 
-        $conferenceData = new Google\Service\Calendar\ConferenceData();
+        $conferencedata = new Google\Service\Calendar\ConferenceData();
         $req = new Google\Service\Calendar\CreateConferenceRequest();
         $req->setRequestId("req_".time());
-        $conferenceData->setCreateRequest($req);
-        $event->setConferenceData($conferenceData);
+        $conferencedata->setCreateRequest($req);
+        $event->setConferenceData($conferencedata);
 
         $event = $service->events->insert($calendarid, $event, array('conferenceDataVersion' => 1));
 
         return $event;
     }
 
-    public function saveToken($configmeet) {
+    public function save_token($configmeet) {
         global $DB;
         $configmeet->token = json_encode($this->client->getAccessToken());;
         $DB->update_record('hybridteachstore_meet_config', $configmeet);

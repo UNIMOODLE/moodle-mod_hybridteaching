@@ -1,4 +1,18 @@
 <?php
+// This file is part of Moodle - https://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -33,19 +47,19 @@ class session_filter_date extends session_filter_type {
      * @param object $mform a MoodleForm object to setup
      */
     public function setup_form(&$mform) {
-        $objs = array();
+        $objs = [];
 
         $objs[] = $mform->createElement('static', $this->_name.'_s1', null,
-            html_writer::start_tag('div', array('class' => 'w-100 d-flex align-items-center')));
+            html_writer::start_tag('div', ['class' => 'w-100 d-flex align-items-center']));
         $objs[] = $mform->createElement('static', $this->_name.'_s2', null,
-            html_writer::tag('div', get_string('isafter', 'filters'), array('class' => 'mr-2')));
-        $objs[] = $mform->createElement('date_time_selector', $this->_name.'_sdt', null, array('optional' => true));
+            html_writer::tag('div', get_string('isafter', 'filters'), ['class' => 'mr-2']));
+        $objs[] = $mform->createElement('date_time_selector', $this->_name.'_sdt', null, ['optional' => true]);
         $objs[] = $mform->createElement('static', $this->_name.'_s3', null, html_writer::end_tag('div'));
         $objs[] = $mform->createElement('static', $this->_name.'_s4', null,
-            html_writer::start_tag('div', array('class' => 'w-100 d-flex align-items-center')));
+            html_writer::start_tag('div', ['class' => 'w-100 d-flex align-items-center']));
         $objs[] = $mform->createElement('static', $this->_name.'_s5', null,
-            html_writer::tag('div', get_string('isbefore', 'filters'), array('class' => 'mr-2')));
-        $objs[] = $mform->createElement('date_time_selector', $this->_name.'_edt', null, array('optional' => true));
+            html_writer::tag('div', get_string('isbefore', 'filters'), ['class' => 'mr-2']));
+        $objs[] = $mform->createElement('date_time_selector', $this->_name.'_edt', null, ['optional' => true]);
         $objs[] = $mform->createElement('static', $this->_name.'_s6', null, html_writer::end_tag('div'));
 
         $grp =& $mform->addElement('group', $this->_name.'_grp', $this->_label, $objs, '', false);
@@ -68,7 +82,7 @@ class session_filter_date extends session_filter_type {
             return false;
         }
 
-        $data = array();
+        $data = [];
         $data['after'] = $formdata->$sdt;
         $data['before'] = $formdata->$edt;
 
@@ -87,7 +101,7 @@ class session_filter_date extends session_filter_type {
         $field  = $this->_field;
 
         if (empty($after) && empty($before)) {
-            return array('', array());
+            return ['', []];
         }
 
         $res = " $field >= 0 ";
@@ -99,7 +113,7 @@ class session_filter_date extends session_filter_type {
         if ($before) {
             $res .= " AND $field <= $before";
         }
-        return array($res, array());
+        return [$res, []];
     }
 
     /**

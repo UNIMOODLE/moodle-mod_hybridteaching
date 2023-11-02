@@ -1,8 +1,23 @@
 <?php
+// This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 defined('MOODLE_INTERNAL') || die();
 
 require_once(dirname(__FILE__).'../../../../../config.php');
+require_login();
 require_once($CFG->libdir . '/gradelib.php');
 require_once($CFG->dirroot . '/mod/hybridteaching/classes/controller/attendance_controller.php');
 
@@ -17,15 +32,15 @@ class grades {
      * @param int $htid The ID of the hybrid teaching module.
      * @param array $userids An array of user IDs to update the grades for. If empty, all enrolled users will be updated.
      * @throws Some_Exception_Class description of exception
-     * @return bool|int Returns false if the grade or max grade attendance is empty, 
+     * @return bool|int Returns false if the grade or max grade attendance is empty,
      *                  otherwise it returns true or false based on the success of grade update.
      */
-    public function hybridteaching_update_users_grade($htid, $userids = array()) {
+    public function hybridteaching_update_users_grade($htid, $userids = []) {
         global $DB;
 
-        $ht = $DB->get_record('hybridteaching', array('id' => $htid));
+        $ht = $DB->get_record('hybridteaching', ['id' => $htid]);
         $cmid = get_coursemodule_from_instance('hybridteaching', $htid);
-        if (empty($ht->grade) || empty($ht->maxgradeattendance)) {
+        if (empty($ht->grade) || empty($ht->maxgradeattendance) || !$cmid) {
             return false;
         }
 
@@ -36,7 +51,7 @@ class grades {
             $userids = array_keys(get_enrolled_users($context, '', 0, 'u.id'));
         }
 
-        $grades = array();
+        $grades = [];
         foreach ($userids as $userid) {
             $grades[$userid] = new stdClass();
             $grades[$userid]->userid = $userid;
@@ -61,7 +76,7 @@ class grades {
      */
     public function has_taken_attendance($htid, $userid, $sessid = null) {
         global $DB;
-        $params = array('userid' => $userid, 'hybridteachingid' => $htid);
+        $params = ['userid' => $userid, 'hybridteachingid' => $htid];
         !empty($sessid) ? $params['sessionid'] = $sessid : null;
         return $DB->record_exists('hybridteaching_attendance', $params);
     }
@@ -161,10 +176,10 @@ class grades {
                  WHERE hs.hybridteachingid = :hybridteachingid
                    AND hs.attexempt = :attexempt";
 
-        $params = array(
+        $params = [
             'hybridteachingid' => $ht->id,
-            'attexempt' => 0
-        );
+            'attexempt' => 0,
+        ];
 
         $attendancetomaxgrade = round($DB->get_record_sql($sql, $params)->totalduration * $maxgradeper);
 
@@ -176,13 +191,13 @@ class grades {
                    AND (ha.status = :status OR ha.status = :status2)
                    AND hs.attexempt = :attexempt";
 
-        $params = array(
+        $params = [
             'userid' => $userid,
             'hybridteachingid' => $ht->id,
             'status' => 1,
             'status2' => 2,
-            'attexempt' => 0
-        );
+            'attexempt' => 0,
+        ];
 
         $userattendancetime = $DB->get_record_sql($sql, $params);
 
@@ -214,13 +229,13 @@ class grades {
                    AND (ha.status = :status OR ha.status = :status2)
                    AND hs.attexempt = :attexempt";
 
-        $params = array(
+        $params = [
             'userid' => $userid,
             'hybridteachingid' => $ht->id,
             'status' => 1,
             'status2' => 2,
-            'attexempt' => 0
-        );
+            'attexempt' => 0,
+        ];
 
         return $DB->get_record_sql($sql, $params);
     }
@@ -234,10 +249,10 @@ class grades {
      * @throws Exception If the hybrid teaching session does not have a grade.
      * @return bool Whether the attendance grades were successfully updated.
      */
-    public function ht_update_users_att_grade($htid, $sessid, $userids = array()) {
+    public function ht_update_users_att_grade($htid, $sessid, $userids = []) {
         global $DB;
 
-        $ht = $DB->get_record('hybridteaching', array('id' => $htid));
+        $ht = $DB->get_record('hybridteaching', ['id' => $htid]);
         $cmid = get_coursemodule_from_instance('hybridteaching', $htid);
         if (empty($ht->grade)) {
             return false;
@@ -254,11 +269,12 @@ class grades {
         foreach ($userids as $userid) {
             if ($this->has_taken_attendance($ht->id, $userid, $sessid) && !$this->is_session_exempt($sessid)) {
                 if ($att = $this->has_valid_attendance($ht->id, $sessid, $userid)) {
-                    if ($attcontroller::hybridteaching_get_last_attend($att->id, $userid)->action == 1) {
+                    $getlastattend = $attcontroller::hybridteaching_get_last_attend($att->id, $userid);
+                    if (is_object($getlastattend) && $getlastattend->action == 1) {
                         $notify = $attcontroller::hybridteaching_set_attendance_log($ht, (int)$sessid, 0, $userid);
                         $notify['ntype'] == 'success' ?
                             attendance_controller::hybridteaching_set_attendance($ht, (int)$sessid, 1, null, $userid)
-                        : '';
+                            : '';
                     } else {
                         attendance_controller::hybridteaching_set_attendance($ht, (int)$sessid, 0, null, $userid);
                     }
@@ -280,11 +296,11 @@ class grades {
      */
     public function has_valid_attendance($htid, $sessid, $userid) {
         global $DB;
-        return $DB->get_record('hybridteaching_attendance', array(
+        return $DB->get_record('hybridteaching_attendance', [
             'hybridteachingid' => $htid,
             'sessionid' => $sessid,
-            'userid' => $userid
-        ));
+            'userid' => $userid,
+        ]);
     }
 
     /**
@@ -299,8 +315,8 @@ class grades {
     public function calc_att_grade_for($ht, $sessid, $attid) {
         global $DB;
         $usersessgrade = 0;
-        $userconnectime = $DB->get_field('hybridteaching_attendance', 'connectiontime', array('id' => $attid));
-        $sessduration = $DB->get_field('hybridteaching_session', 'duration', array('id' => $sessid));
+        $userconnectime = $DB->get_field('hybridteaching_attendance', 'connectiontime', ['id' => $attid]);
+        $sessduration = $DB->get_field('hybridteaching_session', 'duration', ['id' => $sessid]);
         if ($userconnectime >= $sessduration) {
             $usersessgrade = $ht->grade;
         } else {
@@ -319,6 +335,6 @@ class grades {
      */
     public function is_session_exempt($sessid) {
         global $DB;
-        return $DB->record_exists('hybridteaching_session', array('id' => $sessid, 'attexempt' => 1));
+        return $DB->record_exists('hybridteaching_session', ['id' => $sessid, 'attexempt' => 1]);
     }
 }

@@ -1,5 +1,4 @@
 <?php
-
 // This file is part of Moodle - https://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -15,15 +14,22 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
+// Project implemented by the "Recovery, Transformation and Resilience Plan.
+// Funded by the European Union - Next GenerationEU".
+//
+// Produced by the UNIMOODLE University Group: Universities of
+// Valladolid, Complutense de Madrid, UPV/EHU, León, Salamanca,
+// Illes Balears, Valencia, Rey Juan Carlos, La Laguna, Zaragoza, Málaga,
+// Córdoba, Extremadura, Vigo, Las Palmas de Gran Canaria y Burgos.
+
 /**
- * Display information about all the mod_hybridteaching modules in the requested course.
- *
- * @package     mod_hybridteaching
- * @copyright   2023 isyc <isyc@example.com>
- * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * Display information about all the mod_hybridteaching modules in the requested course. *
+ * @package    mod_hybridteaching
+ * @copyright  2023 Proyecto UNIMOODLE
+ * @author     UNIMOODLE Group (Coordinator) <direccion.area.estrategia.digital@uva.es>
+ * @author     ISYC <soporte@isyc.com>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-
-
 
 require_once('../../../../config.php');
 require_once('editconfig_form.php');
@@ -73,10 +79,10 @@ if ($mform->is_cancelled()) {
         $data->id = configs::create_config($data);
         $error = $configcontroller->hybridteaching_create_config($data, $type);
         empty($error) ? $message = 'createdconfig' : $message = $error;
-        $configid=$data->id;
+        $configid = $data->id;
     } else {
         $error = $configcontroller->hybridteaching_update_config($data);
-        $configid=configs::update_config($data);
+        $configid = configs::update_config($data);
         empty($error) ? $message = 'updatedconfig' : $message = $error;
     }
     $return = new moodle_url('/admin/settings.php', array('section' => 'hybridteaching_configstoresettings',

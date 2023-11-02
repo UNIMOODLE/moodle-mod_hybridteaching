@@ -14,13 +14,23 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+// Project implemented by the "Recovery, Transformation and Resilience Plan.
+// Funded by the European Union - Next GenerationEU".
+//
+// Produced by the UNIMOODLE University Group: Universities of
+// Valladolid, Complutense de Madrid, UPV/EHU, León, Salamanca,
+// Illes Balears, Valencia, Rey Juan Carlos, La Laguna, Zaragoza, Málaga,
+// Córdoba, Extremadura, Vigo, Las Palmas de Gran Canaria y Burgos.
+
 /**
- * hybridteaching external API
- *
+ * Display information about all the mod_hybridteaching modules in the requested course. *
  * @package    mod_hybridteaching
- * @copyright  2023 isyc
+ * @copyright  2023 Proyecto UNIMOODLE
+ * @author     UNIMOODLE Group (Coordinator) <direccion.area.estrategia.digital@uva.es>
+ * @author     ISYC <soporte@isyc.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+
 
 defined('MOODLE_INTERNAL') || die;
 global $CFG;
@@ -43,8 +53,8 @@ class hybridteaching_external extends external_api {
      */
     public static function set_attendance_status_parameters() {
         return new external_function_parameters(
-            array("attid" => new external_value(PARAM_INT, "attid"),
-                    'status' => new external_value(PARAM_INT, "status"))
+            ["attid" => new external_value(PARAM_INT, "attid"),
+                    'status' => new external_value(PARAM_INT, "status"), ]
         );
     }
 
@@ -52,7 +62,7 @@ class hybridteaching_external extends external_api {
         global $DB, $CFG, $USER;
         $params = self::validate_parameters(
             self::set_attendance_status_parameters(),
-                array("attid" => $attid, 'status' => $status)
+                ["attid" => $attid, 'status' => $status]
         );
 
         $attendance = $DB->get_record('hybridteaching_attendance', ['id' => $attid]);
@@ -60,20 +70,20 @@ class hybridteaching_external extends external_api {
         if ($attendance) {
             $attendance->status = $status;
             $attendance->usermodified = $USER->id;
-            $attendance->timemodified = $timemodified;  
+            $attendance->timemodified = $timemodified;
             $DB->update_record('hybridteaching_attendance', $attendance);
 
             $course = $DB->get_field('hybridteaching', 'course', ['id' => $attendance->hybridteachingid]);
-            $event = \mod_hybridteaching\event\attendance_updated::create(array(
+            $event = \mod_hybridteaching\event\attendance_updated::create([
                 'objectid' => $attendance->hybridteachingid,
                 'context' => \context_course::instance($course),
-                'other' => array(
+                'other' => [
                     'sessid' => $attendance->sessionid,
                     'userid' => $attendance->userid,
-                    'attid' => $attendance->id
-                )
-            ));
-    
+                    'attid' => $attendance->id,
+                ],
+            ]);
+
             $event->trigger();
         }
         return json_encode($attendance);
@@ -88,8 +98,8 @@ class hybridteaching_external extends external_api {
 
     public static function set_session_exempt_parameters() {
         return new external_function_parameters(
-            array("sessid" => new external_value(PARAM_INT, "sessid"),
-                    'attexempt' => new external_value(PARAM_INT, "attexempt"))
+            ["sessid" => new external_value(PARAM_INT, "sessid"),
+                    'attexempt' => new external_value(PARAM_INT, "attexempt"), ]
         );
     }
 
@@ -99,7 +109,7 @@ class hybridteaching_external extends external_api {
 
         $params = self::validate_parameters(
             self::set_session_exempt_parameters(),
-                array("sessid" => $sessid, 'attexempt' => $attexempt)
+                ["sessid" => $sessid, 'attexempt' => $attexempt]
         );
 
         $session = $DB->get_record('hybridteaching_session', ['id' => $sessid]);
@@ -107,7 +117,7 @@ class hybridteaching_external extends external_api {
         if ($session) {
             $session->attexempt = $attexempt;
             $session->modifiedby = $USER->id;
-            $session->timemodified = $timemodified;  
+            $session->timemodified = $timemodified;
             $DB->update_record('hybridteaching_session', $session);
         }
         return json_encode($session);
@@ -119,8 +129,8 @@ class hybridteaching_external extends external_api {
 
     public static function get_display_actions_parameters() {
         return new external_function_parameters(
-            array("sessionid" => new external_value(PARAM_INT, "sessionid"),
-                    'userid' => new external_value(PARAM_INT, "userid"))
+            ["sessionid" => new external_value(PARAM_INT, "sessionid"),
+                    'userid' => new external_value(PARAM_INT, "userid"), ]
         );
     }
 

@@ -1,5 +1,4 @@
 <?php
-
 // This file is part of Moodle - https://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -15,12 +14,21 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
+// Project implemented by the "Recovery, Transformation and Resilience Plan.
+// Funded by the European Union - Next GenerationEU".
+//
+// Produced by the UNIMOODLE University Group: Universities of
+// Valladolid, Complutense de Madrid, UPV/EHU, León, Salamanca,
+// Illes Balears, Valencia, Rey Juan Carlos, La Laguna, Zaragoza, Málaga,
+// Córdoba, Extremadura, Vigo, Las Palmas de Gran Canaria y Burgos.
+
 /**
- * Display information about all the mod_hybridteaching modules in the requested course.
- *
- * @package     mod_hybridteaching
- * @copyright   2023 isyc <isyc@example.com>
- * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * Display information about all the mod_hybridteaching modules in the requested course. *
+ * @package    mod_hybridteaching
+ * @copyright  2023 Proyecto UNIMOODLE
+ * @author     UNIMOODLE Group (Coordinator) <direccion.area.estrategia.digital@uva.es>
+ * @author     ISYC <soporte@isyc.com>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 
@@ -33,7 +41,7 @@ require_once('classes/configs.php');
 $type = optional_param('type', "", PARAM_COMPONENT);
 $configid = optional_param('id', 0, PARAM_INT);
 $context = context_system::instance();
-$return = new moodle_url('/admin/settings.php', array('section' => 'hybridteaching_configstoresettings'));
+$return = new moodle_url('/admin/settings.php', ['section' => 'hybridteaching_configstoresettings']);
 require_admin();
 
 if (empty($type)) {
@@ -47,7 +55,7 @@ $PAGE->set_pagelayout('admin');
 
 $hybridconfig = new stdClass();
 if (!empty($configid)) {
-    $hybridconfig = $DB->get_record('hybridteaching_configs', array('id' => $configid), '*', MUST_EXIST);
+    $hybridconfig = $DB->get_record('hybridteaching_configs', ['id' => $configid], '*', MUST_EXIST);
 } else {
     $hybridconfig->type = $type;
 }
@@ -63,7 +71,7 @@ if (!empty($configid)) {
     $config = (object) array_merge((array) $config, (array) $onedriveconfig);
 }
 
-$mform = new htonedrive_config_edit_form(null, array($config, $type));
+$mform = new htonedrive_config_edit_form(null, [$config, $type]);
 $message = '';
 $error = '';
 if ($mform->is_cancelled()) {
@@ -73,15 +81,15 @@ if ($mform->is_cancelled()) {
         $data->id = configs::create_config($data);
         $error = $configcontroller->hybridteaching_create_config($data, $type);
         empty($error) ? $message = 'createdconfig' : $message = $error;
-        $configid=$data->id;
+        $configid = $data->id;
     } else {
         $error = $configcontroller->hybridteaching_update_config($data);
-        $configid=configs::update_config($data);
+        $configid = configs::update_config($data);
         empty($error) ? $message = 'updatedconfig' : $message = $error;
     }
 
-    //add access code and permissions to onedrive
-    $url = new moodle_url('./classes/onedriveaccess.php',array('id'=>$configid) );
+    // Add access code and permissions to onedrive.
+    $url = new moodle_url('./classes/onedriveaccess.php', ['id' => $configid] );
     redirect($url);
 
 }

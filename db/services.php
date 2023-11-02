@@ -14,12 +14,21 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+// Project implemented by the "Recovery, Transformation and Resilience Plan.
+// Funded by the European Union - Next GenerationEU".
+//
+// Produced by the UNIMOODLE University Group: Universities of
+// Valladolid, Complutense de Madrid, UPV/EHU, León, Salamanca,
+// Illes Balears, Valencia, Rey Juan Carlos, La Laguna, Zaragoza, Málaga,
+// Córdoba, Extremadura, Vigo, Las Palmas de Gran Canaria y Burgos.
+
 /**
- * mod_hybridteahcing web services defintions for AJAX
- *
- * @package   mod_hybridteaching
- * @copyright   2023 isyc
- * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * Display information about all the mod_hybridteaching modules in the requested course. *
+ * @package    mod_hybridteaching
+ * @copyright  2023 Proyecto UNIMOODLE
+ * @author     UNIMOODLE Group (Coordinator) <direccion.area.estrategia.digital@uva.es>
+ * @author     ISYC <soporte@isyc.com>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 defined('MOODLE_INTERNAL') || die();
@@ -34,8 +43,8 @@ $functions = array (
         'type' => 'set',
         'ajax' => true,
         'loginrequired' => true,
-        'capabilities' => '', //capabilities check in form
-    ),   
+        'capabilities' => '', // Capabilities check in form.
+    ),
     'mod_hybridteaching_set_session_exempt' => array(
         'classname' => 'hybridteaching_external',
         'methodname' => 'set_session_exempt',
@@ -44,7 +53,7 @@ $functions = array (
         'type' => 'set',
         'ajax' => true,
         'loginrequired' => true,
-        'capabilities' => '', //capabilities check in form
+        'capabilities' => '', // Capabilities check in form.
     ),
     'mod_hybridtaeching_get_display_actions' => array(
         'classname' => 'hybridteaching_external',
@@ -54,6 +63,6 @@ $functions = array (
         'type' => 'read',
         'ajax' => true,
         'loginrequired' => true,
-        'capabilities' => '', //capabilities check in form
+        'capabilities' => '', // Capabilities check in form.
     ),
 );

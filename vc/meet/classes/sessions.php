@@ -1,16 +1,42 @@
 <?php
+// This file is part of Moodle - https://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
-//use mod_isycgooglemeetav\webservice;
+// Project implemented by the "Recovery, Transformation and Resilience Plan.
+// Funded by the European Union - Next GenerationEU".
+//
+// Produced by the UNIMOODLE University Group: Universities of
+// Valladolid, Complutense de Madrid, UPV/EHU, León, Salamanca,
+// Illes Balears, Valencia, Rey Juan Carlos, La Laguna, Zaragoza, Málaga,
+// Córdoba, Extremadura, Vigo, Las Palmas de Gran Canaria y Burgos.
 
-//use function Symfony\Component\DependencyInjection\Loader\Configurator\param;
+/**
+ * Display information about all the mod_hybridteaching modules in the requested course. *
+ * @package    mod_hybridteaching
+ * @copyright  2023 Proyecto UNIMOODLE
+ * @author     UNIMOODLE Group (Coordinator) <direccion.area.estrategia.digital@uva.es>
+ * @author     ISYC <soporte@isyc.com>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
 
 namespace hybridteachvc_meet;
 
 use stdClass;
 
 defined('MOODLE_INTERNAL') || die();
-
-global $CFG;
 
 require_once('meet_handler.php');
 
@@ -53,7 +79,7 @@ class sessions {
                 $meetsession->url = $event->hangoutLink;
                 $meetsession->creatoremail = $event->creator->email;
                 $meetsession->eventid = $event->id;
-        
+
                 if (!$meetsession->id = $DB->insert_record('hybridteachvc_meet', $meetsession)) {
                     return false;
                 }
@@ -62,9 +88,9 @@ class sessions {
 
         return $meetsession->id;
     }
-    
+
     public function update_session_extended($data, $ht) {
-        // hacer update de meet
+        // Hacer update de meet.
         /*global $DB;
         $dataupdated = $DB->update_record('hybridteachvc_meet', $data);
 
@@ -93,7 +119,7 @@ class sessions {
         return true;
     }
 
-    function get_zone_access() {
+    public function get_zone_access() {
         if ($this->meetsession) {
             $array = [
                 'id' => $this->meetsession->id,
