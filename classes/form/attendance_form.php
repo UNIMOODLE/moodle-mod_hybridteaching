@@ -15,11 +15,12 @@
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
- * The attendance filtering form.
- *
- * @package     mod_hybridteaching
- * @copyright   2023 isyc <isyc@example.com>
- * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * The attendance filtering form
+ * @package    mod_hybridteaching
+ * @copyright  2023 Proyecto UNIMOODLE
+ * @author     UNIMOODLE Group (Coordinator) <direccion.area.estrategia.digital@uva.es>
+ * @author     ISYC <soporte@isyc.com>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 defined('MOODLE_INTERNAL') || die;
 require_once($CFG->libdir.'/formslib.php');
@@ -60,7 +61,7 @@ class attendance_options_form extends moodleform {
                     foreach ($groups as $group) {
                         $selectgroups[$group->id] = $group->name;
                     }
-                    $mform->addElement('select', 'groupid', get_string('sessionfor', 'hybridteaching'), $selectgroups);
+                    $mform->addElement('autocomplete', 'groupid', get_string('sessionfor', 'hybridteaching'), $selectgroups);
                 } else {
                     $mform->addElement('static', 'groupid', get_string('sessionfor', 'hybridteaching'),
                                       get_string('nogroups', 'hybridteaching'));

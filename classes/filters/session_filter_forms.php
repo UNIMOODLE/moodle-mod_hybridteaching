@@ -41,8 +41,10 @@ class session_add_filter_form extends moodleform {
         }
 
         // Add buttons.
-        $replacefiltersbutton = $mform->createElement('submit', 'replacefilters', get_string('replacefilters', 'filters'), null, '', ['class' => 'btn btn-secondary']);
-        $addfilterbutton = $mform->createElement('submit', 'addfilter', get_string('addfilter', 'filters'), null, '', ['class' => 'btn btn-secondary']);
+        $replacefiltersbutton = $mform->createElement('submit', 'replacefilters', get_string('replacefilters', 'filters'),
+            null, '', ['class' => 'btn btn-secondary']);
+        $addfilterbutton = $mform->createElement('submit', 'addfilter', get_string('addfilter', 'filters'), null,
+            '', ['class' => 'btn btn-secondary']);
         $buttons = array_filter([
             empty($SESSION->session_filtering) ? null : $replacefiltersbutton,
             $addfilterbutton,

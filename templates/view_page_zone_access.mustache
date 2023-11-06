@@ -23,6 +23,14 @@
 		{{/isclosedoors}}
 	
 	{{/isstart}}
+	{{^isstart}}
+		{{#sessionexist}}
+			{{#isfinished}}
+				{{#str}} finished, mod_hybridteaching {{/str}} {{finished}}
+				<br>
+			{{/isfinished}}
+		{{/sessionexist}}
+	{{/isstart}}
 
 	{{#isprogress}}
 		{{#str}} started, mod_hybridteaching {{/str}}
@@ -41,13 +49,6 @@
 			{{/canentry}}
 		{{/isclosedoors}}
 	{{/isprogress}}
-
-	{{#sessionexist}}
-		{{#isfinished}}
-			{{#str}} finished, mod_hybridteaching {{/str}} {{finished}}
-			<br>
-		{{/isfinished}}
-	{{/sessionexist}}
 
 </div>
 	{{#isundatedsession}}

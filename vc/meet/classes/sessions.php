@@ -109,12 +109,12 @@ class sessions {
     public function delete_session_extended($id) {
         global $DB;
 
-        $exists = $DB->get_record('hybridteachvc_meet', array('id' => $id));
+        $exists = $DB->get_record('hybridteachvc_meet', ['id' => $id]);
         if (!$exists) {
             return false;
         }
 
-        $DB->delete_records('hybridteachvc_meet', array('id' => $id));
+        $DB->delete_records('hybridteachvc_meet', ['id' => $id]);
 
         return true;
     }

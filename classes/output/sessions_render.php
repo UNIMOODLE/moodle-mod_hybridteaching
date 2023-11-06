@@ -75,7 +75,7 @@ class hybridteaching_sessions_render extends \table_sql implements dynamic_table
         $hybridteachingid = optional_param('h', 0, PARAM_INT);
         $page = optional_param('page', 0, PARAM_INT);
         $perpage = optional_param('perpage', get_config('hybridteaching', 'resultsperpage'), PARAM_INT);
-        $sort = optional_param('sort', 'name', PARAM_ALPHANUMEXT);
+        $sort = optional_param('sort', 'starttime', PARAM_ALPHANUMEXT);
         $dir = optional_param('dir', 'ASC', PARAM_ALPHA);
         $slist = optional_param('l', 1, PARAM_INT);
 
@@ -149,7 +149,7 @@ class hybridteaching_sessions_render extends \table_sql implements dynamic_table
 
         $return = $OUTPUT->box_start('generalbox');
         $baseurl = new moodle_url('/mod/hybridteaching/sessions.php', ['id' => $id, 'l' => $this->typelist,
-            'sort' => $sort, 'dir' => $dir, 'perpage' => $perpage]);
+            'sort' => $sort, 'dir' => $dir, 'perpage' => $perpage, ]);
 
         $table = new html_table();
         $table->head = $this->get_table_header($columns);
@@ -191,7 +191,9 @@ class hybridteaching_sessions_render extends \table_sql implements dynamic_table
                 if ($sessatt === false) {
                     $this->hybridteaching->context = $this->context;
                     $this->hybridteaching->coursecontext = $this->coursecontext;
-                    $sessatt = attendance::calculate_session_att($this->hybridteaching, $sessionid, $session['groupid']);
+                    if ($attcalc = !empty(attendance::calculate_session_att($this->hybridteaching, $sessionid, $session['groupid']))) {
+                        $sessatt = $attcalc;
+                    }
                     $cache->set($cachekey, $sessatt);
                 }
             }
@@ -282,7 +284,7 @@ class hybridteaching_sessions_render extends \table_sql implements dynamic_table
         $sessiontable .= html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'id', 'value' => $id]);
         $sessiontable .= html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'l', 'value' => $this->typelist]);
         $return .= html_writer::tag('form', $sessiontable, ['method' => 'post',
-            'action' => '/mod/hybridteaching/classes/action/session_action.php']);
+            'action' => '/mod/hybridteaching/classes/action/session_action.php', ]);
         $return .= $OUTPUT->paging_bar($sessionscount, $page, $perpage, $baseurl);
         $return .= $OUTPUT->box_end();
 

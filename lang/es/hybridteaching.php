@@ -420,3 +420,4 @@ $string['takensessions'] = 'Sesiones realizadas';
 $string['selectedsessions'] = 'Sessiones seleccionadas';
 $string['anygroup'] = 'Cualquier grupo';
 $string['withoutgroup'] = 'Sin grupo';
+$string['unknown'] = 'Sin definir';

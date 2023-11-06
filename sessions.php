@@ -51,9 +51,9 @@ if ($slist == SESSION_LIST) {
     $PAGE->navbar->add(get_string('programscheduleuc', 'hybridteaching'));
 }
 
-$hybridteaching = $DB->get_record('hybridteaching', array('id' => $cm->instance), '*', MUST_EXIST);
+$hybridteaching = $DB->get_record('hybridteaching', ['id' => $cm->instance], '*', MUST_EXIST);
 $hybridteaching->context = $context;
-$url = new moodle_url('/mod/hybridteaching/sessions.php', array('id' => $id, 'l' => $slist));
+$url = new moodle_url('/mod/hybridteaching/sessions.php', ['id' => $id, 'l' => $slist]);
 $sessionrender = new hybridteaching_sessions_render($hybridteaching, $slist);
 
 $PAGE->set_url($url);

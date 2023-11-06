@@ -432,3 +432,4 @@ $string['takensessions'] = 'Taken sessions';
 $string['selectedsessions'] = 'Selected sessions';
 $string['anygroup'] = 'Any group';
 $string['withoutgroup'] = 'Without group';
+$string['unknown'] = 'Undefined';

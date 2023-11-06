@@ -42,10 +42,10 @@ $finishsession = optional_param('finishsession', 0, PARAM_INT);
 
 list($course, $cm) = get_course_and_cm_from_cmid($id, 'hybridteaching');
 $modulecontext = context_module::instance($cm->id);
-$hybridteaching = $DB->get_record('hybridteaching', array('id' => $cm->instance), '*', MUST_EXIST);
+$hybridteaching = $DB->get_record('hybridteaching', ['id' => $cm->instance], '*', MUST_EXIST);
 $attendancecontroller = new attendance_controller($hybridteaching);
 if (!empty($sid)) {
-    $activesession = $DB->get_record('hybridteaching_session', array('id' => $sid), '*', MUST_EXIST);
+    $activesession = $DB->get_record('hybridteaching_session', ['id' => $sid], '*', MUST_EXIST);
     if (!$finishsession) {
         if ($activesession->typevc != $hybridteaching->typevc) {
             $activesession->typevc = $hybridteaching->typevc;
@@ -90,13 +90,13 @@ if (!empty($sid)) {
             $url = base64_encode($url);
         }
 
-        $event = \mod_hybridteaching\event\session_finished::create(array(
+        $event = \mod_hybridteaching\event\session_finished::create([
             'objectid' => $hybridteaching->id,
             'context' => \context_course::instance($hybridteaching->course),
-            'other' => array(
+            'other' => [
                 'sessid' => $activesession->id,
-            )
-        ));
+            ],
+        ]);
 
         $event->trigger();
     }

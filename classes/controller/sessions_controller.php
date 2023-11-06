@@ -386,20 +386,20 @@ class sessions_controller extends common_controller {
      */
     public function get_next_session() {
         global $DB;
+        $time = time();
 
         $datefilter = "";
-        if (empty($this->hybridobject->undatedsession)) {
-            $datefilter  = " AND (hs.starttime + hs.duration >= UNIX_TIMESTAMP() OR hs.starttime IS NULL)";
-        }
+        $datefilter  = " AND (hs.starttime + hs.duration >= :time OR hs.starttime IS NULL)";
 
         $sql = "SELECT *
                   FROM {hybridteaching_session} AS hs
                  WHERE hs.hybridteachingid = :id
-                   $datefilter
+                       $datefilter
                    AND (hs.isfinished = 0 OR hs.isfinished IS NULL)
-              ORDER BY hs.starttime LIMIT 1";
+              ORDER BY ABS(:time2 - hs.starttime) ASC
+                 LIMIT 1";
 
-        $nextsession = $DB->get_record_sql($sql, ['id' => $this->hybridobject->id]);
+        $nextsession = $DB->get_record_sql($sql, ['id' => $this->hybridobject->id, 'time' => $time, 'time2' => $time]);
 
         return $nextsession;
     }
@@ -414,14 +414,15 @@ class sessions_controller extends common_controller {
      */
     public function get_last_session() {
         global $DB;
+        $time = time();
 
         $sql = "SELECT *
                   FROM {hybridteaching_session} hs
                  WHERE hs.hybridteachingid = :id
-                   AND hs.starttime < UNIX_TIMESTAMP()
+                   AND hs.starttime < :time
                    AND hs.isfinished = 1
               ORDER BY hs.starttime DESC LIMIT 1";
-        $lastsession = $DB->get_record_sql($sql, ['id' => $this->hybridobject->id]);
+        $lastsession = $DB->get_record_sql($sql, ['id' => $this->hybridobject->id, 'time' => $time]);
 
         return $lastsession;
     }
@@ -546,12 +547,12 @@ class sessions_controller extends common_controller {
         return $classname;
     }
 
-/**
- * Retrieves the class name for a given subplugin store type.
- *
- * @param string $type The type of subplugin store.
- * @return string The class name for the specified subplugin store type.
- */
+    /**
+     * Retrieves the class name for a given subplugin store type.
+     *
+     * @param string $type The type of subplugin store.
+     * @return string The class name for the specified subplugin store type.
+     */
     public static function get_subpluginstore_class($type) {
         $classname = '\hybridteachstore_' . $type . '\sessions';
         return $classname;
@@ -612,5 +613,29 @@ class sessions_controller extends common_controller {
         } else {
             return null;
         }
+    }
+
+    public static function set_session_finished($sessid) {
+        global $DB;
+        $session = new stdClass();
+        $session->id = $sessid;
+        $session->isfinished = 1;
+        $DB->update_record('hybridteaching_session', $session);
+    }
+
+    public function get_last_undated_session() {
+        global $DB;
+        $time = time();
+
+        $sql = "SELECT *
+                  FROM {hybridteaching_session} AS hs
+                 WHERE hs.hybridteachingid = :id
+                   AND (hs.isfinished = 0 OR hs.isfinished IS NULL)
+                   AND hs.duration = 0
+              ORDER BY ABS(:time - hs.starttime) ASC
+                 LIMIT 1";
+
+        $undatedsession = $DB->get_record_sql($sql, ['id' => $this->hybridobject->id, 'time' => $time]);
+        return $undatedsession;
     }
 }

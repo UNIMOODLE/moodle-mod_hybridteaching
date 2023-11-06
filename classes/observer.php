@@ -18,12 +18,12 @@ defined('MOODLE_INTERNAL') || die();
 
 require_once(dirname(__FILE__).'/helpers/grades.php');
 require_once(dirname(__FILE__).'/controller/attendance_controller.php');
+require_once(dirname(__FILE__).'/controller/sessions_controller.php');
 
 class mod_hybridteaching_observer {
     public static function session_finished(\mod_hybridteaching\event\session_finished $event) {
-        // Revisar si hay students que no tienen attendance en la session (en ese caso crearla)
-        // Actualizar la asistencia de los usuarios.
         self::update_users_grade($event->objectid, $event->other['sessid']);
+        self::set_session_state($event->other['sessid']);
     }
 
     public static function session_joined(\mod_hybridteaching\event\session_joined $event) {
@@ -72,5 +72,9 @@ class mod_hybridteaching_observer {
         foreach ($usersid as $userid) {
             attendance_controller::hybridteaching_set_attendance($ht, $session, 0, null, $userid);
         }
+    }
+
+    private static function set_session_state($sessid) {
+        sessions_controller::set_session_finished($sessid);
     }
 }

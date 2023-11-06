@@ -80,8 +80,10 @@ $session = new sessions_controller($hybridteaching);
 $activesession = $session->get_next_session();
 $result = [];
 $hasvc = !empty($hybridteaching->typevc) ? true : false;
+$newsession = true;
 if (!$activesession) {
     $activesession = $session->get_last_session();
+    $newsession = false;
 }
 
 if (!$activesession) {
@@ -102,10 +104,8 @@ if (!$activesession) {
         $access = false;
         echo $OUTPUT->notification(get_string('sessionnoaccess', 'mod_hybridteaching', 'info'));
     } else {
-        $date = new DateTime();
-        $date->setTimestamp(intval($activesession->starttime));
-        $timeinit = $date->getTimestamp();
-        $timeend = $timeinit + intval($activesession->duration);
+        $timeinit = $activesession->starttime;
+        $timeend = $timeinit + $activesession->duration;
 
         $isundatedsession = false;
         $isprogress = false;
@@ -126,10 +126,23 @@ if (!$activesession) {
                     }
                 } else {
                     $status = get_string('status_start', 'mod_hybridteaching');
-                    if ($activesession->starttime < time()) {
+                    if (($newsession && $activesession->starttime < time())) {
                         $isprogress = true;
                         $status = get_string('status_ready', 'mod_hybridteaching');
                         $viewupdate = true;
+                    } else if ($newsession && $activesession->starttime > time()) {
+                        $duration = $activesession->duration;
+                        $activesession = $session->get_last_undated_session();
+                        if (!empty($activesession)) {
+                            $isprogress = true;
+                            $status = get_string('status_ready', 'mod_hybridteaching');
+                            $viewupdate = true;
+                            $timeinit = $activesession->starttime;
+                        } else {
+                            $isstart = true;
+                            $isfinished = true;
+                            $nextsessduration = $duration;
+                        }
                     }
                 }
                 $alert = 'alert-info';
@@ -221,7 +234,15 @@ if (!$activesession) {
         $result['isfinished'] = $isfinished;
         $result['starttime'] = userdate($timeinit);
         $result['finished'] = userdate($timeend);
-        $result['duration'] = helper::get_hours_format($activesession->duration);
+        if (!empty($activesession->duration)) {
+            $result['duration'] = helper::get_hours_format($activesession->duration);
+        } else {
+            if (!empty($nextsessduration)) {
+                $result['duration'] = helper::get_hours_format($nextsessduration);
+            } else {
+                $result['duration'] = 'Sin definir';
+            }
+        }
         $result['status'] = $status;
         $result['isadvanceentry'] = $isadvanceentry;
         $result['advanceentrytime'] = helper::get_hours_format($advanceentrytime);

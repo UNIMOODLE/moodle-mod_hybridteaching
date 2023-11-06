@@ -118,7 +118,7 @@ if (!isset($_GET["code"]) && !isset($_GET["error"]) ) {
     $graph = new Graph();
     $graph->setAccessToken($tokenderefresco->access_token);
     $user = $graph->createRequest("get", "/me")
-        ->addHeaders(array("Content-Type" => "application/json"))
+        ->addHeaders(["Content-Type" => "application/json"])
         ->setReturnType(Model\User::class)
         ->setTimeout("1000")
         ->execute();

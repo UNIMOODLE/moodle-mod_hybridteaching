@@ -41,5 +41,5 @@ function xmldb_hybridteachstore_pumukit_uninstall() {
 
 function delete_subplugin_configs() {
     global $DB;
-    $DB->delete_records('hybridteaching_configs', array('type' => get_string('pumukit', 'hybridteachstore_pumukit')));
+    $DB->delete_records('hybridteaching_configs', ['type' => get_string('pumukit', 'hybridteachstore_pumukit')]);
 }

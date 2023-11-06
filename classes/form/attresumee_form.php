@@ -15,11 +15,12 @@
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
- * The attendance filtering form.
- *
- * @package     mod_hybridteaching
- * @copyright   2023 isyc <isyc@example.com>
- * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * The attendance sessions form
+ * @package    mod_hybridteaching
+ * @copyright  2023 Proyecto UNIMOODLE
+ * @author     UNIMOODLE Group (Coordinator) <direccion.area.estrategia.digital@uva.es>
+ * @author     ISYC <soporte@isyc.com>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 defined('MOODLE_INTERNAL') || die;
 require_once($CFG->libdir.'/formslib.php');
@@ -48,7 +49,7 @@ class attresumee_options_form extends moodleform {
         foreach ($husers as $huser) {
             $selectedusers[$huser->id] = $huser->lastname . ' ' . $huser->firstname . '';
         }
-        $mform->addElement('select', 'selecteduser', get_string('userfor', 'mod_hybridteaching'), $selectedusers);
+        $mform->addElement('autocomplete', 'selecteduser', get_string('userfor', 'mod_hybridteaching'), $selectedusers);
         $mform->setDefault('selecteduser', $selecteduser);
 
         $selecteduser = $attcontroller->load_sessions_attendant($selecteduser);

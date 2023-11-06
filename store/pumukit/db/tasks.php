@@ -33,14 +33,14 @@
 
 defined('MOODLE_INTERNAL') || die;
 
-$tasks = array(
-    array(
+$tasks = [
+    [
         'classname' => 'hybridteachstore_pumukit\task\updatestores',
         'blocking' => 0,
         'minute' => '0',
         'hour' => '*/1',
         'day' => '*',
         'month' => '*',
-        'dayofweek' => '*'
-    )
-);
+        'dayofweek' => '*',
+    ],
+];

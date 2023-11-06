@@ -15,11 +15,12 @@
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
- * The students attendance helper.
- *
- * @package     mod_hybridteaching
- * @copyright   2023 isyc <isyc@example.com>
- * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * The attendance controller class
+ * @package    mod_hybridteaching
+ * @copyright  2023 Proyecto UNIMOODLE
+ * @author     UNIMOODLE Group (Coordinator) <direccion.area.estrategia.digital@uva.es>
+ * @author     ISYC <soporte@isyc.com>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 defined('MOODLE_INTERNAL') || die();
@@ -71,7 +72,9 @@ class attendance_controller extends common_controller {
         if (isset($params['view'])) {
             $params['view'] == 'extendedstudentatt' ? $altergroupby .= '  ha.userid ' : $groupby = ' ha.sessionid ';
             $params['view'] == 'extendedsessionatt' ? $groupby = ' ha.id ' : '';
+            $params['view'] == 'sessionattendance' ? $selecpg = ' ha.sessionid, ha.id, ' : $selecpg = ' ha.id, ha.sessionid, ';
         } else {
+            $selecpg = ' ha.id, ha.sessionid ';
             $groupby = ' ha.id ';
         }
         if (isset($params['groupid'])) {
@@ -87,7 +90,8 @@ class attendance_controller extends common_controller {
         !empty($fname) ? $fname = " AND u.firstname like '" . $fname . "%' " : '';
         !empty($lname) ? $lname = " AND u.lastname like '" . $lname . "%' " : '';
 
-        $sql = 'SELECT ha.id, ha.sessionid, ha.id, hs.name, hs.starttime, hs.duration, hs.typevc, ha.visible, ha.grade,
+
+        $sql = 'SELECT' . $selecpg . 'hs.name, hs.starttime, hs.duration, hs.typevc, ha.visible, ha.grade,
                             ha.userid, CASE WHEN ha.connectiontime = 0 THEN -1 ELSE ha.type END as type, ha.status,
                             ha.connectiontime, (hs.starttime + hs.duration) endtime, ha.exempt, u.lastname, u.username
                   FROM {hybridteaching_attendance} ha
@@ -161,11 +165,7 @@ class attendance_controller extends common_controller {
             $userid = $attendancelist;
         }
 
-        $params = ['userid' => $userid];
-        $sql = 'SELECT *
-                    FROM {user}
-                    WHERE id = :userid';
-        return $attendance = $DB->get_record_sql($sql, $params);
+        return $attendance = $DB->get_record('user', ['id' => $userid]);
     }
 
     /**
@@ -268,7 +268,7 @@ class attendance_controller extends common_controller {
     public static function hybridteaching_get_attendance($session, $userid = null) {
         global $DB, $USER;
         is_integer($session) ? $sessid = $session : $sessid = false;
-        if (!$sessid) {
+        if (!$sessid && !empty($session)) {
             is_array($session) ? $sessid = $session['id'] : $sessid = $session->id;
         }
         $params = ['sessionid' => $sessid];

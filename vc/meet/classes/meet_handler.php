@@ -100,23 +100,23 @@ class meet_handler {
 
         $timezone = get_user_timezone($USER->timezone);
 
-        $event = new Google_Service_Calendar_Event(array(
+        $event = new Google_Service_Calendar_Event([
             'summary' => $meet->name,
             'description' => $meet->description,
-            'start' => array(
+            'start' => [
                 'dateTime' => $startdatetime,
-                'timeZone' => $timezone
-            ),
-            'end' => array(
+                'timeZone' => $timezone,
+            ],
+            'end' => [
                 'dateTime' => $enddatetime,
-                'timeZone' => $timezone
-            ),
-            'conferenceData' => array(
-                'createRequest' => array(
-                    'requestID' => 'req_'.time()
-                )
-            )
-        ));
+                'timeZone' => $timezone,
+            ],
+            'conferenceData' => [
+                'createRequest' => [
+                    'requestID' => 'req_'.time(),
+                ],
+            ],
+        ]);
 
         $conferencedata = new Google\Service\Calendar\ConferenceData();
         $req = new Google\Service\Calendar\CreateConferenceRequest();
@@ -124,7 +124,7 @@ class meet_handler {
         $conferencedata->setCreateRequest($req);
         $event->setConferenceData($conferencedata);
 
-        $event = $service->events->insert($calendarid, $event, array('conferenceDataVersion' => 1));
+        $event = $service->events->insert($calendarid, $event, ['conferenceDataVersion' => 1]);
 
         return $event;
     }

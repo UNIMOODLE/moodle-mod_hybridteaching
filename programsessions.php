@@ -47,9 +47,9 @@ require_login($course, true, $cm);
 $context = context_module::instance($cm->id);
 require_capability('mod/hybridteaching:programschedule', $context);
 
-$url = new moodle_url('/mod/hybridteaching/programsessions.php', array('id' => $id));
+$url = new moodle_url('/mod/hybridteaching/programsessions.php', ['id' => $id]);
 
-$hybridteaching = $DB->get_record('hybridteaching', array('id' => $cm->instance), '*', MUST_EXIST);
+$hybridteaching = $DB->get_record('hybridteaching', ['id' => $cm->instance], '*', MUST_EXIST);
 
 $PAGE->set_url($url);
 $PAGE->set_title(format_string($hybridteaching->name));
@@ -59,7 +59,7 @@ $PAGE->set_context($context);
 
 $sessionobj = null;
 if (!empty($sid)) {
-    $sessionobj = $DB->get_record('hybridteaching_session', array('id' => $sid), '*', MUST_EXIST);
+    $sessionobj = $DB->get_record('hybridteaching_session', ['id' => $sid], '*', MUST_EXIST);
     $sessionobj->sessionid = $sessionobj->id;
     unset($sessionobj->id);
     $sessionobj->duration = $sessionobj->duration / MINSECS;

@@ -41,5 +41,5 @@ function xmldb_hybridteachvc_meet_uninstall() {
 
 function delete_subplugin_configs() {
     global $DB;
-    $DB->delete_records('hybridteaching_configs', array('type' => get_string('meet', 'hybridteachvc_meet')));
+    $DB->delete_records('hybridteaching_configs', ['type' => get_string('meet', 'hybridteachvc_meet')]);
 }

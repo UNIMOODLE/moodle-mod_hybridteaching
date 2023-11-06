@@ -276,18 +276,18 @@ class webservice {
             'description' => $meet->description,
             'start' => [
                 'dateTime' => $startdatetime,
-                'timeZone' => $timezone
+                'timeZone' => $timezone,
             ],
             'end' => [
                 'dateTime' => $enddatetime,
-                'timeZone' => $timezone
-            ]
+                'timeZone' => $timezone,
+            ],
         ];
 
         $service = new rest($this->get_user_oauth_client());
 
         $eventparams = [
-            'calendarid' => $calendarid
+            'calendarid' => $calendarid,
         ];
 
         $eventresponse = helper::request($service, 'insertevent', $eventparams, json_encode($eventrawpost));
@@ -295,15 +295,15 @@ class webservice {
         $conferenceparams = [
             'calendarid' => $calendarid,
             'eventid' => $eventresponse->id,
-            'conferenceDataVersion' => 1
+            'conferenceDataVersion' => 1,
         ];
 
         $conferencerawpost = [
             'conferenceData' => [
                 'createRequest' => [
-                    'requestId' => $eventresponse->id
-                ]
-            ]
+                    'requestId' => $eventresponse->id,
+                ],
+            ],
         ];
 
         $conferenceresponse = helper::request($service, 'createconference', $conferenceparams, json_encode($conferencerawpost));
@@ -329,7 +329,7 @@ class webservice {
                         mimeType = "application/vnd.google-apps.folder" and
                         "me" in owners',
                 'pageSize' => 1000,
-                'fields' => 'nextPageToken, files(id,owners)'
+                'fields' => 'nextPageToken, files(id,owners)',
             ];
 
             $folderresponse = helper::request($service, 'list', $folderparams, false);
@@ -352,7 +352,7 @@ class webservice {
                         "me" in owners and
                         (name contains "'.$meetingcode.'" or name contains "'.$name.'")',
                 'pageSize' => 1000,
-                'fields' => 'files(id,name,permissionIds,createdTime,videoMediaMetadata,webViewLink)'
+                'fields' => 'files(id,name,permissionIds,createdTime,videoMediaMetadata,webViewLink)',
             ];
 
             $recordingresponse = helper::request($service, 'list', $recordingparams, false);
@@ -368,11 +368,11 @@ class webservice {
                         if (!in_array('anyoneWithLink', $recording->permissionIds)) {
                             $permissionparams = [
                                 'fileid' => $recording->id,
-                                'fields' => 'id'
+                                'fields' => 'id',
                             ];
                             $permissionrawpost = [
                                 "role" => "reader",
-                                "type" => "anyone"
+                                "type" => "anyone",
                             ];
                             helper::request($service, 'create_permission', $permissionparams, json_encode($permissionrawpost));
                         }

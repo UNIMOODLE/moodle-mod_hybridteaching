@@ -68,7 +68,7 @@ class updatestores extends \core\task\scheduled_task {
             // Aquí hay que leer la instancia de store que corresponda.
             // De momento leemos la guardada con storeinstance.
 
-            $configyt = $DB->get_record('hybridteachstore_pumukit_con', array('id' => $store->subpluginconfigid));
+            $configyt = $DB->get_record('hybridteachstore_pumukit_con', ['id' => $store->subpluginconfigid]);
 
             // Aqui conectar con la config de pumukit, aún no hecho.
             // $pumukitclient = new \pumukig_handler($configyt);

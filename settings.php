@@ -46,7 +46,7 @@ if ($hassiteconfig) {
         new lang_string('configsstoreconfig', 'mod_hybridteaching'));
 
     if ($ADMIN->fulltree) {
-        $options = array(
+        $options = [
             0 => get_string('donotusepaging', 'mod_hybridteaching'),
             10 => 10,
             25 => 25,
@@ -56,7 +56,7 @@ if ($hassiteconfig) {
             250 => 250,
             500 => 500,
             1000 => 1000,
-        );
+        ];
 
         $generalsettings->add(new admin_setting_configselect('hybridteaching/resultsperpage',
             get_string('resultsperpage', 'hybridteaching'), get_string('sessresultsperpage_desc', 'hybridteaching'), 25, $options));

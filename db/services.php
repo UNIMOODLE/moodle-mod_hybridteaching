@@ -33,9 +33,9 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$functions = array (
+$functions = [
 
-    'mod_hybridteaching_set_manual_attendance' => array(
+    'mod_hybridteaching_set_manual_attendance' => [
         'classname' => 'hybridteaching_external',
         'methodname' => 'set_attendance_status',
         'classpath' => '/mod/hybridteaching/externallib.php',
@@ -44,8 +44,8 @@ $functions = array (
         'ajax' => true,
         'loginrequired' => true,
         'capabilities' => '', // Capabilities check in form.
-    ),
-    'mod_hybridteaching_set_session_exempt' => array(
+    ],
+    'mod_hybridteaching_set_session_exempt' => [
         'classname' => 'hybridteaching_external',
         'methodname' => 'set_session_exempt',
         'classpath' => '/mod/hybridteaching/externallib.php',
@@ -54,8 +54,8 @@ $functions = array (
         'ajax' => true,
         'loginrequired' => true,
         'capabilities' => '', // Capabilities check in form.
-    ),
-    'mod_hybridtaeching_get_display_actions' => array(
+    ],
+    'mod_hybridtaeching_get_display_actions' => [
         'classname' => 'hybridteaching_external',
         'methodname' => 'get_display_actions',
         'classpath' => '/mod/hybridteaching/externallib.php',
@@ -64,5 +64,5 @@ $functions = array (
         'ajax' => true,
         'loginrequired' => true,
         'capabilities' => '', // Capabilities check in form.
-    ),
-);
+    ],
+];

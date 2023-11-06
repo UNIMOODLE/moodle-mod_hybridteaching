@@ -244,6 +244,7 @@ class hybridteaching_attendance_render extends \table_sql implements dynamic_tab
         if ($view == 'attendlog') {
             $att = $attendancecontroller->hybridteaching_get_attendance_from_id($attid);
             $att->sessionid != $sessionid ? $att = $attendancecontroller->hybridteaching_get_attendance($sessionid) : '';
+            !$att ? $logs = false :
             $logs = $attendancecontroller->hybridteaching_get_attendance_logs($att->id, $sort, $dir);
             if (!$logs) {
                 if (isset($sessionoptions)) {
@@ -340,6 +341,10 @@ class hybridteaching_attendance_render extends \table_sql implements dynamic_tab
         if ($view == 'extendedstudentatt') {
             $participationrecords = $attendancecontroller->hybridteaching_get_students_participation($hybridteachingid,
                 $sort, $dir, $fname, $lname);
+            $baseurl = new moodle_url('/mod/hybridteaching/attendance.php?view=' . $view, ['id' => $id,
+            'sort' => $sort, 'dir' => $dir, 'perpage' => $perpage, 'sessionid' => $sessionid, ]);
+            $attendancecount = count($participationrecords);
+            $return .= $OUTPUT->paging_bar($attendancecount, $page, $perpage, $baseurl);
             $attuser = $attendancecontroller->load_sessions_attendant($userid);
             $userpicture = $OUTPUT->user_picture($attuser);
             $params['userid'] = $attuser->id;

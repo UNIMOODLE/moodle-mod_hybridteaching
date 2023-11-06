@@ -45,29 +45,13 @@ class custom_completion extends activity_custom_completion {
         $hybridteachingid = $this->cm->instance;
 
         if (!$hybridteaching = $DB->get_record('hybridteaching', ['id' => $hybridteachingid])) {
-            throw new \moodle_exception('Unable to find hybridteaching with id ' . $hybridteachingid);
+            throw new \moodle_exception(get_string('nohid', 'mod_hybridteaching') . $hybridteachingid);
         }
         $status = 0;
-
-        // TO-DO : HACER AQUI LA REGLA PARA CONTAR QUE EL USUARIO HA ASISTIDO A XX SESIONES.
-        /*
-        $postcountparams = ['userid' => $userid, 'hybridteachingid' => $hybridteachingid];
-        $postcountsql = "SELECT COUNT(*)
-                           FROM {forum_posts} fp
-                           JOIN {forum_discussions} fd ON fp.discussion = fd.id
-                          WHERE fp.userid = :userid
-                            AND fd.forum = :forumid";
-
-        if ($rule == 'completiondiscussions') {
-            $status = $forum->completiondiscussions <=
-                $DB->count_records('forum_discussions', ['forum' => $forumid, 'userid' => $userid]);
-        } else if ($rule == 'completionreplies') {
-            $status = $forum->completionreplies <=
-                $DB->get_field_sql($postcountsql . ' AND fp.parent <> 0', $postcountparams);
-        } else if ($rule == 'completionposts') {
-            $status = $forum->completionposts <= $DB->get_field_sql($postcountsql, $postcountparams);
-        }*/
-
+        $attcountparams = ['userid' => $userid, 'hybridteachingid' => $hybridteachingid, 'status' => 1];
+        if ($rule == 'completionattendance') {
+            $status = $hybridteaching->completionattendance <= $DB->count_records('hybridteaching_attendance', $attcountparams);
+        }
         return $status ? COMPLETION_COMPLETE : COMPLETION_INCOMPLETE;
     }
 

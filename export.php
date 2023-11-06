@@ -40,9 +40,9 @@ list($course, $cm) = get_course_and_cm_from_cmid($id, 'hybridteaching');
 require_login($course, true, $cm);
 
 $context = context_module::instance($cm->id);
-$hybridteaching = $DB->get_record('hybridteaching', array('id' => $cm->instance), '*', MUST_EXIST);
+$hybridteaching = $DB->get_record('hybridteaching', ['id' => $cm->instance], '*', MUST_EXIST);
 
-$url = new moodle_url('/mod/hybridteaching/export.php', array('id' => $id));
+$url = new moodle_url('/mod/hybridteaching/export.php', ['id' => $id]);
 $PAGE->set_url($url);
 
 require_capability('mod/hybridteaching:export', $context);
@@ -54,9 +54,9 @@ $PAGE->set_title("$course->shortname: $strexport");
 $PAGE->set_heading($course->fullname);
 $PAGE->set_pagelayout('admin');
 
-$returnurl = new moodle_url('/mod/hybridteaching/view.php', array('id' => $id));
+$returnurl = new moodle_url('/mod/hybridteaching/view.php', ['id' => $id]);
 
-$formparams = array('course' => $course, 'cm' => $cm, 'modcontext' => $context);
+$formparams = ['course' => $course, 'cm' => $cm, 'modcontext' => $context];
 $exportform = new mod_hybridteaching\form\export_form(null, $formparams);
 
 if ($exportform->is_cancelled()) {
