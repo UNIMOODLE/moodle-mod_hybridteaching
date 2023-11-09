@@ -191,8 +191,8 @@ class hybridteaching_sessions_render extends \table_sql implements dynamic_table
                 if ($sessatt === false) {
                     $this->hybridteaching->context = $this->context;
                     $this->hybridteaching->coursecontext = $this->coursecontext;
-                    if ($attcalc = !empty(attendance::calculate_session_att($this->hybridteaching, $sessionid, $session['groupid']))) {
-                        $sessatt = $attcalc;
+                    if (!empty($att = attendance::calculate_session_att($this->hybridteaching, $sessionid, $session['groupid']))) {
+                        $sessatt = $att;
                     }
                     $cache->set($cachekey, $sessatt);
                 }

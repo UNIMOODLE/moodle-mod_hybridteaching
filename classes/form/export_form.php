@@ -41,7 +41,7 @@ class export_form extends \moodleform {
         $cm            = $this->_customdata['cm'];
         $modcontext    = $this->_customdata['modcontext'];
 
-        $mform->addElement('header', 'general', get_string('export', 'attendance'));
+        $mform->addElement('header', 'general', get_string('export', 'hybridteaching'));
 
         $groupmode = groups_get_activity_groupmode($cm, $course);
         $groups = groups_get_activity_allowed_groups($cm, $USER->id);
@@ -65,7 +65,7 @@ class export_form extends \moodleform {
         }
         unset($allusers);
         if (empty($userlist)) {
-            $mform->addElement('static', 'nousers', '', get_string('noattendanceusers', 'attendance'));
+            $mform->addElement('static', 'nousers', '', get_string('noattendanceusers', 'hybridteaching'));
             return;
         }
 
@@ -73,17 +73,17 @@ class export_form extends \moodleform {
 
         $mform->setType('id', PARAM_INT);
 
-        $mform->addElement('checkbox', 'includeallsessions', get_string('includeall', 'attendance'), get_string('yes'));
+        $mform->addElement('checkbox', 'includeallsessions', get_string('includeall', 'hybridteaching'), get_string('yes'));
         $mform->setDefault('includeallsessions', true);
-        $mform->addElement('date_selector', 'sessionstartdate', get_string('startofperiod', 'attendance'));
+        $mform->addElement('date_selector', 'sessionstartdate', get_string('startofperiod', 'hybridteaching'));
         $mform->setDefault('sessionstartdate', $course->startdate);
         $mform->disabledIf('sessionstartdate', 'includeallsessions', 'checked');
-        $mform->addElement('date_selector', 'sessionenddate', get_string('endofperiod', 'attendance'));
+        $mform->addElement('date_selector', 'sessionenddate', get_string('endofperiod', 'hybridteaching'));
         $mform->disabledIf('sessionenddate', 'includeallsessions', 'checked');
 
-        $formatoptions = ['excel' => get_string('downloadexcel', 'attendance'),
-                               'ooo' => get_string('downloadooo', 'attendance'),
-                               'text' => get_string('downloadtext', 'attendance'), ];
+        $formatoptions = ['excel' => get_string('downloadexcel', 'hybridteaching'),
+                               'ooo' => get_string('downloadooo', 'hybridteaching'),
+                               'text' => get_string('downloadtext', 'hybridteaching'), ];
         $mform->addElement('select', 'format', get_string('format'), $formatoptions);
 
         $submitstring = get_string('ok');

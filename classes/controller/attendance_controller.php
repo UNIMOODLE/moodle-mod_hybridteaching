@@ -71,10 +71,8 @@ class attendance_controller extends common_controller {
         }
         if (isset($params['view'])) {
             $params['view'] == 'extendedstudentatt' ? $altergroupby .= '  ha.userid ' : $groupby = ' ha.sessionid ';
-            $params['view'] == 'extendedsessionatt' ? $groupby = ' ha.id ' : '';
-            $params['view'] == 'sessionattendance' ? $selecpg = ' ha.sessionid, ha.id, ' : $selecpg = ' ha.id, ha.sessionid, ';
+            $params['view'] == 'extendedsessionatt' ? $groupby = ' ha.id    ' : '';
         } else {
-            $selecpg = ' ha.id, ha.sessionid ';
             $groupby = ' ha.id ';
         }
         if (isset($params['groupid'])) {
@@ -89,17 +87,38 @@ class attendance_controller extends common_controller {
 
         !empty($fname) ? $fname = " AND u.firstname like '" . $fname . "%' " : '';
         !empty($lname) ? $lname = " AND u.lastname like '" . $lname . "%' " : '';
+        !isset($params['view']) ? $params['view'] = 'bulkform' : '';
 
-
-        $sql = 'SELECT' . $selecpg . 'hs.name, hs.starttime, hs.duration, hs.typevc, ha.visible, ha.grade,
+        if ($params['view'] == 'sessionattendance') {
+            $sql = 'SELECT hs.id, hs.name, hs.starttime, hs.duration, hs.typevc
+            FROM {hybridteaching_session} hs
+           WHERE hs.hybridteachingid = :hybridteachingid ' . $where . ' ' . '
+          ORDER BY ' . $sort . ' ' . $dir . ', visible desc';
+        } else {
+            $sql = 'SELECT ha.id, ha.sessionid, hs.name, hs.starttime, hs.duration, hs.typevc, ha.visible, ha.grade,
                             ha.userid, CASE WHEN ha.connectiontime = 0 THEN -1 ELSE ha.type END as type, ha.status,
                             ha.connectiontime, (hs.starttime + hs.duration) endtime, ha.exempt, u.lastname, u.username
-                  FROM {hybridteaching_attendance} ha
-                  JOIN {hybridteaching_session} hs on (ha.sessionid = hs.id)
-                  JOIN {user} u on (u.id = ha.userid)
-                 WHERE ha.hybridteachingid = :hybridteachingid ' . $where . ' ' . $fname . $lname . '
-              GROUP BY' . $groupby .  $altergroupby . 'ORDER BY ' . $sort . ' ' . $dir . ', visible desc';
-
+                      FROM {hybridteaching_attendance} ha
+                      JOIN {hybridteaching_session} hs on (ha.sessionid = hs.id)
+                      JOIN {user} u on (u.id = ha.userid)
+                     WHERE ha.hybridteachingid = :hybridteachingid ' . $where . ' ' . $fname . $lname . '
+                  GROUP BY ha.id,
+                           ha.sessionid,
+                           hs.name,
+                           hs.starttime,
+                           hs.duration,
+                           hs.typevc,
+                           ha.visible,
+                           ha.grade,
+                           ha.userid,
+                           CASE WHEN ha.connectiontime = 0 THEN -1 ELSE ha.type END,
+                           ha.status,
+                           ha.connectiontime,
+                           (hs.starttime + hs.duration),
+                           ha.exempt,
+                           u.lastname,
+                           u.username ' . 'ORDER BY ' . $sort . ' ' . $dir . ', visible desc';
+        }
         $attendance = $DB->get_records_sql($sql, $params, $page * $recordsperpage, $recordsperpage);
         $attendancearray = json_decode(json_encode($attendance), true);
         return $attendancearray;
@@ -132,8 +151,8 @@ class attendance_controller extends common_controller {
             }
         }
         $sql = 'SELECT sessionid,
-                        sum(CASE WHEN type THEN 0 ELSE 1 END) AS classroom,
-                        sum(CASE WHEN type THEN 1 ELSE 0 END) AS vc
+                        sum(CASE WHEN type <> 0 THEN 0 ELSE 1 END) AS classroom,
+                        sum(CASE WHEN type <> 0 THEN 1 ELSE 0 END) AS vc
                     FROM {hybridteaching_session} hs
                     JOIN {hybridteaching_attendance} ha ON ha.sessionid = hs.id
                 WHERE ha.hybridteachingid = :hybridteachingid
@@ -641,17 +660,17 @@ class attendance_controller extends common_controller {
             return false;
         }
         $sortd = [0 => 'total', 1 => 'vc' , 2 => 'classroom', 3 => 'lastname'];
-        !in_array($sort, $sortd) ? $prefix = 'at.' : $prefix = '';
+        !in_array($sort, $sortd) ? $prefix = 'u.' : $prefix = '';
         !empty($fname) ? $fname = " AND u.firstname like '" . $fname . "%' " : '';
         !empty($lname) ? $lname = " AND u.lastname like '" . $lname . "%' " : '';
         $sql = "SELECT userid, u.lastname,
                          COUNT(type) AS total,
                       SUM(CASE
-                         WHEN type THEN 0
+                         WHEN type <> 0 THEN 0
                          ELSE 1
                       END) AS classroom,
                       SUM(CASE
-                         WHEN type THEN 1
+                         WHEN type <> 0 THEN 1
                          ELSE 0
                       END) AS vc
                   FROM
@@ -663,7 +682,7 @@ class attendance_controller extends common_controller {
                    AND at.connectiontime != 0
                    AND at.visible = 1" .
                     $fname . $lname . "
-              GROUP BY at.userid
+              GROUP BY at.userid, u.lastname, u.id
               ORDER BY " . $prefix . $sort . " " . $dir;
         $param = ['hid' => $hid];
         try {
@@ -734,10 +753,9 @@ class attendance_controller extends common_controller {
         return $errormsg;
     }
 
-    public function update_session_exempt($attid, $action) {
+    public function update_session_exempt($sessid, $action) {
         global $DB, $USER;
 
-        $sessid = $DB->get_record('hybridteaching_attendance', ['id' => $attid], 'sessionid', IGNORE_MISSING)->sessionid;
         $session = $DB->get_record('hybridteaching_session', ['id' => $sessid], 'id');
         $timemodified = (new \DateTime('now', \core_date::get_server_timezone_object()))->getTimestamp();
         $session->attexempt = $action;
@@ -966,7 +984,9 @@ class attendance_controller extends common_controller {
         $usesattendance = 0;
         foreach ($attendances as $att) {
             if (!$usesattendance) {
-                $sessiongroup = $DB->get_field('hybridteaching_session', 'groupid', ['id' => $att['sessionid']], IGNORE_MISSING);
+                isset($att['sessionid']) ? $sessiongroup = $DB->get_field('hybridteaching_session',
+                    'groupid', ['id' => $att['sessionid']], IGNORE_MISSING) :
+                $sessiongroup = $DB->get_field('hybridteaching_session', 'groupid', ['id' => $att['id']], IGNORE_MISSING);
                 $sessiongroup ? $usesattendance = 1 : '';
             }
         }

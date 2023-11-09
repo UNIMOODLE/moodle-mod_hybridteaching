@@ -88,7 +88,10 @@ class export {
         $headers[] = get_string('percentage', 'hybridteaching');
         $sessions = $this->get_headers_dates($data);
         foreach ($sessions as $session) {
-            $headers[] = $session->dategroup;
+            $timestamp = explode(" - ", $session->dategroup)[0];
+            $formattedDate = date("Y-m-d H:i", $timestamp);
+            $newDategroup = str_replace($timestamp, $formattedDate, $session->dategroup);
+            $headers[] = $newDategroup;
             $this->sessions[] = $session->id;
         }
 
@@ -133,11 +136,15 @@ class export {
         $allgroups = get_string('allgroups', 'hybridteaching');
 
         $sql = "SELECT hs.id,
-                       IF(hs.groupid = 0, CONCAT(from_unixtime(hs.starttime), ' - ', '$allgroups'),
-                        IF (g.id IS NOT NULL, CONCAT(from_unixtime(hs.starttime), ' - ', 'g.name'), '-')) AS dategroup
+                           CASE 
+                                WHEN hs.groupid = 0 THEN CONCAT(hs.starttime, ' - All groups')
+                                WHEN g.id IS NOT NULL THEN CONCAT(hs.starttime, ' - ', g.name)
+                                ELSE '-'
+                            END AS dategroup
                   FROM {hybridteaching_session} hs
              LEFT JOIN {groups} g ON g.id = hs.groupid
-                 WHERE 1 = 1 $where";
+                 WHERE 1 = 1 $where
+              ORDER BY hs.id";
 
         $sessions = $DB->get_records_sql($sql, $params);
 
@@ -170,22 +177,48 @@ class export {
         }
 
         $sql = "SELECT
+                        ha.id,
+                        u.id as userid,
                         u.firstname,
                         u.lastname,
-                        IF (g.id IS NOT NULL, g.name, '-') AS groupname,
+                        CASE WHEN g.id IS NOT NULL THEN g.name ELSE '-' END AS groupname,
                         u.email,
-                        GROUP_CONCAT(CONCAT(hs.id, ',', ha.status) SEPARATOR '|') AS attbysess
+                        CONCAT(hs.id, ' - ', ha.status) AS attbysess
                   FROM {hybridteaching_attendance} ha
             INNER JOIN {hybridteaching_session} hs ON hs.id = ha.sessionid
             INNER JOIN {user} u ON u.id = ha.userid
              LEFT JOIN {groups_members} gm ON ha.userid = gm.userid
              LEFT JOIN {groups} g ON g.id = gm.groupid
-                 WHERE 1 = 1 $where
-              GROUP BY ha.userid;";
+                 WHERE 1 = 1 $where";
 
         $body = $DB->get_records_sql($sql, $allparams);
 
-        return $body;
+        $groupedAttendance = array_reduce($body, function ($result, $value) {
+            $userid = $value->userid;
+            if (!isset($result[$userid])) {
+                $result[$userid] = [];
+            }
+            $result[$userid][] = $value;
+            return $result;
+        }, []);
+        
+        // Concatenar attendance separados por |
+        $finalAttendance = array_map(function ($records) {
+            $attendance = array_map(function ($record) {
+                return $record->attbysess;
+            }, $records);
+            
+            $result = new stdClass();
+            $result->firstname = $records[0]->firstname;
+            $result->lastname = $records[0]->lastname;
+            $result->groupname = $records[0]->groupname;
+            $result->email = $records[0]->email;
+            $result->attbysess = implode(' | ', $attendance);
+            
+            return $result;
+        }, $groupedAttendance);
+
+        return $finalAttendance;
     }
 
     public function export($filename, $format) {
@@ -306,7 +339,7 @@ class export {
             $takensess = 0;
             foreach ($this->sessions as $session) {
                 foreach ($attbysess as $att) {
-                    $attparts = explode(",", $att);
+                    $attparts = explode("-", $att);
                     if ($attparts[0] == $session && $attparts[1] != 0) {
                         $takensess++;
                     }
@@ -324,7 +357,7 @@ class export {
             foreach ($this->sessions as $session) {
                 $status = 0;
                 foreach ($attbysess as $att) {
-                    $attparts = explode(",", $att);
+                    $attparts = explode("-", $att);
                     if ($attparts[0] == $session) {
                         $status = $attparts[1];
                         break;

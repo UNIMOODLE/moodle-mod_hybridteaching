@@ -35,6 +35,7 @@ define('NO_OUTPUT_BUFFERING', true);
 
 require('../../../../config.php');
 require_once('../controller/attendance_controller.php');
+require_once('../controller/sessions_controller.php');
 require('../output/attendance_render.php');
 require_once('../form/attendance_form.php');
 
@@ -204,7 +205,7 @@ switch ($action) {
     case 'bulksetsessionexempt':
         $return = new moodle_url($CFG->wwwroot . '/mod/hybridteaching/attendance.php',
                 ['id' => $moduleid, 'view' => $view]);
-        $attendsid = optional_param_array('attendance', '', PARAM_SEQUENCE);
+        $attendsid = optional_param_array('session', '', PARAM_SEQUENCE);
         $ids = optional_param('ids', '', PARAM_ALPHANUMEXT);
 
         $PAGE->set_title(format_string($hybridteaching->name));
@@ -213,10 +214,10 @@ switch ($action) {
         $sessionsids = [];
         if ($attendsid) {
             foreach ($attendsid as $attid) {
-                $sessionid = $attendancecontroller->hybridteaching_get_attendance_from_id($attid)->sessionid;
-                $sessionsids[] = $sessionid;
+                $sessionsids[] = $attid;
             }
         }
+
         $sessionslist = !empty($sessionsids) ? implode('_', $sessionsids) : '';
         $params = [
             'id' => $moduleid,

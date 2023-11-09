@@ -628,7 +628,7 @@ class sessions_controller extends common_controller {
         $time = time();
 
         $sql = "SELECT *
-                  FROM {hybridteaching_session} AS hs
+                  FROM {hybridteaching_session} hs
                  WHERE hs.hybridteachingid = :id
                    AND (hs.isfinished = 0 OR hs.isfinished IS NULL)
                    AND hs.duration = 0

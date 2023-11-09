@@ -87,7 +87,7 @@ if ($mform->is_cancelled()) {
         empty($error) ? $message = 'updatedconfig' : $message = $error;
     }
     $return = new moodle_url('/admin/settings.php', array('section' => 'hybridteaching_configvcsettings',
-        'message' => $message));
+        'message' => $message, ));
 
     redirect($return);
 }
