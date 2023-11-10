@@ -433,7 +433,12 @@ class webservice {
      */
     public function delete_meeting($id, $webinar) {
         $url = ($webinar ? 'webinars/' : 'meetings/') . $id;
-        $this->_make_call($url, null, 'delete');
+        try {
+            $this->_make_call($url, null, 'delete');
+        } catch (\Exception $e){
+
+        }
+        
     }
 
     /**

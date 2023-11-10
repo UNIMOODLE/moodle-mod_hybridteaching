@@ -171,11 +171,6 @@ class mod_hybridteaching_mod_form extends moodleform_mod {
         $mform->addHelpButton('graceperiod', 'graceperiod', 'hybridteaching');
         $mform->setType('graceperiod', PARAM_INT);
 
-        // TO-DO ISYC: AÑADIR AQUI OPCIONES ESPECÍFICAS DEL SUBPLUGIN SELECCIONADO EN LA SECCIÓN GENERAL.
-        $mform->addElement('text', 'recordatorio', 'AÑADIR AQUÍ OPCIONES PROPIAS SEGÚN CADA SUBPLUGIN DE VIDEOCONFERENCIA',
-            ['size' => 6]);
-        $mform->setType('recordatorio', PARAM_RAW);
-
         // Sección Opciones de bloqueo iniciales de la videoconferencia.
         $mform->addElement('header', 'sectioninitialstates', get_string('sectioninitialstates', 'hybridteaching'));
 

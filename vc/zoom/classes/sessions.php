@@ -113,12 +113,12 @@ class sessions {
     public function delete_session_extended($htsession, $configid) {
         global $DB;
         $zoomconfig = $this->load_zoom_config($configid);
-        $service = new \hybridteachvc_zoom\webservice($zoomconfig);
         $zoom = $DB->get_record('hybridteachvc_zoom', ['htsession' => $htsession]);
-        if (!empty($zoom->meetingid)) {
+        if (isset($zoom->meetingid)) {
+            $service = new \hybridteachvc_zoom\webservice($zoomconfig);
             $service->delete_meeting($zoom->meetingid, 0);
-            $DB->delete_records('hybridteachvc_zoom', ['htsession' => $htsession]);
         }
+        $DB->delete_records('hybridteachvc_zoom', ['htsession' => $htsession]);
     }
 
     /**

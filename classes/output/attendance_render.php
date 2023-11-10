@@ -355,13 +355,14 @@ class hybridteaching_attendance_render extends \table_sql implements dynamic_tab
                 $attuser = $attendancecontroller->load_sessions_attendant($participation);
                 $userpicture = $OUTPUT->user_picture($attuser);
                 $attendanceid = $attid;
+                $gradevalue = $usertotalgrade->items[0]->grades[$participation->userid]->grade;
+                $roundedgrade = ($gradevalue !== null) ? round($gradevalue, 2) : null;
                 $body = [
                     'class' => '',
                     'pfp' => $userpicture,
                     'firstlastname' => $attuser->lastname . ' / ' . $attuser->firstname,
                     'combinedatt' => $participation->vc + $participation->classroom,
-                    'grade' => round($usertotalgrade->items[0]->grades[$participation->userid]->grade, 2) .
-                        ' / ' . $this->hybridteaching->grade,
+                    'grade' => ($roundedgrade !== null) ? $roundedgrade . ' / ' . $this->hybridteaching->grade : null,
                     'vc' => $participation->vc,
                     'classroom' => $participation->classroom,
                     'checkbox' => new \core\output\checkbox_toggleall('attendance-table', false, [
@@ -622,8 +623,8 @@ class hybridteaching_attendance_render extends \table_sql implements dynamic_tab
                 'permanence' => $connectiontime,
                 'attendance' => $attendance['exempt'] ? '<b>' . get_string('exempt', 'hybridteaching') . '<b>' : $submitb,
                 'type' => $atttype,
-                'grade' => round($attendgrade, 2) . ' / '.
-                    round($usertotalgrade->items[0]->grades[$attendance['userid']]->grade, 2) .
+                'grade' => round($attendgrade ?? 0, 2) . ' / ' .
+                    round($usertotalgrade->items[0]->grades[$attendance['userid']]->grade ?? 0, 2) .
                     ' / ' . $this->hybridteaching->grade,
                 'vc' => isset($attassistance['vc']) ? $attassistance['vc'] : 0,
                 'classroom' => isset($attassistance['classroom']) ? $attassistance['classroom'] : 0,

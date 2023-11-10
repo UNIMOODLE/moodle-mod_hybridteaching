@@ -1,6 +1,6 @@
-@hybridteaching @javascript
-Feature: Edit an hybridteaching activity in course page
-  In order to edit an hybridteaching activity from a course
+@hybridteaching @hybridteaching_activity @javascript
+Feature: Edit a hybridteaching activity in course page
+  In order to edit a hybridteaching activity from a course
   As a teacher
   I should be enabled to add and edit activities from a course.
 
@@ -21,16 +21,16 @@ Feature: Edit an hybridteaching activity in course page
 
   Scenario: The teacher add and then edit the hybridteaching activity
     Given I click on "Add an activity or resource" "button" in the "Topic 1" "section"
-    When I click on "Add a new Hybrid teaching" "link" in the "Add an activity or resource" "dialogue"
-    Then I should see "Adding a new Hybrid teaching"
+    And I click on "Add a new Hybrid teaching" "link" in the "Add an activity or resource" "dialogue"
+    And I should see "Adding a new Hybrid teaching"
     And I set the following fields to these values:
       | Name | hybridteaching activity to edit |
     And I press "Save and return to course"
-    Then I should see "hybridteaching activity to edit" in the "Topic 1" "section"
-    When I open "hybridteaching activity to edit" actions menu  
+    And I should see "hybridteaching activity to edit" in the "Topic 1" "section"
+    And I open "hybridteaching activity to edit" actions menu  
     And I click on "Edit settings" "link" in the "hybridteaching activity to edit" activity  
-    Then I should see "Updating Hybrid teaching in Topic 1"
-    And I set the following fields to these values:
+    And I should see "Updating Hybrid teaching in Topic 1"
+    When I set the following fields to these values:
       | Name | EDITED hybridteaching activity |
       | Description | I edited the hybridteaching activity description |
       | Duration | 120 |

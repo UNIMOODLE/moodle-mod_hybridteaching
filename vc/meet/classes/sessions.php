@@ -106,17 +106,22 @@ class sessions {
         return $errormsg;*/
     }
 
-    public function delete_session_extended($id) {
+    public function delete_session_extended($htsession, $configid) {
         global $DB;
 
-        $exists = $DB->get_record('hybridteachvc_meet', ['id' => $id]);
-        if (!$exists) {
-            return false;
+        $meet = $DB->get_record('hybridteachvc_meet', ['htsession' => $htsession]);
+        if (isset($meet)) {
+
+            // check this part.
+
+            // If exists meeting, delete it.
+            /*  $meeting = new meeting($bbbconfig);
+            if (isset($meeting)) {
+                $client = new \meet_handler($meetconfig);
+                $event = $client->create_meeting_event($session);
+            }*/
         }
-
-        $DB->delete_records('hybridteachvc_meet', ['id' => $id]);
-
-        return true;
+        $DB->delete_records('hybridteachvc_meet', ['htsession' => $htsession]);
     }
 
     public function get_zone_access() {

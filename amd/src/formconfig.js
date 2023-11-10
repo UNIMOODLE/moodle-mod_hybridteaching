@@ -38,6 +38,7 @@ const ELEMENT_SELECTOR = {
     participantList: () => document.getElementsByName('participants')[0],
     modStandardGrade: () => document.getElementById('id_modstandardgrade'),
     sessionscheduling: () => document.getElementById('id_sessionscheduling'),
+    permisionscontainer: () => document.getElementById('id_sectionaudiencecontainer'),
 };
 
 export const init = () => {
@@ -53,6 +54,7 @@ export const init = () => {
     ELEMENT_SELECTOR.useVC().addEventListener('change', (e) => useVC(e));
     ELEMENT_SELECTOR.useAttendance().addEventListener('change', (e) => useAttendance());
     ELEMENT_SELECTOR.sessionscheduling().addEventListener('change', (e) => useSessionsScheduling());
+    ELEMENT_SELECTOR.permisionscontainer().querySelector('[name="hybridteaching_participant_selection"').disabled = true;
 }
 
 const useSessionsScheduling = (e = ELEMENT_SELECTOR.sessionscheduling()) => {

@@ -11,9 +11,9 @@ En la configuración de AZURE:
 https://NOMBRE DEL DOMINIO/mod/hybridteaching/store/onedrive/classes/onedriveaccess.php
 
 2. Asignar permisos de aplicación:
-Directory.ReadWrite.All
-Files.ReadWrite.All
-Sites.FullControl.All
+    Directory.ReadWrite.All
+    Files.ReadWrite.All
+    Sites.FullControl.All
 
 
 
@@ -22,6 +22,8 @@ Sites.FullControl.All
     Directory.AccessAsUser.All
     Directory.ReadWrite.All
     Sites.ReadWrite.All
+    Files.ReadWrite.All
+    offline_access
 
 
 DOCUMENTACIÓN PARA CONFIGURACIÓN PLUGIN:

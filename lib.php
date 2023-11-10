@@ -182,13 +182,16 @@ function hybridteaching_delete_instance($id) {
         return false;
     }
 
-    // Opción "Usar programación de sesiones" está sin marcar.
-    if (!$existshybrid->sessionscheduling && $existshybrid->typevc != '') {
-        require_once($CFG->dirroot.'/mod/hybridteaching/classes/controller/sessions_controller.php');
-        $sessions = new sessions_controller($existshybrid);
-        $sessions->delete_all_sessions();
+    require_once($CFG->dirroot.'/mod/hybridteaching/classes/controller/sessions_controller.php');
+    $sessions = new sessions_controller($existshybrid);
+    $sessions->delete_all_sessions();
+    
+    $attendance = $DB->get_records('hybridteaching_attendance', ['hybridteachingid' => $id]);
+    foreach ($attendance as $att) {
+        $DB->delete_records('hybridteaching_attend_log', ['attendanceid' => $att->id]);
     }
 
+    $DB->delete_records('hybridteaching_attendance', ['hybridteachingid' => $id]);
     $DB->delete_records('hybridteaching', ['id' => $id]);
 
     // TO-DO: repasar estas funciones para ver cómo incluirlas
@@ -260,7 +263,24 @@ function hybridteaching_pluginfile($course, $cm, $context, $filearea, $args, $fo
     }
 
     require_login($course, true, $cm);
-    send_file_not_found();
+    if (!has_capability('mod/hybridteaching:view', $context)) {
+        return false;
+    }
+
+    if ($filearea !== 'sessionfiles') {
+        return false;
+    }
+
+    $itemid = (int)array_shift($args);
+    $relativepath = implode('/', $args);
+
+    $fullpath = "/{$context->id}/mod_hybridteaching/$filearea/$itemid/$relativepath";
+
+    $fs = get_file_storage();
+    if (!$file = $fs->get_file_by_hash(sha1($fullpath)) or $file->is_directory()) {
+        return false;
+    }
+    send_stored_file($file, 0, 0, $forcedownload, $options);
 }
 
 

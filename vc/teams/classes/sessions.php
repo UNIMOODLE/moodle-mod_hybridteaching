@@ -112,14 +112,14 @@ class sessions {
         global $DB;
         $teamsconfig = $this->load_teams_config($configid);
         $teams = $DB->get_record('hybridteachvc_teams', ['htsession' => $htsession]);
-
-        if ($teams) {
+        if (isset($teams->meetingid)) {
             // If exists meeting, delete it.
             $teamshandler = new teams_handler($teamsconfig);
-            $teamshandler->deletemeeting($teams->meetingid);
-
-            $DB->delete_records('hybridteachvc_teams', ['htsession' => $htsession]);
+            if (isset($teamshandler)) {
+                $teamshandler->deletemeeting($teams->meetingid);
+            }
         }
+        $DB->delete_records('hybridteachvc_teams', ['htsession' => $htsession]);
     }
 
     /**

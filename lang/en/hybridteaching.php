@@ -395,8 +395,8 @@ $string['notexemptattendance'] = 'Use attendance for grades';
 $string['exemptsessionattendance'] = 'Exempt session use for attendance';
 $string['notexemptsessionattendance'] = 'Use session for attendance ';
 $string['exemptuser'] = 'User exempted in this session';
-$string['sessionsattendance'] = 'Sessions asttendance';
-$string['studentsattendance'] = 'Students asttendance';
+$string['sessionsattendance'] = 'Sessions attendance';
+$string['studentsattendance'] = 'Students attendance';
 
 $string['graceperiod'] = 'Grace period';
 $string['graceperiod_help'] = 'Time the user has before the attendance is set as late arrival';

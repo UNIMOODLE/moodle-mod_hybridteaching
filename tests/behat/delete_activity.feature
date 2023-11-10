@@ -1,6 +1,6 @@
-@hybridteaching @javascript
-Feature: Delete an hybridteaching activity from a course page
-  In order to delete an hybridteaching activity from a course
+@hybridteaching @hybridteaching_activity @javascript
+Feature: Delete a hybridteaching activity from a course page
+  In order to delete a hybridteaching activity from a course
   As a teacher
   I should be enabled to add and delete activities from a course.
 
@@ -21,12 +21,12 @@ Feature: Delete an hybridteaching activity from a course page
 
   Scenario: The teacher add and delete the hybridteaching activity
     Given I click on "Add an activity or resource" "button" in the "Topic 1" "section"
-    When I click on "Add a new Hybrid teaching" "link" in the "Add an activity or resource" "dialogue"
-    Then I should see "Adding a new Hybrid teaching"
-    When I set the following fields to these values:
+    And I click on "Add a new Hybrid teaching" "link" in the "Add an activity or resource" "dialogue"
+    And I should see "Adding a new Hybrid teaching"
+    And I set the following fields to these values:
       | Name | hybridteaching activity to delete |
     And I press "Save and return to course"
-    Then I should see "hybridteaching activity to delete" in the "Topic 1" "section"
-    And I delete "hybridteaching activity to delete" activity
+    And I should see "hybridteaching activity to delete" in the "Topic 1" "section"
+    When I delete "hybridteaching activity to delete" activity
     And I turn editing mode off
     Then I should not see "hybridteaching activity to delete" in the "courseindex-content" "region"

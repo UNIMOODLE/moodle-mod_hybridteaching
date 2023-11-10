@@ -1,6 +1,6 @@
-@hybridteaching @javascript
-Feature: Configure an hybridteaching activity in course page
-  In order to add and configure an hybridteaching activity to a course
+@hybridteaching @hybridteaching_activity @javascript
+Feature: Configure a hybridteaching activity in course page
+  In order to add and configure a hybridteaching activity to a course
   As a teacher
   I should be enabled to choose from a list of available activities.
 
@@ -21,9 +21,9 @@ Feature: Configure an hybridteaching activity in course page
 
   Scenario: The teacher add and configure an hybridteaching activity
     Given I click on "Add an activity or resource" "button" in the "Topic 1" "section"
-    When I click on "Add a new Hybrid teaching" "link" in the "Add an activity or resource" "dialogue"
-    Then I should see "Adding a new Hybrid teaching"
-    And I set the following fields to these values:
+    And I click on "Add a new Hybrid teaching" "link" in the "Add an activity or resource" "dialogue"
+    And I should see "Adding a new Hybrid teaching"
+    When I set the following fields to these values:
       | Name | Test hybridteaching activity 1 |
       | Description | This is a description about the Test hybridteaching activity 1 |
       | Duration | 60 |

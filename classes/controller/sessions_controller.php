@@ -93,7 +93,7 @@ class sessions_controller extends common_controller {
         $sql = 'SELECT *
                   FROM {hybridteaching_session}
                  WHERE hybridteachingid = :hybridteachingid ' . $where . '
-              ORDER BY visible DESC, ' . $sort . ' ' . $dir;
+              ORDER BY ' . $sort . ' ' . $dir;
 
         $sessions = $DB->get_records_sql($sql, $params, $page, $recordsperpage);
         $sessionsarray = json_decode(json_encode($sessions), true);
@@ -347,13 +347,13 @@ class sessions_controller extends common_controller {
 
         $sessions = $DB->get_records('hybridteaching_session', ['hybridteachingid' => $this->hybridobject->id]);
         foreach ($sessions as $session) {
-            if (!empty($session->typevc) && helper::subplugin_config_exists($this->hybridobject->config)) {
+            if (!empty($session->typevc)) {
                 $classname = $this->get_subpluginvc_class($session->typevc);
                 $subpluginsession = new $classname();
                 $subpluginsession->delete_session_extended($session->id, $this->hybridobject->config);
             }
 
-            if (!empty($session->storagereference) && helper::subplugin_config_exists($this->hybridobject->config, 'store')) {
+            if (!empty($session->storagereference)) {
                 $storetype = $DB->get_field('hybridteaching_configs', 'type', ['id' => $session->storagereference]);
                 $classname = $this->get_subpluginstore_class($storetype);
                 $subpluginsession = new $classname();
@@ -361,7 +361,16 @@ class sessions_controller extends common_controller {
             }
         }
 
+        // Delete sessions.
         $DB->delete_records('hybridteaching_session', ['hybridteachingid' => $this->hybridobject->id]);
+        
+        // Delete attendances, logs and session_pwd, if exists.
+        $attendances = $DB->get_records('hybridteaching_attendance', ['hybridteachingid' => $this->hybridobject->id], 'id', 'id');
+        foreach ($attendances as $att){
+            $DB->delete_records('hybridteaching_attend_log', ['attendanceid' => $att->id]);
+            $DB->delete_records('hybridteaching_session_pwd', ['attendanceid' => $att->id]);
+        }
+        $DB->delete_records('hybridteaching_attendance', ['hybridteachingid' => $this->hybridobject->id]);
     }
 
     /**
@@ -420,7 +429,6 @@ class sessions_controller extends common_controller {
                   FROM {hybridteaching_session} hs
                  WHERE hs.hybridteachingid = :id
                    AND hs.starttime < :time
-                   AND hs.isfinished = 1
               ORDER BY hs.starttime DESC LIMIT 1";
         $lastsession = $DB->get_record_sql($sql, ['id' => $this->hybridobject->id, 'time' => $time]);
 

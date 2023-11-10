@@ -89,8 +89,11 @@ class bbbproxy extends proxy_base {
     }
 
     public function end_meeting($meetingid, $modpw) {
-        $xml = $this->fetch_endpoint_xml_config('end', ['meetingID' => $meetingid, 'password' => $modpw]);
-        self::assert_returned_xml($xml, ['meetingid' => $meetingid]);
+        try{
+            $xml = $this->fetch_endpoint_xml_config('end', ['meetingID' => $meetingid, 'password' => $modpw]);
+            self::assert_returned_xml($xml, ['meetingid' => $meetingid]);
+        } catch (\Exception $e) {
+        }
     }
 
     /**

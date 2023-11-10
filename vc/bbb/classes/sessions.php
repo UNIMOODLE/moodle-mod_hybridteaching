@@ -108,9 +108,13 @@ class sessions {
         global $DB;
         $bbbconfig = $this->load_bbb_config($configid);
         $bbb = $DB->get_record('hybridteachvc_bbb', ['htsession' => $htsession]);
-        $meeting = new meeting($bbbconfig);
-        $meeting->end_meeting($bbb->meetingid, $bbb->moderatorpass);
-
+        if (isset($bbb->meetingid) && isset($bbb->moderatorpass)) {
+            // If exists meeting, delete it.
+            $meeting = new meeting($bbbconfig);
+            if (isset($meeting)) {
+                $meeting->end_meeting($bbb->meetingid, $bbb->moderatorpass);
+            }
+        }
         $DB->delete_records('hybridteachvc_bbb', ['htsession' => $htsession]);
     }
 

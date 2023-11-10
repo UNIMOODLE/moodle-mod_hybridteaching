@@ -339,16 +339,22 @@ const updateSelectionFromType = (currentTypeSelect) => {
     }
     // Add options depending on the selection.
     if (currentTypeSelect.selectedIndex !== -1) {
-        const options = Object.values(participantData[currentTypeSelect.value].children);
-        options.forEach(option => {
-            createNewOption(participantSelect, option.name, option.id);
-        });
 
-        if (currentTypeSelect.value === 'all') {
-            createNewOption(participantSelect, '---------------', 'all');
-            participantSelect.disabled = true;
-        } else {
-            participantSelect.disabled = false;
+        if (participantData[currentTypeSelect.value] !== null && participantData[currentTypeSelect.value] !== undefined) {
+            const options = Object.values(participantData[currentTypeSelect.value].children);
+            options.forEach(option => {
+                createNewOption(participantSelect, option.name, option.id);
+            });
+    
+            if (currentTypeSelect.value === 'all' || currentTypeSelect.value === '') {
+                createNewOption(participantSelect, '---------------', 'all');
+                participantSelect.disabled = true;
+            } else {
+                participantSelect.disabled = false;
+            }
+            ELEMENT_SELECTOR.participantAddButton().setAttribute('style', 'display:inline-block');
+        } else if (currentTypeSelect.value === '') {
+            ELEMENT_SELECTOR.participantAddButton().setAttribute('style', 'display:none');
         }
     }
 };

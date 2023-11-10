@@ -149,7 +149,7 @@ class teams_handler {
         // Search participants as presenters.
         $participants = [];
         $htparticipants = json_decode($ht->participants);
-        $found = true;
+        $found = false;
         foreach ($htparticipants as $participant) {
             if ($participant->role == 'moderator') {
                 if ($participant->selectiontype == 'user' && is_numeric($participant->selectionid)) {
@@ -163,6 +163,7 @@ class teams_handler {
                             ->setReturnType(Model\User::class)
                             ->execute();
                         $userteams = json_decode(json_encode($graphresponse), true);
+                        $found = true;
                     } catch (\Exception $e) {
                         $found = false;
                     }
@@ -193,13 +194,9 @@ class teams_handler {
             // 'lobbyBypassScope' => 'organization',
         ];
         if (!empty($participants)) {
-            $data[] = [
-                'allowedPresenters' => 'roleIsPresenter',
-            ];
-            $data[] = [
-                'participants' => [
+            $data['allowedPresenters'] = 'roleIsPresenter';
+            $data['participants'] = [
                     'attendees' => $participants,
-                ],
             ];
         }
         try {
@@ -254,19 +251,12 @@ class teams_handler {
         $graph = new Graph();
         $graph->setAccessToken($this->config->accesstoken);
 
-        $data = [
-            'meetingId' => $meetingid,
-        ];
-
         try {
             $graphresponse = $graph
-                ->createRequest("DELETE", "/me/onlineMeetings")
-                ->attachBody($data)
+                ->createRequest("DELETE", "/me/onlineMeetings/$meetingid")
                 ->setReturnType(Model\OnlineMeeting::class)
                 ->execute();
         } catch (Exception $e) {
-            print "Caught Teams service Exception ".$e->getCode(). " message is ".$e->getMessage();
-            print "Stack trace is ".$e->getTraceAsString();
             return;
         }
     }

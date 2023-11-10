@@ -80,10 +80,8 @@ $session = new sessions_controller($hybridteaching);
 $activesession = $session->get_next_session();
 $result = [];
 $hasvc = !empty($hybridteaching->typevc) ? true : false;
-$newsession = true;
 if (!$activesession) {
     $activesession = $session->get_last_session();
-    $newsession = false;
 }
 
 if (!$activesession) {
@@ -100,7 +98,8 @@ if (!$activesession) {
         echo $OUTPUT->notification(get_string('nosessions', 'mod_hybridteaching', 'info'));
     }
 } else {
-    if (!groups_is_member($activesession->groupid, $USER->id) && $activesession->groupid != 0) {
+    if (!has_capability('mod/hybridteaching:sessionsactions', $modulecontext) &&
+          !groups_is_member($activesession->groupid, $USER->id) && $activesession->groupid != 0) {
         $access = false;
         echo $OUTPUT->notification(get_string('sessionnoaccess', 'mod_hybridteaching', 'info'));
     } else {
@@ -126,11 +125,11 @@ if (!$activesession) {
                     }
                 } else {
                     $status = get_string('status_start', 'mod_hybridteaching');
-                    if (($newsession && $activesession->starttime < time())) {
+                    if (($activesession->starttime < time() && $activesession->isfinished == 0)) {
                         $isprogress = true;
                         $status = get_string('status_ready', 'mod_hybridteaching');
                         $viewupdate = true;
-                    } else if ($newsession && $activesession->starttime > time()) {
+                    } else if ($activesession->starttime > time()) {
                         $duration = $activesession->duration;
                         $activesession = $session->get_last_undated_session();
                         if (!empty($activesession)) {

@@ -229,6 +229,23 @@ class hybridteaching_sessions_render extends \table_sql implements dynamic_table
                 }
             }
 
+            /*$fileurl = '';
+            if (!empty($session['sessionfiles'])) {
+                $file = $DB->get_record('files', ['itemid' => $session['sessionfiles']]);
+                if (!empty($file) && $file->filename != '.') {
+                    $fileurl = moodle_url::make_pluginfile_url(
+                        $file->contextid,
+                        'hybridteaching',
+                        $file->filearea,
+                        $file->itemid,
+                        $file->filepath,
+                        $file->filename,
+                        true
+                    );
+                    $fileurl = html_writer::tag('a', $file->filename, ['href' => $fileurl]);
+                }
+            }*/
+
             $body = [
                 'class' => '',
                 'sessionid' => $session['id'],
@@ -243,7 +260,7 @@ class hybridteaching_sessions_render extends \table_sql implements dynamic_table
                     $session['attexempt'], '', ['class' => 'attexempt', 'data-id' => $sessionid]),
                 'duration' => !empty($session['duration']) ? helper::get_hours_format($session['duration']) : self::EMPTY,
                 'recordingbutton' => $recordingbutton,
-                'attendance' => $sessatt['sessatt_string'],
+                'attendance' => is_array($sessatt) && isset($sessatt['sessatt_string']) ? $sessatt['sessatt_string'] : '',
                 'materials' => 'Recursos',
                 'enabled' => $session['visible'],
                 'checkbox' => new \core\output\checkbox_toggleall('sessions-table', false, [

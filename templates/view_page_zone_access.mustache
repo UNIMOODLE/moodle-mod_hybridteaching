@@ -114,11 +114,6 @@
 			</form>
 					{{^isfinished}}
 						{{# useattendance}}
-							<form action="./password.php" target="_blank" method="post" id="showqr">
-									<button type="submit" class="btn btn-success">{{# str}} showqrpassword, mod_hybridteaching {{/ str}}</button>
-									<input type="hidden" name="instance" value="{{instance}}">
-							</form>
-							<br>
 							{{^ rotateqr}}
 								{{# usepassword}}
 									<form action="./passwordaccess.php" target="_self" method="post" id="registeratt">
