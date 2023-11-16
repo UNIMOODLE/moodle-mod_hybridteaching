@@ -101,7 +101,6 @@ if (!empty($sid)) {
         $event->trigger();
     }
 } else {
-    echo "BBB".$hybridteaching->undatedsession;exit;
     if ($hybridteaching->undatedsession) {
         $sessioncontroller = new sessions_controller($hybridteaching);
         $session = new stdClass();
@@ -116,7 +115,6 @@ if (!empty($sid)) {
         if (!empty($session->typevc)) {
             $classname = sessions_controller::get_subpluginvc_class($hybridteaching->typevc);
             $sessionvc = new $classname($session->id);
-echo "AAAAA";exit;
             if (!empty($sessionvc->get_session())) {
                 $resultsaccess = $sessionvc->get_zone_access();
                 $url = $resultsaccess['url'];
