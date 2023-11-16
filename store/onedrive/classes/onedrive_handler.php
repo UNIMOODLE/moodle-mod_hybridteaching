@@ -48,9 +48,6 @@ class onedrive_handler {
                 'client_secret' => $this->config->clientsecret,
                 'grant_type' => 'refresh_token',
                 'refresh_token' => $this->config->refreshtoken,
-                // 'scope' => 'offline_access files.readwrite.all',
-                // Directory.AccessAsUser.All Directory.ReadWrite.All',
-
             ],
         ])->getBody()->getContents());
 
@@ -171,8 +168,7 @@ class onedrive_handler {
                 while (!feof($handle)) {
                     $bytes = fread($handle, $chunksize);
                     $bytesread = ftell($handle);
-                    // Test:.
-                    // echo "<br>prevbytes:".$prevbytesread." - bytesread:".$bytesread."<br>";.
+
                     $graphresponse = $graph
                         ->createRequest("PUT", $uploadsession->getUploadUrl())
                         ->addHeaders([

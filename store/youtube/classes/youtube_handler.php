@@ -45,7 +45,6 @@ class youtube_handler {
 
             $this->createclient($configyt);
 
-            // $this->client->setApprovalPrompt ('consent');
             $this->client->setApprovalPrompt('force');
 
             if (isset($configyt->token) && $configyt->token) {
@@ -60,10 +59,10 @@ class youtube_handler {
                     $this->savetoken($configyt);
                 }
             }
-        } catch (Google_Service_Exception $e) {
+        } catch (\Google_Service_Exception $e) {
             print "Caught Google service Exception ".$e->getCode(). " message is ".$e->getMessage();
             print "Stack trace is ".$e->getTraceAsString();
-        }catch (Exception $e) {
+        }catch (\Exception $e) {
             print "Caught Google service Exception ".$e->getCode(). " message is ".$e->getMessage();
             print "Stack trace is ".$e->getTraceAsString();
         }
@@ -146,10 +145,10 @@ class youtube_handler {
             } else {
                 return null;   // Incorrect upload? Check posible valor at uploadStatus.
             }
-        } catch (Google_Service_Exception $e) {
+        } catch (\Google_Service_Exception $e) {
             print "Caught Google service Exception ".$e->getCode(). " message is ".$e->getMessage();
             print "Stack trace is ".$e->getTraceAsString();
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             print "Caught Google service Exception ".$e->getCode(). " message is ".$e->getMessage();
             print "Stack trace is ".$e->getTraceAsString();
         }

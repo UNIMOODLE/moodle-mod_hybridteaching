@@ -16,10 +16,8 @@
 
 namespace hybridteachvc_bbb;
 
-// use mod_bigbluebuttonbn\local\proxy\bigbluebutton_proxy;
 use mod_bigbluebuttonbn\plugin;
 use hybridteachvc_bbb\bbbproxy;
-
 
 class meeting {
 
@@ -52,17 +50,6 @@ class meeting {
 
         $response = $bbbproxy->create_meeting($data, $metadata, $presentationname, $presentationurl, $this->bbbinstance);
 
-        // New recording management: Insert a recordingID that corresponds to the meeting created.
-        /*if ($this->instance->is_recorded()) {
-            $recording = new recording(0, (object) [
-                'courseid' => $this->instance->get_course_id(),
-                'bigbluebuttonbnid' => $this->instance->get_instance_id(),
-                'recordingid' => $response['internalMeetingID'],
-                'groupid' => $this->instance->get_group_id()]
-            );
-            $recording->create();
-        }*/
-
         return $response;
     }
     /**
@@ -86,7 +73,7 @@ class meeting {
         ];
 
         /*
-        info: estados iniciales añadidos en la vc de BBB:
+        Info: estados iniciales añadidos en la vc de BBB:
                             $ht->userslimit
                             $ht->disablecam
                             $ht->disablemic
@@ -150,29 +137,6 @@ class meeting {
             'bbb-recording-description' => plugin::html2text($session->description, 64),
         ];
 
-        // REVISAR: esta parte probablemente se eliminará.
-        // SEGURAMENTE LO HAREMOS CON UN CRON PARA DESCARGAR LAS GRABACIONES ACTIVAS, DE SIMILAR MANERA QUE CON ZOOM.
-        // OJO: CON LA API NO HAY OPCIÓN DIRECTA PARA DESCARGAR UNA GRABACIÓN
-        // https://www.youtube.com/watch?v=n1NbII0bH40&t=1219s
-        // Revisar /classes/recordings.php, función sync_pending_recordings_from_server.
-
-        // Special metadata for recording processing.
-        /*
-        if ((boolean) config::get('recordingstatus_enabled')) {
-            $metadata["bn-recording-status"] = json_encode(
-                [
-                    'email' => ['"' . fullname($USER) . '" <' . $USER->email . '>'],
-                    'context' => $this->instance->get_view_url(),
-                ]
-            );
-        }
-        if ((boolean) config::get('recordingready_enabled')) {
-            $metadata['bn-recording-ready-url'] = $this->instance->get_record_ready_url()->out(false);
-        }
-        if ((boolean) config::get('meetingevents_enabled')) {
-            $metadata['analytics-callback-url'] = $this->instance->get_meeting_event_notification_url()->out(false);
-        }
-        */
         return $metadata;
     }
 

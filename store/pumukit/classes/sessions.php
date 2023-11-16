@@ -60,6 +60,7 @@ class sessions {
     }
 
     public function delete_session_extended($htsession, $configid) {
-
+        global $DB;
+        $DB->delete_records('hybridteachstore_pumukit', ['sessionid' => $htsession]);
     }
 }

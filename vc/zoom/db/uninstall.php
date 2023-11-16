@@ -31,6 +31,8 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+namespace mod_hybridteaching\vc\zoom\db;
+
 /**
  * Custom uninstallation procedure.
  */
@@ -41,5 +43,5 @@ function xmldb_hybridteachvc_zoom_uninstall() {
 
 function delete_subplugin_configs() {
     global $DB;
-    $DB->delete_records('hybridteaching_configs', array('type' => get_string('zoom', 'hybridteachvc_zoom')));
+    $DB->delete_records('hybridteaching_configs', ['type' => get_string('zoom', 'hybridteachvc_zoom')]);
 }

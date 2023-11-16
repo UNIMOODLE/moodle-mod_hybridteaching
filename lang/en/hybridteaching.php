@@ -440,3 +440,5 @@ $string['downloadtext'] = 'Download in text format';
 $string['startofperiod'] = 'Start of period';
 $string['endofperiod'] = 'End of period';
 $string['includeall'] = 'Select all sessions';
+$string['joinurl'] = 'Join url: ';
+$string['passstring'] = 'Password: ';

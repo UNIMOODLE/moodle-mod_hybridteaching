@@ -77,7 +77,11 @@ class sessions {
         $teamsconfig = $this->load_teams_config($ht->config);
         if ($teamsconfig) {
             $teams = new teams_handler($teamsconfig);
-            $response = $teams->createmeeting($session, $ht);
+            try {
+                $response = $teams->createmeeting($session, $ht);
+            } catch (\Exception $e) {
+                return false;
+            }
 
             if (isset($response['joinUrl']) && isset($response['meetingCode'])
                 && isset($response['participants']['organizer']['identity']['user']['id']) && isset($response['id'])) {
@@ -111,12 +115,16 @@ class sessions {
     public function delete_session_extended($htsession, $configid) {
         global $DB;
         $teamsconfig = $this->load_teams_config($configid);
-        $teams = $DB->get_record('hybridteachvc_teams', ['htsession' => $htsession]);
-        if (isset($teams->meetingid)) {
-            // If exists meeting, delete it.
-            $teamshandler = new teams_handler($teamsconfig);
-            if (isset($teamshandler)) {
-                $teamshandler->deletemeeting($teams->meetingid);
+        if (!empty($teamsconfig)) {
+            $teams = $DB->get_record('hybridteachvc_teams', ['htsession' => $htsession]);
+            if (isset($teams->meetingid)) {
+                // If exists meeting, delete it.
+                try {
+                    $teamshandler = new teams_handler($teamsconfig);
+                    $teamshandler->deletemeeting($teams->meetingid);
+                } catch (\Exception $e) {
+                    // No action for delete.
+                }
             }
         }
         $DB->delete_records('hybridteachvc_teams', ['htsession' => $htsession]);
@@ -127,7 +135,7 @@ class sessions {
      *
      * @param int $configid The ID of the config to load.
      * @throws Exception If the SQL query fails.
-     * @return stdClass|false The Zoom config record on success, or false on failure.
+     * @return stdClass|false The Teams config record on success, or false on failure.
      */
     public function load_teams_config($configid) {
         global $DB;

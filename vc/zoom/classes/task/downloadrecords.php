@@ -56,6 +56,7 @@ class downloadrecords extends \core\task\scheduled_task {
                        ht.id AS htid,
                        ht.course,
                        ht.config,
+                       hs.starttime,
                        zoom.meetingid
                   FROM {hybridteaching_session} hs
             INNER JOIN {hybridteachvc_zoom} zoom ON zoom.htsession = hs.id
@@ -75,7 +76,24 @@ class downloadrecords extends \core\task\scheduled_task {
 
             $zoomconfig = $sessionconfig->load_zoom_config($session->config);
             $service = new webservice($zoomconfig);
-            $response = $service->get_meeting_recordings($session->meetingid);
+            $response=null;
+            try {
+                $response = $service->get_meeting_recordings($session->meetingid);
+            } catch (\Exception $e) {
+
+                // Si la sesión es del día anterior y ha fallado, no hay grabación.
+                /* REVISAR ESTA PARTE PARA GUARDAR EL -2, PARA DIFERENCIAR CUANDO LA
+                 -1: dejar el -1 cuando LA SESION NO ESTÉ PROCESADA POR ZOOM AUN PARA DESCARGAR
+                 -2:   O CUANDO ESTÉ PROCESADA Y NO HAYA GRABACIÓN.*/
+                if ($session->starttime < (time()+90000)) {
+                    // Save -2 indicates there are not recording.
+                    $session = $DB->get_record('hybridteaching_session', ['id' => $session->hsid]);
+                    $session->processedrecording = -2;
+                    $DB->update_record('hybridteaching_session', $session);
+
+                    $response = false;
+                }
+            }
 
             if ($response != false) {
                 $count = 1;
@@ -91,7 +109,7 @@ class downloadrecords extends \core\task\scheduled_task {
                             fclose($file);
 
                             // Save processedrecording in hybridteaching_session=0: ready to upload to store.
-                            $session = $DB->get_record('hybridteaching_session', array('id' => $session->hsid));
+                            $session = $DB->get_record('hybridteaching_session', ['id' => $session->hsid]);
                             $session->processedrecording = 0;
                             $DB->update_record('hybridteaching_session', $session);
                         }

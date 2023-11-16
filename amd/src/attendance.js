@@ -2,28 +2,26 @@ define([
     'core/ajax',
 ], function(ajax) {
     const manualattendance = (e) => {
-        att = e.currentTarget;
-        attid = att.closest('tr').querySelector('[id^="' + 'attendance' + '"]').value
+        var att = e.currentTarget;
+        var attid = att.closest('tr').querySelector('[id^="' + 'attendance' + '"]').value;
         if (att.checked) {
             if (confirm('yes')) {
-                console.log('y');
                 set_manual_attendance(attid, 1);
             }  else {
                 att.checked = false;
             }
         } else {
             if (confirm('no')) {
-                console.log('n');
                 set_manual_attendance(attid, 0);
             }  else {
                 att.checked = true;
             }
         }
-    } 
+    };
 
     /**
      * Sets manual attendance
-     * 
+     *
      * @param {integer} attid
      * @param {array} status
      * @returns response with the modified slot information.
@@ -37,12 +35,16 @@ define([
     }])[0].done(response => {
         return response;
     }).fail(err => {
+        // eslint-disable-next-line no-console
         console.log(err);
     });
 
     return {
         init: () => {
-            if (document.getElementById('id_perpage') != null) {
+            window.addEventListener("beforeunload", (e) => {
+                e.stopImmediatePropagation();
+            }, true);
+            if (document.getElementById('id_perpage') !== null) {
                 document.getElementById('id_perpage').onchange = function() {
                     let formPrefix = 'optionsform';
                     let formElement = document.querySelector('[id^="' + formPrefix + '"]');
@@ -51,7 +53,7 @@ define([
                     }
                 };
             }
-            if (document.getElementById('id_attfilter') != null) {
+            if (document.getElementById('id_attfilter') !== null) {
                 document.getElementById('id_attfilter').onchange = function() {
                     let formPrefix = 'optionsform';
                     let formElement = document.querySelector('[id^="' + formPrefix + '"]');
@@ -60,7 +62,7 @@ define([
                     }
                 };
             }
-            if (document.getElementById('id_groupid') != null) {
+            if (document.getElementById('id_groupid') !== null) {
                 document.getElementById('id_groupid').onchange = function() {
                     let formPrefix = 'optionsform';
                     let formElement = document.querySelector('[id^="' + formPrefix + '"]');
@@ -69,7 +71,7 @@ define([
                     }
                 };
             }
-            if (document.getElementById('id_selectedsession') != null) {
+            if (document.getElementById('id_selectedsession') !== null) {
                 document.getElementById('id_selectedsession').onchange = function() {
                     let formPrefix = 'sessionsform';
                     let formElement = document.querySelector('[id^="' + formPrefix + '"]');
@@ -78,7 +80,7 @@ define([
                     }
                 };
             }
-            if (document.getElementById('id_selecteduser') != null) {
+            if (document.getElementById('id_selecteduser') !== null) {
                 document.getElementById('id_selecteduser').onchange = function() {
                     let formPrefix = 'sessionsform';
                     let formElement = document.querySelector('[id^="' + formPrefix + '"]');
@@ -87,10 +89,10 @@ define([
                     }
                 };
             }
-            manualatt = document.querySelectorAll('.attendance-validated');
+            var manualatt = document.querySelectorAll('.attendance-validated');
             manualatt.forEach(att => {
-                att.addEventListener('change', manualattendance, true); 
+                att.addEventListener('change', manualattendance, true);
             });
         }
-    }
+    };
 });

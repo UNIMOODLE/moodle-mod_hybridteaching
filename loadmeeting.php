@@ -62,16 +62,16 @@ if (!empty($sid)) {
             $classname = sessions_controller::get_subpluginvc_class($hybridteaching->typevc);
             $sessionvc = new $classname($activesession->id);
 
-            if (!empty($sessionvc->get_session())) {
+            if (!empty($sessionvc->get_session())) {          
                 $resultsaccess = $sessionvc->get_zone_access();
                 $url = $resultsaccess['url'];
                 $ishost = $resultsaccess['ishost'];
-            } else {
+            } else {          
                 // FALTA COMPROBAR SI PUEDE ENTRAR ANTES QUE EL ANFITRION.
-                if ($activesession && has_capability('mod/hybridteaching:sessionsactions', $modulecontext)) {
+                if ($activesession && has_capability('mod/hybridteaching:sessionsactions', $modulecontext)) {              
                     // If must save recordings, save the id of storage.
-                    if ($activesession->userecordvc) {
-                        $activesession->storagereference = sessions_controller::savestorage($activesession);
+                    if ($activesession->userecordvc) {                       
+                        $activesession->storagereference = sessions_controller::savestorage($activesession, $hybridteaching->course);
                     }
                     $sessionvc->create_unique_session_extended($activesession, $hybridteaching);
                     $sessionvc->set_session($activesession->id);
@@ -101,6 +101,7 @@ if (!empty($sid)) {
         $event->trigger();
     }
 } else {
+    echo "BBB".$hybridteaching->undatedsession;exit;
     if ($hybridteaching->undatedsession) {
         $sessioncontroller = new sessions_controller($hybridteaching);
         $session = new stdClass();
@@ -115,13 +116,17 @@ if (!empty($sid)) {
         if (!empty($session->typevc)) {
             $classname = sessions_controller::get_subpluginvc_class($hybridteaching->typevc);
             $sessionvc = new $classname($session->id);
-
+echo "AAAAA";exit;
             if (!empty($sessionvc->get_session())) {
                 $resultsaccess = $sessionvc->get_zone_access();
                 $url = $resultsaccess['url'];
                 $ishost = $resultsaccess['ishost'];
             } else {
                 if (has_capability('mod/hybridteaching:sessionsactions', $modulecontext)) {
+                    // If must save recordings, save the id of storage.
+                    if ($activesession->userecordvc) {
+                        $activesession->storagereference = sessions_controller::savestorage($activesession, $hybridteaching->course);
+                    }
                     $sessionvc->create_unique_session_extended($session, $hybridteaching);
                     $sessionvc->set_session($session->id);
                     $resultsaccess = $sessionvc->get_zone_access();

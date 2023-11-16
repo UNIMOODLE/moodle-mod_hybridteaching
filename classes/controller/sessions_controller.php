@@ -149,16 +149,22 @@ class sessions_controller extends common_controller {
      * @throws Exception If there is an error inserting the session into the database.
      */
     public function create_unique_session($session) {
-        global $DB;
+        global $DB, $USER;
 
         $session = $this->fill_session_data_for_create($session);
         $session->id = $DB->insert_record('hybridteaching_session', $session);
         if (!empty($session->description)) {
             $description = file_save_draft_area_files($session->descriptionitemid,
-            $session->context->id, 'mod_hybridteaching', 'session', $session->id,
+                $session->context->id, 'mod_hybridteaching', 'session', $session->id,
                 ['subdirs' => false, 'maxfiles' => -1, 'maxbytes' => 0],
                 $session->description);
             $DB->set_field('hybridteaching_session', 'description', $description, ['id' => $session->id]);
+        }
+
+        if (!empty($session->sessionfiles)) {
+            file_save_draft_area_files($session->sessionfiles,
+                $session->context->id, 'mod_hybridteaching', 'session', $session->id,
+                ['subdirs' => false, 'maxfiles' => -1, 'maxbytes' => 0]);
         }
         $session->htsession = $session->id;
 
@@ -363,10 +369,10 @@ class sessions_controller extends common_controller {
 
         // Delete sessions.
         $DB->delete_records('hybridteaching_session', ['hybridteachingid' => $this->hybridobject->id]);
-        
+
         // Delete attendances, logs and session_pwd, if exists.
         $attendances = $DB->get_records('hybridteaching_attendance', ['hybridteachingid' => $this->hybridobject->id], 'id', 'id');
-        foreach ($attendances as $att){
+        foreach ($attendances as $att) {
             $DB->delete_records('hybridteaching_attend_log', ['attendanceid' => $att->id]);
             $DB->delete_records('hybridteaching_session_pwd', ['attendanceid' => $att->id]);
         }
@@ -528,6 +534,11 @@ class sessions_controller extends common_controller {
         global $USER;
 
         $session = $this->fill_session_data($data);
+        if (!empty($data->sessionfiles)) {
+            file_save_draft_area_files($data->sessionfiles,
+                $data->context->id, 'mod_hybridteaching', 'session', $data->id,
+                ['subdirs' => false, 'maxfiles' => -1, 'maxbytes' => 0]);
+        }
         $session->timemodified = time();
         $session->modifiedby = $USER->id;
 
@@ -581,21 +592,62 @@ class sessions_controller extends common_controller {
      *
      * @param object The session object to calculate to save.
      */
-    public static function savestorage($session) {
+    public static function savestorage($session, $courseid) {
 
-        // FALTA CALCULAR CON LA SELECCION DE CURSOS DE LA CONFIGURACIÓN.
-
-        // Calculate storage.
+        // Calculate storage, based on the course category configured in storage settings.
         global $DB;
-        $sql = 'SELECT id FROM {hybridteaching_configs}
-            WHERE subplugintype = :type AND visible = 1
-            ORDER BY sortorder, id
-            LIMIT 1';
-        $record = $DB->get_record_sql($sql, ['type' => 'storage']);
+
+        $sql = "SELECT path
+                  FROM {course_categories} cc
+                  JOIN {course} c ON c.category = cc.id
+                 WHERE c.id = ?";
+        $path = $DB->get_record_sql ($sql, [$courseid]);
+        $path = $path->path;
+
+        $patharray = explode ('/', $path);
+        $patharray = array_reverse($patharray);
+
+        $store = 0;
+        foreach ($patharray as $element) {
+            if ($element != '') {
+                // Check that there is some direct configuration for the element category.
+                // Otherwise, check another level in the array.
+                $config = $DB->get_records ('hybridteaching_configs',
+                    [
+                        'subplugintype' => 'store',
+                        'category' => $element,
+                        'visible' => 1,
+                    ], 'sortorder', 'id', 0, 1);
+                if ($config) {
+                    // Convert in the first element from array.
+                    $config = reset($config);
+                    if ($config) {
+                        $store = $config->id;
+                        break;
+                    }
+                }
+            }
+        }
+
+        // If no category has been assigned directly, check if there are any category with "All".
+        if ($store == 0) {
+            $config = $DB->get_records ('hybridteaching_configs',
+                [
+                    'subplugintype' => 'store',
+                    'category' => 0,
+                    'visible' => 1,
+                ], 'sortorder', 'id', 0, 1);
+            if ($config) {
+                $config = reset ($config);
+                if ($config) {
+                    $store = $config->id;
+                }
+            }
+        }
 
         // Save storage in session.
-        if ($record) {
-            $session->storagereference = $record->id;
+        if ($store) {
+            $session->storagereference = $store;
             $DB->update_record('hybridteaching_session', $session);
         }
     }

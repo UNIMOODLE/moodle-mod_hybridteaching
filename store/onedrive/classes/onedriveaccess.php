@@ -58,7 +58,6 @@ if (!isset($_GET["code"]) && !isset($_GET["error"]) ) {
              'grant_type' => 'authorization_code',
              'redirect_uri' => $CFG->wwwroot.'/mod/hybridteaching/store/onedrive/classes/onedriveaccess.php',
              'code' => $_GET["code"],
-             // 'scope' => 'offline_access files.readwrite.all'
          ],
      ])->getBody()->getContents());
 

@@ -191,7 +191,6 @@ class teams_handler {
             'allowAttendeeToEnableMic' => $allowattendeetoenablemic,
             'allowMeetingChat' => $allowmeetingchat,
             'recordAutomatically' => $recordautomatically,
-            // 'lobbyBypassScope' => 'organization',
         ];
         if (!empty($participants)) {
             $data['allowedPresenters'] = 'roleIsPresenter';

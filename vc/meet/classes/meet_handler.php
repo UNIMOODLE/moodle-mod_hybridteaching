@@ -31,6 +31,7 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+namespace hybridteachvc_meet;
 
 class meet_handler {
     public $client;
@@ -49,10 +50,10 @@ class meet_handler {
                     $this->save_token($configmeet);
                 }
             }
-        } catch (Google_Service_Exception $e) {
+        } catch (\Google_Service_Exception $e) {
             print "Caught Google service Exception ".$e->getCode(). " message is ".$e->getMessage();
             print "Stack trace is ".$e->getTraceAsString();
-        }catch (Exception $e) {
+        }catch (\Exception $e) {
             print "Caught Google service Exception ".$e->getCode(). " message is ".$e->getMessage();
             print "Stack trace is ".$e->getTraceAsString();
         }
@@ -61,10 +62,10 @@ class meet_handler {
     public function createclient($configmeet) {
         require_once(__DIR__.'/../vendor/autoload.php');
 
-        $this->client = new Google_Client();
+        $this->client = new \Google_Client();
         $this->client->setClientId($configmeet->clientid);
         $this->client->setClientSecret($configmeet->clientsecret);
-        $this->client->setScopes(Google_Service_Calendar::CALENDAR);
+        $this->client->setScopes(\Google_Service_Calendar::CALENDAR);
         $this->client->setApplicationName(get_string('pluginname', 'hybridteaching'));
         $this->client->setAccessType('offline');
         $this->client->setPrompt('consent');
@@ -80,7 +81,7 @@ class meet_handler {
     public function create_meeting_event($meet) {
         global $USER;
 
-        $service = new Google_Service_Calendar($this->client);
+        $service = new \Google_Service_Calendar($this->client);
         $calendarid = 'primary';
 
         $sessionstart = new \DateTime();
@@ -100,7 +101,7 @@ class meet_handler {
 
         $timezone = get_user_timezone($USER->timezone);
 
-        $event = new Google_Service_Calendar_Event([
+        $event = new \Google_Service_Calendar_Event([
             'summary' => $meet->name,
             'description' => $meet->description,
             'start' => [
@@ -118,8 +119,8 @@ class meet_handler {
             ],
         ]);
 
-        $conferencedata = new Google\Service\Calendar\ConferenceData();
-        $req = new Google\Service\Calendar\CreateConferenceRequest();
+        $conferencedata = new \Google\Service\Calendar\ConferenceData();
+        $req = new \Google\Service\Calendar\CreateConferenceRequest();
         $req->setRequestId("req_".time());
         $conferencedata->setCreateRequest($req);
         $event->setConferenceData($conferencedata);
@@ -133,6 +134,9 @@ class meet_handler {
         global $DB;
         $configmeet->token = json_encode($this->client->getAccessToken());;
         $DB->update_record('hybridteachstore_meet_config', $configmeet);
+    }
+
+    public function deletemeeting ($meetingid) {
     }
 }
 

@@ -50,8 +50,6 @@ class downloadrecords extends \core\task\scheduled_task {
                 mkdir($folder, 0777, true);
             }
 
-            // $folder_file=$folder."/".$session->htid."-".$session->hsid.'.mp4';
-
             $bbbconfig = $sessionconfig->load_bbb_config($session->config);
             $meeting = new meeting($bbbconfig);
             $response = $meeting->get_meeting_recordings($session->meetingid);
@@ -59,7 +57,6 @@ class downloadrecords extends \core\task\scheduled_task {
             if ($response['returncode'] == 'SUCCESS') {
                 if ($response['recordingid'] != '') {
                     $bbb = $DB->get_record('hybridteachvc_bbb', ['meetingid' => $session->meetingid] );
-                    // $bbb->recordingurl = $response['recordingurl'];
                     $bbb->recordingid = $response['recordingid'];
                     $DB->update_record('hybridteachvc_bbb', $bbb);
                     // Save processedrecording in hybridteaching_session=0: ready to upload to store.
@@ -68,7 +65,6 @@ class downloadrecords extends \core\task\scheduled_task {
                     $session->storagereference = -1;
                     $DB->update_record('hybridteaching_session', $session);
                 }
-
             }
         }
     }

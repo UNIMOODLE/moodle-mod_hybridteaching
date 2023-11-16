@@ -41,7 +41,7 @@ require_once('classes/configs.php');
 $type = optional_param('type', "", PARAM_COMPONENT);
 $configid = optional_param('id', 0, PARAM_INT);
 $context = context_system::instance();
-$return = new moodle_url('/admin/settings.php', array('section' => 'hybridteaching_configvcsettings'));
+$return = new moodle_url('/admin/settings.php', ['section' => 'hybridteaching_configvcsettings']);
 require_admin();
 
 if (empty($type)) {
@@ -55,7 +55,7 @@ $PAGE->set_pagelayout('admin');
 
 $hybridconfig = new stdClass();
 if (!empty($configid)) {
-    $hybridconfig = $DB->get_record('hybridteaching_configs', array('id' => $configid), '*', MUST_EXIST);
+    $hybridconfig = $DB->get_record('hybridteaching_configs', ['id' => $configid], '*', MUST_EXIST);
 } else {
     $hybridconfig->type = $type;
 }
@@ -71,7 +71,7 @@ if (!empty($configid)) {
     $config = (object) array_merge((array) $config, (array) $zoomconfig);
 }
 
-$mform = new htzoom_config_edit_form(null, array($config, $type));
+$mform = new htzoom_config_edit_form(null, [$config, $type]);
 $message = '';
 $error = '';
 if ($mform->is_cancelled()) {
@@ -86,8 +86,8 @@ if ($mform->is_cancelled()) {
         configs::update_config($data);
         empty($error) ? $message = 'updatedconfig' : $message = $error;
     }
-    $return = new moodle_url('/admin/settings.php', array('section' => 'hybridteaching_configvcsettings',
-        'message' => $message, ));
+    $return = new moodle_url('/admin/settings.php',
+        ['section' => 'hybridteaching_configvcsettings', 'message' => $message]);
 
     redirect($return);
 }

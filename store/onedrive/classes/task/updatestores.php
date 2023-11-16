@@ -79,9 +79,7 @@ class updatestores extends \core\task\scheduled_task {
             // videoconferencia por si hubiera que hacer comprobaciones.
             $path = $CFG->dataroot.'/repository/hybridteaching/'.$store->course.'/';
 
-            // $files=glob($path.'*');
-
-            $videopath = $path.$store->htid.'-'.$store->hsid.'.mp4';
+            $videopath = $path.$store->htid.'-'.$store->hsid.'-1.mp4';
             if (file_exists($videopath)) {
 
                 // Onedrive connect.

@@ -70,7 +70,7 @@ class sessions {
         if (!$existsmeet) {
             $subpluginconfigid = $DB->get_field('hybridteaching_configs', 'subpluginconfigid', ['id' => $ht->config]);
             $meetconfig = $DB->get_record('hybridteachvc_meet_config', ['id' => $subpluginconfigid]);
-            $client = new \meet_handler($meetconfig);
+            $client = new meet_handler($meetconfig);
             $event = $client->create_meeting_event($session);
 
             if ($event) {
@@ -109,20 +109,41 @@ class sessions {
     public function delete_session_extended($htsession, $configid) {
         global $DB;
 
-        $meet = $DB->get_record('hybridteachvc_meet', ['htsession' => $htsession]);
-        if (isset($meet)) {
-
-            // check this part.
-
-            // If exists meeting, delete it.
-            /*  $meeting = new meeting($bbbconfig);
-            if (isset($meeting)) {
-                $client = new \meet_handler($meetconfig);
-                $event = $client->create_meeting_event($session);
-            }*/
+        $meetconfig = $this->load_meet_config($configid);
+        if (!empty($meetconfig)) {
+            $meet = $DB->get_record('hybridteachvc_meet', ['htsession' => $htsession]);
+            if (isset($meet->meetingid)) {
+                // If exists meeting, delete it.
+                try {
+                    $meethandler = new meet_handler($meetconfig);
+                    $meethandler->deletemeeting($meet->meetingid);
+                } catch (\Exception $e) {
+                    // No action for delete.
+                }
+            }
         }
         $DB->delete_records('hybridteachvc_meet', ['htsession' => $htsession]);
     }
+
+    /**
+     * Loads a Meet config based on the given config ID.
+     *
+     * @param int $configid The ID of the config to load.
+     * @throws Exception If the SQL query fails.
+     * @return stdClass|false The Meet config record on success, or false on failure.
+     */
+    public function load_meet_config($configid) {
+        global $DB;
+
+        $sql = 'SELECT mc.*
+                  FROM {hybridteaching_configs} hc
+                  JOIN {hybridteachvc_meet_config} mc ON mc.id = hc.subpluginconfigid
+                 WHERE hc.id = :configid AND hc.visible = 1';
+
+        $config = $DB->get_record_sql($sql, ['configid' => $configid]);
+        return $config;
+    }
+
 
     public function get_zone_access() {
         if ($this->meetsession) {

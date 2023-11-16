@@ -42,28 +42,15 @@ function xmldb_hybridteaching_upgrade($oldversion) {
     global $DB, $CFG;
     $dbman = $DB->get_manager(); // Loads ddl manager and xmldb classes.
 
-    if ($oldversion < '2023031700.16') {
+    if ($oldversion < '2023031700.19') {
+        $table = new xmldb_table('hybridteachvc_meet');
+        $field = new xmldb_field('url', XMLDB_TYPE_CHAR, '255', null, XMLDB_NOTNULL, null, null, 'htsession');
 
-        // Define field category to be added to hybridteaching_configs.
-        $table = new xmldb_table('hybridteaching_configs');
-        $field = new xmldb_field('category', XMLDB_TYPE_INTEGER, '11', null, null, null, null, 'subpluginconfigid');
+        // Launch rename field joinurl.
+        $dbman->rename_field($table, $field, 'joinurl');
 
-        // Conditionally launch add field category.
-        if (!$dbman->field_exists($table, $field)) {
-            $dbman->add_field($table, $field);
-        }
-
-        $table = new xmldb_table('hybridteaching_session');
-
-        if ($oldversion < 2023031700.16) {
-            $field = new xmldb_field('vcreference', XMLDB_TYPE_INTEGER, '11', null, null, null, null, 'userecordvc');
-            if (!$dbman->field_exists($table, $field)) {
-                $dbman->add_field($table, $field);
-            }
-        }
-
-        // Hybridteaching savepoint reached.
-        upgrade_mod_savepoint(true, '2023031700.16', 'hybridteaching');
+        // Meet savepoint reached.
+        upgrade_plugin_savepoint(true, '2023033100.03', 'hybridteachvc', 'meet');
     }
 
     return true;

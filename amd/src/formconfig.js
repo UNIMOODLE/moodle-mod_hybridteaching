@@ -16,7 +16,6 @@
 /**
  * The main mod_hybridteaching configuration form js.
  *
- * @package     mod_hybridteaching
  * @copyright   2023 isyc <isyc@example.com>
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -45,17 +44,16 @@ export const init = () => {
     /**
      * page load
      */
-    oldtypevc = ELEMENT_SELECTOR.typeVC().value;
     useVC();
     useAttendance();
     useSessionsScheduling();
     //
     ELEMENT_SELECTOR.useVCRecord().addEventListener('change', (e) => useVCRecord(e));
     ELEMENT_SELECTOR.useVC().addEventListener('change', (e) => useVC(e));
-    ELEMENT_SELECTOR.useAttendance().addEventListener('change', (e) => useAttendance());
-    ELEMENT_SELECTOR.sessionscheduling().addEventListener('change', (e) => useSessionsScheduling());
+    ELEMENT_SELECTOR.useAttendance().addEventListener('change', () => useAttendance());
+    ELEMENT_SELECTOR.sessionscheduling().addEventListener('change', () => useSessionsScheduling());
     ELEMENT_SELECTOR.permisionscontainer().querySelector('[name="hybridteaching_participant_selection"').disabled = true;
-}
+};
 
 const useSessionsScheduling = (e = ELEMENT_SELECTOR.sessionscheduling()) => {
     let sessionscheduling = ELEMENT_SELECTOR.sessionscheduling();
@@ -65,15 +63,15 @@ const useSessionsScheduling = (e = ELEMENT_SELECTOR.sessionscheduling()) => {
         sectionsessions.querySelector('#fgroup_id_durationgroup').setAttribute('style', 'display:none');
         sectionsessions.querySelector('#id_duration').value = 0;
         sectionsessions.querySelector('#id_starttime_enabled').checked = 0;
-        
+
     } else {
         sectionsessions.querySelector('#fitem_id_starttime').setAttribute('style', 'display:flex');
         sectionsessions.querySelector('#fgroup_id_durationgroup').setAttribute('style', 'display:flex');
         sectionsessions.querySelector('#fitem_id_starttime').value = 0;
 
     }
-    
-}
+
+};
 
 const useAttendance = (e = ELEMENT_SELECTOR.useAttendance()) => {
     let sectionAttendance = ELEMENT_SELECTOR.sectionAttendance();
@@ -84,7 +82,7 @@ const useAttendance = (e = ELEMENT_SELECTOR.useAttendance()) => {
         formi.forEach(input => {
             if (input.type !== 'hidden' && input.type !== 'text') {
                 input.value = 1;
-            }  
+            }
         });
         sectionAttendance.setAttribute('style', 'display:block');
 
@@ -94,15 +92,15 @@ const useAttendance = (e = ELEMENT_SELECTOR.useAttendance()) => {
         formi.forEach(input => {
             if (input.type !== 'hidden') {
                 input.value = '';
-            }  
+            }
         });
         sectionAttendance.setAttribute('style', 'display:none');
-    
+
         gradeformselect.value = 'none';
         modStandardGrade.setAttribute('style', 'display:none');
     }
-    
-}
+
+};
 
 const useVC = (e = ELEMENT_SELECTOR.useVC()) => {
     let recordoptions = ELEMENT_SELECTOR.useVCRecord();
@@ -113,9 +111,10 @@ const useVC = (e = ELEMENT_SELECTOR.useVC()) => {
     let initialformi = sectionInitialStates.getElementsByTagName('INPUT');
     let sectionAudience = ELEMENT_SELECTOR.sectionAudience();
     let participantList = ELEMENT_SELECTOR.participantList();
-
+    let oldtypevc = ELEMENT_SELECTOR.typeVC().value;
+    let plistold = participantList.value;
     if (is_checkbox_checked(e) && is_element_displayed(e)) {
-        recordoptions.value = 1
+        recordoptions.value = 1;
         typeVC.value = oldtypevc;
         recordoptions.closest('.form-group').setAttribute('style', 'display:flex');
         typeVC.closest('.form-group').setAttribute('style', 'display:flex');
@@ -123,24 +122,24 @@ const useVC = (e = ELEMENT_SELECTOR.useVC()) => {
         accessformi.forEach(accesinput => {
             if (accesinput.type !== 'hidden'&& accesinput.type !== 'text') {
                 accesinput.value = 1;
-            }  
+            }
         });
-        sectionAccess.setAttribute('style', 'display:block')
+        sectionAccess.setAttribute('style', 'display:block');
 
         initialformi.forEach(initialinput => {
             if (initialinput.type !== 'hidden'&& initialinput.type !== 'text') {
                 initialinput.value = 1;
-            }  
+            }
         });
-        sectionInitialStates.setAttribute('style', 'display:block')
+        sectionInitialStates.setAttribute('style', 'display:block');
 
         if (typeof plistold !== 'undefined') {
             participantList.value = plistold;
         }
-        sectionAudience.setAttribute('style', 'display:block')
+        sectionAudience.setAttribute('style', 'display:block');
 
     } else {
-        recordoptions.value = 0
+        recordoptions.value = 0;
         oldtypevc = typeVC.value;
         typeVC.value = 0;
         recordoptions.closest('.form-group').setAttribute('style', 'display:none');
@@ -148,23 +147,23 @@ const useVC = (e = ELEMENT_SELECTOR.useVC()) => {
         accessformi.forEach(accesinput => {
             if (accesinput.type !== 'hidden') {
                 accesinput.value = 0;
-            }  
+            }
         });
-        sectionAccess.setAttribute('style', 'display:none')
+        sectionAccess.setAttribute('style', 'display:none');
 
         initialformi.forEach(initialinput => {
             if (initialinput.type !== 'hidden') {
                 initialinput.value = 0;
-            }  
+            }
         });
-        sectionInitialStates.setAttribute('style', 'display:none')
+        sectionInitialStates.setAttribute('style', 'display:none');
 
         plistold = participantList.value;
         participantList.value = '[]';
-        sectionAudience.setAttribute('style', 'display:none')
+        sectionAudience.setAttribute('style', 'display:none');
     }
     useVCRecord();
-}
+};
 
 const useVCRecord = (e = ELEMENT_SELECTOR.useVCRecord()) => {
     let recordOptions = ELEMENT_SELECTOR.recordOptions();
@@ -173,29 +172,32 @@ const useVCRecord = (e = ELEMENT_SELECTOR.useVCRecord()) => {
         formi.forEach(input => {
             if (input.type !== 'hidden' && input.type !== 'text') {
                 input.value = 1;
-            }  
+            }
         });
         recordOptions.setAttribute('style', 'display:block');
     } else {
         formi.forEach(input => {
             if (input.type !== 'hidden') {
                 input.value = 0;
-            }  
+            }
         });
         recordOptions.setAttribute('style', 'display:none');
     }
-    
-}
+
+};
 
 const is_checkbox_checked = (e) => {
     if (e.target !== undefined) {
         return e.target.checked;
     } return e.checked;
-}
+};
 
 const is_element_displayed = (e) => {
     let displayed;
-    e.target !== undefined ? displayed = window.getComputedStyle(e.target.closest('.form-group'), null).display
-        : displayed = window.getComputedStyle(e.closest('.form-group'), null).display;
+    if (e.target !== undefined) {
+        displayed = window.getComputedStyle(e.target.closest('.form-group'), null).display;
+    } else {
+        displayed = window.getComputedStyle(e.closest('.form-group'), null).display;
+    }
     return displayed != 'none';
-}
+};

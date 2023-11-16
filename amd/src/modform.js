@@ -16,7 +16,6 @@
 /**
  * The main mod_hybridteaching configuration form js.
  *
- * @package     mod_hybridteaching
  * @copyright   2023 isyc <isyc@example.com>
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -45,7 +44,6 @@ const ELEMENT_SELECTOR = {
  * This will help hide or show items depending on the selection of the instance type.
  *
  * @method init
- * @param {object} info
  */
 export const init = () => {
 
@@ -69,6 +67,7 @@ export const init = () => {
  * @param {string} profileType
  * @param {function} isFeatureEnabled
  */
+      // eslint-disable-next-line no-unused-vars
 const applyInstanceTypeProfile = (profileType, isFeatureEnabled) => {
     let showAll = isFeatureEnabled(profileType, 'all');
     const showFieldset = (id, show) => {
@@ -345,7 +344,7 @@ const updateSelectionFromType = (currentTypeSelect) => {
             options.forEach(option => {
                 createNewOption(participantSelect, option.name, option.id);
             });
-    
+
             if (currentTypeSelect.value === 'all' || currentTypeSelect.value === '') {
                 createNewOption(participantSelect, '---------------', 'all');
                 participantSelect.disabled = true;

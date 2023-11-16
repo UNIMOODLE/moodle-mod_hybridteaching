@@ -31,11 +31,9 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-defined('MOODLE_INTERNAL') || die();
 
 require_once('../../../../config.php');
 require_once('./vendor/autoload.php');
-require_once('./classes/meet_handler.php');
 
 require_login();
 
@@ -52,7 +50,7 @@ if (empty($meetconfig)) {
     redirect($return, get_string('loggingerrormeet', 'hybridteaching'), null, \core\output\notification::NOTIFY_ERROR);
 }
 
-$meethandler = new meet_handler($meetconfig);
+$meethandler = new \hybridteachvc_meet\meet_handler($meetconfig);
 $redirect = $CFG->wwwroot.'/mod/hybridteaching/vc/meet/meetaccess.php';
 $meethandler->setredirecturi($redirect);
 $meetconnect = new Google_Service_Calendar($meethandler->client);

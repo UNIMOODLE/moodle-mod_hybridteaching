@@ -157,4 +157,43 @@ class hybridteaching_external extends external_api {
     public static function get_display_actions_returns() {
         // TODO.
     }
+
+
+    public static function get_modal_text_parameters() {
+        return new external_function_parameters(
+            ["sessid" => new external_value(PARAM_INT, "sessid"),]
+        );
+    }
+
+
+    public static function get_modal_text($sessid) {
+        global $DB;
+        $session = $DB->get_record('hybridteaching_session', ['id' => $sessid]);
+        $passstring = get_string('passstring', 'hybridteaching');
+        $joinurlstring = get_string('joinurl', 'hybridteaching');
+        $unknown = get_string('unknown', 'hybridteaching');
+        $sesspass = $DB->get_field('hybridteaching', 'studentpassword', ['id' => $session->hybridteachingid]);
+        $joinurl = null;
+
+        if (!empty($session->typevc)) {
+            if ($session->typevc == 'bbb') {
+                $classname = $session->typevc;
+                $subpluginsession = new $classname();
+                //$joinurl = $subpluginsession->get_join_url($session->id, $session->config);
+            } else {
+                $joinurl = $DB->get_field('hybridteachvc_'.$session->typevc, 'joinurl', ['htsession' => $session->id]);
+            }
+        }
+
+        $modalinfo = [
+            'sessname' => $session->name, 
+            'sesspass' => !empty($sesspass) ? $passstring . $sesspass : $passstring . $unknown,
+            'sessurl' => !empty($joinurl) ? $joinurlstring . html_writer::link($joinurl, $joinurl) : $joinurlstring . $unknown,
+        ];
+        return json_encode($modalinfo);
+    }
+
+    public static function get_modal_text_returns() {
+        // TODO.
+    }
 }

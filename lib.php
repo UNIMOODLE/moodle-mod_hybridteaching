@@ -255,7 +255,7 @@ function hybridteaching_get_file_info($browser, $areas, $course, $cm, $context, 
  * @param bool $forcedownload Whether or not force download.
  * @param array $options Additional options affecting the file serving.
  */
-function hybridteaching_pluginfile($course, $cm, $context, $filearea, $args, $forcedownload, $options = []) {
+function mod_hybridteaching_pluginfile($course, $cm, $context, $filearea, $args, $forcedownload, $options = []) {
     global $DB, $CFG;
 
     if ($context->contextlevel != CONTEXT_MODULE) {
@@ -267,7 +267,7 @@ function hybridteaching_pluginfile($course, $cm, $context, $filearea, $args, $fo
         return false;
     }
 
-    if ($filearea !== 'sessionfiles') {
+    if ($filearea !== 'session') {
         return false;
     }
 

@@ -66,7 +66,7 @@ class downloadrecords extends \core\task\scheduled_task {
                 mkdir($folder, 0777, true);
             }
 
-            $folderfile = $folder."/".$session->htid."-".$session->hsid.'.mp4';
+            $folderfile = $folder."/".$session->htid."-".$session->hsid.'-1.mp4';
 
             $teamsconfig = $sessionconfig->load_teams_config($session->config);
             $teamshandler = new teams_handler($teamsconfig);
@@ -79,7 +79,7 @@ class downloadrecords extends \core\task\scheduled_task {
             if ($response != false) {
                 $teams = $DB->get_record('hybridteachvc_teams', ['meetingid' => $session->meetingid] );
                 $teams->recordingid = $response;
-                $DB->update_record('hybridteachvc_teams', $teams);              
+                $DB->update_record('hybridteachvc_teams', $teams);
                 $session->processedrecording = 0;
             } else {
                 // Save -2 indicates there are not recording.

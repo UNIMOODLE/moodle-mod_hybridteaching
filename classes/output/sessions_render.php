@@ -93,6 +93,9 @@ class hybridteaching_sessions_render extends \table_sql implements dynamic_table
             'attexempt' => get_string('attexempt', 'hybridteaching'),
         ];
 
+        /*echo html_writer::start_div('prueba', ['id' => 'sessinfomodaldiv']);
+        echo html_writer::end_div();*/
+
         $sortexclusions = ['strrecording', 'strattendance', 'strmaterials', 'stroptions', 'strstart'];
         foreach ($columns as $key => $column) {
             $columnnames = $this->get_column_name($key);
@@ -229,22 +232,27 @@ class hybridteaching_sessions_render extends \table_sql implements dynamic_table
                 }
             }
 
-            /*$fileurl = '';
+            $fileurl = '';
+            $fileurls = '';
             if (!empty($session['sessionfiles'])) {
-                $file = $DB->get_record('files', ['itemid' => $session['sessionfiles']]);
-                if (!empty($file) && $file->filename != '.') {
-                    $fileurl = moodle_url::make_pluginfile_url(
-                        $file->contextid,
-                        'hybridteaching',
-                        $file->filearea,
-                        $file->itemid,
-                        $file->filepath,
-                        $file->filename,
-                        true
-                    );
-                    $fileurl = html_writer::tag('a', $file->filename, ['href' => $fileurl]);
+                $filestorage = new file_storage();
+                $files = $filestorage->get_area_files($this->context->id, 'mod_hybridteaching', 'session', $session['id']);
+                foreach ($files as $file) {
+                    if (!empty($file) && $file->get_filename() != '.') {
+                        $fileurl = moodle_url::make_pluginfile_url(
+                            $file->get_contextid(),
+                            $file->get_component(),
+                            $file->get_filearea(),
+                            $file->get_itemid(),
+                            $file->get_filepath(),
+                            $file->get_filename(),
+                            true
+                        );
+                        $fileurls .= html_writer::tag('a', $file->get_filename(), ['href' => $fileurl])
+                            . html_writer::start_tag('br');
+                    }
                 }
-            }*/
+            }
 
             $body = [
                 'class' => '',
@@ -260,8 +268,8 @@ class hybridteaching_sessions_render extends \table_sql implements dynamic_table
                     $session['attexempt'], '', ['class' => 'attexempt', 'data-id' => $sessionid]),
                 'duration' => !empty($session['duration']) ? helper::get_hours_format($session['duration']) : self::EMPTY,
                 'recordingbutton' => $recordingbutton,
-                'attendance' => is_array($sessatt) && isset($sessatt['sessatt_string']) ? $sessatt['sessatt_string'] : '',
-                'materials' => 'Recursos',
+                'attendance' => $sessatt['sessatt_string'],
+                'materials' => $fileurls,
                 'enabled' => $session['visible'],
                 'checkbox' => new \core\output\checkbox_toggleall('sessions-table', false, [
                     'id' => 'session-' . $sessionid,
@@ -286,6 +294,7 @@ class hybridteaching_sessions_render extends \table_sql implements dynamic_table
             }
             $table->data[] = $row;
         }
+        echo $OUTPUT->render_from_template('mod_hybridteaching/sessionsmodal', null);
 
         // Add filters.
         $sfiltering->display_add();
@@ -387,8 +396,13 @@ class hybridteaching_sessions_render extends \table_sql implements dynamic_table
             { return false; }', ]
         );
 
-        $info = html_writer::link(new moodle_url(''),
-            $OUTPUT->pix_icon('docs', get_string('actions', 'mod_hybridteaching'), 'moodle', ['class' => 'iconsmall']));
+        $info = '';
+        if ($this->typelist == SESSION_LIST) {
+            $info .= html_writer::link('',
+                $OUTPUT->pix_icon('docs', get_string('actions', 'mod_hybridteaching')), 
+                ['class' => 'sessinfo', 'data-id' => $body['sessionid'], 'data-toggle' => 'modal', 
+                'data-target' => '#sessinfomodal']);
+        }
 
         $record = html_writer::link(new moodle_url(''),
             $OUTPUT->pix_icon('i/messagecontentvideo', get_string('actions', 'mod_hybridteaching'),

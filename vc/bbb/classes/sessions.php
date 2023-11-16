@@ -36,6 +36,8 @@ namespace hybridteachvc_bbb;
 use function Symfony\Component\DependencyInjection\Loader\Configurator\param;
 use hybridteachvc_bbb\bbbproxy;
 use hybridteachvc_bbb\meeting;
+use mod_hybridteaching\helpers\roles;
+
 defined('MOODLE_INTERNAL') || die();
 
 global $CFG;
@@ -107,12 +109,14 @@ class sessions {
     public function delete_session_extended($htsession, $configid) {
         global $DB;
         $bbbconfig = $this->load_bbb_config($configid);
-        $bbb = $DB->get_record('hybridteachvc_bbb', ['htsession' => $htsession]);
-        if (isset($bbb->meetingid) && isset($bbb->moderatorpass)) {
-            // If exists meeting, delete it.
-            $meeting = new meeting($bbbconfig);
-            if (isset($meeting)) {
-                $meeting->end_meeting($bbb->meetingid, $bbb->moderatorpass);
+        if (!empty($bbbconfig)) {
+            $bbb = $DB->get_record('hybridteachvc_bbb', ['htsession' => $htsession]);
+            if (isset($bbb->meetingid) && isset($bbb->moderatorpass)) {
+                // If exists meeting, delete it.
+                $meeting = new meeting($bbbconfig);
+                if (isset($meeting)) {
+                    $meeting->end_meeting($bbb->meetingid, $bbb->moderatorpass);
+                }
             }
         }
         $DB->delete_records('hybridteachvc_bbb', ['htsession' => $htsession]);
@@ -194,12 +198,12 @@ class sessions {
             // Si es viewer, comprobar si está activa la opción de waitmoderator.
                 // Si es así, sacar un msj de "esperando al moderador".
                 // Si no, poder entrar.
-
+            $role = self::get_user_meeting_role($this->bbbsession);
             $url = $bbbproxy->get_join_url(
                 $this->bbbsession->meetingid,
                 $USER->username,
                 'https://www.urldelogout',   // Comprobar.
-                'MODERATOR',     // Aqui VIEWER or MODERATOR. Según sea admin o moderator, o viewer.
+                $role,     // Aqui VIEWER or MODERATOR. Según sea admin o moderator, o viewer.
                 null, // Un token.
                 $USER->id,
                 $this->bbbsession->createtime
@@ -230,5 +234,20 @@ class sessions {
             }
         }
         return $url;
+    }
+
+    protected static function get_user_meeting_role($session) : String {
+        global $DB, $USER;
+
+        $meetingrole = 'VIEWER';
+        $hybridteaching = $DB->get_record('hybridteaching', ['id' => $DB->get_field('hybridteaching_session', 'hybridteachingid',
+            ['id' => $session->htsession], IGNORE_MISSING)], 'id, participants', IGNORE_MISSING);
+        $cm = get_coursemodule_from_id('hybridteaching',  $hybridteaching->id,  0,  false,  MUST_EXIST);
+        $context = \context_module::instance($cm->id);
+        $role = roles::is_moderator($context, json_decode($hybridteaching->participants, true), $USER->id);
+        if ($role) {
+            $meetingrole = 'MODERATOR';
+        }
+        return $meetingrole;
     }
 }

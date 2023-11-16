@@ -334,7 +334,6 @@ class hybridteaching_attendance_render extends \table_sql implements dynamic_tab
                 '&sessionid=' . $sessionid, ]);
             $baseurl = new moodle_url('/mod/hybridteaching/attendance.php?view=' . $view, ['id' => $id,
                 'sort' => $sort, 'dir' => $dir, 'perpage' => $perpage, 'sessionid' => $sessionid, 'attid' => $selecteduser, ]);
-            $return .= $OUTPUT->paging_bar($attendancecount, $page, $perpage, $baseurl);
             $return .= $OUTPUT->box_end();
             return $return;
         }
@@ -489,12 +488,18 @@ class hybridteaching_attendance_render extends \table_sql implements dynamic_tab
                     $session->groupid == 0 ? $groupbody = get_string('commonattendance', 'hybridteaching') :
                         $groupbody = groups_get_group($session->groupid)->name;
                 }
+                if (!empty($session->typevc)) {
+                    $typealias = get_string('alias', 'hybridteachvc_'.$session->typevc);
+                } else {
+                    $typealias = get_string('classroom', 'mod_hybridteaching');
+                }
                 $body = [
                     'class' => '',
                     'group' => $groupbody,
                     'name' => $session->name,
                     'date' => $date,
                     'duration' => !empty($session->duration) ? helper::get_hours_format($session->duration) : self::EMPTY,
+                    'typevc' => $typealias,
                     'vc' => isset($attassistance['vc']) ? $attassistance['vc'] : 0,
                     'classroom' => isset($attassistance['classroom']) ? $attassistance['classroom'] : 0,
                     'attexempt' => $session->attexempt,
@@ -527,7 +532,7 @@ class hybridteaching_attendance_render extends \table_sql implements dynamic_tab
                     $table->data[] = [];
                 }
             }
-                        // Add filters.
+            // Add filters.
             if (isset($attresumee)) {
                 $attresumee->display();
             }
@@ -698,6 +703,10 @@ class hybridteaching_attendance_render extends \table_sql implements dynamic_tab
                 return 'groupid';
                 break;
             case 'strtype':
+                if ($view == 'sessionattendance') {
+                    return 'typevc';
+                    break;
+                }
                 return 'type';
                 break;
             case 'strdate':
@@ -786,6 +795,7 @@ class hybridteaching_attendance_render extends \table_sql implements dynamic_tab
                 $columns['strname'],
                 $columns['strdate'],
                 $columns['strduration'],
+                $columns['strtype'],
                 $columns['strclassroom'],
                 $columns['strvc'],
                 $columns['stroptions'],
@@ -916,12 +926,12 @@ class hybridteaching_attendance_render extends \table_sql implements dynamic_tab
             case 'sessionattendance':
                 if (!$params['group']) {
                     $row = new html_table_row([$OUTPUT->render($params['checkbox']),
-                    $params['name'], $params['date'], $params['duration'], $params['classroom'], $params['vc'],
+                    $params['name'], $params['date'], $params['duration'], $params['typevc'], $params['classroom'], $params['vc'],
                         $options, ]);
                     break;
                 }
                 $row = new html_table_row([$OUTPUT->render($params['checkbox']), $params['group'],
-                $params['name'], $params['date'], $params['duration'], $params['classroom'], $params['vc'],
+                $params['name'], $params['date'], $params['duration'], $params['typevc'], $params['classroom'], $params['vc'],
                     $options, ]);
                 break;
             case 'studentattendance':

@@ -361,4 +361,83 @@ class roles {
 
         return $DB->count_records_sql($sql, $params);
     }
+
+        /**
+     * Evaluate if a user in a context is moderator based on roles and participation rules.
+     *
+     * @param context $context
+     * @param array $participantlist
+     * @param int $userid
+     *
+     * @return bool
+     */
+    public static function is_moderator(context $context, array $participantlist, ?int $userid = null): bool {
+        global $USER;
+        // If an admin, then also a moderator.
+        if (has_capability('moodle/site:config', $context)) {
+            return true;
+        }
+        if (!is_array($participantlist)) {
+            return false;
+        }
+        if (empty($userid)) {
+            $userid = $USER->id;
+        }
+        $userroles = self::get_guest_role();
+        if (!isguestuser()) {
+            $userroles = self::get_user_roles($context, $userid);
+        }
+        return self::is_moderator_validator($participantlist, $userid, $userroles);
+    }
+
+    /**
+     * Iterates participant list rules to evaluate if a user is moderator.
+     *
+     * @param array $participantlist
+     * @param int $userid
+     * @param array $userroles
+     *
+     * @return bool
+     */
+    protected static function is_moderator_validator(array $participantlist, int $userid, array $userroles): bool {
+        // Iterate participant rules.
+        foreach ($participantlist as $participant) {
+            if (self::is_moderator_validate_rule($participant, $userid, $userroles)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Evaluate if a user is moderator based on roles and a particular participation rule.
+     *
+     * @param array $participant
+     * @param int $userid
+     * @param array $userroles
+     *
+     * @return bool
+     */
+    protected static function is_moderator_validate_rule(array $participant, int $userid, array $userroles): bool {
+        if ($participant['role'] == self::ROLE_VIEWER) {
+            return false;
+        }
+        // Validation for the 'all' rule.
+        if ($participant['selectiontype'] == 'all') {   
+            return true;
+        }
+        // Validation for a 'user' rule.
+        if ($participant['selectiontype'] == 'user') {
+            if ($participant['selectionid'] == $userid) {
+                return true;
+            }
+            return false;
+        }
+        // Validation for a 'role' rule.
+        $role = self::get_role($participant['selectionid']);
+        if ($role != null && array_key_exists($role->id, $userroles)) {
+            return true;
+        }
+        return false;
+    }
 }

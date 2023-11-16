@@ -3,7 +3,7 @@ define([
 ], function(ajax, toast, str) {
 
     const hybridteaching_student_view_update = (sessionid, userid) => ajax.call([{
-        methodname: 'mod_hybridtaeching_get_display_actions',
+        methodname: 'mod_hybridteaching_get_display_actions',
         args: {
             sessionid,
             userid,
@@ -11,47 +11,68 @@ define([
     }])[0].done(response => {
         return JSON.parse(response);
     }).fail(err => {
+        // eslint-disable-next-line no-console
         console.log(err);
     });
-    const update_view = (sessionid, userid, test = 0) => {
+    const update_view = (sessionid, userid, timer = 0) => {
         hybridteaching_student_view_update(sessionid, userid).done( r => {
             r = JSON.parse(r);
-            useform = false;
-            if (r.buttons == null || r.buttons == false ) {
-                clearInterval(test);
+            var useform = false;
+            if (r.buttons === null || r.buttons == false ) {
+                clearInterval(timer);
             } else {
-                display = r.buttons;
+                var display = r.buttons;
                 if (!r.admin) {
-                    display == 'enter' ? toast.add(str.get_string('entersession', 'hybridteaching')) :
+                    if (display == 'enter') {
+                        toast.add(str.get_string('entersession', 'hybridteaching'));
+                    } else {
                         toast.add(str.get_string('exitsession', 'hybridteaching'));
+                    }
                     var exitstr = str.get_string('exitsession', 'hybridteaching');
                     exitstr.done(function(exitstring) {
-                        display == 'exit' ? document.querySelector('#zonemessage').querySelector('.alert-info').textContent =
-                         exitstring : '';
-                    })
+                        if (display == 'exit') {
+                            document.querySelector('#zonemessage').querySelector('.alert-info').textContent =
+                            exitstring;
+                        }
+                    });
+                    clearInterval(timer);
                 }
 
-                forms = (document.getElementsByTagName('form'));
+                var forms = (document.getElementsByTagName('form'));
                 forms.forEach(form => {
                     let formid = (form.getAttribute('id'));
-                    formid !== undefined && formid !== null ? useform = true : '';
+                    if (formid !== undefined && formid !== null) {
+                        useform = true;
+                    }
                     if (useform && (display == 'enter' || display == 'exit')) {
                         switch (formid) {
                             case 'joinvc':
-                                display == 'enter' ? form.setAttribute('style', 'display: block;') :
-                                form.setAttribute('style', 'display: none;');
+                                if (display == 'enter') {
+                                    form.setAttribute('style', 'display: block;');
+                                } else {
+                                    form.setAttribute('style', 'display: none;');
+                                }
                                 break;
                             case 'showqr':
-                                display == 'enter' ? form.setAttribute('style', 'display: block;') :
-                                form.setAttribute('style', 'display: none;');
+                                if (display == 'enter') {
+                                    form.setAttribute('style', 'display: block;');
+                                } else {
+                                    form.setAttribute('style', 'display: none;');
+                                }
                                 break;
                             case 'registeratt':
-                                display == 'enter' ? form.setAttribute('style', 'display: block;') :
-                                form.setAttribute('style', 'display: none;');
+                                if (display == 'enter') {
+                                    form.setAttribute('style', 'display: block;');
+                                } else {
+                                    form.setAttribute('style', 'display: none;');
+                                }
                                 break;
                             case 'finishatt':
-                                display == 'enter' ? form.setAttribute('style', 'display: none;') :
-                                form.setAttribute('style', 'display: block;');
+                                if (display == 'enter') {
+                                    form.setAttribute('style', 'display: none;');
+                                } else {
+                                    form.setAttribute('style', 'display: block;');
+                                }
                                 break;
                             default:
                                 break;
@@ -59,15 +80,14 @@ define([
                     }
                 });
             }
-            
         });
-    }
+    };
     return {
         init: (sessionid, userid) => {
             update_view(sessionid, userid);
             hybridteaching_student_view_update(sessionid, userid);
-            var test = setInterval(() => {
-                update_view(sessionid, userid, test)}, 15000);
+            var timer = setInterval(() => {
+                update_view(sessionid, userid, timer);}, 15000);
         }
-    }
+    };
 });

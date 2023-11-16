@@ -43,7 +43,7 @@ $functions = [
         'type' => 'set',
         'ajax' => true,
         'loginrequired' => true,
-        'capabilities' => '', // Capabilities check in form.
+        'capabilities' => 'mod/hybridteaching:attendancesactions', // Capabilities check in form.
     ],
     'mod_hybridteaching_set_session_exempt' => [
         'classname' => 'hybridteaching_external',
@@ -53,9 +53,9 @@ $functions = [
         'type' => 'set',
         'ajax' => true,
         'loginrequired' => true,
-        'capabilities' => '', // Capabilities check in form.
+        'capabilities' => 'mod/hybridteaching:sessionsactions', // Capabilities check in form.
     ],
-    'mod_hybridtaeching_get_display_actions' => [
+    'mod_hybridteaching_get_display_actions' => [
         'classname' => 'hybridteaching_external',
         'methodname' => 'get_display_actions',
         'classpath' => '/mod/hybridteaching/externallib.php',
@@ -64,5 +64,15 @@ $functions = [
         'ajax' => true,
         'loginrequired' => true,
         'capabilities' => '', // Capabilities check in form.
+    ],
+    'mod_hybridteaching_get_modal_text' => [
+        'classname' => 'hybridteaching_external',
+        'methodname' => 'get_modal_text',
+        'classpath' => '/mod/hybridteaching/externallib.php',
+        'description' => 'gets modal with the session info',
+        'type' => 'read',
+        'ajax' => true,
+        'loginrequired' => true,
+        'capabilities' => 'mod/hybridteaching:sessionsactions', // Capabilities check in form.
     ],
 ];

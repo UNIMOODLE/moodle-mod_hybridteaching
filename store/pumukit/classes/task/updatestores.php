@@ -57,7 +57,6 @@ class updatestores extends \core\task\scheduled_task {
             WHERE hs.userecordvc=1 AND hc.type='pumukit' AND hs.processedrecording=0";
 
         $storespumukit = $DB->get_records_sql($sql);
-        var_dump($storespumukit);
 
         // 3.  subirlas a pumukit
         // 4. guardar el registro como ya subido a pumukit.

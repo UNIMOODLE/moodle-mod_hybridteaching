@@ -428,3 +428,5 @@ $string['downloadtext'] = 'Descargar en formato de texto';
 $string['startofperiod'] = 'Inicio del período';
 $string['endofperiod'] = 'Fin del período';
 $string['includeall'] = 'Seleccionar todas las sesiones';
+$string['joinurl'] = 'Url de acceso: ';
+$string['passstring'] = 'Contraseña: ';

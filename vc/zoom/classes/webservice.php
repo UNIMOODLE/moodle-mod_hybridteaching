@@ -351,9 +351,9 @@ class webservice {
     protected function _database_to_api($zoom, $ht) {
         global $CFG;
 
-        $data = array(
+        $data = [
             'topic' => $zoom->name,
-        );
+        ];
         if (isset($CFG->timezone) && !empty($CFG->timezone)) {
             $data['timezone'] = $CFG->timezone;
         } else {
@@ -431,14 +431,14 @@ class webservice {
      * @param bool $webinar Whether the meeting or webinar you want to delete is a webinar.
      * @return void
      */
-    public function delete_meeting($id, $webinar) {
+    public function deletemeeting($id, $webinar) {
         $url = ($webinar ? 'webinars/' : 'meetings/') . $id;
         try {
             $this->_make_call($url, null, 'delete');
-        } catch (\Exception $e){
-
+        } catch (\Exception $e) {
+            // No action for delete.
         }
-        
+
     }
 
     /**
@@ -526,7 +526,11 @@ class webservice {
      */
     public function get_user_report($userid, $from, $to) {
         $url = 'report/users/' . $userid . '/meetings';
-        $data = array('from' => $from, 'to' => $to, 'page_size' => HTZOOM_MAX_RECORDS_PER_CALL);
+        $data = [
+            'from' => $from,
+            'to' => $to,
+            'page_size' => HTZOOM_MAX_RECORDS_PER_CALL
+        ];
         return $this->_make_paginated_call($url, $data, 'meetings');
     }
 

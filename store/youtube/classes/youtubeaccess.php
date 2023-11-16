@@ -108,8 +108,6 @@ END;
 }
 ?>
 
-
-
 <!doctype html>
 <html>
 <head>
@@ -119,22 +117,3 @@ END;
 <?php echo $htmlbody?>
 </body>
 </html>
-
-
-
-<!--
-/*
-require_once($CFG->dirroot . '/mod/hybridteaching/store/youtube/classes/youtube_handler.php');
-
-$configid = optional_param('id', 0, PARAM_INT);
-global $DB;
-
-$config = $DB->get_record('hybridteachstore_youtube_con', ['id' => $configid]);
-
-$youtubeclient = new \youtube_handler($config);
-
-$htmlbody=$youtubeclient->createclient($config);
-
-    echo $htmlbody;
-*/
--->

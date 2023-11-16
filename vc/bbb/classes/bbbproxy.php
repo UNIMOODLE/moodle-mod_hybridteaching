@@ -89,10 +89,11 @@ class bbbproxy extends proxy_base {
     }
 
     public function end_meeting($meetingid, $modpw) {
-        try{
+        try {
             $xml = $this->fetch_endpoint_xml_config('end', ['meetingID' => $meetingid, 'password' => $modpw]);
             self::assert_returned_xml($xml, ['meetingid' => $meetingid]);
         } catch (\Exception $e) {
+            // No action for endmeeting.
         }
     }
 
@@ -120,7 +121,6 @@ class bbbproxy extends proxy_base {
      * @return string
      */
     protected function sanitized_url_config() {
-        // $serverurl = trim(config::get('server_url'));
         $serverurl = trim($this->bbbinstance->serverurl);
         if (PHPUNIT_TEST) {
             $serverurl = (new moodle_url(TEST_MOD_BIGBLUEBUTTONBN_MOCK_SERVER))->out(false);
@@ -169,7 +169,6 @@ class bbbproxy extends proxy_base {
         $data = [
             'meetingID' => $meetingid,
             'fullName' => $username,
-            // 'password' => $pw,   //deprecado, no es necesario ya que se pasa el rol
             'logoutURL' => $logouturl,
             'role' => $role,
         ];
@@ -203,9 +202,7 @@ class bbbproxy extends proxy_base {
     public function get_meeting_recording($meetingid) {
         $data = [
             'meetingID' => $meetingid,
-            // '496909493508781bb144e696513a1b492ef0d940',
-            'state' => 'published, unpublished,processed, processing, deleted',
-            // Comprobar si las processed hay que descargarlas tb o no.
+            'state' => 'published, unpublished, processed, processing, deleted',
         ];
         $recordingurl = $this->action_url_config('getRecordings', $data);
         $recordingid = '';
@@ -321,7 +318,6 @@ class bbbproxy extends proxy_base {
             self::get_server_not_available_message(),
             \core\notification::ERROR
         );
-        // redirect(self::get_server_not_available_url($instance));
     }
 
     /**

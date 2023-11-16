@@ -56,12 +56,13 @@ class sessions {
         $config = $this->load_config($storagereference);
 
         $recording = new \hybridteachstore_onedrive\onedrive_handler($config);
-        // $url = $recording->get_urlrecording ($processedrecording /*, $htid, $sid*/);
         $url = $recording->get_urlrecording ($processedrecording);
         return $url;
     }
 
     public function delete_session_extended($htsession, $configid) {
+        global $DB;
+        $DB->delete_records('hybridteachstore_onedrive', ['sessionid' => $htsession]);
 
     }
 }

@@ -188,8 +188,10 @@ class hybridteaching_admin_plugins_configs extends admin_setting {
         }
 
         $return .= html_writer::table($table);
-        $selectsubplugins = $this->create_subplugin_select();
-        echo $OUTPUT->render($selectsubplugins);
+        if (!empty($section)) {
+            $selectsubplugins = $this->create_subplugin_select();
+            echo $OUTPUT->render($selectsubplugins);
+        }
 
         $return .= $OUTPUT->box_end();
         return highlight($query, $return);
