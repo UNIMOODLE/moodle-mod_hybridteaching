@@ -13,6 +13,7 @@
 		{{#str}} estimatedduration, mod_hybridteaching {{/str}} 
 		{{duration}} <br>
 		{{#isadvanceentry}}
+			{{#waitmoderator}} {{#str}} waitmoderator, mod_hybridteaching {{/str}} {{/waitmoderator}} <br>
 			{{#str}} advanceentry, mod_hybridteaching {{/str}}  {{advanceentrytime}}
 			<br>
 		{{/isadvanceentry}}
@@ -33,6 +34,7 @@
 	{{/isstart}}
 
 	{{#isprogress}}
+		{{#waitmoderator}} {{#str}} waitmoderator, mod_hybridteaching {{/str}} {{/waitmoderator}} <br>
 		{{#str}} started, mod_hybridteaching {{/str}}
 		{{starttime}} <br>
 		{{#str}} estimatedduration, mod_hybridteaching {{/str}} 

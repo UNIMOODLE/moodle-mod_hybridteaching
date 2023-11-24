@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/
+// This file is part of Moodle - https://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -12,7 +12,7 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+// along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 // Project implemented by the "Recovery, Transformation and Resilience Plan.
 // Funded by the European Union - Next GenerationEU".
@@ -173,9 +173,14 @@ class hybridteaching_admin_plugins_configs extends admin_setting {
             $options .= html_writer::link(new moodle_url($urledit),
                 $OUTPUT->pix_icon('t/edit', $stroptions, 'moodle', ['class' => 'iconsmall']));
 
+            $htmodules = $DB->get_fieldset_select('hybridteaching', 'name', 'config = :config',
+                ['config' => $configid], IGNORE_MISSING);
+            $stringtodelete = !empty($htmodules) ?
+                get_string('deletewithhybridmods', 'mod_hybridteaching', implode(', ', $htmodules)) :
+                get_string('deleteconfirm', 'mod_hybridteaching', $configname);
             $options .= html_writer::link(new moodle_url($url, ['action' => 'delete', 'id' => $configid]),
                 $OUTPUT->pix_icon('t/delete', $struninstall, 'moodle', ['class' => 'iconsmall']),
-                ['onclick' => 'if (!confirm("'.get_string('deleteconfirm', 'mod_hybridteaching', $configname).'"))
+                ['onclick' => 'if (!confirm("'.$stringtodelete.'"))
                 { return false; }', ]
             );
 

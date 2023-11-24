@@ -37,11 +37,11 @@ namespace mod_hybridteaching\store\youtube\db;
  * Custom uninstallation procedure.
  */
 function xmldb_hybridteachstore_youtube_uninstall() {
-    delete_subplugin_configs();
+    delete_youtube_configs();
     return true;
 }
 
-function delete_subplugin_configs() {
+function delete_youtube_configs() {
     global $DB;
     $DB->delete_records('hybridteaching_configs', ['type' => get_string('youtube', 'hybridteachstore_youtube')]);
 }

@@ -51,7 +51,7 @@ class updatestores extends \core\task\scheduled_task {
         require_once($CFG->dirroot . '/mod/hybridteaching/store/youtube/classes/youtube_handler.php');
         // Sessions to get
         // 1. Obtain the sessions from which to download recordings, which have the YouTube storage method.
-        $sql = "SELECT ht.id AS htid,ht.course, hs.id AS hsid, hs.name, hs.userecordvc,";
+        $sql = "SELECT concat(ht.id,'-',hs.id) AS id, ht.id AS htid, ht.course, hs.id AS hsid, hs.name, hs.userecordvc,";
         $sql .= " hs.processedrecording, hs.storagereference, hc.subpluginconfigid";
         $sql .= " FROM {hybridteaching_session} hs";
         $sql .= " INNER JOIN {hybridteaching} ht ON ht.id=hs.hybridteachingid";
@@ -68,21 +68,33 @@ class updatestores extends \core\task\scheduled_task {
 
             // Read the store instance config.
             $configyt = $DB->get_record('hybridteachstore_youtube_con', ['id' => $store->subpluginconfigid]);
-            $youtubeclient = new youtube_handler($configyt);
-            $redirect = $CFG->wwwroot . '/admin/cli/scheduled_task.php';
-            $youtubeclient->setredirecturi($redirect);
-
-            // Path that will be saved from moodledata in the vc subactivity (zoom,bbb,...).
 
             $path = $CFG->dataroot.'/repository/hybridteaching/'.$store->course.'/';
-            $files = glob ($path.'*');
 
-            foreach ($files as $videopath) {
+            // Check type mp4 or MP4.
+            // Videopath is the path from moodledata.
+            $videopath = $path.$store->htid.'-'.$store->hsid.'-1.mp4';
+            $exist = false;
+            if (!file_exists($videopath)) {
+                $videopath = $path.$store->htid.'-'.$store->hsid.'-1.MP4';
+                if (file_exists($videopath)) {
+                    $exist = true;
+                }
+            } else {
+                $exist = true;
+            }
 
+            if ($exist) {
+                // Youtube connect.
+                $youtubeclient = new youtube_handler($configyt);
+                $redirect = $CFG->wwwroot . '/admin/cli/scheduled_task.php';
+                $youtubeclient->setredirecturi($redirect);
+
+                // Upload file.
                 $youtubecode = $youtubeclient->uploadfile ($store, $videopath);
 
-                if ($youtubecode != null) { // If there has been a correct upload and we have the YouTube code:
-                    // Save youtube id and record, type "jj_6Ic7N8Dg".
+                // If there has been a correct upload and we have the YouTube code.
+                if ($youtubecode != null) {
                     $youtube = new  \stdClass();
                     $youtube->sessionid = $store->hsid;
                     $youtube->code = $youtubecode;

@@ -16,7 +16,7 @@
         <FIELD NAME="hostid" TYPE="char" LENGTH="30" NOTNULL="true" SEQUENCE="false" COMMENT="Meeting host user ID. Can be any user under this account. Cannot be updated after creation."/>
         <FIELD NAME="optionhostvideo" TYPE="int" LENGTH="1" NOTNULL="false" DEFAULT="1" SEQUENCE="false" COMMENT="Start video when host joins meeting."/>
         <FIELD NAME="optionparticipantsvideo" TYPE="int" LENGTH="1" NOTNULL="false" DEFAULT="1" SEQUENCE="false" COMMENT="Start video when participants join meeting."/>
-        <FIELD NAME="existsonzoom" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="1" SEQUENCE="false" COMMENT="Whether the meeting can be found on Zoom servers. Usually should be true, should only be false if API call returned that meeting can't be found."/>
+        <FIELD NAME="downloadattempts" TYPE="int" LENGTH="11" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Counts failed attempts to download the recording."/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id" COMMENT="The unique id for this zoom vc."/>

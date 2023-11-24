@@ -76,7 +76,7 @@ class sessions {
             if ($event) {
                 $meetsession = new stdClass();
                 $meetsession->htsession = $session->id;
-                $meetsession->url = $event->hangoutLink;
+                $meetsession->joinurl = $event->hangoutLink;
                 $meetsession->creatoremail = $event->creator->email;
                 $meetsession->eventid = $event->id;
 
@@ -89,36 +89,29 @@ class sessions {
         return $meetsession->id;
     }
 
-    public function update_session_extended($data, $ht) {
-        // Hacer update de meet.
-        /*global $DB;
-        $dataupdated = $DB->update_record('hybridteachvc_meet', $data);
+    public function update_session_extended($session, $ht) {
+        global $DB;
 
-        helper::create_calendar_event($data);
-        $meet = $DB->get_record('hybridteachvc_meet', ['htsession' => $data->id]);
-
-        $event = $service->events->get('primary', 'eventId');
-
-        $event->setSummary('Appointment at Somewhere');
-
-        $updatedEvent = $service->events->update('primary', $event->getId(), $event);
-
-        return $errormsg;*/
+        /*$existsmeet = $DB->get_field('hybridteachvc_meet', 'id', ['htsession' => $session->id]);
+        if ($existsmeet) {
+            $subpluginconfigid = $DB->get_field('hybridteaching_configs', 'subpluginconfigid', ['id' => $ht->config]);
+            $meetconfig = $DB->get_record('hybridteachvc_meet_config', ['id' => $subpluginconfigid]);
+            $client = new meet_handler($meetconfig);
+            $client->update_meeting_event($session, $existsmeet);
+        }*/
     }
 
     public function delete_session_extended($htsession, $configid) {
         global $DB;
-
         $meetconfig = $this->load_meet_config($configid);
         if (!empty($meetconfig)) {
             $meet = $DB->get_record('hybridteachvc_meet', ['htsession' => $htsession]);
-            if (isset($meet->meetingid)) {
-                // If exists meeting, delete it.
+            if (isset($meet->eventid)) {
                 try {
                     $meethandler = new meet_handler($meetconfig);
-                    $meethandler->deletemeeting($meet->meetingid);
+                    $meethandler->deletemeeting($meet->eventid);
                 } catch (\Exception $e) {
-                    // No action for delete.
+                    throw new \Exception($e->getMessage());
                 }
             }
         }
@@ -151,7 +144,7 @@ class sessions {
                 'id' => $this->meetsession->id,
                 'ishost' => true,
                 'isaccess' => true,
-                'url' => base64_encode($this->meetsession->url),
+                'url' => base64_encode($this->meetsession->joinurl),
             ];
             return $array;
         } else {

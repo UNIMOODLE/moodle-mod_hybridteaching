@@ -35,6 +35,5 @@
  * Custom code to be run on installing the plugin.
  */
 function xmldb_hybridteaching_install() {
-
     return true;
 }

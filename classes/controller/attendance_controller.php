@@ -14,8 +14,16 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
+// Project implemented by the "Recovery, Transformation and Resilience Plan.
+// Funded by the European Union - Next GenerationEU".
+//
+// Produced by the UNIMOODLE University Group: Universities of
+// Valladolid, Complutense de Madrid, UPV/EHU, León, Salamanca,
+// Illes Balears, Valencia, Rey Juan Carlos, La Laguna, Zaragoza, Málaga,
+// Córdoba, Extremadura, Vigo, Las Palmas de Gran Canaria y Burgos.
+
 /**
- * The attendance controller class
+ * Display information about all the mod_hybridteaching modules in the requested course. *
  * @package    mod_hybridteaching
  * @copyright  2023 Proyecto UNIMOODLE
  * @author     UNIMOODLE Group (Coordinator) <direccion.area.estrategia.digital@uva.es>
@@ -346,7 +354,7 @@ class attendance_controller extends common_controller {
      * @throws \Throwable description of exception
      * @return mixed
      */
-    public static function hybridteaching_set_attendance_log($hybridteaching, $session, $action, $userid = 0) {
+    public static function hybridteaching_set_attendance_log($hybridteaching, $session, $action, $userid = 0, $event = false) {
         global $DB, $USER;
         !$userid ? $userid = $USER->id : '';
         $att = self::hybridteaching_get_attendance($session, $userid);
@@ -358,6 +366,11 @@ class attendance_controller extends common_controller {
             $att->id = $id;
         }
         $timenow = (new \DateTime('now', \core_date::get_server_timezone_object()))->getTimestamp();
+        if ($event) {
+            $sessiontime = $DB->get_record('hybridteaching_session', ['id' => $session], 'starttime, duration');
+            $timenow = $sessiontime->starttime + $sessiontime->duration;
+        }
+
         $log = self::hybridteaching_get_last_attend($att->id, $userid);
         if ($log) {
             if ($log->action == 1 && $action == 0) {
@@ -964,6 +977,13 @@ class attendance_controller extends common_controller {
         return $displayrow;
     }
 
+    /**
+     * Determines if a user belongs to a session group.
+     *
+     * @param int $userid The ID of the user.
+     * @param int $sessid The ID of the session.
+     * @return bool Whether the user belongs to the session group.
+     */
     public static function user_belongs_in_session_group($userid, $sessid) : bool {
         global $DB;
 
@@ -978,6 +998,13 @@ class attendance_controller extends common_controller {
         return $useringroup;
     }
 
+    /**
+     * Calculates the number of attendances that uses groups.
+     *
+     * @param array $attendances An array of attendance data.
+     * @throws Some_Exception_Class Description of exception.
+     * @return int The number of attendances that uses groups.
+     */
     public function attendances_uses_groups($attendances) : int {
         global $DB;
 

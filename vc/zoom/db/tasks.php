@@ -33,8 +33,8 @@
 
 defined('MOODLE_INTERNAL') || die;
 
-$tasks = array(
-    array(
+$tasks = [
+    [
         'classname' => 'hybridteachvc_zoom\task\downloadrecords',
         'blocking' => 0,
         'minute' => '0',
@@ -42,5 +42,5 @@ $tasks = array(
         'day' => '*',
         'month' => '*',
         'dayofweek' => '*',
-    )
-);
+    ],
+];

@@ -37,11 +37,11 @@ namespace mod_hybridteaching\vc\zoom\db;
  * Custom uninstallation procedure.
  */
 function xmldb_hybridteachvc_zoom_uninstall() {
-    delete_subplugin_configs();
+    delete_zoom_configs();
     return true;
 }
 
-function delete_subplugin_configs() {
+function delete_zoom_configs() {
     global $DB;
     $DB->delete_records('hybridteaching_configs', ['type' => get_string('zoom', 'hybridteachvc_zoom')]);
 }

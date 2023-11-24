@@ -78,9 +78,7 @@ if ($hybridteaching->rotateqr == 1 && $action == 1) {
             $qrpassflag = true;
         }
     }
-    // Used for quick testing to be removed.
-    echo '<br> pass:';
-    var_dump($qrpass);
+
     if ($qrpassflag) {
         // Create and store the token.
         setcookie($cookiename, $secrethash, time() + (60 * 5), "/");
@@ -138,7 +136,7 @@ if ($hybridteaching->rotateqr == 1 && $action == 1) {
     redirect($url, get_string('incorrect_password', 'hybridteaching'), null, \core\output\notification::NOTIFY_ERROR);
 } else {
     if ($action != 0 && $qrpass != $hybridteaching->studentpassword) {
-        redirect($url, get_string('incorrect_password', 'hybridteaching'), null, \core\output\notification::NOTIFY_INFO);
+        redirect($url, get_string('incorrect_password', 'hybridteaching'), null, \core\output\notification::NOTIFY_ERROR);
     }
     $qrsecret = optional_param('secretqr', null, PARAM_TEXT);
     // Finish attendance.

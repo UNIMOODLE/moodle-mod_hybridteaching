@@ -49,22 +49,48 @@ use mod_bigbluebuttonbn\plugin;
 class sessions {
     protected $bbbsession;
 
+    /**
+     * Constructor for the class.
+     *
+     * @param mixed $htsessionid The session ID (optional)
+     * @throws None
+     * @return None
+     */
     public function __construct($htsessionid = null) {
         if (!empty($htsessionid)) {
             $this->bbbsession = $this->load_session($htsessionid);
         }
     }
 
+    /**
+     * Loads a session using the provided session ID.
+     *
+     * @param string $htsessionid The session ID.
+     * @throws Some_Exception_Class Description of the exception.
+     * @return mixed The loaded session.
+     */
     public function load_session($htsessionid) {
         global $DB;
         $this->bbbsession = $DB->get_record('hybridteachvc_bbb', ['htsession' => $htsessionid]);
         return $this->bbbsession;
     }
 
+    /**
+     * Set the session with the given session ID.
+     *
+     * @param datatype $htsessionid The session ID to set.
+     * @throws Some_Exception_Class Description of exception
+     * @return void
+     */
     public function set_session($htsessionid) {
         $this->bbbsession = $this->load_session($htsessionid);
     }
 
+    /**
+     * Retrieves the session for the current instance.
+     *
+     * @return mixed The session object.
+     */
     public function get_session() {
         return $this->bbbsession;
     }
@@ -140,13 +166,13 @@ class sessions {
         return $newbbb;
     }
 
-        /**
-         * Loads a BBB config based on the given config ID.
-         *
-         * @param int $configid The ID of the config to load.
-         * @throws Exception If the SQL query fails.
-         * @return stdClass|false The Zoom config record on success, or false on failure.
-         */
+    /**
+     * Loads a BBB config based on the given config ID.
+     *
+     * @param int $configid The ID of the config to load.
+     * @throws Exception If the SQL query fails.
+     * @return stdClass|false The Zoom config record on success, or false on failure.
+     */
     public function load_bbb_config($configid) {
         global $DB;
 
@@ -159,21 +185,34 @@ class sessions {
         return $config;
     }
 
-    // Carga la configuración de isntancia desde el htsession
-    // (ya inicializado con el constructor).
 
+    /**
+     * Loads the BBB configuration from the session.
+     *
+     * @return mixed The loaded BBB configuration.
+     */
     public function load_bbb_config_from_session() {
         global $DB;
         $sql = "SELECT h.config
                 FROM {hybridteaching} h
-                JOIN {hybridteaching_session} hs ON hs.hybridteachingid=h.id
-                WHERE hs.id=:htsession";
+                JOIN {hybridteaching_session} hs ON hs.hybridteachingid = h.id
+                WHERE hs.id = :htsession";
 
         $configpartial = $DB->get_record_sql($sql, ['htsession' => $this->bbbsession->htsession]);
         $config = $this->load_bbb_config($configpartial->config);
         return $config;
     }
 
+    /**
+     * Get the zone access for the user.
+     *
+     * This function calculates the necessary data for the access zone,
+     * checks if the role is for starting a meeting or joining a meeting,
+     * and returns the access URL (either starturl or joinurl) based on the role.
+     *
+     * @throws Some_Exception_Class This function does not throw any exceptions.
+     * @return array|null Returns an array with the zone access information or null if there is no session available.
+     */
     public function get_zone_access() {
         // ESTA FUNCION NO NECESITA NINGÚN $hybridteachingid
         // PORQUE YA ESTÁ INICIALIZADA EN EL CONSTRUCTOR CON SU SESSION,
@@ -222,6 +261,11 @@ class sessions {
     }
 
 
+    /**
+     * Get the recording URL.
+     *
+     * @return string The URL of the recording.
+     */
     public function get_recording () {
         $bbbconfig = $this->load_bbb_config_from_session();
         $bbbproxy = new bbbproxy($bbbconfig);
@@ -236,18 +280,45 @@ class sessions {
         return $url;
     }
 
-    protected static function get_user_meeting_role($session) : String {
+    /**
+     * Retrieves the role of the user in a meeting.
+     *
+     * @param object $session The session object for the meeting.
+     * @global object $DB The global database object.
+     * @global object $USER The global user object.
+     * @throws Some_Exception_Class A description of the exception that can be thrown.
+     * @return string The role of the user in the meeting ('VIEWER' or 'MODERATOR').
+     */
+    public static function get_user_meeting_role($session) : String {
         global $DB, $USER;
 
         $meetingrole = 'VIEWER';
         $hybridteaching = $DB->get_record('hybridteaching', ['id' => $DB->get_field('hybridteaching_session', 'hybridteachingid',
-            ['id' => $session->htsession], IGNORE_MISSING)], 'id, participants', IGNORE_MISSING);
-        $cm = get_coursemodule_from_id('hybridteaching',  $hybridteaching->id,  0,  false,  MUST_EXIST);
-        $context = \context_module::instance($cm->id);
+            ['id' => $session->htsession], IGNORE_MISSING), ], 'id, course, participants', IGNORE_MISSING);
+        $context = \context_course::instance($hybridteaching->course);
         $role = roles::is_moderator($context, json_decode($hybridteaching->participants, true), $USER->id);
         if ($role) {
             $meetingrole = 'MODERATOR';
         }
         return $meetingrole;
+    }
+
+    /**
+     * Retrieves the join URL for a BigBlueButton session.
+     *
+     * @param object $session The session object.
+     * @throws Exception If the join URL cannot be retrieved.
+     * @return string The join URL for the session.
+     */
+    public static function get_join_url($session) {
+        global $DB, $USER;
+        $bbbconfig = $DB->get_field('hybridteaching', 'config', ['id' => $session->hybridteachingid]);
+        $bbbproxy = new bbbproxy($bbbconfig);
+        $bbbsess = $DB->get_record('hybridteachvc_bbb', ['htsession' => $session->id]);
+        $role = self::get_user_meeting_role($bbbsess);
+        $joinurl = $bbbproxy->get_join_url($bbbsess->meetingid, $USER->username,
+            'https://www.urldelogout', $role);
+
+        return $joinurl;
     }
 }

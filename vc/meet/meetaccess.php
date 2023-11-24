@@ -47,7 +47,7 @@ $subpluginconfigid = $DB->get_field('hybridteaching_configs', 'subpluginconfigid
 $meetconfig = $DB->get_record('hybridteachvc_meet_config', ['id' => $subpluginconfigid]);
 
 if (empty($meetconfig)) {
-    redirect($return, get_string('loggingerrormeet', 'hybridteaching'), null, \core\output\notification::NOTIFY_ERROR);
+    redirect($return, get_string('loggingerrormeet', 'hybridteachvc_meet'), null, \core\output\notification::NOTIFY_ERROR);
 }
 
 $meethandler = new \hybridteachvc_meet\meet_handler($meetconfig);

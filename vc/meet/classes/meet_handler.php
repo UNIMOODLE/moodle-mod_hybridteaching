@@ -33,6 +33,8 @@
 
 namespace hybridteachvc_meet;
 
+use Google\Client;
+use Google\Service\Drive;
 class meet_handler {
     public $client;
 
@@ -130,13 +132,109 @@ class meet_handler {
         return $event;
     }
 
-    public function save_token($configmeet) {
-        global $DB;
-        $configmeet->token = json_encode($this->client->getAccessToken());;
-        $DB->update_record('hybridteachstore_meet_config', $configmeet);
+    public function update_meeting_event($session, $meetdata) {
+        global $USER;
+
+        $service = new \Google_Service_Calendar($this->client);
+        $calendarid = 'primary';
+
+        $sessionstart = new \DateTime();
+        $sessionstart->setTimestamp($session->starttime);
+
+        $sessionend = new \DateTime();
+        $sessionend->setTimestamp($session->starttime + $session->duration);
+
+        $starttime = $sessionstart->format('H:i:s');
+        $sdate = $sessionstart->format('Y-m-d');
+
+        $endtime = $sessionend->format('H:i:s');
+        $edate = $sessionend->format('Y-m-d');
+
+        $startdatetime = $sdate . 'T' . $starttime;
+        $enddatetime = $edate . 'T' . $endtime;
+
+        $timezone = get_user_timezone($USER->timezone);
+
+        $event = new \Google_Service_Calendar_Event([
+            'summary' => $session->name,
+            'description' => $session->description,
+            'start' => [
+                'dateTime' => $startdatetime,
+                'timeZone' => $timezone,
+            ],
+            'end' => [
+                'dateTime' => $enddatetime,
+                'timeZone' => $timezone,
+            ],
+            'conferenceData' => [
+                'createRequest' => [
+                    'requestID' => 'req_'.time(),
+                ],
+            ],
+        ]);
+
+        // First retrieve the event from the API.
+        $event = $service->events->get('primary', $meetdata->eventid);
+
+        $event->setSummary('Appointment at Somewhere');
+
+        $service->events->update('primary', $event->getId(), $event);
+
+        return $event;
     }
 
-    public function deletemeeting ($meetingid) {
+    public function save_token($configmeet) {
+        global $DB;
+        $configmeet->token = json_encode($this->client->getAccessToken());
+        if (!empty($configmeet->id)) {
+            $DB->update_record('hybridteachvc_meet_config', $configmeet);
+        }
+    }
+
+    public function deletemeeting($eventid) {
+        $service = new \Google_Service_Calendar($this->client);
+        $service->events->delete('primary', $eventid);
+    }
+
+    public static function searchFiles($joincode) {
+        try {
+            $client = new Client();
+            $client->useApplicationDefaultCredentials();
+            $client->addScope(Drive::DRIVE);
+            $driveService = new Drive($client);
+            $files = array();
+            $pageToken = null;
+            do {
+                $response = $driveService->files->listFiles(array(
+                    'q' => "mimeType='application/vnd.google-apps.file'",
+                    'name' => $joincode,
+                    'spaces' => 'drive',
+                    'pageToken' => $pageToken,
+                    'fields' => 'nextPageToken, files(id, name)',
+                ));
+                array_push($files, $response->files);
+    
+                $pageToken = $response->pageToken;
+            } while ($pageToken != null);
+            return $files;
+        } catch(\Exception $e) {
+           echo "Error Message: ".$e;
+        }
+    }
+
+    public static function downloadFile($fileId) {
+        try {
+            $client = new Client();
+            $client->useApplicationDefaultCredentials();
+            $client->addScope(Drive::DRIVE);
+            $driveService = new Drive($client);
+            $response = $driveService->files->get($fileId, array(
+                'alt' => 'media'));
+            $content = $response->getBody()->getContents();
+            return $content;
+        } catch(\Exception $e) {
+            echo "Error Message: ".$e;
+        }
     }
 }
 

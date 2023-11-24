@@ -36,7 +36,9 @@ require(__DIR__ . '/../../config.php');
 require_once(__DIR__ . '/lib.php');
 require_once($CFG->dirroot . '/mod/hybridteaching/classes/helper.php');
 require_once($CFG->dirroot . '/mod/hybridteaching/classes/controller/sessions_controller.php');
+require_once($CFG->dirroot . '/mod/hybridteaching/classes/controller/notify_controller.php');
 require_once($CFG->dirroot . '/lib/grouplib.php');
+use mod_hybridteaching\helpers\roles;
 
 $id = optional_param('id', 0, PARAM_INT);
 $h = optional_param('h', 0, PARAM_INT);
@@ -161,10 +163,20 @@ if (!$activesession) {
                 $status = get_string('status_finished', 'mod_hybridteaching');
                 $isfinished = true;
                 $alert = 'alert-danger';
+                if (!$session::session_finished_triggered($activesession->id)) {
+                    $event = \mod_hybridteaching\event\session_finished::create([
+                        'objectid' => $hybridteaching->id,
+                        'context' => \context_course::instance($hybridteaching->course),
+                        'other' => [
+                            'sessid' => $activesession->id,
+                        ],
+                    ]);
+    
+                    $event->trigger();
+                }
+
                 break;
         }
-        $viewupdate && has_capability('mod/hybridteaching:attendanceregister', $modulecontext) && $hybridteaching->useattendance
-            ? $PAGE->requires->js_call_amd('mod_hybridteaching/view', 'init', [$activesession->id, $USER->id]) : '';
         !isset($status) ? $status = '' : '';
 
         // Closedoors.
@@ -217,6 +229,20 @@ if (!$activesession) {
             }
         }
 
+        if ($hybridteaching->waitmoderator) {
+            $role = roles::is_moderator($modulecontext, json_decode($hybridteaching->participants, true), $USER->id);
+            $issessionmoderator = ($role || has_capability('mod/hybridteaching:sessionsactions', $modulecontext));
+            if (!$issessionmoderator && $canentry ) {
+                if (!$session->session_started($activesession)) {
+                    // Wait moderator.
+                    $result['waitmoderator'] = true;
+                    $canentry = false;
+                }
+            }
+        }
+        $viewupdate && has_capability('mod/hybridteaching:attendanceregister', $modulecontext) && $hybridteaching->useattendance
+           && $canentry ? $PAGE->requires->js_call_amd('mod_hybridteaching/view', 'init', [$activesession->id, $USER->id]) : '';
+
         $result['isaccess'] = true;
         $result['id'] = $id;
         $result['s'] = !$isfinished ? $activesession->id : 0;
@@ -261,6 +287,6 @@ if (!$activesession) {
         $result['useattendance'] = $hybridteaching->useattendance;
     }
 }
-
+notify_controller::show();
 echo $renderer->zone_access($result);
 echo $OUTPUT->footer();

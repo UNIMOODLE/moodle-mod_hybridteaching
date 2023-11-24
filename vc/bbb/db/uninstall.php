@@ -37,11 +37,11 @@ namespace mod_hybridteaching\vc\bbb\db;
  * Custom uninstallation procedure.
  */
 function xmldb_hybridteachvc_bbb_uninstall() {
-    delete_subplugin_configs();
+    delete_bbb_configs();
     return true;
 }
 
-function delete_subplugin_configs() {
+function delete_bbb_configs() {
     global $DB;
     $DB->delete_records('hybridteaching_configs', ['type' => get_string('bbb', 'hybridteachvc_bbb')]);
 }

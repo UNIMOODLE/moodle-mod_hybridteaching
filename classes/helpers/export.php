@@ -89,15 +89,24 @@ class export {
         $sessions = $this->get_headers_dates($data);
         foreach ($sessions as $session) {
             $timestamp = explode(" - ", $session->dategroup)[0];
-            $formattedDate = date("Y-m-d H:i", $timestamp);
-            $newDategroup = str_replace($timestamp, $formattedDate, $session->dategroup);
-            $headers[] = $newDategroup;
+            $formatteddate = date("Y-m-d H:i", $timestamp);
+            $newdategroup = str_replace($timestamp, $formatteddate, $session->dategroup);
+            $headers[] = $newdategroup;
             $this->sessions[] = $session->id;
         }
 
         return $headers;
     }
 
+    /**
+     * Retrieves the headers and dates of sessions.
+     *
+     * @param mixed $data The data used to retrieve the sessions.
+     *                    If the 'includeallsessions' parameter is set, all sessions will be retrieved.
+     *                    Otherwise, the sessions will be retrieved based on the start and end dates provided in the $data object.
+     * @throws Some_Exception_Class A description of the exception that may be thrown.
+     * @return array An array of sessions containing the headers and dates.
+     */
     public function get_headers_dates($data) {
         $sessions = [];
         if (isset($data->includeallsessions)) {
@@ -136,7 +145,7 @@ class export {
         $allgroups = get_string('allgroups', 'hybridteaching');
 
         $sql = "SELECT hs.id,
-                           CASE 
+                           CASE
                                 WHEN hs.groupid = 0 THEN CONCAT(hs.starttime, ' - All groups')
                                 WHEN g.id IS NOT NULL THEN CONCAT(hs.starttime, ' - ', g.name)
                                 ELSE '-'
@@ -193,7 +202,7 @@ class export {
 
         $body = $DB->get_records_sql($sql, $allparams);
 
-        $groupedAttendance = array_reduce($body, function ($result, $value) {
+        $groupedattendance = array_reduce($body, function ($result, $value) {
             $userid = $value->userid;
             if (!isset($result[$userid])) {
                 $result[$userid] = [];
@@ -201,26 +210,34 @@ class export {
             $result[$userid][] = $value;
             return $result;
         }, []);
-        
-        // Concatenar attendance separados por |
-        $finalAttendance = array_map(function ($records) {
+
+        // Concatenar attendance separados por |.
+        $finalattendance = array_map(function ($records) {
             $attendance = array_map(function ($record) {
                 return $record->attbysess;
             }, $records);
-            
+
             $result = new stdClass();
             $result->firstname = $records[0]->firstname;
             $result->lastname = $records[0]->lastname;
             $result->groupname = $records[0]->groupname;
             $result->email = $records[0]->email;
             $result->attbysess = implode(' | ', $attendance);
-            
-            return $result;
-        }, $groupedAttendance);
 
-        return $finalAttendance;
+            return $result;
+        }, $groupedattendance);
+
+        return $finalattendance;
     }
 
+    /**
+     * Exports the data to a file in the specified format.
+     *
+     * @param string $filename The name of the file to export to.
+     * @param string $format The format of the exported file (text or excel/ods).
+     * @throws Some_Exception_Class If an error occurs during the export process.
+     * @return void
+     */
     public function export($filename, $format) {
         if ($format === 'text') {
             $this->export_text($filename);

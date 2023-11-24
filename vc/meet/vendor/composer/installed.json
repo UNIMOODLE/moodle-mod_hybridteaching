@@ -125,17 +125,17 @@
     },
     {
         "name": "google/apiclient-services",
-        "version": "v0.311.1",
-        "version_normalized": "0.311.1.0",
+        "version": "v0.325.0",
+        "version_normalized": "0.325.0.0",
         "source": {
             "type": "git",
             "url": "https://github.com/googleapis/google-api-php-client-services.git",
-            "reference": "e8816f6708fac9d78ab59ef27a61a08d0af84d1e"
+            "reference": "b2d39ef968f0017d6bff3c1da82501a0c575c9ce"
         },
         "dist": {
             "type": "zip",
-            "url": "https://api.github.com/repos/googleapis/google-api-php-client-services/zipball/e8816f6708fac9d78ab59ef27a61a08d0af84d1e",
-            "reference": "e8816f6708fac9d78ab59ef27a61a08d0af84d1e",
+            "url": "https://api.github.com/repos/googleapis/google-api-php-client-services/zipball/b2d39ef968f0017d6bff3c1da82501a0c575c9ce",
+            "reference": "b2d39ef968f0017d6bff3c1da82501a0c575c9ce",
             "shasum": ""
         },
         "require": {
@@ -144,7 +144,7 @@
         "require-dev": {
             "phpunit/phpunit": "^5.7||^8.5.13"
         },
-        "time": "2023-08-06T00:56:12+00:00",
+        "time": "2023-11-18T01:04:14+00:00",
         "type": "library",
         "installation-source": "dist",
         "autoload": {
@@ -222,23 +222,23 @@
     },
     {
         "name": "guzzlehttp/guzzle",
-        "version": "7.7.0",
-        "version_normalized": "7.7.0.0",
+        "version": "7.8.0",
+        "version_normalized": "7.8.0.0",
         "source": {
             "type": "git",
             "url": "https://github.com/guzzle/guzzle.git",
-            "reference": "fb7566caccf22d74d1ab270de3551f72a58399f5"
+            "reference": "1110f66a6530a40fe7aea0378fe608ee2b2248f9"
         },
         "dist": {
             "type": "zip",
-            "url": "https://api.github.com/repos/guzzle/guzzle/zipball/fb7566caccf22d74d1ab270de3551f72a58399f5",
-            "reference": "fb7566caccf22d74d1ab270de3551f72a58399f5",
+            "url": "https://api.github.com/repos/guzzle/guzzle/zipball/1110f66a6530a40fe7aea0378fe608ee2b2248f9",
+            "reference": "1110f66a6530a40fe7aea0378fe608ee2b2248f9",
             "shasum": ""
         },
         "require": {
             "ext-json": "*",
-            "guzzlehttp/promises": "^1.5.3 || ^2.0",
-            "guzzlehttp/psr7": "^1.9.1 || ^2.4.5",
+            "guzzlehttp/promises": "^1.5.3 || ^2.0.1",
+            "guzzlehttp/psr7": "^1.9.1 || ^2.5.1",
             "php": "^7.2.5 || ^8.0",
             "psr/http-client": "^1.0",
             "symfony/deprecation-contracts": "^2.2 || ^3.0"
@@ -259,7 +259,7 @@
             "ext-intl": "Required for Internationalized Domain Name (IDN) support",
             "psr/log": "Required for using the Log middleware"
         },
-        "time": "2023-05-21T14:04:53+00:00",
+        "time": "2023-08-27T10:20:53+00:00",
         "type": "library",
         "extra": {
             "bamarni-bin": {
@@ -427,17 +427,17 @@
     },
     {
         "name": "guzzlehttp/psr7",
-        "version": "2.6.0",
-        "version_normalized": "2.6.0.0",
+        "version": "2.6.1",
+        "version_normalized": "2.6.1.0",
         "source": {
             "type": "git",
             "url": "https://github.com/guzzle/psr7.git",
-            "reference": "8bd7c33a0734ae1c5d074360512beb716bef3f77"
+            "reference": "be45764272e8873c72dbe3d2edcfdfcc3bc9f727"
         },
         "dist": {
             "type": "zip",
-            "url": "https://api.github.com/repos/guzzle/psr7/zipball/8bd7c33a0734ae1c5d074360512beb716bef3f77",
-            "reference": "8bd7c33a0734ae1c5d074360512beb716bef3f77",
+            "url": "https://api.github.com/repos/guzzle/psr7/zipball/be45764272e8873c72dbe3d2edcfdfcc3bc9f727",
+            "reference": "be45764272e8873c72dbe3d2edcfdfcc3bc9f727",
             "shasum": ""
         },
         "require": {
@@ -458,7 +458,7 @@
         "suggest": {
             "laminas/laminas-httphandlerrunner": "Emit PSR-7 responses"
         },
-        "time": "2023-08-03T15:06:02+00:00",
+        "time": "2023-08-27T10:13:57+00:00",
         "type": "library",
         "extra": {
             "bamarni-bin": {
@@ -541,17 +541,17 @@
     },
     {
         "name": "monolog/monolog",
-        "version": "2.9.1",
-        "version_normalized": "2.9.1.0",
+        "version": "2.9.2",
+        "version_normalized": "2.9.2.0",
         "source": {
             "type": "git",
             "url": "https://github.com/Seldaek/monolog.git",
-            "reference": "f259e2b15fb95494c83f52d3caad003bbf5ffaa1"
+            "reference": "437cb3628f4cf6042cc10ae97fc2b8472e48ca1f"
         },
         "dist": {
             "type": "zip",
-            "url": "https://api.github.com/repos/Seldaek/monolog/zipball/f259e2b15fb95494c83f52d3caad003bbf5ffaa1",
-            "reference": "f259e2b15fb95494c83f52d3caad003bbf5ffaa1",
+            "url": "https://api.github.com/repos/Seldaek/monolog/zipball/437cb3628f4cf6042cc10ae97fc2b8472e48ca1f",
+            "reference": "437cb3628f4cf6042cc10ae97fc2b8472e48ca1f",
             "shasum": ""
         },
         "require": {
@@ -597,7 +597,7 @@
             "rollbar/rollbar": "Allow sending log messages to Rollbar",
             "ruflin/elastica": "Allow sending log messages to an Elastic Search server"
         },
-        "time": "2023-02-06T13:44:46+00:00",
+        "time": "2023-10-27T15:25:26+00:00",
         "type": "library",
         "extra": {
             "branch-alias": {
@@ -752,17 +752,17 @@
     },
     {
         "name": "phpseclib/phpseclib",
-        "version": "3.0.21",
-        "version_normalized": "3.0.21.0",
+        "version": "3.0.33",
+        "version_normalized": "3.0.33.0",
         "source": {
             "type": "git",
             "url": "https://github.com/phpseclib/phpseclib.git",
-            "reference": "4580645d3fc05c189024eb3b834c6c1e4f0f30a1"
+            "reference": "33fa69b2514a61138dd48e7a49f99445711e0ad0"
         },
         "dist": {
             "type": "zip",
-            "url": "https://api.github.com/repos/phpseclib/phpseclib/zipball/4580645d3fc05c189024eb3b834c6c1e4f0f30a1",
-            "reference": "4580645d3fc05c189024eb3b834c6c1e4f0f30a1",
+            "url": "https://api.github.com/repos/phpseclib/phpseclib/zipball/33fa69b2514a61138dd48e7a49f99445711e0ad0",
+            "reference": "33fa69b2514a61138dd48e7a49f99445711e0ad0",
             "shasum": ""
         },
         "require": {
@@ -780,7 +780,7 @@
             "ext-mcrypt": "Install the Mcrypt extension in order to speed up a few other cryptographic operations.",
             "ext-openssl": "Install the OpenSSL extension in order to speed up a wide variety of cryptographic operations."
         },
-        "time": "2023-07-09T15:24:48+00:00",
+        "time": "2023-10-21T14:00:39+00:00",
         "type": "library",
         "installation-source": "dist",
         "autoload": {
@@ -908,24 +908,24 @@
     },
     {
         "name": "psr/http-client",
-        "version": "1.0.2",
-        "version_normalized": "1.0.2.0",
+        "version": "1.0.3",
+        "version_normalized": "1.0.3.0",
         "source": {
             "type": "git",
             "url": "https://github.com/php-fig/http-client.git",
-            "reference": "0955afe48220520692d2d09f7ab7e0f93ffd6a31"
+            "reference": "bb5906edc1c324c9a05aa0873d40117941e5fa90"
         },
         "dist": {
             "type": "zip",
-            "url": "https://api.github.com/repos/php-fig/http-client/zipball/0955afe48220520692d2d09f7ab7e0f93ffd6a31",
-            "reference": "0955afe48220520692d2d09f7ab7e0f93ffd6a31",
+            "url": "https://api.github.com/repos/php-fig/http-client/zipball/bb5906edc1c324c9a05aa0873d40117941e5fa90",
+            "reference": "bb5906edc1c324c9a05aa0873d40117941e5fa90",
             "shasum": ""
         },
         "require": {
             "php": "^7.0 || ^8.0",
             "psr/http-message": "^1.0 || ^2.0"
         },
-        "time": "2023-04-10T20:12:12+00:00",
+        "time": "2023-09-23T14:17:50+00:00",
         "type": "library",
         "extra": {
             "branch-alias": {

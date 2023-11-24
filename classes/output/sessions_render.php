@@ -36,6 +36,7 @@ defined('MOODLE_INTERNAL') || die();
 use core_table\dynamic as dynamic_table;
 
 require_once($CFG->dirroot . '/mod/hybridteaching/classes/controller/sessions_controller.php');
+require_once($CFG->dirroot . '/mod/hybridteaching/classes/controller/notify_controller.php');
 require_once($CFG->dirroot . '/mod/hybridteaching/classes/helpers/attendance.php');
 require_once($CFG->libdir . '/tablelib.php');
 require_once($CFG->dirroot . '/user/lib.php');
@@ -92,9 +93,6 @@ class hybridteaching_sessions_render extends \table_sql implements dynamic_table
             'stroptions' => get_string('actions', 'mod_hybridteaching'),
             'attexempt' => get_string('attexempt', 'hybridteaching'),
         ];
-
-        /*echo html_writer::start_div('prueba', ['id' => 'sessinfomodaldiv']);
-        echo html_writer::end_div();*/
 
         $sortexclusions = ['strrecording', 'strattendance', 'strmaterials', 'stroptions', 'strstart'];
         foreach ($columns as $key => $column) {
@@ -201,32 +199,33 @@ class hybridteaching_sessions_render extends \table_sql implements dynamic_table
                 }
             }
 
-            // Get recordings.
-
             $recordingbutton = get_string('norecording', 'mod_hybridteaching');
             if (has_capability('mod/hybridteaching:viewrecordings', $this->context)) {
-                if ($session['userecordvc'] == 1 && $session['processedrecording'] >= 0) {
-                    if ($session['storagereference'] > 0) {
-                        $classstorage = sessions_controller::get_subpluginstorage_class($session['storagereference']);
-                        $config = helper::subplugin_config_exists($session['storagereference'], 'store');
+                if (!has_capability('mod/hybridteaching:sessionsactions', $this->context) && $session['visiblerecord'] == 0) {
+                    $recordingbutton = get_string('norecording', 'mod_hybridteaching');
+                } else {
+                    if ($session['userecordvc'] == 1 && $session['processedrecording'] >= 0) {
+                        if ($session['storagereference'] > 0) {
+                            $classstorage = sessions_controller::get_subpluginstorage_class($session['storagereference']);
+                            $config = helper::subplugin_config_exists($session['storagereference'], 'store');
 
-                        if ($config) {
-                            sessions_controller::require_subplugin_store($classstorage['type']);
-                            $classname = $classstorage['classname'];
-                            $sessionrecording = new $classname();
-                            $urlrecording = $CFG->wwwroot . '/mod/hybridteaching/loadrecording.php?cid='.
-                                $this->hybridteaching->course.'&sid='.$session['id'].'&id='.$this->cm->id;
-                            $recordingbutton = html_writer::link($urlrecording, get_string('watchrecording',
-                                'mod_hybridteaching'), ['target' => '_blank', 'class' => 'btn btn-secondary']);
-                        }
-                    } else if ($session['storagereference'] == -1) {
-                        // For use case to BBB or a videconference type storage.
-                        $config = helper::subplugin_config_exists($session['vcreference'], 'vc');
-                        if ($config) {
-                            sessions_controller::require_subplugin_session($session['typevc']);
-                            $classname = sessions_controller::get_subpluginvc_class($session['typevc']);
-                            $sessionrecording = new $classname($session['id']);
-                            $urlrecording = $sessionrecording->get_recording($session['id']);
+                            if ($config) {
+                                sessions_controller::require_subplugin_store($classstorage['type']);
+                                $classname = $classstorage['classname'];
+                                $sessionrecording = new $classname();
+                                $urlrecording = $CFG->wwwroot . '/mod/hybridteaching/loadrecording.php?cid='.
+                                    $this->hybridteaching->course.'&sid='.$session['id'].'&id='.$this->cm->id;
+                                $recordingbutton = html_writer::link($urlrecording, get_string('watchrecording',
+                                    'mod_hybridteaching'), ['target' => '_blank', 'class' => 'btn btn-secondary']);
+                            }
+                        } else if ($session['storagereference'] == -1) {
+                            $config = helper::subplugin_config_exists($session['vcreference'], 'vc');
+                            if ($config) {
+                                sessions_controller::require_subplugin_session($session['typevc']);
+                                $classname = sessions_controller::get_subpluginvc_class($session['typevc']);
+                                $sessionrecording = new $classname($session['id']);
+                                $urlrecording = $sessionrecording->get_recording($session['id']);
+                            }
                         }
                     }
                 }
@@ -266,11 +265,12 @@ class hybridteaching_sessions_render extends \table_sql implements dynamic_table
                 'hour' => $hour,
                 'attexempt' => html_writer::checkbox('attexempt[]', $session['attexempt'],
                     $session['attexempt'], '', ['class' => 'attexempt', 'data-id' => $sessionid]),
-                'duration' => !empty($session['duration']) ? helper::get_hours_format($session['duration']) : self::EMPTY,
+                'duration' => !empty($session['duration']) && $session['duration'] > 0 ? helper::get_hours_format($session['duration']) : self::EMPTY,
                 'recordingbutton' => $recordingbutton,
-                'attendance' => $sessatt['sessatt_string'],
+                'attendance' => is_array($sessatt) && isset($sessatt['sessatt_string']) ? $sessatt['sessatt_string'] : '',
                 'materials' => $fileurls,
                 'enabled' => $session['visible'],
+                'visiblerecord' => $session['visiblerecord'],
                 'checkbox' => new \core\output\checkbox_toggleall('sessions-table', false, [
                     'id' => 'session-' . $sessionid,
                     'name' => 'session[]',
@@ -313,6 +313,7 @@ class hybridteaching_sessions_render extends \table_sql implements dynamic_table
             'action' => '/mod/hybridteaching/classes/action/session_action.php', ]);
         $return .= $OUTPUT->paging_bar($sessionscount, $page, $perpage, $baseurl);
         $return .= $OUTPUT->box_end();
+        notify_controller::show();
 
         return $return;
     }
@@ -399,14 +400,20 @@ class hybridteaching_sessions_render extends \table_sql implements dynamic_table
         $info = '';
         if ($this->typelist == SESSION_LIST) {
             $info .= html_writer::link('',
-                $OUTPUT->pix_icon('docs', get_string('actions', 'mod_hybridteaching')), 
-                ['class' => 'sessinfo', 'data-id' => $body['sessionid'], 'data-toggle' => 'modal', 
-                'data-target' => '#sessinfomodal']);
+                $OUTPUT->pix_icon('docs', get_string('actions', 'mod_hybridteaching')),
+                ['class' => 'sessinfo', 'data-id' => $body['sessionid'], 'data-toggle' => 'modal',
+                'data-target' => '#sessinfomodal', ]);
         }
 
-        $record = html_writer::link(new moodle_url(''),
-            $OUTPUT->pix_icon('i/messagecontentvideo', get_string('actions', 'mod_hybridteaching'),
-                'moodle', ['class' => 'iconsmall']));
+        if ($body['visiblerecord']) {
+            $record = html_writer::link(new moodle_url($url, array_merge($params, ['action' => 'visiblerecord'])),
+                $OUTPUT->pix_icon('i/messagecontentvideo', get_string('hiderecords', 'mod_hybridteaching'),
+                    'moodle', ['class' => 'iconsmall']));
+        } else {
+            $record = html_writer::link(new moodle_url($url, array_merge($params, ['action' => 'visiblerecord'])),
+                $OUTPUT->pix_icon('i/messagecontentvideo', get_string('visiblerecords', 'mod_hybridteaching'),
+                    'moodle', ['class' => 'iconsmall fa-film-slash']));
+        }
 
         $attendance = html_writer::link(new moodle_url(''),
             $OUTPUT->pix_icon('i/unchecked', get_string('actions', 'mod_hybridteaching'), 'moodle', ['class' => 'iconsmall']));
@@ -450,7 +457,7 @@ class hybridteaching_sessions_render extends \table_sql implements dynamic_table
                     (has_capability('mod/hybridteaching:viewrecordings', $this->context)) ? $params['recordingbutton'] : '',
                     (has_capability('mod/hybridteaching:sessionsfulltable', $this->context)) ? $params['attendance'] : '',
                     (has_capability('mod/hybridteaching:sessionsfulltable', $this->context)) ? $params['attexempt'] : '',
-                    $params['materials'],
+                    $params['enabled'] ? $params['materials'] : '',
                     $options, ]);
         } else if ($this->typelist == PROGRAM_SESSION_LIST) {
             $row = new html_table_row([$OUTPUT->render($params['checkbox']), $params['date'], $params['hour'],

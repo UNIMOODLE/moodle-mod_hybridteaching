@@ -145,7 +145,7 @@ class sessions {
         $newzoom->joinurl = $response->join_url;
         $newzoom->optionhostvideo = $response->settings->host_video;
         $newzoom->optionparticipantsvideo = $response->settings->participant_video;
-        $newzoom->existsonzoom = 1;
+        $newzoom->downloadattempts = 0;
 
         return $newzoom;
     }

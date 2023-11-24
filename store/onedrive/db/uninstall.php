@@ -37,11 +37,11 @@ namespace mod_hybridteaching\store\onedrive\db;
  * Custom uninstallation procedure.
  */
 function xmldb_hybridteachstore_onedrive_uninstall() {
-    delete_subplugin_configs();
+    delete_onedrive_configs();
     return true;
 }
 
-function delete_subplugin_configs() {
+function delete_onedrive_configs() {
     global $DB;
     $DB->delete_records('hybridteaching_configs', ['type' => get_string('onedrive', 'hybridteachstore_onedrive')]);
 }

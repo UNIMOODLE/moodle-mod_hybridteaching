@@ -75,17 +75,17 @@ class downloadrecords extends \core\task\scheduled_task {
             $response = $teamshandler->get_meeting_recordings($folderfile, $session->meetingid, $session->organizer);
 
             // Save recordingid and prepare to upload.
-            $session = $DB->get_record('hybridteaching_session', ['id' => $session->hsid]);
+            $sess = $DB->get_record('hybridteaching_session', ['id' => $session->hsid]);
             if ($response != false) {
                 $teams = $DB->get_record('hybridteachvc_teams', ['meetingid' => $session->meetingid] );
                 $teams->recordingid = $response;
                 $DB->update_record('hybridteachvc_teams', $teams);
-                $session->processedrecording = 0;
+                $sess->processedrecording = 0;
             } else {
                 // Save -2 indicates there are not recording.
-                $session->processedrecording = -2;
+                $sess->processedrecording = -2;
             }
-            $DB->update_record('hybridteaching_session', $session);
+            $DB->update_record('hybridteaching_session', $sess);
         }
     }
 }

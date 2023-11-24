@@ -430,3 +430,12 @@ $string['endofperiod'] = 'Fin del período';
 $string['includeall'] = 'Seleccionar todas las sesiones';
 $string['joinurl'] = 'Url de acceso: ';
 $string['passstring'] = 'Contraseña: ';
+$string['vcconfigremoved'] = 'La configuracion de videollamada de la actividad fue eliminada por un administrador';
+$string['hiderecords'] = 'Ocultar grabaciones';
+$string['visiblerecords'] = 'Mostrar grabaciones';
+
+$string['error:deleteinprogress'] = 'No puedes borrar una sesión en curso';
+$string['deletewithhybridmods'] = 'Esta configuración se usa en los siguientes modulos de hybridteaching: {$a}. ¿Está seguro de que desea borrarla?';
+$string['lostconfig'] = 'Esta configuración ha sido eliminada por un administrador';
+$string['noinitialstateconfig'] = 'Este tipo de videoconferencia no tiene configuración de estados iniciales';
+$string['cantfinishunstarted'] = 'No puedes finalizar una sesión antes del inicio establecido';

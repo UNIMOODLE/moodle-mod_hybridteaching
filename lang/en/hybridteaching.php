@@ -442,3 +442,12 @@ $string['endofperiod'] = 'End of period';
 $string['includeall'] = 'Select all sessions';
 $string['joinurl'] = 'Join url: ';
 $string['passstring'] = 'Password: ';
+$string['vcconfigremoved'] = 'The videoconference config for this module was removed by an administrator';
+$string['hiderecords'] = 'Hide recordings';
+$string['visiblerecords'] = 'Show recordings';
+
+$string['error:deleteinprogress'] = 'You can not delete an in progress session';
+$string['deletewithhybridmods'] = 'This config is used in the following hybridteaching modules: {$a}. Are you sure you want to delete it?';
+$string['lostconfig'] = 'This session config has been deleted by an administrator';
+$string['noinitialstateconfig'] = 'This meeting has no initial status to be configured';
+$string['cantfinishunstarted'] = 'Can not finish a session before the real start time';

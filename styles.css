@@ -1,0 +1,13 @@
+table.sessionstable .icon.fa-film{
+    position: relative;
+}
+
+table.sessionstable .icon.fa-film.fa-film-slash:after{
+    position: absolute;
+    content: "/";
+    color: inherit;
+    font-weight: 800;
+    font-size: 2em;
+    left: 4px;
+    top: -8px;
+}

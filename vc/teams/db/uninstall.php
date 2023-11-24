@@ -37,12 +37,12 @@ namespace mod_hybridteaching\vc\teams\db;
  * Custom uninstallation procedure.
  */
 function xmldb_hybridteachvc_teams_uninstall() {
-    delete_subplugin_configs();
+    delete_teams_configs();
     return true;
 }
 
 
-function delete_subplugin_configs() {
+function delete_teams_configs() {
     global $DB;
     $DB->delete_records('hybridteaching_configs', ['type' => get_string('teams', 'hybridteachvc_teams')]);
 }

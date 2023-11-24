@@ -66,6 +66,9 @@ class grades {
 
             if ($this->has_taken_attendance($ht->id, $userid)) {
                 $grades[$userid]->rawgrade = $this->get_instance_grade_for($ht, $userid);
+                if (isset($grades[$userid]->rawrgrade)) {
+                    $grades[$userid]->rawrgrade < 0 ? $grades[$userid]->rawrgrade = 0 : '';
+                }
             } else {
                 $grades[$userid]->rawgrade = null;
             }
@@ -279,7 +282,7 @@ class grades {
                 if ($att = $this->has_valid_attendance($ht->id, $sessid, $userid)) {
                     $getlastattend = $attcontroller::hybridteaching_get_last_attend($att->id, $userid);
                     if (is_object($getlastattend) && $getlastattend->action == 1) {
-                        $notify = $attcontroller::hybridteaching_set_attendance_log($ht, (int)$sessid, 0, $userid);
+                        $notify = $attcontroller::hybridteaching_set_attendance_log($ht, (int)$sessid, 0, $userid, $event = true);
                         $notify['ntype'] == 'success' ?
                             attendance_controller::hybridteaching_set_attendance($ht, (int)$sessid, 1, null, $userid)
                             : '';
@@ -330,7 +333,7 @@ class grades {
         } else {
             $usersessgrade = ($userconnectime / $sessduration) * $ht->grade;
         }
-
+        $usersessgrade < 0 ? $usersessgrade = 0 : '';
         return $usersessgrade;
     }
 

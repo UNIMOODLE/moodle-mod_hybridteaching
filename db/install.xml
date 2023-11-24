@@ -97,8 +97,10 @@
         <FIELD NAME="vcreference" TYPE="int" LENGTH="11" NOTNULL="false" SEQUENCE="false" COMMENT="Vc reference"/>
         <FIELD NAME="processedrecording" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Session recording. -1: no downloaded from vc yet (ready for download), 0: downloaded from vc, positive number: activity id storage"/>
         <FIELD NAME="storagereference" TYPE="int" LENGTH="11" NOTNULL="false" SEQUENCE="false" COMMENT="Recording reference"/>
+        <FIELD NAME="visiblerecord" TYPE="int" LENGTH="1" NOTNULL="false" DEFAULT="1" SEQUENCE="false"/>
         <FIELD NAME="isfinished" TYPE="int" LENGTH="1" NOTNULL="false" DEFAULT="0" SEQUENCE="false" COMMENT="Session finished flag"/>
         <FIELD NAME="attexempt" TYPE="int" LENGTH="1" NOTNULL="false" DEFAULT="0" SEQUENCE="false" COMMENT="Is attendance exempt for this session"/>
+        <FIELD NAME="caleventid" TYPE="int" LENGTH="11" NOTNULL="false" SEQUENCE="false" COMMENT="Calendar event id"/>
         <FIELD NAME="visible" TYPE="int" LENGTH="1" NOTNULL="false" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="timecreated" TYPE="int" LENGTH="11" NOTNULL="false" SEQUENCE="false"/>
         <FIELD NAME="timemodified" TYPE="int" LENGTH="11" NOTNULL="false" SEQUENCE="false"/>

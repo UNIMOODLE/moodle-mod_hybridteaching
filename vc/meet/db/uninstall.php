@@ -37,11 +37,11 @@ namespace mod_hybridteaching\vc\meet\db;
  * Custom uninstallation procedure.
  */
 function xmldb_hybridteachvc_meet_uninstall() {
-    delete_subplugin_configs();
+    delete_meet_configs();
     return true;
 }
 
-function delete_subplugin_configs() {
+function delete_meet_configs() {
     global $DB;
     $DB->delete_records('hybridteaching_configs', ['type' => get_string('meet', 'hybridteachvc_meet')]);
 }

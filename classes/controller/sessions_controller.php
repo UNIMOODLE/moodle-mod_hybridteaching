@@ -31,11 +31,14 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+use mod_hybridteaching\plugininfo\hybridteachvc;
+
 defined('MOODLE_INTERNAL') || die();
 global $CFG;
 
 require_once('common_controller.php');
 require_once($CFG->dirroot . '/mod/hybridteaching/classes/helper.php');
+require_once($CFG->dirroot . '/mod/hybridteaching/classes/helpers/calendar_helpers.php');
 
 class sessions_controller extends common_controller {
     const MINUTE_TIMETYPE = 1;
@@ -83,7 +86,7 @@ class sessions_controller extends common_controller {
         $params = $params + ['hybridteachingid' => $this->hybridobject->id];
 
         if (!empty($params['starttime'])) {
-            $where .= ' AND starttime + duration '.$operator.' :starttime';
+            $where .= ' AND starttime '.$operator.' :starttime';
         }
 
         if (!empty($extraselect)) {
@@ -117,7 +120,6 @@ class sessions_controller extends common_controller {
         $data->userecordvc = $this->hybridobject->userecordvc;
         if ($data->userecordvc == 1) {
             $data->processedrecording = -1;
-            $data->vcreference = $this->hybridobject->config;
         }
 
         $multiplesess = false;
@@ -148,8 +150,8 @@ class sessions_controller extends common_controller {
      * @param array $data An array of session data to be saved.
      * @throws Exception If there is an error inserting the session into the database.
      */
-    public function create_unique_session($session) {
-        global $DB, $USER;
+    public function create_unique_session($session, $countsess = 0) {
+        global $DB;
 
         $session = $this->fill_session_data_for_create($session);
         $session->id = $DB->insert_record('hybridteaching_session', $session);
@@ -162,11 +164,28 @@ class sessions_controller extends common_controller {
         }
 
         if (!empty($session->sessionfiles)) {
-            file_save_draft_area_files($session->sessionfiles,
+            if (isset($session->replicatedoc) && $session->replicatedoc == 1) {
+                file_save_draft_area_files($session->sessionfiles,
                 $session->context->id, 'mod_hybridteaching', 'session', $session->id,
                 ['subdirs' => false, 'maxfiles' => -1, 'maxbytes' => 0]);
+            } else {
+                if ($countsess == 0) {
+                    file_save_draft_area_files($session->sessionfiles,
+                    $session->context->id, 'mod_hybridteaching', 'session', $session->id,
+                    ['subdirs' => false, 'maxfiles' => -1, 'maxbytes' => 0]);
+                }
+            }
+
         }
         $session->htsession = $session->id;
+        $session->caleventid = 0;
+        if (isset($session->caleneventpersession) && $session->caleneventpersession == 1) {
+            hybridteaching_create_calendar_event($session);
+        } else {
+            if ($countsess == 0) {
+                hybridteaching_create_calendar_event($session);
+            }
+        }
 
         return $session;
     }
@@ -200,13 +219,15 @@ class sessions_controller extends common_controller {
 
         $wdaydesc = [0 => 'Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
         list($hour, $minutes) = $this->get_hour_and_minutes($data->starttime);
+        $countsess = 0;
         while ($sdate < $enddate) {
             if ($sdate < strtotime('+1 week', $startweek)) {
                 $dinfo = usergetdate($sdate);
                 if (isset($data->sdays) && array_key_exists($wdaydesc[$dinfo['wday']], $data->sdays)) {
                     $data->starttime = make_timestamp($dinfo['year'], $dinfo['mon'], $dinfo['mday'],
                         $hour, $minutes);
-                    $this->create_unique_session($data);
+                    $this->create_unique_session($data, $countsess);
+                    $countsess++;
                 }
 
                 $sdate = strtotime("+1 day", $sdate); // Set start to tomorrow.
@@ -232,6 +253,8 @@ class sessions_controller extends common_controller {
         if (!$DB->update_record('hybridteaching_session', $session)) {
             $errormsg = 'errorupdatesession';
         }
+
+        hybridteaching_update_calendar_event($session);
 
         $session = $DB->get_record('hybridteaching_session', ['id' => $session->id]);
         if (!empty($session->typevc)) {
@@ -312,6 +335,8 @@ class sessions_controller extends common_controller {
         if (time() >= $sessiondata->starttime && time() < ($sessiondata->starttime + $sessiondata->duration)) {
             $$errormsg = 'errordsinprogress';
         } else {
+            hybridteaching_delete_calendar_events($id);
+
             if (!$DB->delete_records('hybridteaching_session', ['id' => $id])) {
                 $errormsg = 'errordeletesession';
             }
@@ -531,7 +556,7 @@ class sessions_controller extends common_controller {
      * @return object The updated session object.
      */
     public function fill_session_data_for_update($data) {
-        global $USER;
+        global $USER, $DB;
 
         $session = $this->fill_session_data($data);
         if (!empty($data->sessionfiles)) {
@@ -540,6 +565,8 @@ class sessions_controller extends common_controller {
                 ['subdirs' => false, 'maxfiles' => -1, 'maxbytes' => 0]);
         }
         $session->timemodified = time();
+        $session->caleventid = $DB->get_field('hybridteaching_session', 'caleventid', ['id' => $session->id]);
+        $session->hybridteachingid = $DB->get_field('hybridteaching_session', 'hybridteachingid', ['id' => $session->id]);
         $session->modifiedby = $USER->id;
 
         return $session;
@@ -593,7 +620,6 @@ class sessions_controller extends common_controller {
      * @param object The session object to calculate to save.
      */
     public static function savestorage($session, $courseid) {
-
         // Calculate storage, based on the course category configured in storage settings.
         global $DB;
 
@@ -675,6 +701,11 @@ class sessions_controller extends common_controller {
         }
     }
 
+    /**
+     * Sets the isfinished property of a session to 1 in the hybridteaching_session table.
+     *
+     * @param int $sessid The ID of the session to update.
+     */
     public static function set_session_finished($sessid) {
         global $DB;
         $session = new stdClass();
@@ -683,6 +714,11 @@ class sessions_controller extends common_controller {
         $DB->update_record('hybridteaching_session', $session);
     }
 
+    /**
+     * Retrieves the last undated session for the given hybrid teaching ID.
+     *
+     * @return mixed The undated session record or null if not found.
+     */
     public function get_last_undated_session() {
         global $DB;
         $time = time();
@@ -697,5 +733,74 @@ class sessions_controller extends common_controller {
 
         $undatedsession = $DB->get_record_sql($sql, ['id' => $this->hybridobject->id, 'time' => $time]);
         return $undatedsession;
+    }
+
+    /**
+     * Sets the visibility of a record in the hybridteaching_session table.
+     *
+     * @param int $sessid The ID of the session.
+     * @throws -
+     * @return void
+     */
+    public static function set_record_visibility($sessid) {
+        global $DB;
+
+        $session = $DB->get_record('hybridteaching_session', ['id' => $sessid]);
+        if ($session->visiblerecord == 1) {
+            $session->visiblerecord = 0;
+            $DB->update_record('hybridteaching_session', $session);
+        } else {
+            $session->visiblerecord = 1;
+            $DB->update_record('hybridteaching_session', $session);
+        }
+    }
+
+    /**
+     * Check if a session configuration exists.
+     *
+     * @param object $session The session object.
+     * @global object $DB The global database object.
+     * @return bool Whether the session configuration exists or not.
+     */
+    public static function get_sessionconfig_exists($session) : bool {
+        global $DB;
+
+        $configexists = true;
+        if (empty($session->vcreference) || !$DB->get_record('hybridteaching_configs', ['id' => $session->vcreference], '*', IGNORE_MISSING)) {
+            $configexists = false;
+        }
+        return $configexists;
+    }
+
+    /**
+     * Checks if the session has started.
+     *
+     * @param mixed $session The session object.
+     * @global object $DB The global database object.
+     * @return bool Returns true if the session has started, false otherwise.
+     */
+    public function session_started($session) : bool {
+        global $DB;
+
+        $sessionvcstarted = false;
+        $sessionvctable = 'hybridteachvc_' . $session->typevc;
+        if ($DB->get_record($sessionvctable, ['htsession' => $session->id], '*', IGNORE_MISSING)) {
+            $sessionvcstarted = true;
+        }
+
+        return $sessionvcstarted;
+    }
+
+    public static function session_finished_triggered($sessionid) : bool {
+        global $DB;
+
+        $event = '\mod_hybridteaching\event\session_finished';
+        $sql = 'SELECT id
+                  FROM {logstore_standard_log}
+                 WHERE eventname like \'%session_finished\'
+                   AND ' . $DB->sql_compare_text("other") . ' = ' . $DB->sql_compare_text(':othersessionid') . '';
+        $finished = $DB->get_records_sql($sql, ['othersessionid' => '{"sessid":"' . $sessionid . '"}'], IGNORE_MISSING);
+
+        return !empty($finished);
     }
 }

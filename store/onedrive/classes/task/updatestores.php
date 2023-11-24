@@ -66,22 +66,25 @@ class updatestores extends \core\task\scheduled_task {
 
         foreach ($storeonedrive as $store) {
 
-            // Aquí hay que leer la instancia de store que corresponda.
-            // De momento leemos la guardada con storeinstance.
-
+            // Read store instance.
             $configonedrive = $DB->get_record('hybridteachstore_onedrive_co', ['id' => $store->subpluginconfigid]);
 
-            // ...$videoPath es el path que se guardará de moodledata en la subactividad de vc (zoom,bbb, meet,...)
-            // hay que hacer una estructura donde poder descargar los vídeos antes de subirlos,.
-
-            // Comprobar si una sesión tuviera varios archivos de grabación, se añade entonces como -1.mp4, -2.mp4,.....
-            // Con zoom se guardan en mp4. Comprobar la extensión de los otros sistemas de
-            // videoconferencia por si hubiera que hacer comprobaciones.
             $path = $CFG->dataroot.'/repository/hybridteaching/'.$store->course.'/';
 
+            // Check type mp4 or MP4.
+            // Videopath is the path from moodledata.
             $videopath = $path.$store->htid.'-'.$store->hsid.'-1.mp4';
-            if (file_exists($videopath)) {
+            $exist = false;
+            if (!file_exists($videopath)) {
+                $videopath = $path.$store->htid.'-'.$store->hsid.'-1.MP4';
+                if (file_exists($videopath)) {
+                    $exist = true;
+                }
+            } else {
+                $exist = true;
+            }
 
+            if ($exist) {
                 // Onedrive connect.
                 $onedriveclient = new \hybridteachstore_onedrive\onedrive_handler($configonedrive);
 
@@ -101,7 +104,6 @@ class updatestores extends \core\task\scheduled_task {
                     // Update _session with onedrive id.
                     $storesession = $DB->get_record('hybridteaching_session', ['id' => $store->hsid]);
                     $storesession->processedrecording = $onedriveid;    // 1;
-                    // No poner 1 como true, podemos poner el id de subactividad onedrive.
                     $DB->update_record('hybridteaching_session', $storesession);
 
                     // Delete video from origin download vc moodledata.

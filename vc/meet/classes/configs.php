@@ -61,7 +61,6 @@ class configs extends configs_controller {
 
     public static function delete_config($configid) {
         global $DB;
-        $configid = ['id' => $configid];
-        $DB->delete_records('hybridteachvc_meet_config', $configid);
+        $DB->delete_records('hybridteachvc_meet_config', ['id' => $configid]);
     }
 }

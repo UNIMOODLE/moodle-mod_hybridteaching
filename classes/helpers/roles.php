@@ -362,7 +362,7 @@ class roles {
         return $DB->count_records_sql($sql, $params);
     }
 
-        /**
+    /**
      * Evaluate if a user in a context is moderator based on roles and participation rules.
      *
      * @param context $context
@@ -423,7 +423,7 @@ class roles {
             return false;
         }
         // Validation for the 'all' rule.
-        if ($participant['selectiontype'] == 'all') {   
+        if ($participant['selectiontype'] == 'all') {
             return true;
         }
         // Validation for a 'user' rule.

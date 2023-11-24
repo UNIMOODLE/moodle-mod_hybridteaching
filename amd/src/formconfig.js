@@ -20,6 +20,7 @@
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+import {get_string as getString} from 'core/str';
 /**
  * Get all selectors in one place.
  *
@@ -32,7 +33,7 @@ const ELEMENT_SELECTOR = {
     recordOptions: () => document.getElementById('id_sectionrecording'),
     sectionAttendance: () => document.getElementById('id_sectionattendance'),
     sectionAccess: () => document.getElementById('id_sectionsessionaccess'),
-    sectionInitialStates: () => document.getElementById('id_sectioninitialstates'),
+    sectionInitialStatus: () => document.getElementById('id_sectioninitialstates'),
     sectionAudience: () => document.getElementById('id_sectionaudience'),
     participantList: () => document.getElementsByName('participants')[0],
     modStandardGrade: () => document.getElementById('id_modstandardgrade'),
@@ -40,19 +41,22 @@ const ELEMENT_SELECTOR = {
     permisionscontainer: () => document.getElementById('id_sectionaudiencecontainer'),
 };
 
+//initialformi check fun on change typevc;
 export const init = () => {
     /**
-     * page load
+     * Page load actions and events.
      */
     useVC();
     useAttendance();
     useSessionsScheduling();
-    //
+    vcInitialStatus(ELEMENT_SELECTOR.typeVC());
+    // Event listeners.
     ELEMENT_SELECTOR.useVCRecord().addEventListener('change', (e) => useVCRecord(e));
     ELEMENT_SELECTOR.useVC().addEventListener('change', (e) => useVC(e));
     ELEMENT_SELECTOR.useAttendance().addEventListener('change', () => useAttendance());
     ELEMENT_SELECTOR.sessionscheduling().addEventListener('change', () => useSessionsScheduling());
     ELEMENT_SELECTOR.permisionscontainer().querySelector('[name="hybridteaching_participant_selection"').disabled = true;
+    ELEMENT_SELECTOR.typeVC().addEventListener('change', (e) => vcInitialStatus(e.target));
 };
 
 const useSessionsScheduling = (e = ELEMENT_SELECTOR.sessionscheduling()) => {
@@ -107,8 +111,8 @@ const useVC = (e = ELEMENT_SELECTOR.useVC()) => {
     let typeVC = ELEMENT_SELECTOR.typeVC();
     let sectionAccess = ELEMENT_SELECTOR.sectionAccess();
     let accessformi = sectionAccess.getElementsByTagName('INPUT');
-    let sectionInitialStates = ELEMENT_SELECTOR.sectionInitialStates();
-    let initialformi = sectionInitialStates.getElementsByTagName('INPUT');
+    let sectionInitialStatus = ELEMENT_SELECTOR.sectionInitialStatus();
+    let initialformi = sectionInitialStatus.getElementsByTagName('INPUT');
     let sectionAudience = ELEMENT_SELECTOR.sectionAudience();
     let participantList = ELEMENT_SELECTOR.participantList();
     let oldtypevc = ELEMENT_SELECTOR.typeVC().value;
@@ -131,7 +135,7 @@ const useVC = (e = ELEMENT_SELECTOR.useVC()) => {
                 initialinput.value = 1;
             }
         });
-        sectionInitialStates.setAttribute('style', 'display:block');
+        sectionInitialStatus.setAttribute('style', 'display:block');
 
         if (typeof plistold !== 'undefined') {
             participantList.value = plistold;
@@ -156,7 +160,7 @@ const useVC = (e = ELEMENT_SELECTOR.useVC()) => {
                 initialinput.value = 0;
             }
         });
-        sectionInitialStates.setAttribute('style', 'display:none');
+        sectionInitialStatus.setAttribute('style', 'display:none');
 
         plistold = participantList.value;
         participantList.value = '[]';
@@ -200,4 +204,78 @@ const is_element_displayed = (e) => {
         displayed = window.getComputedStyle(e.closest('.form-group'), null).display;
     }
     return displayed != 'none';
+};
+
+const vcInitialStatus = (e) => {
+    let target = (e);
+    if ( target.options[target.selectedIndex] === undefined) {
+        return null;
+    }
+    let vctypevalue = target.options[target.selectedIndex].value;
+    let regex = /[A-Za-z]+/i;
+    let vctype = vctypevalue.match(regex)[0];
+    let validStatus = [];
+    let disabledOptions = [];
+    validStatus['vc'] = ELEMENT_SELECTOR.sectionInitialStatus().querySelectorAll('input:not([type=hidden])');
+    validStatus['store'] = ELEMENT_SELECTOR.recordOptions().querySelectorAll('input:not([type=hidden])');
+    switch (vctype) {
+        case 'bbb':
+            disabledOptions = ['id_downloadrecords'];
+            break;
+        case 'meet':
+            disabledOptions = ['id_disablecam', 'id_disablemic', 'id_disableprivatechat', 'id_disablepublicchat',
+                'id_disablenote', 'id_hideuserlist', 'id_blockroomdesign', 'id_ignorelocksettings',
+                'id_initialrecord', 'id_hiderecordbutton'];
+            break;
+        case 'teams':
+            disabledOptions = ['id_disableprivatechat', 'id_disablenote', 'id_hideuserlist', 'id_blockroomdesign',
+                'id_ignorelocksettings', 'id_hiderecordbutton', 'id_showpreviewrecord'];
+            break;
+        case 'zoom':
+            disabledOptions = ['id_disableprivatechat', 'id_disablepublicchat', 'id_disablenote', 'id_hideuserlist',
+                'id_blockroomdesign', 'id_ignorelocksettings', 'id_initialrecord', 'id_hiderecordbutton',
+                'id_showpreviewrecord'];
+            break;
+        default:
+            break;
+    }
+    vcInitialStatusDisplay(validStatus['vc'], validStatus['store'], disabledOptions, vctype).then();
+};
+
+const vcInitialStatusDisplay = async(vc, store, conditions, vctype) => {
+    const nostateconfig = await getString('noinitialstateconfig', 'mod_hybridteaching');
+    let disabledOptions = conditions;
+    vc.forEach(input => {
+        if (disabledOptions.includes(input.id)) {
+            input.closest('.row.fitem').setAttribute('style', 'display:none;');
+            input.value = 0;
+        } else {
+            input.closest('.row.fitem').setAttribute('style', 'display:flex;');
+            input.value = 1;
+        }
+    });
+    store.forEach(input => {
+        if (disabledOptions.includes(input.id)) {
+            input.closest('.row.fitem').setAttribute('style', 'display:none;');
+            input.value = 0;
+        } else {
+            input.closest('.row.fitem').setAttribute('style', 'display:flex;');
+            input.value = 1;
+        }
+    });
+    if (vctype === 'meet') {
+        if (document.getElementById('nostateconfig') !== null) {
+            document.getElementById('nostateconfig').setAttribute('style', 'display:flex');
+        } else {
+            let stateNode = document.createElement('p');
+            stateNode.append(nostateconfig);
+            stateNode.setAttribute('id', 'nostateconfig');
+            stateNode.setAttribute('class', 'text-info');
+            document.getElementById('id_sectioninitialstatescontainer').appendChild(stateNode);
+        }
+    } else {
+        if (document.getElementById('nostateconfig') !== null) {
+            document.getElementById('nostateconfig').setAttribute('style', 'display:none');
+        }
+    }
 };

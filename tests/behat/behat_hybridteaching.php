@@ -37,4 +37,32 @@ require_once(__DIR__ . '/../../../../lib/behat/behat_base.php');
  */
 class behat_hybridteaching extends behat_base {
 
+    /**
+     * @Given /^the session date is set to the current date and time plus 1 hour$/
+     */
+    public function theSessionDateIsSetToTheCurrentDateAndTimePlusOneHour() {
+        $currentdatetime = new \DateTime();
+
+        $currentdatetime->modify('+1 hour');
+
+        $year = $currentdatetime->format('Y');
+        $month = $currentdatetime->format('n');
+        $day = $currentdatetime->format('j');
+        $hour = $currentdatetime->format('G');
+        $minute = $currentdatetime->format('i');
+
+        $this->getSession()->getPage()->selectFieldOption('starttime[day]', $day);
+        $this->getSession()->getPage()->selectFieldOption('starttime[month]', $month);
+        $this->getSession()->getPage()->selectFieldOption('starttime[year]', $year);
+        $this->getSession()->getPage()->selectFieldOption('starttime[hour]', $hour);
+        $this->getSession()->getPage()->selectFieldOption('starttime[minute]', $minute);
+    }
+
+    /**
+     * @Given /^I confirm the dialog$/
+     * @throws \Behat\Mink\Exception\DriverException
+     */
+    public function iConfirmTheDialog() {
+        $this->getSession()->getDriver()->executeScript('window.confirm = function () { return true; };');
+    }
 }

@@ -9,14 +9,14 @@ define([
         } else {
             set_session_exempt(sessid, 0);
         }
-    }
-    
+    };
+
     const get_modal = (e) => {
         e.preventDefault();
-        sess = e.currentTarget;
-        sessid = sess.dataset.id
+        let sess = e.currentTarget;
+        let sessid = sess.dataset.id;
         get_modal_text(sessid);
-    } 
+    };
 
     /**
      * Sets manual attendance
@@ -54,6 +54,7 @@ define([
             document.querySelector("#sessionurlmodal").innerHTML = parsedResponse.sessurl;
         }
     }).fail( err => {
+        // eslint-disable-next-line no-console
         console.log(err);
     });
 
@@ -69,9 +70,9 @@ define([
 
             const sessinfo = document.querySelectorAll('.sessinfo');
             sessinfo.forEach(sess => {
-                sess.addEventListener('click', get_modal, true); 
+                sess.addEventListener('click', get_modal, true);
             });
-            
+
             const attsess = document.querySelectorAll('.attexempt');
             attsess.forEach(sess => {
                 sess.addEventListener('change', sessionexempt, true);

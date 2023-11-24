@@ -70,7 +70,7 @@ $params = [
     'course' => $course,
     'cm' => $cm,
     'session' => $sessionobj,
-    'typevc' => $hybridteaching->typevc,
+    //'typevc' => $hybridteaching->typevc,
 ];
 $mform = new sessions_form(null, $params);
 $return = new moodle_url('sessions.php?id='.$id.'&l='.$slist);

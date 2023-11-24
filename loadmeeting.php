@@ -31,8 +31,10 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+use mod_hybridteaching\helpers\roles;
 require_once(dirname(dirname(dirname(__FILE__))).'/config.php');
 require_once(__DIR__.'/classes/controller/sessions_controller.php');
+require_once(__DIR__.'/classes/controller/notify_controller.php');
 require_once($CFG->dirroot.'/mod/hybridteaching/classes/controller/attendance_controller.php');
 
 $id = required_param('id', PARAM_INT);
@@ -51,7 +53,10 @@ if (!empty($sid)) {
             $activesession->typevc = $hybridteaching->typevc;
             $DB->update_record('hybridteaching_session', $activesession);
         }
-
+        if ($activesession->vcreference != $hybridteaching->config) {
+            $activesession->vcreference = $hybridteaching->config;
+            $DB->update_record('hybridteaching_session', $activesession);
+        }
         if ($activesession->starttime == 0) {
             $activesession->starttime = time();
             $DB->update_record('hybridteaching_session', $activesession);
@@ -62,16 +67,26 @@ if (!empty($sid)) {
             $classname = sessions_controller::get_subpluginvc_class($hybridteaching->typevc);
             $sessionvc = new $classname($activesession->id);
 
-            if (!empty($sessionvc->get_session())) {          
+            if (!empty($sessionvc->get_session())) {
                 $resultsaccess = $sessionvc->get_zone_access();
                 $url = $resultsaccess['url'];
                 $ishost = $resultsaccess['ishost'];
-            } else {          
-                // FALTA COMPROBAR SI PUEDE ENTRAR ANTES QUE EL ANFITRION.
-                if ($activesession && has_capability('mod/hybridteaching:sessionsactions', $modulecontext)) {              
+            } else {
+                $sessioncontroller = new sessions_controller($hybridteaching);
+                $role = false;
+                if ($hybridteaching->waitmoderator || !empty($hybridteaching->participants)) {
+                    $role = roles::is_moderator($modulecontext, json_decode($hybridteaching->participants, true), $USER->id);
+                }
+                $issessionmoderator = ($role || has_capability('mod/hybridteaching:sessionsactions', $modulecontext));
+                if ($activesession && $issessionmoderator) {
                     // If must save recordings, save the id of storage.
-                    if ($activesession->userecordvc) {                       
-                        $activesession->storagereference = sessions_controller::savestorage($activesession, $hybridteaching->course);
+                    if ($activesession->userecordvc) {
+                        $activesession->storagereference = sessions_controller::savestorage($activesession, 
+                            $hybridteaching->course);
+                    }
+                    if (!$sessioncontroller->get_sessionconfig_exists($activesession)) {
+                        $url = new moodle_url('/mod/hybridteaching/view.php', ['id' => $id]);
+                        redirect($url, get_string('vcconfigremoved', 'hybridteaching'), null, 'error');
                     }
                     $sessionvc->create_unique_session_extended($activesession, $hybridteaching);
                     $sessionvc->set_session($activesession->id);
@@ -82,26 +97,29 @@ if (!empty($sid)) {
             }
         }
     } else {
-        if (!get_config('hybridteaching', 'reusesession')) {
-            $activesession->isfinished = 1;
-            $activesession->duration = time() - $activesession->starttime;
-            $DB->update_record('hybridteaching_session', $activesession);
-            $url = new moodle_url('/mod/hybridteaching/view.php', ['id' => $id]);
-            $url = base64_encode($url);
+        if (time() > $activesession->starttime) {
+            if (!get_config('hybridteaching', 'reusesession')) {
+                $activesession->isfinished = 1;
+                $activesession->duration = time() - $activesession->starttime;
+                $DB->update_record('hybridteaching_session', $activesession);
+                $url = new moodle_url('/mod/hybridteaching/view.php', ['id' => $id]);
+                $url = base64_encode($url);
+            }
+
+            $event = \mod_hybridteaching\event\session_finished::create([
+                'objectid' => $hybridteaching->id,
+                'context' => \context_course::instance($hybridteaching->course),
+                'other' => [
+                    'sessid' => $activesession->id,
+                ],
+            ]);
+
+            $event->trigger();
+        } else {
+            notify_controller::notify_problem(get_string('cantfinishunstarted', 'hybridteaching'));
         }
-
-        $event = \mod_hybridteaching\event\session_finished::create([
-            'objectid' => $hybridteaching->id,
-            'context' => \context_course::instance($hybridteaching->course),
-            'other' => [
-                'sessid' => $activesession->id,
-            ],
-        ]);
-
-        $event->trigger();
     }
 } else {
-    echo "BBB".$hybridteaching->undatedsession;exit;
     if ($hybridteaching->undatedsession) {
         $sessioncontroller = new sessions_controller($hybridteaching);
         $session = new stdClass();
@@ -111,21 +129,32 @@ if (!empty($sid)) {
         $session->duration = 0;
         $session->timetype = 0;
         $session->typevc = $hybridteaching->typevc;
+        $session->vcreference = $hybridteaching->config;
         $session = (object) $sessioncontroller->create_session($session);
 
         if (!empty($session->typevc)) {
             $classname = sessions_controller::get_subpluginvc_class($hybridteaching->typevc);
             $sessionvc = new $classname($session->id);
-echo "AAAAA";exit;
             if (!empty($sessionvc->get_session())) {
+                if (!$sessioncontroller->get_sessionconfig_exists($session)) {
+                    $url = new moodle_url('/mod/hybridteaching/view.php', ['id' => $id]);
+                    redirect($url, get_string('vcconfigremoved', 'hybridteaching'), null, 'error');
+                }
                 $resultsaccess = $sessionvc->get_zone_access();
                 $url = $resultsaccess['url'];
                 $ishost = $resultsaccess['ishost'];
             } else {
                 if (has_capability('mod/hybridteaching:sessionsactions', $modulecontext)) {
-                    // If must save recordings, save the id of storage.
-                    if ($activesession->userecordvc) {
-                        $activesession->storagereference = sessions_controller::savestorage($activesession, $hybridteaching->course);
+                    if ($activesession = $DB->get_record('hybridteaching_session', ['id' => $session->id], '*', MUST_EXIST)) {
+                        // If must save recordings, save the id of storage.
+                        if ($activesession->userecordvc) {
+                            $activesession->storagereference = sessions_controller::savestorage($activesession, 
+                                $hybridteaching->course);
+                        }
+                    }
+                    if (!$sessioncontroller->get_sessionconfig_exists($session)) {
+                        $url = new moodle_url('/mod/hybridteaching/view.php', ['id' => $id]);
+                        redirect($url, get_string('vcconfigremoved', 'hybridteaching'), null, 'error');
                     }
                     $sessionvc->create_unique_session_extended($session, $hybridteaching);
                     $sessionvc->set_session($session->id);

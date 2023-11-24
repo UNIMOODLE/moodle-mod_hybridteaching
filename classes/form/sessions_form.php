@@ -34,8 +34,7 @@ class sessions_form extends moodleform {
         $course = $this->_customdata['course'];
         $cm = $this->_customdata['cm'];
         $session = $this->_customdata['session'];
-        $typevc = $this->_customdata['typevc'];
-
+        !isset($this->_customdata['typevc']) ? $typevc = '': $typevc = $this->_customdata['typevc'];
         $modcontext = context_module::instance($cm->id);
         if (!empty($session)) {
             $defopts = ['maxfiles' => EDITOR_UNLIMITED_FILES, 'noclean' => true, 'context' => $modcontext];
@@ -157,6 +156,7 @@ class sessions_form extends moodleform {
 
         $mform->addElement('header', 'headeradotheroptions', get_string('otheroptions', 'hybridteaching'));
         $mform->addElement('checkbox', 'replicatedoc', '', get_string('replicatedoc', 'hybridteaching'));
+        $mform->setDefault('replicatedoc', '1');
         $mform->addElement('checkbox', 'caleneventpersession', '', get_string('caleneventpersession', 'hybridteaching'));
 
         if (empty($session)) {

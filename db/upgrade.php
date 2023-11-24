@@ -53,6 +53,33 @@ function xmldb_hybridteaching_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, '2023033100.03', 'hybridteachvc', 'meet');
     }
 
+    if ($oldversion < '2023031700.21') {
+        $table = new xmldb_table('hybridteaching_session');
+        $field = new xmldb_field('visiblerecord', XMLDB_TYPE_INTEGER, '1', null, null, null, '1', 'storagereference');
+
+        // Conditionally launch add field visible.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Hybridteaching savepoint reached.
+        upgrade_mod_savepoint(true, '2023031700.21', 'hybridteaching');
+    }
+
+    if ($oldversion < '2023031700.22') {
+
+        // Define field caleventid to be added to hybridteaching_session.
+        $table = new xmldb_table('hybridteaching_session');
+        $field = new xmldb_field('caleventid', XMLDB_TYPE_INTEGER, '11', null, null, null, null, 'attexempt');
+
+        // Conditionally launch add field caleventid.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Hybridteaching savepoint reached.
+        upgrade_mod_savepoint(true, '2023031700.22', 'hybridteaching');
+    }
+
     return true;
 }
-

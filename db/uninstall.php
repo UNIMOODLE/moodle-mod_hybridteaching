@@ -35,6 +35,5 @@
  * Custom uninstallation procedure.
  */
 function xmldb_hybridteaching_uninstall() {
-
     return true;
 }

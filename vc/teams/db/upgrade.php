@@ -41,7 +41,7 @@ function xmldb_hybridteachvc_teams_upgrade($oldversion) {
     global $DB, $CFG;
     $dbman = $DB->get_manager(); // Loads ddl manager and xmldb classes.
 
-    if ($oldversion < ' 2023081600.06') {
+    if ($oldversion < '2023081600.06') {
 
         // Define field category to be added to hybridteaching_configs.
         $table = new xmldb_table('hybridteachvc_teams');

@@ -34,7 +34,6 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-// Modify capabilities as needed and remove this comment.
 $capabilities = [
     'mod/hybridteaching:addinstance' => [
         'riskbitmask' => RISK_XSS,

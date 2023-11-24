@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/
+// This file is part of Moodle - https://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -12,7 +12,7 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+// along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 // Project implemented by the "Recovery, Transformation and Resilience Plan.
 // Funded by the European Union - Next GenerationEU".
@@ -35,6 +35,7 @@
 defined('MOODLE_INTERNAL') || die;
 global $CFG;
 require_once("$CFG->libdir/externallib.php");
+require_once(__DIR__.'/classes/controller/sessions_controller.php');
 
 /**
  * hybridteaching external functions
@@ -58,6 +59,14 @@ class hybridteaching_external extends external_api {
         );
     }
 
+    /**
+     * Sets the attendance status for a given attendance ID.
+     *
+     * @param int $attid The ID of the attendance.
+     * @param string $status The status to set for the attendance.
+     * @throws Some_Exception_Class A description of the exception that can be thrown.
+     * @return string The attendance record in JSON format.
+     */
     public static function set_attendance_status($attid, $status) {
         global $DB, $CFG, $USER;
         $params = self::validate_parameters(
@@ -96,6 +105,11 @@ class hybridteaching_external extends external_api {
         // TODO.
     }
 
+    /**
+     * Set session exempt parameters.
+     *
+     * @return external_function_parameters
+     */
     public static function set_session_exempt_parameters() {
         return new external_function_parameters(
             ["sessid" => new external_value(PARAM_INT, "sessid"),
@@ -104,6 +118,14 @@ class hybridteaching_external extends external_api {
     }
 
 
+    /**
+     * Sets the exemption status for a session.
+     *
+     * @param mixed $sessid The ID of the session.
+     * @param mixed $attexempt The exemption status to set.
+     * @throws Some_Exception_Class Description of any exceptions that may be thrown.
+     * @return string The JSON-encoded session object.
+     */
     public static function set_session_exempt($sessid, $attexempt) {
         global $DB, $USER;
 
@@ -127,6 +149,11 @@ class hybridteaching_external extends external_api {
         // TODO.
     }
 
+    /**
+     * Retrieve the parameters for the display actions.
+     *
+     * @return external_function_parameters The parameters for the display actions.
+     */
     public static function get_display_actions_parameters() {
         return new external_function_parameters(
             ["sessionid" => new external_value(PARAM_INT, "sessionid"),
@@ -135,6 +162,13 @@ class hybridteaching_external extends external_api {
     }
 
 
+    /**
+     * Retrieves the display actions for a given session and user.
+     *
+     * @param string $sessionid The ID of the session.
+     * @param int $userid The ID of the user.
+     * @return string The JSON-encoded display actions.
+     */
     public static function get_display_actions($sessionid, $userid) {
         global $DB, $USER;
 
@@ -154,20 +188,37 @@ class hybridteaching_external extends external_api {
         return json_encode($actions);
     }
 
+    /**
+     * Returns the display actions.
+     *
+     * @return datatype The display actions.
+     */
     public static function get_display_actions_returns() {
         // TODO.
     }
 
 
+    /**
+     * Get the parameters for the `get_modal_text` function.
+     *
+     * @return external_function_parameters The parameters for the function.
+     */
     public static function get_modal_text_parameters() {
         return new external_function_parameters(
-            ["sessid" => new external_value(PARAM_INT, "sessid"),]
+            ["sessid" => new external_value(PARAM_INT, "sessid"), ]
         );
     }
 
 
+    /**
+     * Retrieves the modal text for a given session ID.
+     *
+     * @param int $sessid The ID of the session.
+     * @throws Some_Exception_Class description of exception
+     * @return string The JSON-encoded modal information.
+     */
     public static function get_modal_text($sessid) {
-        global $DB;
+        global $DB, $USER;
         $session = $DB->get_record('hybridteaching_session', ['id' => $sessid]);
         $passstring = get_string('passstring', 'hybridteaching');
         $joinurlstring = get_string('joinurl', 'hybridteaching');
@@ -176,23 +227,34 @@ class hybridteaching_external extends external_api {
         $joinurl = null;
 
         if (!empty($session->typevc)) {
-            if ($session->typevc == 'bbb') {
-                $classname = $session->typevc;
-                $subpluginsession = new $classname();
-                //$joinurl = $subpluginsession->get_join_url($session->id, $session->config);
+            if (sessions_controller::get_sessionconfig_exists($session)) {
+                if ($session->typevc == 'bbb') {
+                    $sessioncontroller = new sessions_controller();
+                    $classname = $sessioncontroller->get_subpluginvc_class($session->typevc);
+                    $subpluginsession = new $classname();
+                    $joinurl = $subpluginsession->get_join_url($session);
+                } else {
+                    $joinurl = $DB->get_field('hybridteachvc_'.$session->typevc, 'joinurl', ['htsession' => $session->id]);
+                }
+                $joinurl = html_writer::link($joinurl, $joinurl);
             } else {
-                $joinurl = $DB->get_field('hybridteachvc_'.$session->typevc, 'joinurl', ['htsession' => $session->id]);
+                $joinurl = get_string('lostconfig', 'hybridteaching');
             }
         }
 
         $modalinfo = [
-            'sessname' => $session->name, 
+            'sessname' => $session->name,
             'sesspass' => !empty($sesspass) ? $passstring . $sesspass : $passstring . $unknown,
-            'sessurl' => !empty($joinurl) ? $joinurlstring . html_writer::link($joinurl, $joinurl) : $joinurlstring . $unknown,
+            'sessurl' => !empty($joinurl) ? $joinurlstring . $joinurl : $joinurlstring . $unknown,
         ];
         return json_encode($modalinfo);
     }
 
+    /**
+     * Retrieves the modal text returns.
+     *
+     * @return Some_Return_Value
+     */
     public static function get_modal_text_returns() {
         // TODO.
     }

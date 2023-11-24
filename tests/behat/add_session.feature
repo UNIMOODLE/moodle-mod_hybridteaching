@@ -2,7 +2,7 @@
 Feature: Add a hybridteaching session
   In order to add a session in a hybridteaching activity
   As a teacher
-  I should be enabled to configure sessions in hybridteaching activities.
+  I should be enabled to add sessions in hybridteaching activities.
 
   Background:
     Given the following "users" exist:
@@ -25,7 +25,6 @@ Feature: Add a hybridteaching session
     And I should see "Adding a new Hybrid teaching"
     And I set the following fields to these values:
       | Name | hybridteaching example |
-      | Duration | 45 |
       | Student password | studentpass |
     And I click on "Use sessions scheduling" "checkbox"
     And I press "Save and display"
@@ -36,4 +35,5 @@ Feature: Add a hybridteaching session
       | Duration | 45 |
       | Description | This is a hybridteaching session description |
     And I click on "Add" "button" in the "[data-fieldtype='submit']" "css_element"
-    Then I should see "session example" in the "hybridteachingsessions" "table"
+    Then I click on "Sessions" "link"
+    And I should see "session example"

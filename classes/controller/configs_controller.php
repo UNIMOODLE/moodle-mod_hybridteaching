@@ -31,8 +31,6 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-use core\oauth2\rest;
-
 defined('MOODLE_INTERNAL') || die();
 
 require_once('common_controller.php');
@@ -125,13 +123,18 @@ class configs_controller extends common_controller {
     public function hybridteaching_delete_config($configid) {
         global $DB;
         $errormsg = '';
-        $configid = ['id' => $configid];
-        $subpluginconfigid = $DB->get_field('hybridteaching_configs', 'subpluginconfigid', $configid);
-        if (!$DB->delete_records('hybridteaching_configs', $configid)) {
+        $subpluginconfigid = $DB->get_field('hybridteaching_configs', 'subpluginconfigid', ['id' => $configid]);
+        if (!$DB->delete_records('hybridteaching_configs', ['id' => $configid])) {
             $errormsg = 'errordeleteconfig';
         } else {
             require_once('../../'.$this->splugindir.'/'.$this->hybridobject->type.'/classes/configs.php');
             configs::delete_config($subpluginconfigid);
+            $htmodules = $DB->get_records('hybridteaching', ['config' => $configid]);
+            foreach ($htmodules as $htmodule) {
+                $htmodule->config = 0;
+                $htmodule->typevc = '';
+                $DB->update_record('hybridteaching', $htmodule);
+            }
         }
         return $errormsg;
     }

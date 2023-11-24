@@ -33,9 +33,10 @@
 
 define('NO_OUTPUT_BUFFERING', true);
 
-require('../../../../config.php');
+require_once('../../../../config.php');
 require_once('../controller/sessions_controller.php');
-require('../output/sessions_render.php');
+require_once($CFG->dirroot.'/mod/hybridteaching/classes/controller/notify_controller.php');
+require_once('../output/sessions_render.php');
 require_once('../form/sessions_form.php');
 
 $action = required_param('action', PARAM_ALPHANUMEXT);
@@ -65,6 +66,9 @@ $hybridteaching = $DB->get_record('hybridteaching', ['id' => $hybridteachingid],
 $sessioncontroller = new sessions_controller($hybridteaching, 'hybridteaching_session');
 $sessionslist = $sessioncontroller->load_sessions();
 $mform = null;
+if ($sesionid) {
+    $session = $DB->get_record('hybridteaching_session', ['id' => $sesionid], '*', MUST_EXIST);
+}
 
 switch ($action) {
     case 'disable':
@@ -74,7 +78,16 @@ switch ($action) {
         $sessioncontroller->enable_data($sesionid, true, 'hybridteaching_session');
         break;
     case 'delete':
-        $sessioncontroller->delete_session($sesionid, $hybridteachingid);
+        if ($hybridteaching->undatedsession && $session->isfinished
+              || !$hybridteaching->undatedsession && (time() < $session->starttime
+              || time() > ($session->starttime + $session->duration))) {
+            $sessioncontroller->delete_session($sesionid, $hybridteachingid);
+        } else {
+            notify_controller::notify_problem(get_string('error:deleteinprogress', 'hybridteaching'));
+        }
+        break;
+    case 'visiblerecord':
+        $sessioncontroller->set_record_visibility($sesionid);
         break;
     case 'bulkupdateduration':
     case 'bulkupdatestarttime':
@@ -121,7 +134,14 @@ switch ($action) {
             $sessionsids = required_param('session', PARAM_ALPHANUMEXT);
             $sessionsids = explode('_', $sessionsids);
             foreach ($sessionsids as $sessid) {
-                $sessioncontroller->delete_session($sessid);
+                $session = $DB->get_record('hybridteaching_session', ['id' => $sessid], '*', MUST_EXIST);
+                if ($hybridteaching->undatedsession && $session->isfinished
+                      || !$hybridteaching->undatedsession && (time() < $session->starttime
+                      || time() > ($session->starttime + $session->duration))) {
+                    $sessioncontroller->delete_session($sessid);
+                } else {
+                    notify_controller::notify_problem(get_string('error:deleteinprogress', 'hybridteaching'));
+                }
             }
             redirect($return, get_string('sessiondeleted', 'hybridteaching'));
         }

@@ -106,6 +106,7 @@ function hybridteaching_add_instance($moduleinstance, $mform = null) {
     if (!$moduleinstance->sessionscheduling && !empty($moduleinstance->id)) {
         require_once($CFG->dirroot.'/mod/hybridteaching/classes/controller/sessions_controller.php');
         $sessioncontroller = new sessions_controller($moduleinstance);
+        $moduleinstance->groupid = 0;
         $session = (object) $sessioncontroller->create_session($moduleinstance);
 
         if (!empty($moduleinstance->typevc) && !empty($moduleinstance->usevideoconference)) {
@@ -185,7 +186,7 @@ function hybridteaching_delete_instance($id) {
     require_once($CFG->dirroot.'/mod/hybridteaching/classes/controller/sessions_controller.php');
     $sessions = new sessions_controller($existshybrid);
     $sessions->delete_all_sessions();
-    
+
     $attendance = $DB->get_records('hybridteaching_attendance', ['hybridteachingid' => $id]);
     foreach ($attendance as $att) {
         $DB->delete_records('hybridteaching_attend_log', ['attendanceid' => $att->id]);
@@ -277,7 +278,7 @@ function mod_hybridteaching_pluginfile($course, $cm, $context, $filearea, $args,
     $fullpath = "/{$context->id}/mod_hybridteaching/$filearea/$itemid/$relativepath";
 
     $fs = get_file_storage();
-    if (!$file = $fs->get_file_by_hash(sha1($fullpath)) or $file->is_directory()) {
+    if (!$file = $fs->get_file_by_hash(sha1($fullpath))) {
         return false;
     }
     send_stored_file($file, 0, 0, $forcedownload, $options);

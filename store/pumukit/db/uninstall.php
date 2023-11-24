@@ -37,11 +37,11 @@ namespace mod_hybridteaching\store\pumukit\db;
  * Custom uninstallation procedure.
  */
 function xmldb_hybridteachstore_pumukit_uninstall() {
-    delete_subplugin_configs();
+    delete_pumukit_configs();
     return true;
 }
 
-function delete_subplugin_configs() {
+function delete_pumukit_configs() {
     global $DB;
     $DB->delete_records('hybridteaching_configs', ['type' => get_string('pumukit', 'hybridteachstore_pumukit')]);
 }
