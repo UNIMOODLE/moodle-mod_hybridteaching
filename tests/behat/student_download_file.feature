@@ -46,7 +46,7 @@ Feature: A student download a file from a hybridteaching session
     Given I log in as "student1"
     And I am on "testhybridteaching" course homepage
     And I click on "hybridteaching example" "link" in the "hybridteaching example" activity
-    When I click on "More" "link" in the ".secondary-navigation [data-region='morebutton']" "css_element"
+    When I click on "More" "link" in the ".secondary-navigation .moremenu .more-nav .dropdownmoremenu" "css_element"
     And I click on "Sessions" "link"
     And I should see "logo_isyc.png" in the "hybridteachingsessions" "table"
     Then I click on "logo_isyc.png" "link"

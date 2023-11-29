@@ -16,7 +16,6 @@ Feature: A student join a videoconference in a hybridteaching activity
       | user | course | role |
       | teacher1 | testhybridteaching | editingteacher |
       | student1 | testhybridteaching | student |
-    And I am on the Moodle site homepage
     When I log in as "admin"
     And I navigate to "Plugins > Manage videoconference settings" in site administration
     And I select "Zoom" from the "jump" singleselect
