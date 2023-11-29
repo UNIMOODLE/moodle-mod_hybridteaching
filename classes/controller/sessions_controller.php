@@ -80,7 +80,7 @@ class sessions_controller extends common_controller {
      * @return array An array of session objects.
      */
     public function load_sessions($page = 0, $recordsperpage = 0, $params = [], $extraselect = '',
-          $operator = self::OPERATOR_GREATER_THAN, $sort = 'starttime', $dir = 'ASC') {
+          $operator = self::OPERATOR_GREATER_THAN, $sort = 'starttime', $dir = 'DESC') {
         global $DB;
         $where = '';
         $params = $params + ['hybridteachingid' => $this->hybridobject->id];
@@ -98,7 +98,7 @@ class sessions_controller extends common_controller {
                  WHERE hybridteachingid = :hybridteachingid ' . $where . '
               ORDER BY ' . $sort . ' ' . $dir;
 
-        $sessions = $DB->get_records_sql($sql, $params, $page, $recordsperpage);
+        $sessions = $DB->get_records_sql($sql, $params, $page * $recordsperpage, $recordsperpage);
         $sessionsarray = json_decode(json_encode($sessions), true);
         return $sessionsarray;
     }
@@ -116,7 +116,8 @@ class sessions_controller extends common_controller {
         $session = null;
         $data->hybridteachingid = $this->hybridobject->id;
         $data->config = $this->hybridobject->config;
-        $data->duration = self::calculate_duration($data->duration, $data->timetype);
+        $data->duration = self::calculate_duration($data->durationgroup['duration'],
+            $data->durationgroup['timetype']);
         $data->userecordvc = $this->hybridobject->userecordvc;
         if ($data->userecordvc == 1) {
             $data->processedrecording = -1;
@@ -249,7 +250,8 @@ class sessions_controller extends common_controller {
         global $DB;
         $errormsg = '';
         $session = $this->fill_session_data_for_update($data);
-        $session->duration = self::calculate_duration($data->duration, $data->timetype);
+        $session->duration = self::calculate_duration($session->duration,
+            $session->timetype);
         if (!$DB->update_record('hybridteaching_session', $session)) {
             $errormsg = 'errorupdatesession';
         }
@@ -276,6 +278,8 @@ class sessions_controller extends common_controller {
     public function update_multiple_session($sessids, $data) {
         global $DB;
         $errormsg = '';
+        $data->duration = $data->durationgroup['duration'];
+        $data->timetype = $data->durationgroup['timetype'];
 
         foreach ($sessids as $sessid) {
             $session = $DB->get_record('hybridteaching_session', ['id' => $sessid]);
@@ -519,6 +523,8 @@ class sessions_controller extends common_controller {
      */
     public function fill_session_data($data) {
         $session = clone $data;
+        !empty($session->duration) ? $session->duration : $session->duration = $data->durationgroup['duration'];
+        !empty($session->timetype) ? $session->timetype : $session->timetype = $data->durationgroup['timetype'];
         if (!empty($data->description["text"])) {
             $session->descriptionitemid = $data->description['itemid'];
             $session->description = $data->description['text'];
@@ -766,7 +772,8 @@ class sessions_controller extends common_controller {
         global $DB;
 
         $configexists = true;
-        if (empty($session->vcreference) || !$DB->get_record('hybridteaching_configs', ['id' => $session->vcreference], '*', IGNORE_MISSING)) {
+        if (empty($session->vcreference) ||
+              !$DB->get_record('hybridteaching_configs', ['id' => $session->vcreference], '*', IGNORE_MISSING)) {
             $configexists = false;
         }
         return $configexists;
@@ -791,6 +798,14 @@ class sessions_controller extends common_controller {
         return $sessionvcstarted;
     }
 
+    /**
+     * Checks if a session has been finished.
+     *
+     * @param int $sessionid The ID of the session.
+     * @global moodle_database $DB The global database object.
+     * @throws Exception
+     * @return bool Returns true if the session has been finished, false otherwise.
+     */
     public static function session_finished_triggered($sessionid) : bool {
         global $DB;
 
@@ -802,5 +817,36 @@ class sessions_controller extends common_controller {
         $finished = $DB->get_records_sql($sql, ['othersessionid' => '{"sessid":"' . $sessionid . '"}'], IGNORE_MISSING);
 
         return !empty($finished);
+    }
+
+    /**
+     * Finish unfinished sessions for a given hybrid teaching ID.
+     *
+     * @param int $hid The hybrid teaching ID.
+     * @throws Some_Exception_Class If an error occurs while finishing the sessions.
+     * @return void
+     */
+    public function finish_unfinished_sessions($hid) : void {
+        global $DB;
+
+        $sql = 'SELECT *
+                  FROM {hybridteaching_session}
+                 WHERE hybridteachingid = ?
+                   AND isfinished = ?
+                   AND starttime + duration < ?
+                   AND duration > 0';
+        $sessions = $DB->get_records_sql($sql, [$hid, 0, time()]);
+        if ($sessions) {
+            foreach ($sessions as $session) {
+                $event = \mod_hybridteaching\event\session_finished::create([
+                    'objectid' => $hid,
+                    'context' => \context_course::instance($this->hybridobject->course),
+                    'other' => [
+                        'sessid' => $session->id,
+                    ],
+                ]);
+                $event->trigger();
+            }
+        }
     }
 }

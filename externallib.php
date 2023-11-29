@@ -205,7 +205,7 @@ class hybridteaching_external extends external_api {
      */
     public static function get_modal_text_parameters() {
         return new external_function_parameters(
-            ["sessid" => new external_value(PARAM_INT, "sessid"), ]
+            ["sessid" => new external_value(PARAM_INT, "sessid")]
         );
     }
 
@@ -231,7 +231,7 @@ class hybridteaching_external extends external_api {
                 if ($session->typevc == 'bbb') {
                     $sessioncontroller = new sessions_controller();
                     $classname = $sessioncontroller->get_subpluginvc_class($session->typevc);
-                    $subpluginsession = new $classname();
+                    $subpluginsession = new $classname($session->id);
                     $joinurl = $subpluginsession->get_join_url($session);
                 } else {
                     $joinurl = $DB->get_field('hybridteachvc_'.$session->typevc, 'joinurl', ['htsession' => $session->id]);

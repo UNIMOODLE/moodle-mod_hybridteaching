@@ -71,7 +71,25 @@ class sessions {
             $subpluginconfigid = $DB->get_field('hybridteaching_configs', 'subpluginconfigid', ['id' => $ht->config]);
             $meetconfig = $DB->get_record('hybridteachvc_meet_config', ['id' => $subpluginconfigid]);
             $client = new meet_handler($meetconfig);
-            $event = $client->create_meeting_event($session);
+            if (!get_config('hybridteaching', 'reusesession')) {
+                $event = $client->create_meeting_event($session);
+            } else {
+                if (isset($session->vcreference)) {
+                    $meet = $this->get_last_meet_in_hybrid($session->hybridteachingid,
+                        $session->groupid, $session->typevc, $session->vcreference,
+                        $session->starttime);
+                }
+                if (!empty($meet)) {
+                    $event = new stdClass();
+                    $event->creator = new stdClass();
+                    $event->creator->email = $meet->creatoremail;
+                    $event->hangoutLink = $meet->joinurl;
+                    $eventgoogle = $client->create_meeting_event($session);
+                    $event->id = $eventgoogle->id;
+                } else {
+                    $event = $client->create_meeting_event($session);
+                }
+            }
 
             if ($event) {
                 $meetsession = new stdClass();
@@ -152,4 +170,20 @@ class sessions {
         }
     }
 
+    public function get_last_meet_in_hybrid($htid, $groupid, $typevc, $vcreference, $starttime) {
+        global $DB;
+
+        $sql = 'SELECT hm.*
+                  FROM {hybridteachvc_meet} hm
+            INNER JOIN {hybridteaching_session} hs ON hm.htsession = hs.id
+                 WHERE hs.hybridteachingid = :htid AND hs.groupid = :groupid 
+                   AND hs.typevc = :typevc AND hs.vcreference = :vcreference
+                   AND hs.starttime < :starttime
+              ORDER BY hm.id DESC
+                 LIMIT 1';
+
+        $config = $DB->get_record_sql($sql, ['htid' => $htid, 'groupid' => $groupid, 
+            'typevc' => $typevc, 'vcreference' => $vcreference, 'starttime' => $starttime]);
+        return $config;
+    }
 }

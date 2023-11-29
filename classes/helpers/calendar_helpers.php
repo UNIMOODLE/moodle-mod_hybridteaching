@@ -40,8 +40,8 @@ require_once($CFG->dirroot.'/calendar/lib.php');
  *
  * @param object &$session A reference to the hybrid teaching session object.
  * @throws None
- * @return mixed Returns the ID of the newly created calendar event if successful, 
- *               false otherwise.
+ * @return mixed Returns the ID of the newly created calendar event if successful,
+ * false otherwise.
  */
 function hybridteaching_create_calendar_event(&$session) {
     global $DB;

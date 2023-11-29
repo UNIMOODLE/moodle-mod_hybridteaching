@@ -1,5 +1,5 @@
 <?php
-// This file is part of the Zoom plugin for Moodle - http://moodle.org/
+// This file is part of Moodle - https://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -12,7 +12,23 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+// along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+
+// Project implemented by the "Recovery, Transformation and Resilience Plan.
+// Funded by the European Union - Next GenerationEU".
+//
+// Produced by the UNIMOODLE University Group: Universities of
+// Valladolid, Complutense de Madrid, UPV/EHU, León, Salamanca,
+// Illes Balears, Valencia, Rey Juan Carlos, La Laguna, Zaragoza, Málaga,
+// Córdoba, Extremadura, Vigo, Las Palmas de Gran Canaria y Burgos.
+/**
+ * Display information about all the mod_hybridteaching modules in the requested course. *
+ * @package    mod_hybridteaching
+ * @copyright  2023 Proyecto UNIMOODLE
+ * @author     UNIMOODLE Group (Coordinator) <direccion.area.estrategia.digital@uva.es>
+ * @author     ISYC <soporte@isyc.com>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 
 namespace hybridteachvc_bbb;
 
@@ -46,34 +62,42 @@ class bbbproxy extends proxy_base {
      *
      * @param array $data
      * @param array $metadata
-     * @param string|null $presentationname
-     * @param string|null $presentationurl
+     * @param array|null $presentations
      * @return array
      * @throws bigbluebutton_exception
      */
     public function create_meeting(
         array $data,
         array $metadata,
-        ?string $presentationname = null,
-        ?string $presentationurl = null
+        array $presentations = null
     ): array {
         $createmeetingurl = $this->action_url_config('create', $data, $metadata);
 
         $curl = new curl();
-        if (!is_null($presentationname) && !is_null($presentationurl)) {
-            $payload = "<?xml version='1.0' encoding='UTF-8'?><modules><module name='presentation'><document url='" .
-                $presentationurl . "' /></module></modules>";
-
+        if ($presentations != null) {
+            $payload = "<?xml version='1.0' encoding='UTF-8'?><modules><module name='presentation'>";
+            foreach ($presentations as $presentation) {
+                if (isset($presentation['name']) && isset($presentation['content'])
+                    && !is_null($presentation['name']) && !is_null($presentation['content'])) {
+                        $payload .= "<document name='".$presentation['name']."'>";
+                        $payload .= base64_encode($presentation['content']);
+                        $payload .= "</document>";
+                }
+            }
+            $payload .= "</module></modules>";
             $xml = $curl->post($createmeetingurl, $payload);
         } else {
             $xml = $curl->get($createmeetingurl);
         }
-        self::assert_returned_xml($xml);
 
+        if ($xml->returncode[0] == 'FAILED') {
+            return ['message' => $xml->returncode];
+        }
+
+        self::assert_returned_xml($xml);
         if (empty($xml->meetingID)) {
             throw new bigbluebutton_exception('general_error_cannot_create_meeting');
         }
-
         if ($xml->hasBeenForciblyEnded === 'true') {
             throw new bigbluebutton_exception('index_error_forciblyended');
         }
@@ -88,6 +112,12 @@ class bbbproxy extends proxy_base {
         ];
     }
 
+    /**
+     * End a meeting.
+     *
+     * @param string $meetingid
+     * @param array $modpw
+     */
     public function end_meeting($meetingid, $modpw) {
         try {
             $xml = $this->fetch_endpoint_xml_config('end', ['meetingID' => $meetingid, 'password' => $modpw]);
@@ -148,8 +178,6 @@ class bbbproxy extends proxy_base {
      *
      * @param string $meetingid
      * @param string $username
-     * @param string $pw
-     * @param string $logouturl
      * @param string $role
      * @param string|null $configtoken
      * @param int $userid
@@ -160,7 +188,6 @@ class bbbproxy extends proxy_base {
     public function get_join_url(
         string $meetingid,
         string $username,
-        string $logouturl,
         string $role,
         string $configtoken = null,
         int $userid = 0,
@@ -169,7 +196,6 @@ class bbbproxy extends proxy_base {
         $data = [
             'meetingID' => $meetingid,
             'fullName' => $username,
-            'logoutURL' => $logouturl,
             'role' => $role,
         ];
 
@@ -246,8 +272,6 @@ class bbbproxy extends proxy_base {
             'recordingid' => $recordingurl,
         ];
     }
-
-
 
     /**
      * Ensure that the remote server was contactable.
@@ -327,15 +351,8 @@ class bbbproxy extends proxy_base {
      */
     public static function get_server_not_available_message(): string {
         global $USER;
-
-        // AÑADIR AQUI EL MENSAJE DEPENDIENDO DEL ROL DENTRO DE LA INSTANCIA
-        // UN MENSAJE DISTINTO SI ES ADMIN, SI ES MODERADOR O SI ES ESTUDIANTE.
-
         if (is_siteadmin($USER->id)) {
             return get_string('view_error_unable_join', 'mod_bigbluebuttonbn');
-            /*} else if ($USER->is_moderator()) {
-                return get_string('view_error_unable_join_teacher', 'mod_bigbluebuttonbn');
-             */
         } else {
             return get_string('view_error_unable_join_student', 'mod_bigbluebuttonbn');
         }
@@ -348,24 +365,36 @@ class bbbproxy extends proxy_base {
      * @return string
      */
     public static function get_server_not_available_url($instance): string {
-
-        // AÑADIR AQUI EL MENSAJE DEPENDIENDO DEL ROL DENTRO DE LA INSTANCIA
-        // UN MENSAJE DISTINTO SI ES ADMIN, SI ES MODERADOR O SI ES ESTUDIANTE.
-
         global $USER;
         if (is_siteadmin($USER->id)) {
             return new moodle_url('/admin/settings.php', ['section' => 'modsettingbigbluebuttonbn']);
-            /*} else if ($instance->is_moderator()) {
-                return new moodle_url('/course/view.php', ['id' => $instance->get_course_id()]);
-            */
         } else {
             return new moodle_url('/course/view.php', ['id' => $instance->get_course_id()]);
         }
     }
 
+    /**
+     * Determines if a meeting is currently running.
+     *
+     * @param int $meetingid The ID of the meeting.
+     * @return bool Returns true if the meeting is running, false otherwise.
+     */
+    public function is_meeting_running($meetingid) {
+        $action = 'isMeetingRunning';
+        $params = http_build_query(['meetingID' => $meetingid], '', '&');
+        $url = $this->sanitized_url_config() . $action .  '?meetingID=' . $meetingid .
+            '&checksum=' . sha1($action . $params . $this->sanitized_secret_config());
+
+        // Request HTTP.
+        $response = file_get_contents($url);
+
+        // Parse XML.
+        $xml = simplexml_load_string($response);
+
+        if ($xml->returncode == 'SUCCESS' && $xml->running == 'true') {
+            return true;
+        } else {
+            return false;
+        }
+    }
 }
-
-
-
-
-

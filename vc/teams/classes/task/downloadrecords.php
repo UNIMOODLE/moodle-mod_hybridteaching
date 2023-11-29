@@ -53,11 +53,11 @@ class downloadrecords extends \core\task\scheduled_task {
 
         $sessionconfig = new sessions();
 
-        $sql = 'SELECT hs.id AS hsid, ht.id AS htid, ht.course, ht.config, teams.meetingid, teams.organizer
-            FROM {hybridteaching_session} hs
-            INNER JOIN {hybridteachvc_teams} teams ON teams.htsession=hs.id
-            INNER JOIN {hybridteaching} ht ON ht.id=hs.hybridteachingid
-            WHERE hs.typevc="teams" AND hs.userecordvc=1 AND hs.processedrecording=-1';
+        $sql = "SELECT hs.id AS hsid, ht.id AS htid, ht.course, ht.config, teams.meetingid, teams.organizer
+                  FROM {hybridteaching_session} hs
+            INNER JOIN {hybridteachvc_teams} teams ON teams.htsession = hs.id
+            INNER JOIN {hybridteaching} ht ON ht.id = hs.hybridteachingid
+                 WHERE hs.typevc = 'teams' AND hs.userecordvc = 1 AND hs.processedrecording = -1";
         $download = $DB->get_records_sql($sql);
 
         foreach ($download as $session) {

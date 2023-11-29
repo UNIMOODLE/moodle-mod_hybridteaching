@@ -34,7 +34,7 @@ class sessions_form extends moodleform {
         $course = $this->_customdata['course'];
         $cm = $this->_customdata['cm'];
         $session = $this->_customdata['session'];
-        !isset($this->_customdata['typevc']) ? $typevc = '': $typevc = $this->_customdata['typevc'];
+        !isset($this->_customdata['typevc']) ? $typevc = '' : $typevc = $this->_customdata['typevc'];
         $modcontext = context_module::instance($cm->id);
         if (!empty($session)) {
             $defopts = ['maxfiles' => EDITOR_UNLIMITED_FILES, 'noclean' => true, 'context' => $modcontext];
@@ -48,7 +48,7 @@ class sessions_form extends moodleform {
             $headertitle = get_string('editsession', 'hybridteaching');
         }
 
-        $mform->addElement('header', 'general', get_string('addsession', 'hybridteaching'));
+        $mform->addElement('header', 'general', $headertitle);
 
         $mform->addElement('text', 'name', get_string('sessionname', 'hybridteaching'));
         $mform->setType('name', PARAM_TEXT);
@@ -95,16 +95,14 @@ class sessions_form extends moodleform {
         $mform->setType('starttime', PARAM_TEXT);
 
         $duration[] = &$mform->createElement('text', 'duration', get_string('duration', 'hybridteaching'));
-        $mform->setType('duration', PARAM_INT);
-
         $options = [
             '1' => get_string('minutes'),
             '2' => get_string('hours'),
         ];
         $duration[] = &$mform->createElement('select', 'timetype', '', $options);
-        $mform->setType('timetype', PARAM_INT);
-        $mform->addGroup($duration, 'durationgroup', get_string('duration', 'hybridteaching'), [' '], false);
-        $mform->addRule('durationgroup', null, 'required', null, 'client');
+        $mform->addGroup($duration, 'durationgroup', get_string('duration', 'hybridteaching'));
+        $mform->addGroupRule('durationgroup', get_string('required'), 'required');
+        $mform->setType('durationgroup[duration]', PARAM_RAW);
 
         $mform->addElement('advcheckbox', 'attexempt', get_string('attexempt', 'hybridteaching'), '', null, [0, 1]);
 

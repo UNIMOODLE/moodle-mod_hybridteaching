@@ -331,7 +331,11 @@ class grades {
         if ($userconnectime >= $sessduration) {
             $usersessgrade = $ht->grade;
         } else {
-            $usersessgrade = ($userconnectime / $sessduration) * $ht->grade;
+            if ($sessduration) {
+                $usersessgrade = ($userconnectime / $sessduration) * $ht->grade;
+            } else {
+                $usersessgrade = 0;
+            }
         }
         $usersessgrade < 0 ? $usersessgrade = 0 : '';
         return $usersessgrade;

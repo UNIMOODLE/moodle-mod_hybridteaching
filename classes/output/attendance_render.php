@@ -317,7 +317,7 @@ class hybridteaching_attendance_render extends \table_sql implements dynamic_tab
             $connectiontime = $attendancecontroller->hybridteaching_get_attendance($session, $att->userid)->connectiontime;
             $participantpercent = round(($connectiontime / $session->duration) * 100, 2);
             $participantpercent > 100 ? $participantpercent = 100 : '';
-            $participantpercent < 0 ? $participantpercent = 0 : ''; 
+            $participantpercent < 0 ? $participantpercent = 0 : '';
             $return .= html_writer::tag('span', get_string('participationtime', 'hybridteaching') .
                 ': ' . helper::get_hours_format($connectiontime) . ' ' . $participantpercent . '%' );
             $return .= html_writer::empty_tag('br');

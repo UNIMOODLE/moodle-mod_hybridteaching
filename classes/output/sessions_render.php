@@ -77,7 +77,7 @@ class hybridteaching_sessions_render extends \table_sql implements dynamic_table
         $page = optional_param('page', 0, PARAM_INT);
         $perpage = optional_param('perpage', get_config('hybridteaching', 'resultsperpage'), PARAM_INT);
         $sort = optional_param('sort', 'starttime', PARAM_ALPHANUMEXT);
-        $dir = optional_param('dir', 'ASC', PARAM_ALPHA);
+        $dir = optional_param('dir', 'DESC', PARAM_ALPHA);
         $slist = optional_param('l', 1, PARAM_INT);
 
         $columns = [
@@ -265,7 +265,8 @@ class hybridteaching_sessions_render extends \table_sql implements dynamic_table
                 'hour' => $hour,
                 'attexempt' => html_writer::checkbox('attexempt[]', $session['attexempt'],
                     $session['attexempt'], '', ['class' => 'attexempt', 'data-id' => $sessionid]),
-                'duration' => !empty($session['duration']) && $session['duration'] > 0 ? helper::get_hours_format($session['duration']) : self::EMPTY,
+                'duration' => !empty($session['duration']) && $session['duration'] > 0 ?
+                    helper::get_hours_format($session['duration']) : self::EMPTY,
                 'recordingbutton' => $recordingbutton,
                 'attendance' => is_array($sessatt) && isset($sessatt['sessatt_string']) ? $sessatt['sessatt_string'] : '',
                 'materials' => $fileurls,

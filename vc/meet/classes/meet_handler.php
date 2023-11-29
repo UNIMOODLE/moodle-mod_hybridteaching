@@ -128,7 +128,6 @@ class meet_handler {
         $event->setConferenceData($conferencedata);
 
         $event = $service->events->insert($calendarid, $event, ['conferenceDataVersion' => 1]);
-
         return $event;
     }
 
@@ -196,45 +195,63 @@ class meet_handler {
         $service->events->delete('primary', $eventid);
     }
 
-    public static function searchFiles($joincode) {
+    public static function search_files($joincode) {
         try {
             $client = new Client();
             $client->useApplicationDefaultCredentials();
             $client->addScope(Drive::DRIVE);
-            $driveService = new Drive($client);
-            $files = array();
-            $pageToken = null;
+            $driveservice = new Drive($client);
+            $files = [];
+            $pagetoken = null;
             do {
-                $response = $driveService->files->listFiles(array(
+                $response = $driveservice->files->listFiles([
                     'q' => "mimeType='application/vnd.google-apps.file'",
                     'name' => $joincode,
                     'spaces' => 'drive',
-                    'pageToken' => $pageToken,
+                    'pageToken' => $pagetoken,
                     'fields' => 'nextPageToken, files(id, name)',
-                ));
+                ]);
                 array_push($files, $response->files);
-    
-                $pageToken = $response->pageToken;
-            } while ($pageToken != null);
+
+                $pagetoken = $response->pageToken;
+            } while ($pagetoken != null);
             return $files;
-        } catch(\Exception $e) {
-           echo "Error Message: ".$e;
+        }catch(\Exception $e) {
+            echo "Error Message: ".$e;
         }
     }
 
-    public static function downloadFile($fileId) {
+    public static function download_file($fileid) {
         try {
             $client = new Client();
             $client->useApplicationDefaultCredentials();
             $client->addScope(Drive::DRIVE);
-            $driveService = new Drive($client);
-            $response = $driveService->files->get($fileId, array(
-                'alt' => 'media'));
+            $driveservice = new Drive($client);
+            $response = $driveservice->files->get($fileid, [
+                'alt' => 'media', ]);
             $content = $response->getBody()->getContents();
             return $content;
         } catch(\Exception $e) {
             echo "Error Message: ".$e;
         }
     }
-}
 
+    public function addAttachment($calendarservice, $driveservice, $calendarid, $eventid, $fileid) {
+        $file = $driveservice->files->get($fileid);
+        $event = $calendarservice->events->get($calendarid, $eventid);
+        $attachments = $event->attachments;
+
+        $attachments[] = [
+          'fileUrl' => $file->alternateLink,
+          'mimeType' => $file->mimeType,
+          'title' => $file->title,
+        ];
+        $changes = new \Google_Service_Calendar_Event([
+          'attachments' => $attachments,
+        ]);
+
+        $calendarservice->events->patch($calendarid, $eventid, $changes, [
+          'supportsAttachments' => TRUE,
+        ]);
+    }
+}

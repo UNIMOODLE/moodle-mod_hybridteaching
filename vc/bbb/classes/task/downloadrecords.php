@@ -14,12 +14,26 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
+// Project implemented by the "Recovery, Transformation and Resilience Plan.
+// Funded by the European Union - Next GenerationEU".
+//
+// Produced by the UNIMOODLE University Group: Universities of
+// Valladolid, Complutense de Madrid, UPV/EHU, León, Salamanca,
+// Illes Balears, Valencia, Rey Juan Carlos, La Laguna, Zaragoza, Málaga,
+// Córdoba, Extremadura, Vigo, Las Palmas de Gran Canaria y Burgos.
+/**
+ * Display information about all the mod_hybridteaching modules in the requested course. *
+ * @package    mod_hybridteaching
+ * @copyright  2023 Proyecto UNIMOODLE
+ * @author     UNIMOODLE Group (Coordinator] <direccion.area.estrategia.digital@uva.es>
+ * @author     ISYC <soporte@isyc.com>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
 namespace hybridteachvc_bbb\task;
 
 use hybridteachvc_bbb\sessions;
 use hybridteachvc_bbb\meeting;
-
-
 
 class downloadrecords extends \core\task\scheduled_task {
 
@@ -37,11 +51,11 @@ class downloadrecords extends \core\task\scheduled_task {
 
         $sessionconfig = new sessions();
 
-        $sql = 'SELECT hs.id AS hsid, ht.id AS htid, ht.course, ht.config, bbb.meetingid
-            FROM {hybridteaching_session} hs
-            INNER JOIN {hybridteachvc_bbb} bbb ON bbb.htsession=hs.id
-            INNER JOIN {hybridteaching} ht ON ht.id=hs.hybridteachingid
-            WHERE hs.typevc="bbb" AND hs.userecordvc=1 AND hs.processedrecording=-1';
+        $sql = "SELECT hs.id AS hsid, ht.id AS htid, ht.course, ht.config, bbb.meetingid
+                  FROM {hybridteaching_session} hs
+            INNER JOIN {hybridteachvc_bbb} bbb ON bbb.htsession = hs.id
+            INNER JOIN {hybridteaching} ht ON ht.id = hs.hybridteachingid
+                 WHERE hs.typevc = 'bbb' AND hs.userecordvc = 1 AND hs.processedrecording = -1";
         $download = $DB->get_records_sql($sql);
 
         foreach ($download as $session) {

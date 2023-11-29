@@ -33,7 +33,6 @@
 
 namespace hybridteachvc_bbb;
 
-use function Symfony\Component\DependencyInjection\Loader\Configurator\param;
 use hybridteachvc_bbb\bbbproxy;
 use hybridteachvc_bbb\meeting;
 use mod_hybridteaching\helpers\roles;
@@ -58,7 +57,7 @@ class sessions {
      */
     public function __construct($htsessionid = null) {
         if (!empty($htsessionid)) {
-            $this->bbbsession = $this->load_session($htsessionid);
+            $this->set_session($htsessionid);
         }
     }
 
@@ -71,8 +70,7 @@ class sessions {
      */
     public function load_session($htsessionid) {
         global $DB;
-        $this->bbbsession = $DB->get_record('hybridteachvc_bbb', ['htsession' => $htsessionid]);
-        return $this->bbbsession;
+        return $DB->get_record('hybridteachvc_bbb', ['htsession' => $htsessionid]);
     }
 
     /**
@@ -108,9 +106,35 @@ class sessions {
         global $DB;
 
         $bbbconfig = $this->load_bbb_config($ht->config);
-
+        $bbbproxy = new bbbproxy($bbbconfig);
         $meeting = new meeting($bbbconfig);
         $response = $meeting->create_meeting($session, $ht);
+
+        if (!get_config('hybridteaching', 'reusesession')) {
+            $response = $meeting->create_meeting($session, $ht);
+        } else {
+            $bbb = null;
+            if (isset($session->vcreference)) {
+                $bbb = $this->get_last_bbb_in_hybrid($session->hybridteachingid,
+                    $session->groupid, $session->typevc, $session->vcreference,
+                    $session->starttime);
+            }
+            if (!empty($bbb)) {
+                $bbbvcexpired = $bbbproxy->is_meeting_running($bbb->meetingid);
+                if ($bbbvcexpired) {
+                    $response = [];
+                    $response['meetingID'] = $bbb->meetingid;
+                    $response['moderatorPW'] = $bbb->moderatorpass;
+                    $response['attendeePW'] = $bbb->viewerpass;
+                    $response['createTime'] = $bbb->createtime;
+                    $response['returncode'] = 'SUCCESS';
+                } else {
+                    $response = $meeting->create_meeting($session, $ht);
+                }
+            } else {
+                $response = $meeting->create_meeting($session, $ht);
+            }
+        }
 
         if (isset($response['returncode']) && $response['returncode'] == 'SUCCESS') {
             $bbb = $this->populate_htbbb_from_response($session, $response);
@@ -171,7 +195,7 @@ class sessions {
      *
      * @param int $configid The ID of the config to load.
      * @throws Exception If the SQL query fails.
-     * @return stdClass|false The Zoom config record on success, or false on failure.
+     * @return stdClass|false The bbb config record on success, or false on failure.
      */
     public function load_bbb_config($configid) {
         global $DB;
@@ -214,36 +238,19 @@ class sessions {
      * @return array|null Returns an array with the zone access information or null if there is no session available.
      */
     public function get_zone_access() {
-        // ESTA FUNCION NO NECESITA NINGÚN $hybridteachingid
-        // PORQUE YA ESTÁ INICIALIZADA EN EL CONSTRUCTOR CON SU SESSION,
-        // NO ES NECESARIO NINGÚN id DE ACTIVIDAD
-        // la info ya está cargada del constructor.
-
-        // AquÍ solo calcular los datos necesarios de la zona de acceso
-        // comprobar si el rol es para iniciar reunión o para entrar a reunión
-        // y mandamos la url de acceso (o bien starturl o bien joinurl)
-        // starturl o join url, según sea hospedador o participante.
-
-            global $USER;
+        global $USER;
 
         if ($this->bbbsession) {
             $bbbconfig = $this->load_bbb_config_from_session();
             $bbbproxy = new bbbproxy($bbbconfig);
 
-            // COMO BBB NO TIENE SALA DE ESPERA AL MODERADOR, HAY QUE SIMULARLA EN BBB:.
-
-            // Comprobar aquí si es moderator o viewer.
-            // Si es admin o moderador, poder entrar.
-            // Si es viewer, comprobar si está activa la opción de waitmoderator.
-                // Si es así, sacar un msj de "esperando al moderador".
-                // Si no, poder entrar.
             $role = self::get_user_meeting_role($this->bbbsession);
+
             $url = $bbbproxy->get_join_url(
                 $this->bbbsession->meetingid,
                 $USER->username,
-                'https://www.urldelogout',   // Comprobar.
-                $role,     // Aqui VIEWER or MODERATOR. Según sea admin o moderator, o viewer.
-                null, // Un token.
+                $role,
+                null, // A token.
                 $USER->id,
                 $this->bbbsession->createtime
             );
@@ -254,12 +261,34 @@ class sessions {
                 'isaccess' => true,
                 'url' => base64_encode($url),
             ];
+
             return $array;
         } else {
             return null;
         }
     }
 
+    /**
+     * Get the return URL.
+     *
+     * @return string The return URL.
+     */
+    /*
+
+    // Not necessary at the moment.
+
+    public function get_returnurl () {
+        global $DB;
+        $htid = $DB->get_field('hybridteaching_session', 'hybridteachingid', ['id' => $this->bbbsession->htsession]);
+        $courseid = $DB->get_field('hybridteaching', 'course', ['id' => $htid]);
+        if ($courseid) {
+            $returnurl = new \moodle_url('/course/view.php', ['id' => $courseid]);
+            return (string) $returnurl;
+        } else {
+            return null;
+        }
+    }
+    */
 
     /**
      * Get the recording URL.
@@ -310,15 +339,33 @@ class sessions {
      * @throws Exception If the join URL cannot be retrieved.
      * @return string The join URL for the session.
      */
-    public static function get_join_url($session) {
+    public function get_join_url($session) {
         global $DB, $USER;
-        $bbbconfig = $DB->get_field('hybridteaching', 'config', ['id' => $session->hybridteachingid]);
+
+        $bbbconfig = $this->load_bbb_config_from_session();
         $bbbproxy = new bbbproxy($bbbconfig);
+
         $bbbsess = $DB->get_record('hybridteachvc_bbb', ['htsession' => $session->id]);
         $role = self::get_user_meeting_role($bbbsess);
-        $joinurl = $bbbproxy->get_join_url($bbbsess->meetingid, $USER->username,
-            'https://www.urldelogout', $role);
+        $joinurl = $bbbproxy->get_join_url($bbbsess->meetingid, $USER->username, $role);
 
         return $joinurl;
+    }
+
+    public function get_last_bbb_in_hybrid($htid, $groupid, $typevc, $vcreference, $starttime) {
+        global $DB;
+
+        $sql = 'SELECT hm.*
+                  FROM {hybridteachvc_bbb} hm
+            INNER JOIN {hybridteaching_session} hs ON hm.htsession = hs.id
+                 WHERE hs.hybridteachingid = :htid AND hs.groupid = :groupid
+                   AND hs.typevc = :typevc AND hs.vcreference = :vcreference
+                   AND hs.starttime < :starttime
+              ORDER BY hm.id DESC
+                 LIMIT 1';
+
+        $config = $DB->get_record_sql($sql, ['htid' => $htid, 'groupid' => $groupid,
+            'typevc' => $typevc, 'vcreference' => $vcreference, 'starttime' => $starttime, ]);
+        return $config;
     }
 }

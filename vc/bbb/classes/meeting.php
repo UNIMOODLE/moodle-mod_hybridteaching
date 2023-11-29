@@ -14,6 +14,22 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
+// Project implemented by the "Recovery, Transformation and Resilience Plan.
+// Funded by the European Union - Next GenerationEU".
+//
+// Produced by the UNIMOODLE University Group: Universities of
+// Valladolid, Complutense de Madrid, UPV/EHU, León, Salamanca,
+// Illes Balears, Valencia, Rey Juan Carlos, La Laguna, Zaragoza, Málaga,
+// Córdoba, Extremadura, Vigo, Las Palmas de Gran Canaria y Burgos.
+/**
+ * Display information about all the mod_hybridteaching modules in the requested course. *
+ * @package    mod_hybridteaching
+ * @copyright  2023 Proyecto UNIMOODLE
+ * @author     UNIMOODLE Group (Coordinator) <direccion.area.estrategia.digital@uva.es>
+ * @author     ISYC <soporte@isyc.com>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
 namespace hybridteachvc_bbb;
 
 use mod_bigbluebuttonbn\plugin;
@@ -26,7 +42,7 @@ class meeting {
     /**
      * Constructor for the meeting object.
      *
-     * @param  $data
+     * @param  $bbbinstance
      */
     public function __construct($bbbinstance) {
         $this->bbbinstance = $bbbinstance;  // Api with credentials, url...
@@ -42,21 +58,50 @@ class meeting {
         $bbbproxy->require_working_server();
         $data = $this->create_meeting_data($session, $ht);
         $metadata = $this->create_meeting_metadata($session, $ht);
-        // $presentation = $this->instance->get_presentation_for_bigbluebutton_upload(); // The URL must contain nonce.
-        // $presentationname = $presentation['name'] ?? null;
-        // $presentationurl = $presentation['url'] ?? null;
-        $presentationname = null;
-        $presentationurl = null;
+        $presentations = null;
+        if ($ht->sessionscheduling == 1) {
+            // Only presentations for sessionscheduling in advanced configurations.
+            $presentations = $this->upload_presentation($session, $ht);
+        }
 
-        $response = $bbbproxy->create_meeting($data, $metadata, $presentationname, $presentationurl, $this->bbbinstance);
-
+        $response = $bbbproxy->create_meeting($data, $metadata, $presentations, $this->bbbinstance);
         return $response;
     }
+
+    /**
+     * Upload presentation.
+     *
+     * @param $session session instance
+     * @param $ht hybridteaching instance
+     * @return array|null the representation of the presentations as array
+     */
+    public function upload_presentation ($session, $ht) {
+        $fs = get_file_storage();
+        $cm = get_coursemodule_from_instance('hybridteaching', $ht->id);
+        $context = \context_module::instance($cm->id);
+        $files = $fs->get_area_files($context->id, 'mod_hybridteaching', 'session', $session->id);
+        $presentations = [];
+
+        foreach ($files as $file) {
+            if (!empty($file) && $file->get_filename() != '.') {
+                $presentations[] = [
+                    'name' => $file->get_filename(),
+                    'content' => $file->get_content(),
+                ];
+            }
+        }
+        if (empty($presentations)) {
+            return null;
+        }
+        return $presentations;
+    }
+
     /**
      * Helper to prepare data used for create meeting.
      * Populate the data from session and ht to BBB meeting.
      * @todo moderatorPW and attendeePW will be removed from create after release of BBB v2.6.
-     *
+     * @param $session session instance
+     * @param $ht hybridteaching instance
      * @return array
      */
     protected function create_meeting_data($session, $ht) {
@@ -65,15 +110,17 @@ class meeting {
         $moderatorpass = plugin::random_password(12);
         $viewerpass = plugin::random_password(12, $moderatorpass);
 
+        $url = new \moodle_url('/course/view.php', ['id' => $ht->course]);
+
         $data = ['meetingID' => $meetingid,
                 'name' => \mod_bigbluebuttonbn\plugin::html2text($session->name, 64),
                 'attendeePW' => $viewerpass,
                 'moderatorPW' => $moderatorpass,
-            // 'logoutURL' => $this->instance->get_logout_url()->out(false),
+                'logoutURL' => (string) $url,
         ];
 
         /*
-        Info: estados iniciales añadidos en la vc de BBB:
+        Info: initial states added in BBB:
                             $ht->userslimit
                             $ht->disablecam
                             $ht->disablemic
@@ -150,38 +197,12 @@ class meeting {
 
     }
 
-
-    // SE PODRÍA ADAPTAR ESTO PARA:
-    // SI AL HACER get_join_url EN bbbproxy.php NO ESTÁ EL MEET CREADO, ENTONCES SE CREA.
-    // HABRÍA QUE ACTUALIZAR/INSERTAR EN mdl_hybridteachvc_bbb EL REGISTRO.
-    /**
-     * Helper to join a meeting.
-     *
-     *
-     * It will create the meeting if not already created.
-     *
-     * @param instance $instance
-     * @param int $origin
-     * @return string
-     * @throws meeting_join_exception this is sent if we cannot join (meeting full, user needs to wait...)
-     */
-    /*public function join_meeting($instance, $origin = logger::ORIGIN_BASE): string {
-        // See if the session is in progress.
-        $meeting = new meeting($instance);
-        // As the meeting doesn't exist, try to create it.
-        if (empty($meeting->get_meeting_info(true)->createtime)) {
-            $meeting->create_meeting();
-        }
-        return $meeting->join($origin);
-    }*/
-
     /*
     * Get meeting recordings
     */
     public function get_meeting_recordings($meetingid) {
         $bbbproxy = new bbbproxy($this->bbbinstance);
         return $bbbproxy->get_meeting_recording($meetingid);
-
     }
 
     /**
@@ -197,7 +218,6 @@ class meeting {
         } while ($meetingid == $encodedseed);
         return $encodedseed;
     }
-
 
     /**
      * Get information about the origin.
@@ -217,5 +237,4 @@ class meeting {
             'originTag' => sprintf('moodle-mod_bigbluebuttonbn (%s)', get_config('hybridteachvc_bbb', 'version')),
         ];
     }
-
 }

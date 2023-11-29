@@ -72,7 +72,30 @@ class sessions {
         $zoomconfig = $this->load_zoom_config($ht->config);
 
         $service = new \hybridteachvc_zoom\webservice($zoomconfig);
-        $response = $service->create_meeting($session, $ht);
+        if (!get_config('hybridteaching', 'reusesession')) {
+            $response = $service->create_meeting($session, $ht);
+        } else {
+            $zoom = null;
+            if (isset($session->vcreference)) {
+                $zoom = $this->get_last_zoom_in_hybrid($session->hybridteachingid,
+                    $session->groupid, $session->typevc, $session->vcreference,
+                    $session->starttime);
+            }
+            if (!empty($zoom)) {
+                $response = new \stdClass();
+                $response->id = $zoom->meetingid;
+                $response->host_id = $zoom->hostid;
+                $response->host_email = $zoom->hostemail;
+                $response->start_url = $zoom->starturl;
+                $response->join_url = $zoom->joinurl;
+                $response->settings = new \stdClass();
+                $response->settings->host_video = $zoom->optionhostvideo;
+                $response->settings->participant_video = $zoom->optionparticipantsvideo;
+            } else {
+                $response = $service->create_meeting($session, $ht);
+            }
+        }
+
         if ($response != false) {
             $zoom = $this->populate_htzoom_from_response($session, $response);
             $zoom->id = $DB->insert_record('hybridteachvc_zoom', $zoom);
@@ -182,5 +205,22 @@ class sessions {
         } else {
             return null;
         }
+    }
+
+    public function get_last_zoom_in_hybrid($htid, $groupid, $typevc, $vcreference, $starttime) {
+        global $DB;
+
+        $sql = 'SELECT hm.*
+                  FROM {hybridteachvc_zoom} hm
+            INNER JOIN {hybridteaching_session} hs ON hm.htsession = hs.id
+                 WHERE hs.hybridteachingid = :htid AND hs.groupid = :groupid 
+                   AND hs.typevc = :typevc AND hs.vcreference = :vcreference
+                   AND hs.starttime < :starttime
+              ORDER BY hm.id DESC
+                 LIMIT 1';
+
+        $config = $DB->get_record_sql($sql, ['htid' => $htid, 'groupid' => $groupid,
+            'typevc' => $typevc, 'vcreference' => $vcreference, 'starttime' => $starttime,]);
+        return $config;
     }
 }

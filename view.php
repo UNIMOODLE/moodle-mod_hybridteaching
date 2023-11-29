@@ -85,7 +85,9 @@ $hasvc = !empty($hybridteaching->typevc) ? true : false;
 if (!$activesession) {
     $activesession = $session->get_last_session();
 }
-
+if (has_capability('mod/hybridteaching:sessionsactions', $modulecontext)) {
+    $session->finish_unfinished_sessions($hybridteaching->id);
+}
 if (!$activesession) {
     if ($hybridteaching->undatedsession && has_capability('mod/hybridteaching:sessionsactions', $modulecontext)) {
         $result['id'] = $id;
@@ -171,7 +173,6 @@ if (!$activesession) {
                             'sessid' => $activesession->id,
                         ],
                     ]);
-    
                     $event->trigger();
                 }
 

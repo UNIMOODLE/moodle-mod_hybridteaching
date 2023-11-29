@@ -77,10 +77,32 @@ class sessions {
         $teamsconfig = $this->load_teams_config($ht->config);
         if ($teamsconfig) {
             $teams = new teams_handler($teamsconfig);
-            try {
-                $response = $teams->createmeeting($session, $ht);
-            } catch (\Exception $e) {
-                return false;
+            if (!get_config('hybridteaching', 'reusesession')) {
+                try {
+                    $response = $teams->createmeeting($session, $ht);
+                } catch (\Exception $e) {
+                    return false;
+                }
+            } else {
+                $lastteams = null;
+                if (isset($session->vcreference)) {
+                    $lastteams = $this->get_last_teams_in_hybrid($session->hybridteachingid,
+                        $session->groupid, $session->typevc, $session->vcreference,
+                        $session->starttime);
+                }
+                if (!empty($lastteams)) {
+                    $response = [];
+                    $response['id'] = $lastteams->meetingid;
+                    $response['meetingCode'] = $lastteams->meetingcode;
+                    $response['participants']['organizer']['identity']['user']['id'] = $lastteams->organizer;
+                    $response['joinUrl'] = $lastteams->joinurl;
+                } else {
+                    try {
+                        $response = $teams->createmeeting($session, $ht);
+                    } catch (\Exception $e) {
+                        return false;
+                    }
+                }
             }
 
             if (isset($response['joinUrl']) && isset($response['meetingCode'])
@@ -161,5 +183,22 @@ class sessions {
         } else {
             return null;
         }
+    }
+
+    public function get_last_teams_in_hybrid($htid, $groupid, $typevc, $vcreference, $starttime) {
+        global $DB;
+
+        $sql = 'SELECT hm.*
+                  FROM {hybridteachvc_teams} hm
+            INNER JOIN {hybridteaching_session} hs ON hm.htsession = hs.id
+                 WHERE hs.hybridteachingid = :htid AND hs.groupid = :groupid 
+                   AND hs.typevc = :typevc AND hs.vcreference = :vcreference
+                   AND hs.starttime < :starttime
+              ORDER BY hm.id DESC
+                 LIMIT 1';
+
+        $config = $DB->get_record_sql($sql, ['htid' => $htid, 'groupid' => $groupid, 
+            'typevc' => $typevc, 'vcreference' => $vcreference, 'starttime' => $starttime]);
+        return $config;
     }
 }

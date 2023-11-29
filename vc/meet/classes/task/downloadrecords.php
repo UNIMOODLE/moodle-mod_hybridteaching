@@ -53,11 +53,11 @@ class downloadrecords extends \core\task\scheduled_task {
 
         $sessionconfig = new sessions();
 
-        $sql = 'SELECT hs.id AS hsid, ht.id AS htid, ht.course, ht.config, meet.joinurl
+        $sql = "SELECT hs.id AS hsid, ht.id AS htid, ht.course, ht.config, meet.joinurl
                   FROM {hybridteaching_session} hs
             INNER JOIN {hybridteachvc_meet} meet ON meet.htsession = hs.id
             INNER JOIN {hybridteaching} ht ON ht.id = hs.hybridteachingid
-                 WHERE hs.typevc="meet" AND hs.userecordvc = 1 AND hs.processedrecording = -1';
+                 WHERE hs.typevc = 'meet' AND hs.userecordvc = 1 AND hs.processedrecording = -1";
         $download = $DB->get_records_sql($sql);
 
         foreach ($download as $session) {
@@ -71,9 +71,9 @@ class downloadrecords extends \core\task\scheduled_task {
             $meetconfig = $sessionconfig->load_meet_config($session->config);
             $meethandler = new meet_handler($meetconfig);
 
-            $files = $meethandler->searchFiles(basename($session->joinurl));
+            $files = $meethandler->search_files(basename($session->joinurl));
             foreach ($files as $file) {
-                $meethandler->downloadFile($file);
+                $meethandler->download_file($file);
             }
             
 

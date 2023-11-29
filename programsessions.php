@@ -63,6 +63,7 @@ if (!empty($sid)) {
     $sessionobj->sessionid = $sessionobj->id;
     unset($sessionobj->id);
     $sessionobj->duration = $sessionobj->duration / MINSECS;
+    $sessionobj->durationgroup['duration'] = $sessionobj->duration;
 }
 
 $sessioncontroller = new sessions_controller($hybridteaching);
@@ -70,7 +71,7 @@ $params = [
     'course' => $course,
     'cm' => $cm,
     'session' => $sessionobj,
-    //'typevc' => $hybridteaching->typevc,
+    'typevc' => $hybridteaching->typevc,
 ];
 $mform = new sessions_form(null, $params);
 $return = new moodle_url('sessions.php?id='.$id.'&l='.$slist);
