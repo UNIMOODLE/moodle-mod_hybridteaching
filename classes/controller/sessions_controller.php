@@ -116,8 +116,13 @@ class sessions_controller extends common_controller {
         $session = null;
         $data->hybridteachingid = $this->hybridobject->id;
         $data->config = $this->hybridobject->config;
-        $data->duration = self::calculate_duration($data->durationgroup['duration'],
-            $data->durationgroup['timetype']);
+        if (!empty($data->durationgroup)) {
+            $data->duration = self::calculate_duration($data->durationgroup['duration'],
+                $data->durationgroup['timetype']);
+        } else {
+            $data->duration = self::calculate_duration($data->duration,
+                $data->timetype);
+        }
         $data->userecordvc = $this->hybridobject->userecordvc;
         if ($data->userecordvc == 1) {
             $data->processedrecording = -1;
@@ -523,8 +528,13 @@ class sessions_controller extends common_controller {
      */
     public function fill_session_data($data) {
         $session = clone $data;
-        !empty($session->duration) ? $session->duration : $session->duration = $data->durationgroup['duration'];
-        !empty($session->timetype) ? $session->timetype : $session->timetype = $data->durationgroup['timetype'];
+        if (isset($data->durationgroup['duration']) && isset($data->durationgroup['timetype'])) {
+            !empty($session->duration) ? $session->duration :
+                $session->duration = $data->durationgroup['duration'];
+            !empty($session->timetype) ? $session->timetype :
+                $session->timetype = $data->durationgroup['timetype'];
+        }
+
         if (!empty($data->description["text"])) {
             $session->descriptionitemid = $data->description['itemid'];
             $session->description = $data->description['text'];
