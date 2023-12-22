@@ -49,3 +49,7 @@ $string['view_error_unable_join_teacher'] = 'Unable to connect to the BigBlueBut
 $string['view_error_unable_join'] = 'Unable to join the session. Please check the server added in the BigBlueButton config and check that the BigBlueButton server is up and running.';
 
 $string['downloadrecordsbbb'] = 'Download BigBlueButton records';
+
+$string['bbb:view'] = 'Access BigBlueButton';
+$string['bbb:use'] = 'Generate BigBlueButton meetings';
+$string['bbb:record'] = 'Store BigBlueButton recordings';

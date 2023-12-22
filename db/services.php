@@ -75,4 +75,14 @@ $functions = [
         'loginrequired' => true,
         'capabilities' => 'mod/hybridteaching:sessionsactions', // Capabilities check in form.
     ],
+    'mod_hybridteaching_user_has_recording_capability' => [
+        'classname' => 'hybridteaching_external',
+        'methodname' => 'get_user_has_recording_capability',
+        'classpath' => '/mod/hybridteaching/externallib.php',
+        'description' => 'gets if the user can use recodings for the selected vc',
+        'type' => 'read',
+        'ajax' => true,
+        'loginrequired' => true,
+        'capabilities' => '', // Capabilities check in form.
+    ]
 ];

@@ -49,3 +49,5 @@ $string['licenses'] = 'Licencias';
 $string['downloadrecordsmeet'] = 'Descargar grabaciones Meet';
 $string['alreadyloggedmeet'] = 'Ya has iniciado sesión para esta configuración de meet';
 $string['loggingerrormeet'] = 'Error de inicio de sesión en su cuenta de Google';
+$string['downloadrecordsmeet'] = 'Descargar grabaciones Meet';
+$string['chatnamefile'] = 'Chat de meet';

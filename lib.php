@@ -56,7 +56,7 @@ function hybridteaching_supports($feature) {
             // ...case FEATURE_MOD_PURPOSE
             // MOD_PURPOSE_COMMUNICATION
         case FEATURE_BACKUP_MOODLE2:
-            // ...case FEATURE_ADVANCED_GRADING:
+            // ...case FEATURE_ADVANCED_GRADING.
             return true;
         default:
             return null;
@@ -268,7 +268,7 @@ function mod_hybridteaching_pluginfile($course, $cm, $context, $filearea, $args,
         return false;
     }
 
-    if ($filearea !== 'session') {
+    if ($filearea !== 'session' && $filearea !== 'chats') {
         return false;
     }
 

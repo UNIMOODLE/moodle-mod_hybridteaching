@@ -60,4 +60,9 @@ $observers = [
         'eventname'   => '\mod_hybridteaching\event\attendance_updated',
         'callback'    => 'mod_hybridteaching_observer::attendance_updated',
     ],
+    [
+        'eventname'   => '\core\event\course_module_updated',
+        'callback'    => 'mod_hybridteaching_observer::course_module_updated',
+    ],
+
 ];

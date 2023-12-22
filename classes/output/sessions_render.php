@@ -82,15 +82,16 @@ class hybridteaching_sessions_render extends \table_sql implements dynamic_table
 
         $columns = [
             'strgroup' => get_string('group'),
-            'strtype' => get_string('type', 'mod_hybridteaching'),
+            'strtype' => get_string('type', 'hybridteaching'),
             'strname' => get_string('name'),
             'strdate' => get_string('date'),
-            'strstart' => get_string('start', 'mod_hybridteaching'),
-            'strduration' => get_string('duration', 'mod_hybridteaching'),
-            'strrecording' => get_string('recording', 'mod_hybridteaching'),
-            'strattendance' => get_string('attendance', 'mod_hybridteaching'),
-            'strmaterials' => get_string('materials', 'mod_hybridteaching'),
-            'stroptions' => get_string('actions', 'mod_hybridteaching'),
+            'strstart' => get_string('start', 'hybridteaching'),
+            'strduration' => get_string('duration', 'hybridteaching'),
+            'strrecording' => get_string('recording', 'hybridteaching'),
+            'strchats' => get_string('chats', 'hybridteaching'),
+            'strattendance' => get_string('attendance', 'hybridteaching'),
+            'strmaterials' => get_string('materials', 'hybridteaching'),
+            'stroptions' => get_string('actions', 'hybridteaching'),
             'attexempt' => get_string('attexempt', 'hybridteaching'),
         ];
 
@@ -199,59 +200,10 @@ class hybridteaching_sessions_render extends \table_sql implements dynamic_table
                 }
             }
 
-            $recordingbutton = get_string('norecording', 'mod_hybridteaching');
-            if (has_capability('mod/hybridteaching:viewrecordings', $this->context)) {
-                if (!has_capability('mod/hybridteaching:sessionsactions', $this->context) && $session['visiblerecord'] == 0) {
-                    $recordingbutton = get_string('norecording', 'mod_hybridteaching');
-                } else {
-                    if ($session['userecordvc'] == 1 && $session['processedrecording'] >= 0) {
-                        if ($session['storagereference'] > 0) {
-                            $classstorage = sessions_controller::get_subpluginstorage_class($session['storagereference']);
-                            $config = helper::subplugin_config_exists($session['storagereference'], 'store');
-
-                            if ($config) {
-                                sessions_controller::require_subplugin_store($classstorage['type']);
-                                $classname = $classstorage['classname'];
-                                $sessionrecording = new $classname();
-                                $urlrecording = $CFG->wwwroot . '/mod/hybridteaching/loadrecording.php?cid='.
-                                    $this->hybridteaching->course.'&sid='.$session['id'].'&id='.$this->cm->id;
-                                $recordingbutton = html_writer::link($urlrecording, get_string('watchrecording',
-                                    'mod_hybridteaching'), ['target' => '_blank', 'class' => 'btn btn-secondary']);
-                            }
-                        } else if ($session['storagereference'] == -1) {
-                            $config = helper::subplugin_config_exists($session['vcreference'], 'vc');
-                            if ($config) {
-                                sessions_controller::require_subplugin_session($session['typevc']);
-                                $classname = sessions_controller::get_subpluginvc_class($session['typevc']);
-                                $sessionrecording = new $classname($session['id']);
-                                $urlrecording = $sessionrecording->get_recording($session['id']);
-                            }
-                        }
-                    }
-                }
-            }
-
-            $fileurl = '';
-            $fileurls = '';
-            if (!empty($session['sessionfiles'])) {
-                $filestorage = new file_storage();
-                $files = $filestorage->get_area_files($this->context->id, 'mod_hybridteaching', 'session', $session['id']);
-                foreach ($files as $file) {
-                    if (!empty($file) && $file->get_filename() != '.') {
-                        $fileurl = moodle_url::make_pluginfile_url(
-                            $file->get_contextid(),
-                            $file->get_component(),
-                            $file->get_filearea(),
-                            $file->get_itemid(),
-                            $file->get_filepath(),
-                            $file->get_filename(),
-                            true
-                        );
-                        $fileurls .= html_writer::tag('a', $file->get_filename(), ['href' => $fileurl])
-                            . html_writer::start_tag('br');
-                    }
-                }
-            }
+            $materialsinfo = $this->get_files_url($session);
+            $recordingbutton = $materialsinfo['recordingbutton'];
+            $fileurls = $materialsinfo['fileurls'];
+            $chaturls = $this->get_chats_url($session);
 
             $body = [
                 'class' => '',
@@ -270,6 +222,7 @@ class hybridteaching_sessions_render extends \table_sql implements dynamic_table
                 'recordingbutton' => $recordingbutton,
                 'attendance' => is_array($sessatt) && isset($sessatt['sessatt_string']) ? $sessatt['sessatt_string'] : '',
                 'materials' => $fileurls,
+                'chaturls' => $chaturls,
                 'enabled' => $session['visible'],
                 'visiblerecord' => $session['visiblerecord'],
                 'checkbox' => new \core\output\checkbox_toggleall('sessions-table', false, [
@@ -332,6 +285,7 @@ class hybridteaching_sessions_render extends \table_sql implements dynamic_table
                 $columns['strdate'],
                 $columns['strduration'],
                 (has_capability('mod/hybridteaching:viewrecordings', $this->context)) ? $columns['strrecording'] : '',
+                $columns['strchats'],
                 (has_capability('mod/hybridteaching:sessionsfulltable', $this->context)) ? $columns['strattendance'] : '',
                 (has_capability('mod/hybridteaching:sessionsfulltable', $this->context)) ? $columns['attexempt'] : '',
                 $columns['strmaterials'],
@@ -394,30 +348,30 @@ class hybridteaching_sessions_render extends \table_sql implements dynamic_table
 
         $delete = html_writer::link(new moodle_url($url, array_merge($params, ['action' => 'delete'])),
             $OUTPUT->pix_icon('t/delete', get_string('delete'), 'moodle', ['class' => 'iconsmall']),
-            ['onclick' => 'if (!confirm("'.get_string('deleteconfirm', 'mod_hybridteaching', $body['name']).'"))
+            ['onclick' => 'if (!confirm("'.get_string('deleteconfirm', 'hybridteaching', $body['name']).'"))
             { return false; }', ]
         );
 
         $info = '';
         if ($this->typelist == SESSION_LIST) {
             $info .= html_writer::link('',
-                $OUTPUT->pix_icon('docs', get_string('actions', 'mod_hybridteaching')),
+                $OUTPUT->pix_icon('docs', get_string('actions', 'hybridteaching')),
                 ['class' => 'sessinfo', 'data-id' => $body['sessionid'], 'data-toggle' => 'modal',
                 'data-target' => '#sessinfomodal', ]);
         }
 
         if ($body['visiblerecord']) {
             $record = html_writer::link(new moodle_url($url, array_merge($params, ['action' => 'visiblerecord'])),
-                $OUTPUT->pix_icon('i/messagecontentvideo', get_string('hiderecords', 'mod_hybridteaching'),
+                $OUTPUT->pix_icon('i/messagecontentvideo', get_string('hiderecords', 'hybridteaching'),
                     'moodle', ['class' => 'iconsmall']));
         } else {
             $record = html_writer::link(new moodle_url($url, array_merge($params, ['action' => 'visiblerecord'])),
-                $OUTPUT->pix_icon('i/messagecontentvideo', get_string('visiblerecords', 'mod_hybridteaching'),
+                $OUTPUT->pix_icon('i/messagecontentvideo', get_string('visiblerecords', 'hybridteaching'),
                     'moodle', ['class' => 'iconsmall fa-film-slash']));
         }
 
         $attendance = html_writer::link(new moodle_url(''),
-            $OUTPUT->pix_icon('i/unchecked', get_string('actions', 'mod_hybridteaching'), 'moodle', ['class' => 'iconsmall']));
+            $OUTPUT->pix_icon('i/unchecked', get_string('actions', 'hybridteaching'), 'moodle', ['class' => 'iconsmall']));
 
         $options = [
             'visible' => $visible,
@@ -456,6 +410,7 @@ class hybridteaching_sessions_render extends \table_sql implements dynamic_table
                     $params['date'],
                     $params['duration'],
                     (has_capability('mod/hybridteaching:viewrecordings', $this->context)) ? $params['recordingbutton'] : '',
+                    $params['chaturls'],
                     (has_capability('mod/hybridteaching:sessionsfulltable', $this->context)) ? $params['attendance'] : '',
                     (has_capability('mod/hybridteaching:sessionsfulltable', $this->context)) ? $params['attexempt'] : '',
                     $params['enabled'] ? $params['materials'] : '',
@@ -543,11 +498,11 @@ class hybridteaching_sessions_render extends \table_sql implements dynamic_table
         $columns = [
             'strname' => get_string('name'),
             'strdate' => get_string('date'),
-            'strstart' => get_string('start', 'mod_hybridteaching'),
-            'strduration' => get_string('duration', 'mod_hybridteaching'),
+            'strstart' => get_string('start', 'hybridteaching'),
+            'strduration' => get_string('duration', 'hybridteaching'),
         ];
 
-        $return = $OUTPUT->heading(get_string('withselectedsessions', 'mod_hybridteaching'));
+        $return = $OUTPUT->heading(get_string('withselectedsessions', 'hybridteaching'));
         $return .= $OUTPUT->box_start('generalbox');
 
         $table = new html_table();
@@ -598,5 +553,122 @@ class hybridteaching_sessions_render extends \table_sql implements dynamic_table
         [$insql, $params] = $DB->get_in_or_equal($grouparray, SQL_PARAMS_NAMED, 'groupid');
         $extrasql = 'groupid ' . $insql;
         return [$extrasql, $params];
+    }
+
+    public function get_files_url($session) {
+        global $CFG;
+        
+        $fileurls = '';
+        $recordingbutton = get_string('norecording', 'hybridteaching');
+        $urlchatmeeting = '';
+        if (has_capability('mod/hybridteaching:viewrecordings', $this->context)) {
+            if (!has_capability('mod/hybridteaching:sessionsactions', $this->context) && $session['visiblerecord'] == 0) {
+                $recordingbutton = get_string('norecording', 'hybridteaching');
+            } else {
+                if ($session['userecordvc'] == 1 && $session['processedrecording'] >= 0) {
+                    if ($session['storagereference'] > 0) {
+                        $classstorage = sessions_controller::get_subpluginstorage_class($session['storagereference']);
+                        $config = helper::subplugin_config_exists($session['storagereference'], 'store');
+
+                        if ($config) {
+                            sessions_controller::require_subplugin_store($classstorage['type']);
+                            $classname = $classstorage['classname'];
+                            $sessionrecording = new $classname();
+                            $urlrecording = $CFG->wwwroot . '/mod/hybridteaching/loadrecording.php?cid='.
+                                $this->hybridteaching->course.'&sid='.$session['id'].'&id='.$this->cm->id;
+                            $recordingbutton = html_writer::link($urlrecording, get_string('watchrecording',
+                                'mod_hybridteaching'), ['target' => '_blank', 'class' => 'btn btn-secondary']);
+                        }
+                    }
+
+                    $config = helper::subplugin_config_exists($session['vcreference'], 'vc');        
+                    if ($config) {
+                        // Check if exists urlchat meeting to get the url.
+                        sessions_controller::require_subplugin_session($session['typevc']);
+                        $classname = sessions_controller::get_subpluginvc_class($session['typevc']);
+                        $sessionrecording = new $classname($session['id']);
+                        if (has_capability('mod/hybridteaching:viewchat', $this->context)) {
+                            $urlchatmeeting = $sessionrecording->get_chat_url($this->context);
+                            if ($urlchatmeeting != '') {
+                                $fileurls .= html_writer::tag('a', get_string('chaturlmeeting', 'hybridteaching'),
+                                    ['href' => $urlchatmeeting, 'target' => '_blank']);
+                            }
+                        }
+
+                        // Get recording if there are subplugin without api to download recordings.
+                        // Then, get the recording from url from vc subplugin or similar.
+                        if ($session['storagereference'] == -1) {
+                            if (method_exists($sessionrecording, 'get_recording')) {
+                                $urlrecording = $sessionrecording->get_recording($this->context);
+                                if (isset($urlrecording['recording']) && $urlrecording['recording'] != '') {
+                                    $recordingbutton = html_writer::link($urlrecording['recording'], get_string('watchrecording',
+                                        'mod_hybridteaching'), ['target' => '_blank', 'class' => 'btn btn-secondary']);
+                                }
+                                if (isset($urlrecording['materials']) && $urlrecording['materials'] != '') {
+                                    $fileurls .= html_writer::tag('a', get_string('notesurlmeeting', 'hybridteaching'),
+                                    ['href' => $urlrecording['materials'], 'target' => '_blank']);
+                                    
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        
+        $fileurl = '';
+        if (!empty($session['sessionfiles'])) {
+            $filestorage = new file_storage();
+            $files = $filestorage->get_area_files($this->context->id, 'mod_hybridteaching', 'session', $session['id']);
+            if ($fileurls != '') {
+                $fileurls .= html_writer::start_tag('br');
+            }
+            foreach ($files as $file) {
+                if (!empty($file) && $file->get_filename() != '.') {
+                    $fileurl = moodle_url::make_pluginfile_url(
+                        $file->get_contextid(),
+                        $file->get_component(),
+                        $file->get_filearea(),
+                        $file->get_itemid(),
+                        $file->get_filepath(),
+                        $file->get_filename(),
+                        true
+                    );
+                    $fileurls .= html_writer::tag('a', $file->get_filename(), ['href' => $fileurl])
+                        . html_writer::start_tag('br');
+                }
+            }
+        }
+
+        return ['recordingbutton' => $recordingbutton, 'fileurls' => $fileurls];
+    }
+
+    public function get_chats_url($session) {
+        $fileurls = '';
+        $fileurl = '';
+        $filestorage = new file_storage();
+        $files = $filestorage->get_area_files($this->context->id, 'mod_hybridteaching', 'chats', $session['id']);
+        if (!empty($files)) {
+            if ($fileurls != '') {
+                $fileurls .= html_writer::start_tag('br');
+            }
+            foreach ($files as $file) {
+                if (!empty($file) && $file->get_filename() != '.') {
+                    $fileurl = moodle_url::make_pluginfile_url(
+                        $file->get_contextid(),
+                        $file->get_component(),
+                        $file->get_filearea(),
+                        $file->get_itemid(),
+                        $file->get_filepath(),
+                        $file->get_filename(),
+                        true
+                    );
+                    $fileurls .= html_writer::tag('a', $file->get_filename(), ['href' => $fileurl])
+                        . html_writer::start_tag('br');
+                }
+            }
+        }
+
+        return $fileurls;
     }
 }

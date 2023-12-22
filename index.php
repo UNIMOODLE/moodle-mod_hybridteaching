@@ -56,13 +56,13 @@ $PAGE->set_context($coursecontext);
 
 echo $OUTPUT->header();
 
-$modulenameplural = get_string('modulenameplural', 'mod_hybridteaching');
+$modulenameplural = get_string('modulenameplural', 'hybridteaching');
 echo $OUTPUT->heading($modulenameplural);
 
 $hybridteachings = get_all_instances_in_course('hybridteaching', $course);
 
 if (empty($hybridteachings)) {
-    notice(get_string('no$hybridteachingconfigs', 'mod_hybridteaching'), new moodle_url('/course/view.php', ['id' => $course->id]));
+    notice(get_string('no$hybridteachingconfigs', 'hybridteaching'), new moodle_url('/course/view.php', ['id' => $course->id]));
 }
 
 $table = new html_table();

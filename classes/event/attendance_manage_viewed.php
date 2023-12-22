@@ -44,7 +44,7 @@ class attendance_manage_viewed extends \core\event\base {
      * @return string
      */
     public static function get_name() {
-        return get_string('eventattmngviewed', 'mod_hybridteaching');
+        return get_string('eventattmngviewed', 'hybridteaching');
     }
 
     /**

@@ -44,7 +44,7 @@ class session_viewed extends \core\event\base {
      * @return string
      */
     public static function get_name() {
-        return get_string('eventsessionviewed', 'mod_hybridteaching');
+        return get_string('eventsessionviewed', 'hybridteaching');
     }
 
     /**

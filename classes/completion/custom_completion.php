@@ -62,7 +62,7 @@ class custom_completion extends activity_custom_completion {
         $hybridteachingid = $this->cm->instance;
 
         if (!$hybridteaching = $DB->get_record('hybridteaching', ['id' => $hybridteachingid])) {
-            throw new \moodle_exception(get_string('nohid', 'mod_hybridteaching') . $hybridteachingid);
+            throw new \moodle_exception(get_string('nohid', 'hybridteaching') . $hybridteachingid);
         }
         $status = 0;
         $attcountparams = ['userid' => $userid, 'hybridteachingid' => $hybridteachingid, 'status' => 1];

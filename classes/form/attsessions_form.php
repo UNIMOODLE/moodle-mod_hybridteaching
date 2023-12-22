@@ -31,6 +31,7 @@ class attsessions_options_form extends moodleform {
     public function definition() {
         global $CFG, $USER, $DB;
         $mform = &$this->_form;
+        $this->_form->disable_form_change_checker();
         $mform->_attributes['id'] = 'sessionsform' . substr($mform->_attributes['id'], 6);
         $id = $this->_customdata['id'];
         $cm = get_coursemodule_from_id('hybridteaching', $id,  0,  false,  MUST_EXIST);
@@ -51,7 +52,7 @@ class attsessions_options_form extends moodleform {
         $selectedsessions = [];
         if ($view == 'attendlog') {
             $selecteduser = $this->_customdata['selecteduser'];
-            $mform->addElement('header', 'participant', get_string('participant', 'mod_hybridteaching'));
+            $mform->addElement('header', 'participant', get_string('participant', 'hybridteaching'));
             $selectedusers = [];
             $sessionusers = $attcontroller->hybridteaching_get_attendance_users_in_session($sessionid, $hid);
             if ($sessionusers) {
@@ -65,7 +66,7 @@ class attsessions_options_form extends moodleform {
                         $selectedusers[$useratt->id] = $sesuser->lastname . ' ' . $sesuser->firstname;
                     }
                 }
-                $mform->addElement('autocomplete', 'selecteduser', get_string('userfor', 'mod_hybridteaching'), $selectedusers);
+                $mform->addElement('autocomplete', 'selecteduser', get_string('userfor', 'hybridteaching'), $selectedusers);
                 $mform->setDefault('selecteduser', $selecteduser);
             }
             $mform->addElement('static',  'description',  get_string('session', 'hybridteaching'), $sessioninfo);
@@ -73,7 +74,7 @@ class attsessions_options_form extends moodleform {
             $selectedsessions[0] = get_string('allsessions', 'hybridteaching');
         }
 
-        $mform->addElement('header', 'sessions', get_string('sessions', 'mod_hybridteaching'));
+        $mform->addElement('header', 'sessions', get_string('sessions', 'hybridteaching'));
         foreach ($sessions as $sess) {
             if ($att = $attcontroller->hybridteaching_get_attendance($sess)) {
                 $att->visible && !$sess['attexempt'] ? $visible = '' : $visible = get_string('attnotforgrade', 'hybridteaching');
@@ -81,7 +82,7 @@ class attsessions_options_form extends moodleform {
                     ' ' . $visible;
             }
         }
-        $mform->addElement('autocomplete', 'selectedsession', get_string('sessionfor', 'mod_hybridteaching'), $selectedsessions);
+        $mform->addElement('autocomplete', 'selectedsession', get_string('sessionfor', 'hybridteaching'), $selectedsessions);
         if ($sessionid) {
             $selectedsessions[$sessionid] = $session->name;
             $mform->setDefault('selectedsession', $sessionid);

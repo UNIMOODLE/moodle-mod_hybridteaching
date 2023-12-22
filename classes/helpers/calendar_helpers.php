@@ -52,7 +52,10 @@ function hybridteaching_create_calendar_event(&$session) {
     }
 
     $hybridteaching = $DB->get_record('hybridteaching', ['id' => $session->hybridteachingid]);
-
+    if (!$hybridteaching) {
+        $hybridteaching = $DB->get_record('hybridteaching', ['id' => $DB->get_field('course_modules', 'instance',
+            ['id' => $session->coursemodule], MUST_EXIST)]);
+    }
     $caleventdata = new stdClass();
     $caleventdata->name           = $session->name;
     $caleventdata->courseid       = $hybridteaching->course;

@@ -65,7 +65,7 @@ if (isset($_GET['code'])) {
     $SESSION->token = $meethandler->client->getAccessToken();
 }
 
-if (isset($SESSION->token) && $SESSION->token['access_token'] != 0) {
+if (isset($SESSION->token['access_token'])) {
     $meethandler->client->setAccessToken($SESSION->token);
     if ($meetconfig) {
         $meetconfig->token = json_encode($SESSION->token);
@@ -74,7 +74,6 @@ if (isset($SESSION->token) && $SESSION->token['access_token'] != 0) {
     }
 }
 
-$htmblody = '';
 // Check to ensure that the access token was successfully acquired.
 if ($meethandler->client->getAccessToken() && $meethandler->client->getAccessToken()['access_token'] != 0) {
     $SESSION->token = $meethandler->client->getAccessToken();

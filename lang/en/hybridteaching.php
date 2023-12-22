@@ -98,6 +98,9 @@ $string['hybridteachvcpluginname'] = 'Videoconference plugin';
 $string['headerconfigvc'] = 'Manage videoconference extensions';
 $string['videoconferenceplugins'] = 'Videoconference plugins';
 
+$string['subplugintype_hybridteachstore'] = 'Storage type';
+$string['subplugintype_hybridteachstore_plural'] = 'Storage types';
+
 $string['view_error_url_missing_parameters'] = 'There are parameters missing in this URL';
 
 $string['programschedule'] = 'Schedule program';
@@ -119,6 +122,7 @@ $string['hybridteaching:record'] = 'Allow recordings';
 $string['hybridteaching:viewallsessions'] = 'Allow view all sessions without group filter';
 $string['hybridteaching:viewhiddenitems'] = 'View hidden items';
 $string['hybridteaching:viewrecordings'] = 'View recordings';
+$string['hybridteaching:viewchat'] = 'View chats';
 
 $string['type'] = 'Type';
 $string['order'] = 'Order';
@@ -208,6 +212,7 @@ $string['started'] = 'Started on';
 $string['closedoorsnext'] = 'Close doors after';
 $string['closedoorsnext2'] = 'from start';
 $string['closedoorsprev'] = 'This session closed doors to';
+$string['closedoorsafter'] = 'from start';
 $string['finished'] = 'Last session ended on';
 
 $string['mod_form_field_participant_list_action_add'] = 'Add';
@@ -222,18 +227,12 @@ $string['mod_form_field_participant_list_action_remove'] = 'Remove';
 $string['mod_form_field_participant_role_moderator'] = 'Moderator';
 $string['mod_form_field_participant_role_viewer'] = 'Viewer';
 
-
 $string['equalto'] = 'Equal to';
 $string['morethan'] = 'More than';
 $string['lessthan'] = 'Less than';
 $string['options'] = 'Options';
 $string['sesperpage'] = 'Sessions per page';
 
-$string['equalto'] = 'Equal to';
-$string['morethan'] = 'More than';
-$string['lessthan'] = 'Less than';
-$string['options'] = 'Options';
-$string['sesperpage'] = 'Sessions per page';
 $string['hybridteaching:bulksessions'] = 'See multiple session actions select';
 $string['updatesessions'] = 'Update sessions';
 $string['deletesessions'] = 'Delete sessions';
@@ -257,10 +256,10 @@ $string['delayin'] = 'Delay in';
 $string['updatestarttime'] = 'Modify start time';
 $string['hybridteaching:sessionsactions'] = 'See session list actions';
 $string['hybridteaching:sessionsfulltable'] = 'Display all fields of session list';
+$string['editsession'] = 'Edit session';
 
 $string['headerconfigstore'] = 'Manage storage extensions';
 $string['storageplugins'] = 'Storage plugins';
-$string['editsession'] = 'Edit session';
 $string['importsessions'] = 'Import sessions';
 $string['export'] = 'Export';
 $string['invalidimportfile'] = 'File format is invalid.';
@@ -297,7 +296,6 @@ $string['sessionnoaccess'] = 'You have no access to this session';
 $string['lessamin'] = 'Less than 1 min';
 
 $string['qrcode'] = 'QR code';
-$string['qrheader'] = 'Scan the QR or use the password listed below to take assistance';
 $string['useqr'] = 'Include QR use';
 $string['rotateqr'] = 'Rotate QR code';
 $string['studentpassword'] = 'Student password';
@@ -362,6 +360,7 @@ $string['eventsessiondeleted'] = 'Session deleted';
 $string['eventattviewed'] = 'Attendance viewed';
 $string['eventattupdated'] = 'Attendance updated';
 $string['eventattmngviewed'] = 'Attendance manage viewed';
+
 $string['gradenoun'] = 'Grade';
 $string['gradenoun_help'] = 'Session grade / Total activity grade / Max activity grade';
 $string['finishattend'] = 'Finish attendance';
@@ -454,3 +453,26 @@ $string['deletewithhybridmods'] = 'This config is used in the following hybridte
 $string['lostconfig'] = 'This session config has been deleted by an administrator';
 $string['noinitialstateconfig'] = 'This meeting has no initial status to be configured';
 $string['cantfinishunstarted'] = 'Can not finish a session before the real start time';
+
+$string['error_unable_join'] = 'Cannot connect. The meeting could not be found or has been deleted. Contact your teacher or administrator.';
+$string['sessionscheduling_help'] = 'If group mode is forced on course, the sessions are forced to use scheduling.
+
+If it isn\'t forced, not using sesions schedulling, forces groups to be disabled for the module.';
+
+$string['error:importsessiontimetype'] = 'Invalid session duration type! Skipping line {$a}.';
+
+$string['invalidduration'] = 'Invalid duration';
+$string['chaturlmeeting'] = 'Chat meeting';
+$string['notesurlmeeting'] = 'Notes meeting';
+
+$string['sessionendbeforestart'] = 'This session would end before the start date, change its duration or start date';
+$string['repeatsessionsamedate'] = 'The session repeat date end can not be set as today';
+$string['programsessionbeforenow'] = 'The repeat session date can not be set before today';
+$string['daynotselected'] = 'A day must be selected for repeating sessions';
+
+$string['norecordingmoderation'] = 'You do not have access to alow recordings on this vc type';
+$string['chats'] = 'Chats';
+
+$string['enabled'] = 'Enabled';
+$string['enabled_help'] = 'If the option is activated, this extension will be enabled';
+$string['disabled'] = 'Disabled';

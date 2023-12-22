@@ -69,6 +69,11 @@ if (!empty($sid)) {
 
             if (!empty($sessionvc->get_session())) {
                 $resultsaccess = $sessionvc->get_zone_access();
+                if ($resultsaccess == null ||
+                    (isset($resultsaccess['returncode']) && $resultsaccess['returncode'] == 'FAILED') ) {
+                        $url = new moodle_url('/mod/hybridteaching/view.php', ['id' => $id, 'err' => 1]);
+                        redirect($url);
+                }
                 $url = $resultsaccess['url'];
                 $ishost = $resultsaccess['ishost'];
                 if ($activesession->isfinished) {
@@ -103,9 +108,10 @@ if (!empty($sid)) {
                     $sessionvc->create_unique_session_extended($activesession, $hybridteaching);
                     $sessionvc->set_session($activesession->id);
                     $resultsaccess = $sessionvc->get_zone_access();
-                    if (!$resultsaccess) {
-                        $url = new moodle_url('/mod/hybridteaching/view.php', ['id' => $id]);
-                        redirect($url, get_string('view_error_unable_join', 'mod_bigbluebuttonbn'), null, 'error');
+                    if ($resultsaccess == null ||
+                        (isset($resultsaccess['returncode']) && $resultsaccess['returncode'] == 'FAILED') ) {
+                            $url = new moodle_url('/mod/hybridteaching/view.php', ['id' => $id, 'err' => 1]);
+                            redirect($url);
                     }
                     $url = $resultsaccess['url'];
                     $ishost = $resultsaccess['ishost'];
@@ -155,6 +161,11 @@ if (!empty($sid)) {
                     redirect($url, get_string('vcconfigremoved', 'hybridteaching'), null, 'error');
                 }
                 $resultsaccess = $sessionvc->get_zone_access();
+                if ($resultsaccess == null ||
+                    (isset($resultsaccess['returncode']) && $resultsaccess['returncode'] == 'FAILED') ) {
+                        $url = new moodle_url('/mod/hybridteaching/view.php', ['id' => $id, 'err' => 1]);
+                        redirect($url);
+                }
                 $url = $resultsaccess['url'];
                 $ishost = $resultsaccess['ishost'];
             } else {
@@ -173,6 +184,11 @@ if (!empty($sid)) {
                     $sessionvc->create_unique_session_extended($session, $hybridteaching);
                     $sessionvc->set_session($session->id);
                     $resultsaccess = $sessionvc->get_zone_access();
+                    if ($resultsaccess == null ||
+                        (isset($resultsaccess['returncode']) && $resultsaccess['returncode'] == 'FAILED') ) {
+                            $url = new moodle_url('/mod/hybridteaching/view.php', ['id' => $id, 'err' => 1]);
+                            redirect($url);
+                    }
                     $url = $resultsaccess['url'];
                     $ishost = $resultsaccess['ishost'];
                 }

@@ -14,16 +14,15 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
-$string['pluginname'] = 'Onedrive Store';
+$string['pluginname'] = 'Hybrid Onedrive';
 $string['pluginconfig'] = 'Onedrive Storeconfig';
 $string['pluginnewconfig'] = 'New Onedrive Store config';
 $string['tenantid'] = 'Tenant ID';
 $string['clientid'] = 'Cliente ID';
-$string['clientsecret'] = 'Secreto del cliente';
-$string['useremail'] = 'Email del usuario';
+$string['clientsecret'] = 'Client secret';
+$string['useremail'] = 'User email';
 $string['onedrive'] = 'onedrive';
 $string['alias'] = 'Onedrive Store';
-$string['pluginname'] = 'Onedrive Store';
 $string['err_field_missing'] = '{$a} not found';
 $string['errorwebservice'] = 'Onedrive webservice error: {$a}.';
 $string['err_no_access_token'] = 'No access token returned';

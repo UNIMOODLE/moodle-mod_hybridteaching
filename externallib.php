@@ -258,4 +258,44 @@ class hybridteaching_external extends external_api {
     public static function get_modal_text_returns() {
         // TODO.
     }
+
+    /**
+     * Get the parameters for the `get_user_has_recording_capability` function.
+     *
+     * @return external_function_parameters The parameters for the function.
+     */
+    public static function get_user_has_recording_capability_parameters() {
+        return new external_function_parameters(
+            ["typevc" => new external_value(PARAM_TEXT, "typevc"),
+                "pagecontext" => new external_value(PARAM_INT, "pagecontext")]
+        );
+    }
+
+
+    /**
+     * Retrieves the recording capability for a given vc type
+     * @param int $typevc The type of the vc.
+     * @throws Some_Exception_Class description of exception
+     * @return string The JSON-encoded capability information.
+     */
+    public static function get_user_has_recording_capability($typevc, $pagecontext) {
+        global $DB, $USER;
+
+        $params = self::validate_parameters(
+            self::get_user_has_recording_capability_parameters(), ["typevc" => $typevc, 'pagecontext' => $pagecontext]
+        );
+        $context = context::instance_by_id($pagecontext, MUST_EXIST);
+        $capability = 'hybridteachvc/' . $typevc . ':record';
+        //$context = $DB->get_record('context', ['id' => 2033], '*', IGNORE_MISSING);
+        return json_encode(has_capability($capability, $context, $USER, true));
+    }
+
+    /**
+     * Retrieves the modal text returns.
+     *
+     * @return Some_Return_Value
+     */
+    public static function get_user_has_recording_capability_returns() {
+        // TODO.
+    }
 }

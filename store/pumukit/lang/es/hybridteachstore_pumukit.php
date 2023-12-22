@@ -31,7 +31,7 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-$string['pluginname'] = 'Pumukit Store';
+$string['pluginname'] = 'Pumukit híbrido';
 $string['pluginconfig'] = 'Configuración de Pumukit Store';
 $string['pluginnewconfig'] = 'Nueva configuración de Pumukit Store';
 $string['url'] = 'Url del servidor PuMuKit';

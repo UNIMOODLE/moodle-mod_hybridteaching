@@ -47,7 +47,7 @@ if ($hassiteconfig) {
 
     if ($ADMIN->fulltree) {
         $options = [
-            0 => get_string('donotusepaging', 'mod_hybridteaching'),
+            0 => get_string('donotusepaging', 'hybridteaching'),
             10 => 10,
             25 => 25,
             50 => 50,
@@ -69,13 +69,13 @@ if ($hassiteconfig) {
 
         $vcsettings->add(new admin_setting_heading(
             'headerconfigvc',
-            get_string('headerconfigvc', 'mod_hybridteaching'),
+            get_string('headerconfigvc', 'hybridteaching'),
             ''
         ));
 
         $vcsettings->add(new hybridteaching_admin_plugins_configs(
             'managevideoconferenceplugins',
-            get_string('videoconferenceplugins', 'mod_hybridteaching'),
+            get_string('videoconferenceplugins', 'hybridteaching'),
             '',
             '',
             'hybridteachvc'
@@ -83,13 +83,13 @@ if ($hassiteconfig) {
 
         $storesettings->add(new admin_setting_heading(
             'headerconfigstore',
-            get_string('headerconfigstore', 'mod_hybridteaching'),
+            get_string('headerconfigstore', 'hybridteaching'),
             ''
         ));
 
         $storesettings->add(new hybridteaching_admin_plugins_configs(
             'managestorageplugins',
-            get_string('storageplugins', 'mod_hybridteaching'),
+            get_string('storageplugins', 'hybridteaching'),
             '',
             '',
             'hybridteachstore'
@@ -99,4 +99,20 @@ if ($hassiteconfig) {
     $ADMIN->add('hybridteaching', $generalsettings);
     $ADMIN->add('hybridteaching', $vcsettings);
     $ADMIN->add('hybridteaching', $storesettings);
+
+    $categoryvc = new admin_category('hybridteachvcplugins',
+    new lang_string('subplugintype_hybridteachvc_plural', 'hybridteaching'), !$module->is_enabled());
+    $ADMIN->add('hybridteaching', $categoryvc);
+
+    $categorystore = new admin_category('hybridteachstoreplugins',
+    new lang_string('subplugintype_hybridteachstore_plural', 'hybridteaching'), !$module->is_enabled());
+    $ADMIN->add('hybridteaching', $categorystore);
+
+    foreach (core_plugin_manager::instance()->get_plugins_of_type('hybridteachvc') as $plugin) {
+        $plugin->load_settings($ADMIN, 'hybridteachvcplugins', $hassiteconfig);
+    }
+
+    foreach (core_plugin_manager::instance()->get_plugins_of_type('hybridteachstore') as $plugin) {
+        $plugin->load_settings($ADMIN, 'hybridteachstoreplugins', $hassiteconfig);
+    }
 }

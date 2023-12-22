@@ -253,23 +253,40 @@ class bbbproxy extends proxy_base {
       */
     public function get_url_recording_by_recordid($recordingid) {
         $data = [
-            'recordingID' => $recordingid,
+            'recordID' => $recordingid,
             'state' => 'published,unpublished,processed',
         ];
-        $recordingurl = $this->action_url_config('getRecordings', $data);
-
+        $recording = $this->action_url_config('getRecordings', $data);
         $curl = new curl();
-        $xml = $curl->get($recordingurl);
+        $xml = $curl->get($recording);
         self::assert_returned_xml($xml);
 
+        $recordingurl = '';
+        $notes = '';
         if ($xml != null) {
-            if (isset($xml->recordings->recording->playback->format->url)) {
-                $recordingurl = (string) $xml->recordings->recording->playback->format->url;
+            if (isset($xml->recordings->recording->playback->format)) {
+                if (isset($xml->recordings->recording->playback->format[0])) {
+                    foreach ($xml->recordings->recording->playback->format as $object) {
+                        if (isset($object->type) && $object->type == 'video') {
+                            $recordingurl = $object->url;
+                        }
+                        if (isset($object->type) && $object->type == 'notes') {
+                            $notes = $object->url;
+                        }
+
+                    }
+                } else {
+                    if (isset($xml->recordings->recording->playback->format->url)) {
+                        $recordingurl = (string) $xml->recordings->recording->playback->format->url;
+                    }
+                }
             }
         }
+
         return [
             'returncode' => (string) $xml->returncode,
-            'recordingid' => $recordingurl,
+            'recording' => $recordingurl,
+            'materials' => $notes,
         ];
     }
 
@@ -395,6 +412,28 @@ class bbbproxy extends proxy_base {
             return true;
         } else {
             return false;
+        }
+    }
+
+    /**
+     * Get a meeting info and if the meeting exists.
+     *
+     * @param int $meetingid The ID of the meeting.
+     * @return mixed Returns info meeting if meeting exists, array with otherwise.
+     */
+    public function get_meeting_info($meetingid) {
+        $data = [
+            'meetingID' => $meetingid,
+        ];
+        $url = $this->action_url_config('getMeetingInfo', $data);
+        $curl = new curl();
+        $xml = $curl->get($url);
+        if ($xml->returncode == 'FAILED') {
+            return [
+                'returncode' => 'FAILED',
+            ];
+        } else {
+            return $xml;
         }
     }
 }

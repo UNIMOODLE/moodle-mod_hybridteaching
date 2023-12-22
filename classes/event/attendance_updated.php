@@ -44,7 +44,7 @@ class attendance_updated extends \core\event\base {
      * @return string
      */
     public static function get_name() {
-        return get_string('eventattupdated', 'mod_hybridteaching');
+        return get_string('eventattupdated', 'hybridteaching');
     }
 
     /**

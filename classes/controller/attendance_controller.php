@@ -97,6 +97,14 @@ class attendance_controller extends common_controller {
         !empty($lname) ? $lname = " AND u.lastname like '" . $lname . "%' " : '';
         !isset($params['view']) ? $params['view'] = 'bulkform' : '';
 
+        $secondarysort = '';
+        if ($sort === 'connectiontime') {
+            $dir == 'ASC' ? $secondarysort .= ', status = 1' : $secondarysort .= ', status != 1';
+        }
+        if ($sort === 'status') {
+            $dir == 'ASC' ? $sort = 'status = 1' : $sort = 'status != 1';
+            $dir = '';
+        }
         if ($params['view'] == 'sessionattendance') {
             $sql = 'SELECT hs.id, hs.name, hs.starttime, hs.duration, hs.typevc
             FROM {hybridteaching_session} hs
@@ -125,7 +133,7 @@ class attendance_controller extends common_controller {
                            (hs.starttime + hs.duration),
                            ha.exempt,
                            u.lastname,
-                           u.username ' . 'ORDER BY ' . $sort . ' ' . $dir . ', visible desc';
+                           u.username ' . 'ORDER BY ' . $sort . ' ' . $dir . $secondarysort . ', visible desc';
         }
         $attendance = $DB->get_records_sql($sql, $params, $page * $recordsperpage, $recordsperpage);
         $attendancearray = json_decode(json_encode($attendance), true);
@@ -520,15 +528,15 @@ class attendance_controller extends common_controller {
         $s .= get_string('group') . ': ';
         $session->groupid == 0 ? $s .= get_string('commonattendance', 'hybridteaching') :
             $s .= groups_get_group($session->groupid)->name;
-        $s .= '<br>' . get_string('typevc', 'mod_hybridteaching') . ': ';
-        $session->typevc != '' ? $s .= $session->typevc : $s .= get_string('novc', 'mod_hybridteaching');
+        $s .= '<br>' . get_string('typevc', 'hybridteaching') . ': ';
+        $session->typevc != '' ? $s .= $session->typevc : $s .= get_string('novc', 'hybridteaching');
         $s .= '<br>' . get_string('sessionstarttime', 'hybridteaching') . ': ' . date('H:i:s', $session->starttime);
         ($session->starttime + $session->duration) == $session->starttime ?
             $s .= '<br>' . get_string('sessionendtime', 'hybridteaching') . ': ' .  get_string('noduration', 'hybridteaching')
             :
             $s .= '<br>' . get_string('sessionendtime', 'hybridteaching') . ': ' .
                 date('H:i:s', $session->starttime + $session->duration);
-        $s .= '<br>' . get_string('duration', 'mod_hybridteaching') . ': ';
+        $s .= '<br>' . get_string('duration', 'hybridteaching') . ': ';
         !empty($session->duration) ? $s .= helper::get_hours_format($session->duration) : $s .= ' - ';
         return $s;
     }
@@ -557,7 +565,11 @@ class attendance_controller extends common_controller {
         $s .= $total;
         $s .= '<br>' . get_string('exempt', 'hybridteaching') . ': ' . $exempted;
         $s .= '<br>' . get_string('validatedattendance', 'hybridteaching') . ': ' . $validated . '/' . $total;
-        $s .= '<br>' . get_string('finalgrade', 'hybridteaching') . ': ' . round($finalgrade, 2) . '/' . $ht->grade;
+        if ($ht->grade) {
+            $s .= '<br>' . get_string('finalgrade', 'hybridteaching') . ': ' . round($finalgrade, 2) . '/' . $ht->grade;
+        } else {
+            $s .= '<br>' . get_string('nograde');
+        }
         return $s;
     }
 
@@ -885,12 +897,12 @@ class attendance_controller extends common_controller {
     public static function user_attendance_in_grace_period($ht, $session, $attid) : bool {
         global $DB;
         $intime = true;
-        empty($ht) ? $gracetime = 0 :
+        empty($ht) || (!isset($ht->graceperiod) || !isset($ht->graceperiodunit)) ? $gracetime = 0 :
         $gracetime = self::hybridteaching_get_needed_time($ht->graceperiod, $ht->graceperiodunit);
-        $logtime = 0;
         if (!$gracetime) {
             return true;
         }
+        $logtime = 0;
         if (!isset($session->starttime)) {
             $starttime = $DB->get_field('hybridteaching_session', 'starttime', ['id' => $session], IGNORE_MISSING);
             $graceend = $starttime + $gracetime;

@@ -41,6 +41,7 @@ class configs extends configs_controller {
     public static function create_config($data) {
         global $DB, $USER;
         $records = new stdClass();
+        $records->accessmethod = $data->accessmethod;
         $records->tenantid = $data->tenantid;
         $records->clientid = $data->clientid;
         $records->clientsecret = $data->clientsecret;
@@ -55,6 +56,7 @@ class configs extends configs_controller {
         global $DB;
         $records = new stdClass();
         $records->id = $data->subpluginconfigid;
+        $records->accessmethod = $data->accessmethod;
         $records->tenantid = $data->tenantid;
         $records->clientid = $data->clientid;
         $records->clientsecret = $data->clientsecret;

@@ -90,9 +90,9 @@ class hybridteaching_admin_plugins_configs extends admin_setting {
         global $CFG, $OUTPUT, $DB, $PAGE;
 
         // Display strings.
-        $strorder = get_string('order', 'mod_hybridteaching');
-        $stroptions = get_string('options', 'mod_hybridteaching');
-        $strstate = get_string('hideshow', 'mod_hybridteaching');
+        $strorder = get_string('order', 'hybridteaching');
+        $stroptions = get_string('options', 'hybridteaching');
+        $strstate = get_string('hideshow', 'hybridteaching');
         $struninstall = get_string('delete');
         $strversion = get_string('version');
         $strdisable = get_string('disable');
@@ -100,7 +100,8 @@ class hybridteaching_admin_plugins_configs extends admin_setting {
         $strup = get_string('up');
         $strdown = get_string('down');
         $strname = get_string('name');
-        $strtype = get_string('type', 'mod_hybridteaching');
+        $strtype = get_string('type', 'hybridteaching');
+        $strconfigenabled = get_string('availability');
         $strcategories = get_string('categories');
         $section = optional_param('section', '', PARAM_COMPONENT);
         $message = optional_param('message', 0, PARAM_COMPONENT);
@@ -108,7 +109,7 @@ class hybridteaching_admin_plugins_configs extends admin_setting {
         $return = $OUTPUT->box_start('generalbox hybridteachingpluginsconfigs');
 
         $table = new html_table();
-        $table->head = [$strname, $strtype, $strcategories, $strversion, $strorder, $stroptions];
+        $table->head = [$strname, $strtype, $strcategories, $strversion, $strorder, $strconfigenabled, $stroptions];
         $table->colclasses = ['leftalign', 'leftalign', 'centeralign',
             'centeralign', 'centeralign', 'centeralign', 'centeralign', ];
         $table->id = 'hybridteachingpluginsconfigs';
@@ -125,7 +126,7 @@ class hybridteaching_admin_plugins_configs extends admin_setting {
         $configlist = $configcontroller->hybridteaching_get_configs();
         $enabledconfigs = $configcontroller->get_enabled_data('hybridteaching_configs', ['subplugintype' => $this->splugindir]);
         if (!empty($message)) {
-            \core\notification::add(get_string($message, 'mod_hybridteaching'), \core\output\notification::NOTIFY_INFO);
+            \core\notification::add(get_string($message, 'hybridteaching'), \core\output\notification::NOTIFY_INFO);
         }
         foreach ($configlist as $config) {
             // Hide/show links.
@@ -139,6 +140,12 @@ class hybridteaching_admin_plugins_configs extends admin_setting {
             $configversion = $config['version'];
             $configtype = $config['type'];
             $configtypealias = get_string('alias', $this->splugintype.'_'.$config['type']);
+            $configenabled = $config['configenabled'];
+            if ($configenabled == true) {
+                $strconfigenabled = get_string('enabled', 'core_admin');
+            } else {
+                $strconfigenabled = get_string('disabled', 'core_admin');
+            }
 
             // Up/down link (only if enrol is enabled).
             $updown = '';
@@ -163,29 +170,33 @@ class hybridteaching_admin_plugins_configs extends admin_setting {
                 $options .= html_writer::link(new moodle_url($url, ['action' => 'disable', 'id' => $configid]),
                     $OUTPUT->pix_icon('t/hide', $strdisable, 'moodle', ['class' => 'iconsmall']));
             } else {
-                $options .= html_writer::link(new moodle_url($url, ['action' => 'enable', 'id' => $configid]),
-                    $OUTPUT->pix_icon('t/show', $strenable, 'moodle', ['class' => 'iconsmall']));
+                if ($configenabled) {
+                    $options .= html_writer::link(new moodle_url($url, ['action' => 'enable', 'id' => $configid]),
+                        $OUTPUT->pix_icon('t/show', $strenable, 'moodle', ['class' => 'iconsmall']));
+
+                }
                 $class = 'dimmed_text';
             }
 
-            $urledit = '/mod/hybridteaching/'. $this->splugindir .'/'.$configtype.
-                '/editconfig.php?type='.$configtype.'&id='.$configid;
-            $options .= html_writer::link(new moodle_url($urledit),
-                $OUTPUT->pix_icon('t/edit', $stroptions, 'moodle', ['class' => 'iconsmall']));
-
+            if ($configenabled) {
+                $urledit = '/mod/hybridteaching/'. $this->splugindir .'/'.$configtype.
+                    '/editconfig.php?type='.$configtype.'&id='.$configid;
+                $options .= html_writer::link(new moodle_url($urledit),
+                    $OUTPUT->pix_icon('t/edit', $stroptions, 'moodle', ['class' => 'iconsmall']));
+            }
             $htmodules = $DB->get_fieldset_select('hybridteaching', 'name', 'config = :config',
                 ['config' => $configid], IGNORE_MISSING);
             $stringtodelete = !empty($htmodules) ?
-                get_string('deletewithhybridmods', 'mod_hybridteaching', implode(', ', $htmodules)) :
-                get_string('deleteconfirm', 'mod_hybridteaching', $configname);
+                get_string('deletewithhybridmods', 'hybridteaching', implode(', ', $htmodules)) :
+                get_string('deleteconfirm', 'hybridteaching', $configname);
             $options .= html_writer::link(new moodle_url($url, ['action' => 'delete', 'id' => $configid]),
                 $OUTPUT->pix_icon('t/delete', $struninstall, 'moodle', ['class' => 'iconsmall']),
-                ['onclick' => 'if (!confirm("'.$stringtodelete.'"))
-                { return false; }', ]
+                    ['onclick' => 'if (!confirm("'.$stringtodelete.'")) { return false; }' ]
             );
 
             // Add a row to the table.
-            $row = new html_table_row([$configname, $configtypealias, $configcategories, $configversion, $updown, $options]);
+            $row = new html_table_row([$configname, $configtypealias, $configcategories, $configversion,
+                $updown, $strconfigenabled, $options, ]);
             if (!empty($class)) {
                 $row->attributes['class'] = $class;
             }
@@ -205,9 +216,9 @@ class hybridteaching_admin_plugins_configs extends admin_setting {
     public function create_subplugin_select() {
         $subpluginsarray = [];
         $pluginmanager = core_plugin_manager::instance();
-        $subplugins = $pluginmanager->get_subplugins_of_plugin('mod_hybridteaching');
+        $subplugins = $pluginmanager->get_subplugins_of_plugin('hybridteaching');
         foreach ($subplugins as $subplugin) {
-            if ($subplugin->type == $this->splugintype) {
+            if ($subplugin->type == $this->splugintype && $subplugin->is_enabled()) {
                 $url = new moodle_url('/mod/hybridteaching/'. $this->splugindir .'/'.$subplugin->name.
                     '/editconfig.php?type='.$subplugin->name);
                 $link = $url->out();

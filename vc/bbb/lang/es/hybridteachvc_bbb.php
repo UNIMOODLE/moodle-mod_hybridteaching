@@ -48,3 +48,7 @@ $string['view_error_unable_join_teacher'] = 'Unable to connect to the BigBlueBut
 $string['view_error_unable_join'] = 'Incapaz de unirse a la sesión. Por favor compruebe el servidor añadido en la configuración de BigBlueButton y compruebe que el servidor de BigBlueButton está en funcionamiento.';
 
 $string['downloadrecordsbbb'] = 'Descargar grabaciones BigBlueButton';
+
+$string['bbb:view'] = 'Ver BigBlueButton';
+$string['bbb:use'] = 'Generar videconferencias BigBlueButton';
+$string['bbb:record'] = 'Almacenar grabaciones BigBlueButton';

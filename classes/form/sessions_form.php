@@ -30,7 +30,7 @@ class sessions_form extends moodleform {
     public function definition() {
         global $CFG, $USER, $DB;
         $mform = &$this->_form;
-
+        $this->_form->disable_form_change_checker();
         $course = $this->_customdata['course'];
         $cm = $this->_customdata['cm'];
         $session = $this->_customdata['session'];
@@ -47,7 +47,11 @@ class sessions_form extends moodleform {
         } else {
             $headertitle = get_string('editsession', 'hybridteaching');
         }
-
+        if (!empty($cm)) {
+            $hasgrade = $DB->get_field('hybridteaching', 'grade', [
+                'id' => $DB->get_field('course_modules', 'instance', ['id' => $cm->id], IGNORE_MISSING),
+            ], IGNORE_MISSING);
+        }
         $mform->addElement('header', 'general', $headertitle);
 
         $mform->addElement('text', 'name', get_string('sessionname', 'hybridteaching'));
@@ -91,7 +95,8 @@ class sessions_form extends moodleform {
             $mform->addElement('select', 'groupid', get_string('groups', 'group'), $selectgroups);
         }
 
-        $mform->addElement('date_time_selector', 'starttime', get_string('sessiondate', 'hybridteaching'));
+        $attributes = ['startyear' => date('Y', time())];
+        $mform->addElement('date_time_selector', 'starttime', get_string('sessiondate', 'hybridteaching'), $attributes);
         $mform->setType('starttime', PARAM_TEXT);
 
         $duration[] = &$mform->createElement('text', 'duration', get_string('duration', 'hybridteaching'));
@@ -104,7 +109,9 @@ class sessions_form extends moodleform {
         $mform->addGroupRule('durationgroup', get_string('required'), 'required');
         $mform->setType('durationgroup[duration]', PARAM_RAW);
 
-        $mform->addElement('advcheckbox', 'attexempt', get_string('attexempt', 'hybridteaching'), '', null, [0, 1]);
+        if ($hasgrade) {
+            $mform->addElement('advcheckbox', 'attexempt', get_string('attexempt', 'hybridteaching'), '', null, [0, 1]);
+        }
 
         $mform->addElement('editor', 'description', get_string('description'), ['rows' => 1, 'columns' => 80],
                             ['maxfiles' => EDITOR_UNLIMITED_FILES, 'noclean' => true, 'context' => $modcontext]);
@@ -148,7 +155,8 @@ class sessions_form extends moodleform {
             $mform->addGroup($periodgroup, 'periodgroup', get_string('repeatevery', 'hybridteaching'), [' '], false);
             $mform->disabledIf('periodgroup', 'addmultiply', 'notchecked');
 
-            $mform->addElement('date_selector', 'sessionenddate', get_string('repeatuntil', 'hybridteaching'));
+            $mform->addElement('date_selector', 'sessionenddate', get_string('repeatuntil', 'hybridteaching'),
+                $attributes);
             $mform->disabledIf('sessionenddate', 'addmultiply', 'notchecked');
         }
 
@@ -163,6 +171,38 @@ class sessions_form extends moodleform {
             $this->add_action_buttons(true, get_string('savechanges'));
         }
         $this->set_data($session);
+    }
+
+    public function validation($data, $files) {
+        // Programsessions duration errors check.
+        $errors = [];
+        $dataduration = (int) $data['durationgroup']['duration'];
+        $dataduration <= 0 ? $errors['durationgroup'] = get_string('invalidduration', 'hybridteaching') . '<br>' : '';
+        if ($data['durationgroup']['timetype'] == 2) {
+            $sessionduration = $dataduration * 3600;
+        } else if ($data['durationgroup']['timetype'] == 1) {
+            $sessionduration = $dataduration * 60;
+        } else {
+            $sessionduration = 0;
+            $errors['starttime'] .= get_string('sessionendbeforestart', 'hybridteaching');
+        }
+
+        if (isset($data['addmultiply'])) {
+            $enddate = date('d-M-Y', $data['sessionenddate']);
+            $datenow = date('d-M-Y', time());
+            if ($enddate == $datenow || $data['sessionenddate'] < time()) {
+                $enddate == $datenow ? $errors['sessionenddate'] = get_string('repeatsessionsamedate', 'hybridteaching') . '<br>' :
+                    $errors['sessionenddate'] = get_string('programsessionbeforenow', 'hybridteaching') . '<br>';
+            }
+            if (!isset($data['sdays'])) {
+                $errors['sessionenddate'] .= get_string('daynotselected', 'hybridteaching');
+            }
+        } else {
+            if ($data['starttime'] + $sessionduration < time()) {
+                $errors['starttime'] = get_string('sessionendbeforestart', 'hybridteaching');
+            }
+        }
+        return $errors;
     }
 }
 
@@ -249,9 +289,9 @@ class session_options_form extends moodleform {
         $mform->setDefault('l', $slist);
         $mform->setType('id', PARAM_INT);
         $mform->setType('l', PARAM_INT);
-        $mform->addElement('header', 'options', get_string('options', 'mod_hybridteaching'));
+        $mform->addElement('header', 'options', get_string('options', 'hybridteaching'));
         $perpage = [
-            0 => get_string('donotusepaging', 'mod_hybridteaching'),
+            0 => get_string('donotusepaging', 'hybridteaching'),
             10 => 10,
             25 => 25,
             50 => 50,
@@ -261,7 +301,7 @@ class session_options_form extends moodleform {
             500 => 500,
             1000 => 1000,
         ];
-        $mform->addElement('select', 'perpage', get_string('sesperpage', 'mod_hybridteaching'), $perpage);
+        $mform->addElement('select', 'perpage', get_string('sesperpage', 'hybridteaching'), $perpage);
         $mform->setDefault('perpage', get_config('hybridteaching', 'resultsperpage'));
     }
 }

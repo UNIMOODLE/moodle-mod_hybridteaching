@@ -41,3 +41,11 @@ $string['useremail'] = 'Email del usuario';
 $string['teams'] = 'teams';
 $string['alias'] = 'Teams';
 $string['downloadrecordsteams'] = 'Descargar grabaciones Teams';
+$string['accessmethod'] = 'Método de acceso para configuración';
+
+$string['teams:view'] = 'Ver Teams';
+$string['teams:use'] = 'Generar videconferencias Teams';
+$string['teams:record'] = 'Almacenar grabaciones Teams';
+
+
+

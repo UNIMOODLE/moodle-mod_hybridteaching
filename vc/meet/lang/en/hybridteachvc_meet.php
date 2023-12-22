@@ -31,7 +31,7 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-$string['pluginname'] = 'Hybrid meet';
+$string['pluginname'] = 'Hybrid Meet';
 $string['pluginconfig'] = 'Hybrid meet configuration';
 $string['pluginnewconfig'] = 'New hybrid meet configuration';
 $string['emailaccount'] = 'Email Google Meet account';
@@ -46,3 +46,5 @@ $string['licenses'] = 'Licenses';
 $string['downloadrecordsmeet'] = 'Download Meet recordings';
 $string['alreadyloggedmeet'] = 'You are already logged for this meet config';
 $string['loggingerrormeet'] = 'Error logging into your google account';
+$string['downloadrecordsmeet'] = 'Download Meet recordings';
+$string['chatnamefile'] = 'Chat meeting';

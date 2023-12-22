@@ -283,8 +283,10 @@ class sessions_controller extends common_controller {
     public function update_multiple_session($sessids, $data) {
         global $DB;
         $errormsg = '';
-        $data->duration = $data->durationgroup['duration'];
-        $data->timetype = $data->durationgroup['timetype'];
+        if (isset($data->durationgroup)) {
+            $data->duration = $data->durationgroup['duration'];
+            $data->timetype = $data->durationgroup['timetype'];
+        }
 
         foreach ($sessids as $sessid) {
             $session = $DB->get_record('hybridteaching_session', ['id' => $sessid]);
@@ -298,8 +300,8 @@ class sessions_controller extends common_controller {
                             self::calculate_duration($data->duration, $data->timetype);
                         break;
                     case self::REDUCE:
-                        $session->duration = $session->duration -
-                            self::calculate_duration($data->duration, $data->timetype);
+                        $reducedduration = $session->duration - self::calculate_duration($data->duration, $data->timetype);
+                        $reducedduration > 0 ? $session->duration = $reducedduration : '';
                         break;
                 }
             }
@@ -800,6 +802,9 @@ class sessions_controller extends common_controller {
         global $DB;
 
         $sessionvcstarted = false;
+        if (empty($session->typevc)) {
+            return true;
+        }
         $sessionvctable = 'hybridteachvc_' . $session->typevc;
         if ($DB->get_record($sessionvctable, ['htsession' => $session->id], '*', IGNORE_MISSING)) {
             $sessionvcstarted = true;

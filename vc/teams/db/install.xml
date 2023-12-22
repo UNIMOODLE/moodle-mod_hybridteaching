@@ -12,7 +12,8 @@
         <FIELD NAME="meetingcode" TYPE="char" LENGTH="30" NOTNULL="false" SEQUENCE="false" COMMENT="meeting code"/>
         <FIELD NAME="organizer" TYPE="char" LENGTH="50" NOTNULL="false" SEQUENCE="false" COMMENT="organizer user id"/>
         <FIELD NAME="joinurl" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="The join URL"/>
-        <FIELD NAME="recordingid" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Recording id"/>        
+        <FIELD NAME="recordingid" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Recording id"/>
+        <FIELD NAME="chaturl" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Meeting chat url"/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
@@ -22,6 +23,7 @@
     <TABLE NAME="hybridteachvc_teams_config" COMMENT="Teams configs">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="11" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="accessmethod" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="0: app, 1:behalf user"/>
         <FIELD NAME="tenantid" TYPE="char" LENGTH="100" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="clientid" TYPE="char" LENGTH="100" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="clientsecret" TYPE="char" LENGTH="100" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>

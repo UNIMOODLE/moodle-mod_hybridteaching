@@ -98,6 +98,6 @@ $PAGE->set_context($context);
 
 
 echo $OUTPUT->header();
-echo $OUTPUT->heading(get_string('pluginname', 'mod_hybridteaching'));
+echo $OUTPUT->heading(get_string('pluginname', 'hybridteaching'));
 $mform->display();
 echo $OUTPUT->footer();

@@ -68,6 +68,11 @@ class sessions {
      */
     public function create_unique_session_extended($session, $ht) {
         global $DB;
+        
+        $context = \context_course::instance($ht->course);
+        if (!has_capability('hybridteachvc/zoom:use', $context)) {
+            return;
+        }
 
         $zoomconfig = $this->load_zoom_config($ht->config);
 
@@ -220,7 +225,14 @@ class sessions {
                  LIMIT 1';
 
         $config = $DB->get_record_sql($sql, ['htid' => $htid, 'groupid' => $groupid,
-            'typevc' => $typevc, 'vcreference' => $vcreference, 'starttime' => $starttime,]);
+            'typevc' => $typevc, 'vcreference' => $vcreference, 'starttime' => $starttime, ]);
         return $config;
+    }
+
+    public function get_chat_url ($context) {
+        if (!has_capability('hybridteachvc/zoom:view', $context)) {
+            return '';
+        }
+        return '';
     }
 }

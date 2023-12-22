@@ -41,3 +41,8 @@ $string['useremail'] = 'Email user';
 $string['teams'] = 'teams';
 $string['alias'] = 'Teams';
 $string['downloadrecordsteams'] = 'Download Teams recordings';
+$string['accessmethod'] = 'Access method to config';
+
+$string['teams:view'] = 'Access Teams';
+$string['teams:use'] = 'Generate Teams meetings';
+$string['teams:record'] = 'Store Teams recordings';

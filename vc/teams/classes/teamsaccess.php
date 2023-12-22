@@ -56,17 +56,22 @@ if (!isset($_GET["code"]) && !isset($_GET["error"])) {
     $url = 'https://login.microsoftonline.com/' . $config->tenantid. '/oauth2/v2.0/authorize';
     $redirect = $CFG->wwwroot.'/mod/hybridteaching/vc/teams/classes/teamsaccess.php';
     $scopes = "scope=offline_access+User.Read+OnlineMeetings.ReadWrite+Calendars.ReadWrite";
-    $params = "client_id=".$config->clientid."&".$scopes."&response_type=code&approval_prompt=auto&redirect_uri=";
+    $params = "client_id=".$config->clientid."&".$scopes."&response_type=code&prompt=login&redirect_uri=";
     $params .= $redirect;
+    $params .= "&login_hint=".$config->useremail;
     $authredirecturl = $url.'?'.$params;
 
     header('Location: '.$authredirecturl);
 } else if (isset($_GET["error"])) {
-    echo "Error handler activated:\n\n";
-    var_dump($_GET);  // Debug print.
+    echo "Error activated:\n\n";
+    if (isset($_GET["error_description"])) {
+        echo $_GET["error_description"];
+    } else {
+        var_dump($_GET);  // Debug print.
+    }
 } else if (isset($_GET["code"])) {
-    // Get tokens and end authentication.
 
+    // Get tokens and end authentication.
      $guzzle = new \GuzzleHttp\Client();
 
      $url = 'https://login.microsoftonline.com/' . $config->tenantid . '/oauth2/v2.0/token';
@@ -92,6 +97,9 @@ if (!isset($_GET["code"]) && !isset($_GET["error"])) {
 
         $return = new moodle_url($CFG->wwwroot. '/admin/settings.php?section=hybridteaching_configvcsettings');
         redirect($return);
+    } if (isset($token->error) && isset($token->error_description)) {
+        echo "Error activated:\n";
+        echo $token->error_description;
     } else {
         echo "Error";
     }

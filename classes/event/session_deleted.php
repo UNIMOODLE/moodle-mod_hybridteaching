@@ -44,7 +44,7 @@ class session_deleted extends \core\event\base {
      * @return string
      */
     public static function get_name() {
-        return get_string('eventsessiondeleted', 'mod_hybridteaching');
+        return get_string('eventsessiondeleted', 'hybridteaching');
     }
 
     /**

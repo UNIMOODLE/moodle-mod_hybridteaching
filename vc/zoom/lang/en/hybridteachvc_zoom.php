@@ -31,7 +31,7 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-$string['pluginname'] = 'Hybrid zoom';
+$string['pluginname'] = 'Hybrid Zoom';
 $string['pluginconfig'] = 'Hybrid zoom config';
 $string['pluginnewconfig'] = 'New hybrid zoom config';
 $string['accountid'] = 'Accountid';
@@ -48,3 +48,6 @@ $string['errorwebservice'] = 'Zoom webservice error: {$a}.';
 $string['zoomerr_no_access_token'] = 'No access token returned';
 $string['licenses'] = 'Licenses';
 $string['downloadrecordszoom'] = 'Download Zoom records';
+$string['maxdownloadattempts'] = 'Max download attempts for recordings';
+$string['maxdownloadattempts_help'] = 'When downloading has been attempted this maximum number of times, attempts to download the recording will stop.';
+$string['chatnamefile'] = 'Chat meeting';

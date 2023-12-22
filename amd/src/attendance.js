@@ -1,21 +1,13 @@
 define([
-    'core/ajax',
+    'core/ajax'
 ], function(ajax) {
-    const manualattendance = (e) => {
+    const manualattendance = async(e) => {
         var att = e.currentTarget;
         var attid = att.closest('tr').querySelector('[id^="' + 'attendance' + '"]').value;
         if (att.checked) {
-            if (confirm('yes')) {
-                set_manual_attendance(attid, 1);
-            }  else {
-                att.checked = false;
-            }
+            set_manual_attendance(attid, 1);
         } else {
-            if (confirm('no')) {
-                set_manual_attendance(attid, 0);
-            }  else {
-                att.checked = true;
-            }
+            set_manual_attendance(attid, 0);
         }
     };
 

@@ -66,6 +66,11 @@ class sessions {
     public function create_unique_session_extended($session, $ht) {
         global $DB;
 
+        $context = \context_course::instance($ht->course);
+        if (!has_capability('hybridteachvc/meet:use', $context)) {
+            return;
+        }
+
         $existsmeet = $DB->get_field('hybridteachvc_meet', 'id', ['htsession' => $session->id]);
         if (!$existsmeet) {
             $subpluginconfigid = $DB->get_field('hybridteaching_configs', 'subpluginconfigid', ['id' => $ht->config]);
@@ -185,5 +190,12 @@ class sessions {
         $config = $DB->get_record_sql($sql, ['htid' => $htid, 'groupid' => $groupid, 
             'typevc' => $typevc, 'vcreference' => $vcreference, 'starttime' => $starttime]);
         return $config;
+    }
+
+    public function get_chat_url ($context) {
+        if (!has_capability('hybridteachvc/meet:view', $context)) {
+            return '';
+        }
+        return '';
     }
 }

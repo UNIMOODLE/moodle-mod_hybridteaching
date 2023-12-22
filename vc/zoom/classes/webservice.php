@@ -230,7 +230,7 @@ class webservice {
      * @link https://zoom.github.io/api/#list-users
      */
     protected function _make_paginated_call($url, $data = array(), $datatoget = null) {
-        $aggregatedata = array();
+        $aggregatedata = [];
         $data['page_size'] = HTZOOM_MAX_RECORDS_PER_CALL;
         $reportcheck = explode('/', $url);
         $isreportcall = in_array('report', $reportcheck);
@@ -529,7 +529,7 @@ class webservice {
         $data = [
             'from' => $from,
             'to' => $to,
-            'page_size' => HTZOOM_MAX_RECORDS_PER_CALL
+            'page_size' => HTZOOM_MAX_RECORDS_PER_CALL,
         ];
         return $this->_make_paginated_call($url, $data, 'meetings');
     }
@@ -600,8 +600,8 @@ class webservice {
      * @return array An array of UUIDs.
      */
     public function get_active_hosts_uuids($from, $to) {
-        $users = $this->_make_paginated_call('report/users', array('type' => 'active', 'from' => $from, 'to' => $to), 'users');
-        $uuids = array();
+        $users = $this->_make_paginated_call('report/users', ['type' => 'active', 'from' => $from, 'to' => $to], 'users');
+        $uuids = [];
         foreach ($users as $user) {
             $uuids[] = $user->id;
         }

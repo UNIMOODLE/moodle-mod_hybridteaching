@@ -52,6 +52,26 @@ function xmldb_hybridteachvc_teams_upgrade($oldversion) {
             $dbman->add_field($table, $field);
         }
     }
+    if ($oldversion < '2023081600.08') {
+        // Define field category to be added to hybridteaching_configs.
+        $table = new xmldb_table('hybridteachvc_teams_config');
+        $field = new xmldb_field('accessmethod', XMLDB_TYPE_INTEGER, '11', null, 1, null, 1, 'id');
+
+        // Conditionally launch add field category.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+    }
+    if ($oldversion < '2023081600.09') {
+        // Define field category to be added to hybridteaching_configs.
+        $table = new xmldb_table('hybridteachvc_teams');
+        $field = new xmldb_field('chaturl', XMLDB_TYPE_TEXT, 'medium', null, null, null, null, 'recordingid');
+
+        // Conditionally launch add field category.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+    }
 
     return true;
 }

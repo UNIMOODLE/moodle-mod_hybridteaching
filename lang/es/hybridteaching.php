@@ -96,7 +96,10 @@ $string['subplugintype_hybridteachvc_plural'] = 'Tipos de videoconferencia';
 $string['hybridteachvc'] = 'Plugin Videoconferencia';
 $string['hybridteachvcpluginname'] = 'Plugin Videoconferencia';
 $string['headerconfig'] = 'Gestionar extensiones de videoconferencia';
-$string['mediaplayers'] = 'Plugins de videoconferencia';
+$string['videoconferenceplugins'] = 'Plugins de videoconferencia';
+
+$string['subplugintype_hybridteachstore'] = 'Tipo de almacenamiento';
+$string['subplugintype_hybridteachstore_plural'] = 'Tipos de almacenamiento';
 
 $string['view_error_url_missing_parameters'] = 'Faltan parámetros en esta URL';
 
@@ -119,6 +122,7 @@ $string['hybridteaching:record'] = 'Permitir grabaciones';
 $string['hybridteaching:viewallsessions'] = 'Permitir ver todas las sesiones sin filtro de grupo';
 $string['hybridteaching:viewhiddenitems'] = 'Ver elementos ocultos';
 $string['hybridteaching:viewrecordings'] = 'Ver grabaciones';
+$string['hybridteaching:viewchat'] = 'Ver chats';
 
 $string['type'] = 'Tipo';
 $string['order'] = 'Ordenar';
@@ -133,7 +137,6 @@ $string['generalconfig'] = 'Configuración general';
 $string['configsconfig'] = 'Administrar configuracións';
 $string['configsvcconfig'] = 'Administrar configuraciones de videoconferencia';
 $string['configsstoreconfig'] = 'Administrar configuraciones de almacenamiento';
-$string['storageplugins'] = 'Extensiones de almacenamiento';
 
 $string['errorcreateconfig'] = 'Error al crear la configuración';
 $string['errorupdateconfig'] = 'Error al actualizar la configuración';
@@ -193,6 +196,7 @@ $string['status_finished'] = 'Esta sesión ha finalizado';
 $string['status_start'] = 'La sesión comenzará próximamente';
 $string['status_ready'] = 'La sesión está lista. Puede entrar ahora.';
 $string['status_undated'] = 'Puede crear una sesión recurrente';
+$string['status_undated_wait'] = 'Debe de esperar hasta que la nueva sesión comience';
 
 $string['closedoors_hours'] = ' {$a} horas tras el inicio';
 $string['closedoors_minutes'] = ' {$a} minutos tras el inicio';
@@ -208,6 +212,7 @@ $string['inprogress'] = 'En progreso';
 $string['closedoorsnext'] = 'Se cerrarán sus puertas tras';
 $string['closedoorsnext2'] = 'del inicio';
 $string['closedoorsprev'] = 'Esta sesión cerró sus puertas a los';
+$string['closedoorsafter'] = 'de comenzar';
 $string['finished'] = 'Esta sesión se terminó el';
 
 $string['mod_form_field_participant_list_action_add'] = 'Agregar';
@@ -227,6 +232,7 @@ $string['morethan'] = 'Mayor que';
 $string['lessthan'] = 'Menor que';
 $string['options'] = 'Opciones';
 $string['sesperpage'] = 'Sesiones por página';
+
 $string['hybridteaching:bulksessions'] = 'Mostrar el selector de acciones múltiples de sesiones';
 $string['updatesessions'] = 'Actualizar sesiones';
 $string['deletesessions'] = 'Borrar sesiones';
@@ -251,6 +257,14 @@ $string['delayin'] = 'Retrasar en';
 $string['hybridteaching:sessionsactions'] = 'Ver acciones en la lista de sesiones';
 $string['hybridteaching:sessionsfulltable'] = 'Mostrar todos los campos de las lista de sesiones';
 $string['editsession'] = 'Editar la sesión';
+
+$string['headerconfigstore'] = 'Administrar extensiones de almacenamiento';
+$string['storageplugins'] = 'Extensiones de almacenamiento';
+$string['importsessions'] = 'Importar sesiones';
+$string['export'] = 'Exportar';
+$string['invalidimportfile'] = 'El formato del archivo no es correcto.';
+$string['processingfile'] = 'Procesando archivo...';
+$string['sessionsgenerated'] = '{$a} sesiones generadas con éxito';
 
 $string['error:importsessionname'] = '¡Nombre de sesión inválido! Saltando línea {$a}.';
 $string['error:importsessionstarttime'] = '¡Hora de inicio de sesión no válida! Saltando línea {$a}.';
@@ -304,11 +318,6 @@ $string['commonattendance'] = 'Todos los grupos';
 $string['videoconference'] = 'Vconf';
 $string['classroom'] = 'Aula';
 
-$string['importsessions'] = 'Importar sesiones';
-$string['export'] = 'Exportar';
-$string['invalidimportfile'] = 'El formato del archivo no es correcto.';
-$string['processingfile'] = 'Procesando archivo...';
-$string['sessionsgenerated'] = '{$a} sesiones generadas con éxito';
 $string['resultsperpage'] = 'Resultados por página';
 $string['sessresultsperpage_desc'] = 'Número de sesiones por página';
 $string['donotusepaging'] = 'No usar paginación';
@@ -327,10 +336,12 @@ $string['passwordgrp_help'] = 'Si se establece, los estudiantes deberán ingresa
 
 $string['maxgradeattendance'] = 'Asistencia para máxima puntuación';
 $string['maxgradeattendance_help'] = 'Modo de cálculo
+
   * Nº de sesiones dadas por asistidas
   * % nº de asistencias sobre el total de sesiones accesibles
-  * % tiempo asistido sobre el total nominal de sesiones accesibles';
+  * % tiempo asistido sobre el total nominal de sesiones accesibles
 
+';
 $string['numsess'] = 'Nº sesiones';
 $string['percennumatt'] = '% nº asistencia';
 $string['percentotaltime'] = '% tiempo total';
@@ -442,3 +453,26 @@ $string['deletewithhybridmods'] = 'Esta configuración se usa en los siguientes 
 $string['lostconfig'] = 'Esta configuración ha sido eliminada por un administrador';
 $string['noinitialstateconfig'] = 'Este tipo de videoconferencia no tiene configuración de estados iniciales';
 $string['cantfinishunstarted'] = 'No puedes finalizar una sesión antes del inicio establecido';
+
+$string['error_unable_join'] = 'No ha sido posible conectar. La reunión no ha podido encontrarse o ha sido eliminada. Contacte con su profesor o administrador.';
+$string['sessionscheduling_help'] = 'Si se fuerza el uso de grupos en el curso, la sesión tendra que programarse obligatoriamente.
+
+Si no se fuerza, al usar sesiones sin programación, se desactiva el uso de grupos en la sesión.';
+
+$string['error:importsessiontimetype'] = '¡Tipo de duración de sesión inválida! Saltando línea {$a}.';
+
+$string['invalidduration'] = 'Duración no válida';
+$string['chaturlmeeting'] = 'Chat de la reunión';
+$string['notesurlmeeting'] = 'Notas de la reunión';
+
+$string['sessionendbeforestart'] = 'La sesión acabaría antes de empezar, cambie la duración, o la fecha de inicio';
+$string['repeatsessionsamedate'] = 'La fecha de fin de repetir sesión no puede ser hoy';
+$string['programsessionbeforenow'] = 'La fecha de fin de repetir sesión no puede ser antes de hoy';
+$string['daynotselected'] = 'Seleccione un día en el que repetir sesiones';
+
+$string['norecordingmoderation'] = 'No tiene acceso de moderación para permitir la grabación de este tipo de videollamada.';
+$string['chats'] = 'Chats';
+
+$string['enabled'] = 'Activado';
+$string['enabled_help'] = 'Si se activa la opción, esta extensión estará habilitada';
+$string['disabled'] = 'Deshabilitado';

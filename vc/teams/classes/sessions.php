@@ -74,6 +74,11 @@ class sessions {
     public function create_unique_session_extended($session, $ht) {
         global $DB;
 
+        $context = \context_course::instance($ht->course);
+        if (!has_capability('hybridteachvc/teams:use', $context)) {
+            return;
+        }
+
         $teamsconfig = $this->load_teams_config($ht->config);
         if ($teamsconfig) {
             $teams = new teams_handler($teamsconfig);
@@ -143,7 +148,7 @@ class sessions {
                 // If exists meeting, delete it.
                 try {
                     $teamshandler = new teams_handler($teamsconfig);
-                    $teamshandler->deletemeeting($teams->meetingid);
+                    $teamshandler->deletemeeting($teams);
                 } catch (\Exception $e) {
                     // No action for delete.
                 }
@@ -197,8 +202,15 @@ class sessions {
               ORDER BY hm.id DESC
                  LIMIT 1';
 
-        $config = $DB->get_record_sql($sql, ['htid' => $htid, 'groupid' => $groupid, 
-            'typevc' => $typevc, 'vcreference' => $vcreference, 'starttime' => $starttime]);
+        $config = $DB->get_record_sql($sql, ['htid' => $htid, 'groupid' => $groupid,
+            'typevc' => $typevc, 'vcreference' => $vcreference, 'starttime' => $starttime, ]);
         return $config;
+    }
+
+    public function get_chat_url ($context) {
+        if (!has_capability('hybridteachvc/teams:view', $context)) {
+            return '';
+        }
+        return $this->teamssession->chaturl;
     }
 }

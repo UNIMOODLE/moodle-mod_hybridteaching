@@ -60,7 +60,7 @@ class mod_hybridteaching_mod_form extends moodleform_mod {
         $mform->addElement('header', 'sectiongeneral', get_string('general', 'form'));
 
         // Adding the standard "name" field.
-        $mform->addElement('text', 'name', get_string('hybridteachingname', 'mod_hybridteaching'), ['size' => '64']);
+        $mform->addElement('text', 'name', get_string('hybridteachingname', 'hybridteaching'), ['size' => '64']);
 
         if (!empty($CFG->formatstringstriptags)) {
             $mform->setType('name', PARAM_TEXT);
@@ -102,14 +102,17 @@ class mod_hybridteaching_mod_form extends moodleform_mod {
 
         $mform->addElement('advcheckbox', 'sessionscheduling', '', get_string('sessionscheduling', 'hybridteaching'), null, [0, 1]);
         $mform->setDefault('sessionscheduling', 0);
+        $mform->addHelpButton('sessionscheduling', 'sessionscheduling', 'hybridteaching');
+        if (isset($PAGE->cm->id)) {
+            $mform->addElement('hidden', 'cmgroupmode', $groupmode = groups_get_activity_groupmode($PAGE->cm));
+            $mform->setType('cmgroupmode', PARAM_INT);
+        }
 
         $mform->addElement('advcheckbox', 'undatedsession', '', get_string('undatedsession', 'hybridteaching'), null, [0, 1]);
         $mform->setDefault('undatedsession', 0);
 
         $mform->addElement('date_time_selector', 'starttime', get_string('starttime', 'hybridteaching'), ['optional' => true]);
 
-        /*$mform->addElement('duration', 'duration', get_string('duration', 'hybridteaching'), array('optional' => false));
-        $mform->setDefault('duration', array('number' => 1, 'timeunit' => 3600));*/
         $duration[] = &$mform->createElement('text', 'duration', get_string('duration', 'hybridteaching'));
         $mform->setType('duration', PARAM_INT);
 
@@ -152,7 +155,7 @@ class mod_hybridteaching_mod_form extends moodleform_mod {
                 ], 'advanceentry', get_string('advanceentry', 'hybridteaching'), ' ', false);
         $mform->addHelpButton('advanceentry', 'advanceentry', 'hybridteaching');
         $mform->setType('advanceentrycount', PARAM_INT);
-
+        $mform->disabledIf('advanceentry', 'sessionscheduling', 'notchecked');
         $mform->addGroup([
                 $mform->createElement('text', 'closedoorscount', '', ['size' => 5]),
                 $mform->createElement('select', 'closedoorsunit', '', $units),
@@ -261,6 +264,7 @@ class mod_hybridteaching_mod_form extends moodleform_mod {
             get_string('maxgradeattendance', 'hybridteaching'), [' '], false);
         $mform->addHelpButton('maxgradeattendancegroup', 'maxgradeattendance', 'hybridteaching');
 
+        $mform->disabledIf('maxgradeattendancegroup', 'grade[modgrade_type]', 'eq', 'none');
         // $mform->setDefault('grade', false);
 
         // Add standard elements.

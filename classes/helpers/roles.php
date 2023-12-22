@@ -440,4 +440,99 @@ class roles {
         }
         return false;
     }
+
+
+     /**
+      * Get array with the participants, filter by moderator or viewer
+      *
+      * @param object $ht
+      * @param int $groupsessionid
+      * @param int $role
+      *
+      * @return array $users
+      */
+    public static function getparticipants($ht, $groupsessionid, $role = self::ROLE_VIEWER) {
+        global $DB;
+        $participants = json_decode($ht->participants);
+        $users = [];
+        $context = context_course::instance($ht->course);
+
+        $course = get_course($context->instanceid);
+        $groupmode = groups_get_course_groupmode($course);
+
+        if ($ht) {
+            list($htcourse, $cm) = get_course_and_cm_from_instance($ht->id, 'hybridteaching');
+            $groupmode = groups_get_activity_groupmode($cm);
+        }
+
+        foreach ($participants as $participant) {
+
+            // Check group mode.
+            $groupid = 0;
+
+            // Check by selectiontype.
+            switch($participant->selectiontype){
+                case 'user':
+                    if ($participant->role == $role) {
+                        if (is_numeric($participant->selectionid)) {
+                            // No checking group mode if is 'user', cause the user or student may have been set manually.
+                            $usermoodle = $DB->get_record('user', ['id' => $participant->selectionid],
+                                'id, username, firstname, lastname, email');
+                            $users[$usermoodle->id] = $usermoodle;
+                        }
+                    }
+                    break;
+                case 'role':
+                    if ($participant->role == $role) {
+                        if ($groupmode == SEPARATEGROUPS && $participant->role == self::ROLE_VIEWER) {
+                            $groupid = $groupsessionid;
+                        }
+                        $usersrole = get_role_users($participant->selectionid, $context, false,
+                            'u.id, u.username, u.firstname, u.lastname, u.email', 'u.username', false, $groupid);
+                        foreach ($usersrole as $u) {
+                            $users[$u->id] = $u;
+                        }
+                    }
+                    break;
+                case 'all':
+                    if ($participant->role == $role) {
+                        if ($groupmode == SEPARATEGROUPS) {
+                            // Get users with access all groups.
+                            $userswithcap = get_enrolled_users($context, 'moodle/site:accessallgroups', 0,
+                                'u.id, u.username, u.firstname, u.lastname, u.email', 'u.username', null, 0, 0, true);
+                            // Get users from groupsession.
+                            $usersallother = get_enrolled_users($context, '', $groupsessionid,
+                                'u.id, u.username, u.firstname, u.lastname, u.email', 'u.username', null, 0, 0, true);
+                            $usersall = array_merge ($userswithcap, $usersallother);
+                        } else {
+                            $usersall = get_enrolled_users($context, '', 0,
+                                'u.id, u.username, u.firstname, u.lastname, u.email', 'u.username', null, 0, 0, true);
+                        }
+
+                        foreach ($usersall as $u) {
+                                $users[$u->id] = $u;
+                        }
+                    }
+            }
+        }
+
+        return $users;
+    }
+
+     /**
+      * Unset moderators users that exists in participants list.
+      *
+      * @param array $moderators
+      * @param array $participants
+      *
+      * @return array $participants
+      */
+    public static function uniqueusers ($moderators, $participants) {
+        foreach ($moderators as $moderator) {
+            if (array_key_exists ($moderator->id, $participants)) {
+                unset($participants[$moderator->id]);
+            }
+        }
+        return $participants;
+    }
 }

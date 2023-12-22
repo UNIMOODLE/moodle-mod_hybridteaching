@@ -81,5 +81,18 @@ function xmldb_hybridteaching_upgrade($oldversion) {
         upgrade_mod_savepoint(true, '2023031700.22', 'hybridteaching');
     }
 
+    if ($oldversion < '2023031700.24') {
+
+        // Changing type of field token on table hybridteachvc_meet_config to text.
+        $table = new xmldb_table('hybridteachvc_meet_config');
+        $field = new xmldb_field('token', XMLDB_TYPE_TEXT, null, null, XMLDB_NOTNULL, null, null, 'clientsecret');
+
+        // Launch change of type for field token.
+        $dbman->change_field_type($table, $field);
+
+        // Meet savepoint reached.
+        upgrade_plugin_savepoint(true, '2023031700.24', 'hybridteachvc', 'meet');
+    }
+
     return true;
 }

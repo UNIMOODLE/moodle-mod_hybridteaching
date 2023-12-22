@@ -96,13 +96,13 @@ class hybridteaching_attendance_render extends \table_sql implements dynamic_tab
             'strgroup' => get_string('group'),
             'strname' => get_string('name'),
             'strdate' => get_string('date'),
-            'strduration' => get_string('duration', 'mod_hybridteaching'),
-            'strtype' => get_string('type', 'mod_hybridteaching'),
-            'strattendance' => get_string('attendance', 'mod_hybridteaching'),
-            'strgrade' => get_string('gradenoun', 'mod_hybridteaching') . $helpatt,
-            'stroptions' => get_string('actions', 'mod_hybridteaching'),
-            'strvc' => get_string('videoconference', 'mod_hybridteaching'),
-            'strclassroom' => get_string('classroom', 'mod_hybridteaching'),
+            'strduration' => get_string('duration', 'hybridteaching'),
+            'strtype' => get_string('type', 'hybridteaching'),
+            'strattendance' => get_string('attendance', 'hybridteaching'),
+            'strgrade' => get_string('gradenoun', 'hybridteaching') . $helpatt,
+            'stroptions' => get_string('actions', 'hybridteaching'),
+            'strvc' => get_string('videoconference', 'hybridteaching'),
+            'strclassroom' => get_string('classroom', 'hybridteaching'),
             'strusername' => get_string('user'),
             'strpfp' => get_string('picture'),
             'strlastfirstname' => get_string('lastname') . ' / ' . get_string('firstname'),
@@ -156,8 +156,8 @@ class hybridteaching_attendance_render extends \table_sql implements dynamic_tab
                     $perpage . '&attfilter=' . $selectedfilter . '&groupid=' . $group, $sessoptionsformparams);
             }
         }
-        if ($view == 'studentattendance' && has_capability('mod/hybridteaching:sessionsfulltable',
-                $this->context, $user = $USER->id)) {
+        if ($view == 'studentattendance'/*  && has_capability('mod/hybridteaching:sessionsfulltable',
+                $this->context, $user = $USER->id) */) {
             $selecteduser ? $params['userid'] = $selecteduser : $selecteduser = $userid;
             $params['userid'] = $selecteduser;
             $attresumee = new attresumee_options_form($CFG->wwwroot . '/mod/hybridteaching/attendance.php?view=' .
@@ -239,215 +239,26 @@ class hybridteaching_attendance_render extends \table_sql implements dynamic_tab
         $operator = $this->get_operator();
         $attendancecount = $attendancecontroller->count_attendance( $fname, $lname, $selectedsession, $params, $operator);
         $returnurl = new moodle_url('/mod/hybridteaching/attendance.php?id='.$this->cm->id.'');
-        has_capability('mod/hybridteaching:sessionsfulltable', $this->context, $user = $USER->id) ?
-                $returntosession = 1 : $returntosession = 0;
         if ($view == 'attendlog') {
-            $att = $attendancecontroller->hybridteaching_get_attendance_from_id($attid);
-            $att->sessionid != $sessionid ? $att = $attendancecontroller->hybridteaching_get_attendance($sessionid) : '';
-            !$att ? $logs = false :
-            $logs = $attendancecontroller->hybridteaching_get_attendance_logs($att->id, $sort, $dir);
-            if (!$logs) {
-                if (isset($sessionoptions)) {
-                    has_capability('mod/hybridteaching:sessionsfulltable', $this->context, $user = $USER->id) ?
-                    $sessionoptions->display() : '';
-                }
-                echo '<br><h2>' . get_string('nologsfound', 'mod_hybridteaching') . '<h2>';
-                $return .= html_writer::tag('a', get_string('viewstudentinfo', 'mod_hybridteaching'),
-                    ['href' => 'attendance.php?id='.$id.'&view=studentattendance&userid='.
-                    $selectedstudent . '', 'class' => 'btn btn-primary', ]);
-                $returntosession ?
-                $return .= html_writer::tag('a', get_string('viewsessioninfo', 'mod_hybridteaching'),
-                    ['href' => 'attendance.php?id='.$id.'&view=extendedsessionatt&sessionid=' .
-                $sessionid.'', 'class' => 'btn btn-primary', ]) : '';
-                $return .= $OUTPUT->box_end();
-                return $return;
-            }
-            $session = $sessionscontroller->get_session($att->sessionid);
-            $unsortedlog = $attendancecontroller->hybridteaching_get_attendance_logs($att->id);
-            $firstlog = $logs[array_key_first($unsortedlog)];
-            $lastlog = $logs[array_key_last($unsortedlog)];
-            foreach ($logs as $log) {
-                $mark = '';
-                $log->id == $lastlog->id && $log->action == 0 ? $mark = get_string('lastexit', 'hybridteaching') : false;
-                $log->id == $firstlog->id ? $mark = get_string('firstentry', 'hybridteaching') : false;
-                $body = [
-                    'class' => '',
-                    'hour' => date('H:i:s | d/m/y', $log->timecreated),
-                    'logaction' => $log->action ? get_string('sessionentry', 'hybridteaching') :
-                        get_string('sessionexit', 'hybridteaching'), 'mark' => $mark != '' ? $mark : self::EMPTY,
-                ];
-                $hybridteachingid = empty($hybridteachingid) ? $this->cm->instance : $hybridteachingid;
-                $params = ['attid' => $attid, 'h' => $hybridteachingid, 'id' => $id,
-                 'returnurl' => $returnurl, 'view' => $view, 'userid' => $userid, ];
-
-                $options = $this->get_table_options($body, $params, $url, $att->sessionid);
-                $class = $options['class'];
-                $options = $options['options'];
-                // Add a row to the table.
-                $row = $this->get_attendance_row($body, $options, $view);
-                if (!empty($class)) {
-                    $row->attributes['class'] = $class;
-                }
-                $table->data[] = $row;
-            }
-
-            $attendancetable = html_writer::table($table);
-            if (has_capability('mod/hybridteaching:bulksessions', $this->context)) {
-                $attendancetable .= $this->get_bulk_options_select($view);
-            }
-            if (isset($sessionoptions)) {
-                has_capability('mod/hybridteaching:sessionsfulltable', $this->context, $user = $USER->id) ?
-                    $sessionoptions->display() : '';
-            }
-
-            if (!$session->duration) {
-                $return .= html_writer::tag('span', get_string('sessiondate', 'hybridteaching') . ' ' .
-                    get_string('noduration', 'hybridteaching'));
-                $return .= html_writer::empty_tag('br');
-                $return .= html_writer::tag('a', get_string('viewstudentinfo', 'mod_hybridteaching'),
-                    ['href' => 'attendance.php?id='.$id.'&view=studentattendance&userid='.
-                    $selectedstudent. '', 'class' => 'btn btn-primary', ]);
-                $returntosession ?
-                    $return .= html_writer::tag('a', get_string('viewsessioninfo', 'mod_hybridteaching'),
-                        ['href' => 'attendance.php?id='.$id.'&view=extendedsessionatt&sessionid=' .
-                    $sessionid.'', 'class' => 'btn btn-primary', ]) : '';
-                $return .= $OUTPUT->box_end();
-                return $return;
-            }
-            $connectiontime = $attendancecontroller->hybridteaching_get_attendance($session, $att->userid)->connectiontime;
-            $participantpercent = round(($connectiontime / $session->duration) * 100, 2);
-            $participantpercent > 100 ? $participantpercent = 100 : '';
-            $participantpercent < 0 ? $participantpercent = 0 : '';
-            $return .= html_writer::tag('span', get_string('participationtime', 'hybridteaching') .
-                ': ' . helper::get_hours_format($connectiontime) . ' ' . $participantpercent . '%' );
-            $return .= html_writer::empty_tag('br');
-            $return .= html_writer::tag('a', get_string('viewstudentinfo', 'mod_hybridteaching'),
-                ['href' => 'attendance.php?id='.$id.'&view=studentattendance&userid='.
-                $selectedstudent . '', 'class' => 'btn btn-primary', ]);
-            $returntosession ?
-                $return .= html_writer::tag('a', get_string('viewsessioninfo', 'mod_hybridteaching'),
-                    ['href' => 'attendance.php?id='.$id.'&view=extendedsessionatt&sessionid=' .
-                $sessionid.'', 'class' => 'btn btn-primary', ]) : '';
-            $attendancetable .= html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'h', 'value' => $hybridteachingid]);
-            $attendancetable .= html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'id', 'value' => $id]);
-            $return .= html_writer::tag('form', $attendancetable, ['method' => 'post',
-                'action' => $CFG->wwwroot . '/mod/hybridteaching/classes/action/attendance_action.php?view=' . $view .
-                '&sessionid=' . $sessionid, ]);
-            $baseurl = new moodle_url('/mod/hybridteaching/attendance.php?view=' . $view, ['id' => $id,
-                'sort' => $sort, 'dir' => $dir, 'perpage' => $perpage, 'sessionid' => $sessionid, 'attid' => $selecteduser, ]);
-            $return .= $OUTPUT->box_end();
-            return $return;
+            $buildparams = ['attid' => $attid, 'h' => $hybridteachingid, 'id' => $id,
+            'returnurl' => $returnurl, 'view' => $view, 'userid' => $userid, ];
+            $return = $this->print_attendance_log_table($attid, $sessionid, $sort, $dir, $url, $buildparams, $table, $return,
+                $selectedstudent, $sessionoptions);
+            if ($return) return $return;
         }
         if ($view == 'extendedstudentatt') {
-            $participationrecords = $attendancecontroller->hybridteaching_get_students_participation($hybridteachingid,
-                $sort, $dir, $fname, $lname);
-            $baseurl = new moodle_url('/mod/hybridteaching/attendance.php?view=' . $view, ['id' => $id,
-            'sort' => $sort, 'dir' => $dir, 'perpage' => $perpage, 'sessionid' => $sessionid, ]);
-            $attendancecount = count($participationrecords);
-            $return .= $OUTPUT->paging_bar($attendancecount, $page, $perpage, $baseurl);
-            $attuser = $attendancecontroller->load_sessions_attendant($userid);
-            $userpicture = $OUTPUT->user_picture($attuser);
-            $params['userid'] = $attuser->id;
-            $attendanceassist = $attendancecontroller->load_attendance_assistance($params, $extrasql, $operator);
-            foreach ($participationrecords as $participation) {
-                $usertotalgrade = grade_get_grades($COURSE->id, 'mod', 'hybridteaching',
-                    $this->hybridteaching->id, $participation->userid);
-                $attuser = $attendancecontroller->load_sessions_attendant($participation);
-                $userpicture = $OUTPUT->user_picture($attuser);
-                $attendanceid = $attid;
-                $gradevalue = $usertotalgrade->items[0]->grades[$participation->userid]->grade;
-                $roundedgrade = ($gradevalue !== null) ? round($gradevalue, 2) : null;
-                $body = [
-                    'class' => '',
-                    'pfp' => $userpicture,
-                    'firstlastname' => $attuser->lastname . ' / ' . $attuser->firstname,
-                    'combinedatt' => $participation->vc + $participation->classroom,
-                    'grade' => ($roundedgrade !== null) ? $roundedgrade . ' / ' . $this->hybridteaching->grade : null,
-                    'vc' => $participation->vc,
-                    'classroom' => $participation->classroom,
-                    'checkbox' => new \core\output\checkbox_toggleall('attendance-table', false, [
-                        'id' => 'attendance-' . $attendanceid,
-                        'name' => 'attendance[]',
-                        'classes' => 'm-1',
-                        'checked' => false,
-                        'value' => $attendanceid,
-                    ]),
-                ];
-                $hybridteachingid = empty($hybridteachingid) ? $this->cm->instance : $hybridteachingid;
-                $params = ['attid' => $attid, 'h' => $hybridteachingid, 'id' => $id,
-                    'returnurl' => $returnurl, 'view' => $view, 'userid' => $attuser->id, ];
-                $options = $this->get_table_options($body, $params, $url, 0);
-                $class = $options['class'];
-                $options = $options['options'];
-                // Add a row to the table.
-                $row = $this->get_attendance_row($body, $options, $view);
-                if (!empty($class)) {
-                    $row->attributes['class'] = $class;
-                }
-                $table->data[] = $row;
-            }
-
-            if (!$participationrecords) {
-                if (isset($attendance) && $attendance) {
-                    $attendgrade = $grades->calc_att_grade_for($this->hybridteaching, $session->id, $attendance['id']);
-                    $usertotalgrade = grade_get_grades($COURSE->id, 'mod', 'hybridteaching',
-                        $this->hybridteaching->id, $attendance['userid']);
-                    foreach ($attuser as $attu) {
-                        $body = [
-                            'class' => '',
-                            'pfp' => $userpicture,
-                            'firstlastname' => $attuser->lastname . ' / ' . $attuser->firstname,
-                            'combinedatt' => $participation->vc + $participation->classroom,
-                            'grade' => round($attendgrade, 2) . ' / '.
-                                round($usertotalgrade->items[0]->grades[$attendance['userid']]->grade, 2) .
-                                ' / ' . $this->hybridteaching->grade,
-                            'vc' => $participation->vc,
-                            'classroom' => $participation->classroom,
-                            'checkbox' => new \core\output\checkbox_toggleall('attendance-table', false, [
-                                'id' => 'attendance-' . $attendanceid,
-                                'name' => 'attendance[]',
-                                'classes' => 'm-1',
-                                'checked' => false,
-                                'value' => $attendanceid,
-                            ]),
-                        ];
-                    }
-                    $hybridteachingid = empty($hybridteachingid) ? $this->cm->instance : $hybridteachingid;
-                        $params = ['attid' => $attid, 'h' => $hybridteachingid, 'id' => $id,
-                            'returnurl' => $returnurl, 'view' => $view, 'userid' => $attuser->id, ];
-
-                        $options = $this->get_table_options($body, $params, $url, $att->sessionid);
-                        $class = $options['class'];
-                        $options = $options['options'];
-                        // Add a row to the table.
-                        $row = $this->get_attendance_row($body, $options, $view);
-                        if (!empty($class)) {
-                            $row->attributes['class'] = $class;
-                        }
-                        $table->data[] = $row;
-                }
-            }
-            $attendancetable = html_writer::table($table);
-            if (has_capability('mod/hybridteaching:bulksessions', $this->context)) {
-                $attendancetable .= $this->get_bulk_options_select($view);
-            }
-            if (isset($attusrfilter)) {
-                $attusrfilter->display();
-            }
-            $attendancetable .= html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'h', 'value' => $hybridteachingid]);
-            $attendancetable .= html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'id', 'value' => $id]);
-            $return .= html_writer::tag('form', $attendancetable, ['method' => 'post',
-                'action' => $CFG->wwwroot . '/mod/hybridteaching/classes/action/attendance_action.php?view=' .
-                $view . '&sessionid=' . $sessionid, ]);
-            $baseurl = new moodle_url('/mod/hybridteaching/attendance.php?view=' . $view, ['id' => $id,
-                'sort' => $sort, 'dir' => $dir, 'perpage' => $perpage, 'sessionid' => $sessionid, ]);
-            $return .= $OUTPUT->paging_bar($attendancecount, $page, $perpage, $baseurl);
-            $return .= $OUTPUT->box_end();
-            return $return;
+            $return = $this->print_attendance_extendedstudent_table($hybridteachingid, $id, $sort, $dir, $page, $perpage, $sessionid, 
+                $fname, $lname, $userid, $return, $extrasql, $operator, $attid, $returnurl, $url, $table);
+            if ($return) return $return;
         }
-        $attendancelist = $attendancecontroller->load_attendance($page, $perpage, $params, $extrasql,
-            $operator, $sort, $dir, $view, $sessionid, $fname, $lname);
-        $attendanceassist = $attendancecontroller->load_attendance_assistance($params, $extrasql, $operator);
+        $attendancelist = [];
+        if ($view != 'attendlog') {
+            $sort = optional_param('sort', 'starttime', PARAM_ALPHANUMEXT);
+            $dir = optional_param('dir', 'DESC', PARAM_ALPHA);
+            $attendancelist = $attendancecontroller->load_attendance($page, $perpage, $params, $extrasql,
+                $operator, $sort, $dir, $view, $sessionid, $fname, $lname);
+            $attendanceassist = $attendancecontroller->load_attendance_assistance($params, $extrasql, $operator);
+        }
         $view == 'studentattendance' ? $baseurl = new moodle_url('/mod/hybridteaching/attendance.php?view=' .
             $view, ['id' => $id, 'sort' => $sort, 'dir' => $dir, 'perpage' => $perpage,
             'sessionid' => $sessionid, 'userid' => $selecteduser, 'fname' => $fname, 'lname' => $lname,
@@ -466,100 +277,13 @@ class hybridteaching_attendance_render extends \table_sql implements dynamic_tab
             }
         }
         if ($view == 'sessionattendance') {
-            foreach ($attendancelist as $sessionlist) {
-                $session = $sessionscontroller->get_session($sessionlist['id']);
-                $date = $session->starttime;
-                $hour = date('H:i', $date);
-                $date = date('l, j \d\e F \d\e Y H:i', $date);
-                $attassistance = [];
-                foreach ($attendanceassist as $attassist) {
-                    if ($attassist['sessionid'] == $session->id) {
-                        $attassistance = $attassist;
-                        continue;
-                    }
-                }
-                $attributes = [
-                    'type'  => 'checkbox',
-                    'name'  => $session->name,
-                    'value' => get_string('active'),
-                    'class' => 'attendance-validated', ];
-                $editing ? true : $attributes['disabled'] = true;
-                $groupbody = '';
-                if ($groupmode) {
-                    $session->groupid == 0 ? $groupbody = get_string('commonattendance', 'hybridteaching') :
-                        $groupbody = groups_get_group($session->groupid)->name;
-                }
-                if (!empty($session->typevc)) {
-                    $typealias = get_string('alias', 'hybridteachvc_'.$session->typevc);
-                } else {
-                    $typealias = get_string('classroom', 'mod_hybridteaching');
-                }
-                $body = [
-                    'class' => '',
-                    'group' => $groupbody,
-                    'name' => $session->name,
-                    'date' => $date,
-                    'duration' => !empty($session->duration) ? helper::get_hours_format($session->duration) : self::EMPTY,
-                    'typevc' => $typealias,
-                    'vc' => isset($attassistance['vc']) ? $attassistance['vc'] : 0,
-                    'classroom' => isset($attassistance['classroom']) ? $attassistance['classroom'] : 0,
-                    'attexempt' => $session->attexempt,
-                    'checkbox' => new \core\output\checkbox_toggleall('attendance-table', false, [
-                        'id' => 'session-' . $session->id ,
-                        'name' => 'session[]',
-                        'classes' => 'm-1',
-                        'checked' => false,
-                        'value' => $session->id,
-                    ]),
-                ];
-                if ($body['attexempt']) {
-                    $body['class'] = 'dimmed_text';
-                }
-                $hybridteachingid = empty($hybridteachingid) ? $this->cm->instance : $hybridteachingid;
-                $params = ['attid' => $session->id, 'h' => $hybridteachingid, 'id' => $id,
-                'returnurl' => $returnurl, 'view' => $view, 'userid' => $userid, ];
-
-                $options = $this->get_table_options($body, $params, $url, $session->id);
-                $class = $options['class'];
-                $options = $options['options'];
-                // Add a row to the table.
-                if ($attendancecontroller->display_attendance_row($body, $selectedfilter, $view)) {
-                    $row = $this->get_attendance_row($body, $options, $view, $session->id);
-                    if (!empty($class)) {
-                        $row->attributes['class'] = $class;
-                    }
-                    $table->data[] = $row;
-                } else {
-                    $table->data[] = [];
-                }
-            }
-            // Add filters.
-            if (isset($attresumee)) {
-                $attresumee->display();
-            }
             $optionsform = new attendance_options_form($CFG->wwwroot . '/mod/hybridteaching/attendance.php?view=' .
                 $view . '&sessionid=' . $sessionid . '&userid=' . $selecteduser . '&sort=' . $sort . '&dir=' .
                 $dir . '&fname=' . $fname . '&lname=' . $lname . '&groupid=' . $group, $optionsformparams);
-            $optionsform->display();
-            if (isset($sessionoptions) && $editing) {
-                $sessionoptions->display();
-            }
-            if (isset($attusrfilter)) {
-                $attusrfilter->display();
-            }
-            $attendancetable = html_writer::table($table);
-            if (has_capability('mod/hybridteaching:bulksessions', $this->context)) {
-                $attendancetable .= $this->get_bulk_options_select($view);
-            }
-
-            $attendancetable .= html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'h', 'value' => $hybridteachingid]);
-            $attendancetable .= html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'id', 'value' => $id]);
-            $return .= html_writer::tag('form', $attendancetable, ['method' => 'post',
-                'action' => $CFG->wwwroot . '/mod/hybridteaching/classes/action/attendance_action.php?view=' .
-                $view . '&sessionid=' . $sessionid, ]);
-            $return .= $OUTPUT->paging_bar($attendancecount, $page, $perpage, $baseurl);
-            $return .= $OUTPUT->box_end();
-            return $return;
+            $return = $this->print_attendance_sessions_table($attendancelist, $attendanceassist, $editing, $groupmode, $id,
+                $returnurl, $baseurl, $url, $userid, $selectedfilter, $table, $return, $optionsform, $page, $perpage,
+                $attendancecount, $sessionid);
+            if ($return) return $return;
         }
 
         foreach ($attendancelist as $attendance) {
@@ -670,18 +394,20 @@ class hybridteaching_attendance_render extends \table_sql implements dynamic_tab
             }
         }
         // Add filters.
-        if (isset($attresumee)) {
-            $attresumee->display();
-        }
-        $optionsform = new attendance_options_form($CFG->wwwroot . '/mod/hybridteaching/attendance.php?view=' .
-            $view . '&sessionid=' . $sessionid . '&userid=' . $selecteduser . '&sort=' . $sort . '&dir=' .
-            $dir . '&fname=' . $fname . '&lname=' . $lname . '&groupid=' . $group, $optionsformparams);
-        $optionsform->display();
-        if (isset($sessionoptions) && $editing) {
-            $sessionoptions->display();
-        }
-        if (isset($attusrfilter)) {
-            $attusrfilter->display();
+        if ($view !== 'attendlog') {
+            if (isset($attresumee)) {
+                $attresumee->display();
+            }
+            $optionsform = new attendance_options_form($CFG->wwwroot . '/mod/hybridteaching/attendance.php?view=' .
+                $view . '&sessionid=' . $sessionid . '&userid=' . $selecteduser . '&sort=' . $sort . '&dir=' .
+                $dir . '&fname=' . $fname . '&lname=' . $lname . '&groupid=' . $group, $optionsformparams);
+            $optionsform->display();
+            if (isset($sessionoptions) && $editing) {
+                $sessionoptions->display();
+            }
+            if (isset($attusrfilter)) {
+                $attusrfilter->display();
+            }
         }
         $attendancetable = html_writer::table($table);
         if (has_capability('mod/hybridteaching:bulksessions', $this->context)) {
@@ -1056,18 +782,18 @@ class hybridteaching_attendance_render extends \table_sql implements dynamic_tab
             $columns = [
                 'strname' => get_string('name'),
                 'strdate' => get_string('date'),
-                'strattendance' => get_string('exempt', 'mod_hybridteaching'),
+                'strattendance' => get_string('exempt', 'hybridteaching'),
             ];
         } else {
             $columns = [
                 'strpfp' => get_string('picture'),
                 'strlastfirstname' => get_string('firstname') . ' / ' . get_string('lastname'),
                 'strdate' => get_string('date'),
-                'strattendance' => get_string('attendance', 'mod_hybridteaching'),
-                'strprevioues' => get_string('prevattend', 'mod_hybridteaching'),
+                'strattendance' => get_string('attendance', 'hybridteaching'),
+                'strprevioues' => get_string('prevattend', 'hybridteaching'),
             ];
         }
-        $return = $OUTPUT->heading(get_string('withselectedattends', 'mod_hybridteaching'));
+        $return = $OUTPUT->heading(get_string('withselectedattends', 'hybridteaching'));
         $return .= $OUTPUT->box_start('generalbox');
 
         $table = new html_table();
@@ -1134,6 +860,300 @@ class hybridteaching_attendance_render extends \table_sql implements dynamic_tab
         $return .= html_writer::table($table);
         $return .= $OUTPUT->box_end();
 
+        return $return;
+    }
+
+    protected function print_attendance_log_table($attid, $sessionid, $sort, $dir, $url, $params, $table, $return,
+        $selectedstudent, $sessionoptions, $view = 'attendlog') {
+        global $OUTPUT, $USER;
+
+        $attendancecontroller = new attendance_controller($this->hybridteaching);
+        $sessionscontroller = new sessions_controller($this->hybridteaching);
+        has_capability('mod/hybridteaching:sessionsfulltable', $this->context, $user = $USER->id) ?
+            $returntosession = 1 : $returntosession = 0;
+        $att = $attendancecontroller->hybridteaching_get_attendance_from_id($attid);
+        $att->sessionid != $sessionid ? $att = $attendancecontroller->hybridteaching_get_attendance($sessionid) : '';
+        !$att ? $logs = false :
+        $logs = $attendancecontroller->hybridteaching_get_attendance_logs($att->id, $sort, $dir);
+        if (!$logs) {
+            if (isset($sessionoptions)) {
+                has_capability('mod/hybridteaching:sessionsfulltable', $this->context, $user = $USER->id) ?
+                $sessionoptions->display() : '';
+            }
+            echo '<br><h2>' . get_string('nologsfound', 'hybridteaching') . '<h2>';
+            $return .= html_writer::tag('a', get_string('viewstudentinfo', 'hybridteaching'),
+                ['href' => 'attendance.php?id='.$params['id'].'&view=studentattendance&userid='.
+                $selectedstudent . '', 'class' => 'btn btn-primary', ]);
+            $returntosession ?
+            $return .= html_writer::tag('a', get_string('viewsessioninfo', 'hybridteaching'),
+                ['href' => 'attendance.php?id='.$params['id'].'&view=extendedsessionatt&sessionid=' .
+            $sessionid.'', 'class' => 'btn btn-primary', ]) : '';
+            $return .= $OUTPUT->box_end();
+            return $return;
+        }
+        $session = $sessionscontroller->get_session($att->sessionid);
+        $unsortedlog = $attendancecontroller->hybridteaching_get_attendance_logs($att->id);
+        $firstlog = $logs[array_key_first($unsortedlog)];
+        $lastlog = $logs[array_key_last($unsortedlog)];
+        foreach ($logs as $log) {
+            $mark = '';
+            $log->id == $lastlog->id && $log->action == 0 ? $mark = get_string('lastexit', 'hybridteaching') : false;
+            $log->id == $firstlog->id ? $mark = get_string('firstentry', 'hybridteaching') : false;
+            $body = [
+                'class' => '',
+                'hour' => date('H:i:s | d/m/y', $log->timecreated),
+                'logaction' => $log->action ? get_string('sessionentry', 'hybridteaching') :
+                    get_string('sessionexit', 'hybridteaching'), 'mark' => $mark != '' ? $mark : self::EMPTY,
+            ];
+            $hybridteachingid = empty($hybridteachingid) ? $this->cm->instance : $hybridteachingid;
+
+            $options = $this->get_table_options($body, $params, $url, $att->sessionid);
+            $class = $options['class'];
+            $options = $options['options'];
+            // Add a row to the table.
+            $row = $this->get_attendance_row($body, $options, $view);
+            if (!empty($class)) {
+                $row->attributes['class'] = $class;
+            }
+            $table->data[] = $row;
+        }
+
+        $attendancetable = html_writer::table($table);
+        if (has_capability('mod/hybridteaching:bulksessions', $this->context)) {
+            $attendancetable .= $this->get_bulk_options_select($view);
+        }
+        if (isset($sessionoptions)) {
+            has_capability('mod/hybridteaching:sessionsfulltable', $this->context, $user = $USER->id) ?
+                $sessionoptions->display() : '';
+        }
+
+        if (!$session->duration) {
+            $return .= html_writer::tag('span', get_string('sessiondate', 'hybridteaching') . ' ' .
+                get_string('noduration', 'hybridteaching'));
+            $return .= html_writer::empty_tag('br');
+            $return .= html_writer::tag('a', get_string('viewstudentinfo', 'hybridteaching'),
+                ['href' => 'attendance.php?id='.$id.'&view=studentattendance&userid='.
+                $selectedstudent. '', 'class' => 'btn btn-primary', ]);
+            $returntosession ?
+                $return .= html_writer::tag('a', get_string('viewsessioninfo', 'hybridteaching'),
+                    ['href' => 'attendance.php?id='.$id.'&view=extendedsessionatt&sessionid=' .
+                $sessionid.'', 'class' => 'btn btn-primary', ]) : '';
+            $return .= $OUTPUT->box_end();
+            return $return;
+        }
+    }
+
+    protected function print_attendance_extendedstudent_table($hybridteachingid, $id, $sort, $dir, $page, $perpage, $sessionid, 
+        $fname, $lname, $userid, $return, $extrasql, $operator,  $attid, $returnurl, $url, $table, $view = 'extendedstudentatt') {
+    global $OUTPUT, $USER, $COURSE, $CFG;
+
+    $attendancecontroller = new attendance_controller($this->hybridteaching);
+    $sessionscontroller = new sessions_controller($this->hybridteaching);
+    $participationrecords = $attendancecontroller->hybridteaching_get_students_participation($hybridteachingid,
+        $sort, $dir, $fname, $lname);
+    $baseurl = new moodle_url('/mod/hybridteaching/attendance.php?view=' . $view, ['id' => $id,
+    'sort' => $sort, 'dir' => $dir, 'perpage' => $perpage, 'sessionid' => $sessionid, ]);
+    $attendancecount = count($participationrecords);
+    $return .= $OUTPUT->paging_bar($attendancecount, $page, $perpage, $baseurl);
+    $attuser = $attendancecontroller->load_sessions_attendant($userid);
+    $userpicture = $OUTPUT->user_picture($attuser);
+    $params['userid'] = $attuser->id;
+    $params['view'] = $view;
+    $attendanceassist = $attendancecontroller->load_attendance_assistance($params, $extrasql, $operator);
+    foreach ($participationrecords as $participation) {
+        $usertotalgrade = grade_get_grades($COURSE->id, 'mod', 'hybridteaching',
+            $this->hybridteaching->id, $participation->userid);
+        $attuser = $attendancecontroller->load_sessions_attendant($participation);
+        $userpicture = $OUTPUT->user_picture($attuser);
+        $attendanceid = $attid;
+        $gradevalue = $usertotalgrade->items[0]->grades[$participation->userid]->grade;
+        $roundedgrade = ($gradevalue !== null) ? round($gradevalue, 2) : null;
+        $body = [
+            'class' => '',
+            'pfp' => $userpicture,
+            'firstlastname' => $attuser->lastname . ' / ' . $attuser->firstname,
+            'combinedatt' => $participation->vc + $participation->classroom,
+            'grade' => ($roundedgrade !== null) ? $roundedgrade . ' / ' . $this->hybridteaching->grade : null,
+            'vc' => $participation->vc,
+            'classroom' => $participation->classroom,
+            'checkbox' => new \core\output\checkbox_toggleall('attendance-table', false, [
+                'id' => 'attendance-' . $attendanceid,
+                'name' => 'attendance[]',
+                'classes' => 'm-1',
+                'checked' => false,
+                'value' => $attendanceid,
+            ]),
+        ];
+        $hybridteachingid = empty($hybridteachingid) ? $this->cm->instance : $hybridteachingid;
+        $params = ['attid' => $attid, 'h' => $hybridteachingid, 'id' => $id,
+            'returnurl' => $returnurl, 'view' => $view, 'userid' => $attuser->id, ];
+        $options = $this->get_table_options($body, $params, $url, 0);
+        $class = $options['class'];
+        $options = $options['options'];
+        // Add a row to the table.
+        $row = $this->get_attendance_row($body, $options, $view);
+        if (!empty($class)) {
+            $row->attributes['class'] = $class;
+        }
+        $table->data[] = $row;
+    }
+
+    if (!$participationrecords) {
+        if (isset($attendance) && $attendance) {
+            $attendgrade = $grades->calc_att_grade_for($this->hybridteaching, $session->id, $attendance['id']);
+            $usertotalgrade = grade_get_grades($COURSE->id, 'mod', 'hybridteaching',
+                $this->hybridteaching->id, $attendance['userid']);
+            foreach ($attuser as $attu) {
+                $body = [
+                    'class' => '',
+                    'pfp' => $userpicture,
+                    'firstlastname' => $attuser->lastname . ' / ' . $attuser->firstname,
+                    'combinedatt' => $participation->vc + $participation->classroom,
+                    'grade' => round($attendgrade, 2) . ' / '.
+                        round($usertotalgrade->items[0]->grades[$attendance['userid']]->grade, 2) .
+                        ' / ' . $this->hybridteaching->grade,
+                    'vc' => $participation->vc,
+                    'classroom' => $participation->classroom,
+                    'checkbox' => new \core\output\checkbox_toggleall('attendance-table', false, [
+                        'id' => 'attendance-' . $attendanceid,
+                        'name' => 'attendance[]',
+                        'classes' => 'm-1',
+                        'checked' => false,
+                        'value' => $attendanceid,
+                    ]),
+                ];
+            }
+            $hybridteachingid = empty($hybridteachingid) ? $this->cm->instance : $hybridteachingid;
+                $params = ['attid' => $attid, 'h' => $hybridteachingid, 'id' => $id,
+                    'returnurl' => $returnurl, 'view' => $view, 'userid' => $attuser->id, ];
+
+                $options = $this->get_table_options($body, $params, $url, $att->sessionid);
+                $class = $options['class'];
+                $options = $options['options'];
+                // Add a row to the table.
+                $row = $this->get_attendance_row($body, $options, $view);
+                if (!empty($class)) {
+                    $row->attributes['class'] = $class;
+                }
+                $table->data[] = $row;
+            }
+        }
+        $attendancetable = html_writer::table($table);
+        if (has_capability('mod/hybridteaching:bulksessions', $this->context)) {
+            $attendancetable .= $this->get_bulk_options_select($view);
+        }
+        if (isset($attusrfilter)) {
+            $attusrfilter->display();
+        }
+        $attendancetable .= html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'h', 'value' => $hybridteachingid]);
+        $attendancetable .= html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'id', 'value' => $id]);
+        $return .= html_writer::tag('form', $attendancetable, ['method' => 'post',
+            'action' => $CFG->wwwroot . '/mod/hybridteaching/classes/action/attendance_action.php?view=' .
+            $view . '&sessionid=' . $sessionid, ]);
+        $baseurl = new moodle_url('/mod/hybridteaching/attendance.php?view=' . $view, ['id' => $id,
+            'sort' => $sort, 'dir' => $dir, 'perpage' => $perpage, 'sessionid' => $sessionid, ]);
+        $return .= $OUTPUT->paging_bar($attendancecount, $page, $perpage, $baseurl);
+        $return .= $OUTPUT->box_end();
+        return $return;
+    }
+
+    protected function print_attendance_sessions_table($attendancelist, $attendanceassist, $editing, $groupmode, $id,
+        $returnurl, $baseurl, $url, $userid, $selectedfilter, $table, $return, $optionsform, $page, $perpage,
+        $attendancecount, $sessionid, $view = 'sessionattendance') {
+        global $OUTPUT, $CFG, $USER;
+
+        $attendancecontroller = new attendance_controller($this->hybridteaching);
+        $sessionscontroller = new sessions_controller($this->hybridteaching);
+        foreach ($attendancelist as $sessionlist) {
+            $session = $sessionscontroller->get_session($sessionlist['id']);
+            $date = $session->starttime;
+            $hour = date('H:i', $date);
+            $date = date('l, j \d\e F \d\e Y H:i', $date);
+            $attassistance = [];
+            foreach ($attendanceassist as $attassist) {
+                if ($attassist['sessionid'] == $session->id) {
+                    $attassistance = $attassist;
+                    continue;
+                }
+            }
+            $attributes = [
+                'type'  => 'checkbox',
+                'name'  => $session->name,
+                'value' => get_string('active'),
+                'class' => 'attendance-validated', ];
+            $editing ? true : $attributes['disabled'] = true;
+            $groupbody = '';
+            if ($groupmode) {
+                $session->groupid == 0 ? $groupbody = get_string('commonattendance', 'hybridteaching') :
+                    $groupbody = groups_get_group($session->groupid)->name;
+            }
+            if (!empty($session->typevc)) {
+                $typealias = get_string('alias', 'hybridteachvc_'.$session->typevc);
+            } else {
+                $typealias = get_string('classroom', 'hybridteaching');
+            }
+            $body = [
+                'class' => '',
+                'group' => $groupbody,
+                'name' => $session->attexempt ? $session->name . ' ' . get_string('attnotforgrade', 'hybridteaching') : $session->name,
+                'date' => $date,
+                'duration' => !empty($session->duration) ? helper::get_hours_format($session->duration) : self::EMPTY,
+                'typevc' => $typealias,
+                'vc' => isset($attassistance['vc']) ? $attassistance['vc'] : 0,
+                'classroom' => isset($attassistance['classroom']) ? $attassistance['classroom'] : 0,
+                'attexempt' => $session->attexempt,
+                'checkbox' => new \core\output\checkbox_toggleall('attendance-table', false, [
+                    'id' => 'session-' . $session->id ,
+                    'name' => 'session[]',
+                    'classes' => 'm-1',
+                    'checked' => false,
+                    'value' => $session->id,
+                ]),
+            ];
+            if ($body['attexempt']) {
+                $body['class'] = 'dimmed_text';
+            }
+            $hybridteachingid = empty($hybridteachingid) ? $this->cm->instance : $hybridteachingid;
+            $params = ['attid' => $session->id, 'h' => $hybridteachingid, 'id' => $id,
+            'returnurl' => $returnurl, 'view' => $view, 'userid' => $userid, ];
+
+            $options = $this->get_table_options($body, $params, $url, $session->id);
+            $class = $options['class'];
+            $options = $options['options'];
+            // Add a row to the table.
+            if ($attendancecontroller->display_attendance_row($body, $selectedfilter, $view)) {
+                $row = $this->get_attendance_row($body, $options, $view, $session->id);
+                if (!empty($class)) {
+                    $row->attributes['class'] = $class;
+                }
+                $table->data[] = $row;
+            } else {
+                $table->data[] = [];
+            }
+        }
+        // Add filters.
+        if (isset($attresumee)) {
+            $attresumee->display();
+        }
+        $optionsform->display();
+        if (isset($sessionoptions) && $editing) {
+            $sessionoptions->display();
+        }
+        if (isset($attusrfilter)) {
+            $attusrfilter->display();
+        }
+        $attendancetable = html_writer::table($table);
+        if (has_capability('mod/hybridteaching:bulksessions', $this->context)) {
+            $attendancetable .= $this->get_bulk_options_select($view);
+        }
+
+        $attendancetable .= html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'h', 'value' => $hybridteachingid]);
+        $attendancetable .= html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'id', 'value' => $id]);
+        $return .= html_writer::tag('form', $attendancetable, ['method' => 'post',
+            'action' => $CFG->wwwroot . '/mod/hybridteaching/classes/action/attendance_action.php?view=' .
+            $view . '&sessionid=' . $sessionid, ]);
+        $return .= $OUTPUT->paging_bar($attendancecount, $page, $perpage, $baseurl);
+        $return .= $OUTPUT->box_end();
         return $return;
     }
 }

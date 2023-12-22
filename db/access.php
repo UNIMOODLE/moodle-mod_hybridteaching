@@ -175,6 +175,16 @@ $capabilities = [
             'student' => CAP_ALLOW,
         ],
     ],
+    'mod/hybridteaching:viewchat' => [
+        'captype' => 'read',
+        'contextlevel' => CONTEXT_COURSE,
+        'archetypes' => [
+            'teacher' => CAP_ALLOW,
+            'editingteacher' => CAP_ALLOW,
+            'manager' => CAP_ALLOW,
+            'student' => CAP_ALLOW,
+        ],
+    ],
     'mod/hybridteaching:downloadrecordings' => [
         'captype' => 'read',
         'contextlevel' => CONTEXT_COURSE,

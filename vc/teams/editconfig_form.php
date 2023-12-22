@@ -72,10 +72,11 @@ class htteams_config_edit_form extends moodleform {
         $mform->addRule('configname', null, 'maxlength', 255, 'client');
 
         $mform->addElement('header', 'subplugin', get_string('pluginname', 'hybridteachvc_teams'));
-        $mform->addElement('text', 'tenantid', get_string('tenantid', 'hybridteachvc_teams'));
-        $mform->addElement('text', 'clientid', get_string('clientid', 'hybridteachvc_teams'));
-        $mform->addElement('text', 'clientsecret', get_string('clientsecret', 'hybridteachvc_teams'));
-        $mform->addElement('text', 'useremail', get_string('useremail', 'hybridteachvc_teams'));
+        $mform->addElement('select', 'accessmethod', get_string('accessmethod', 'hybridteachvc_teams'), ['app', 'behaf user']);
+        $mform->addElement('text', 'tenantid', get_string('tenantid', 'hybridteachvc_teams'), ['size' => 50]);
+        $mform->addElement('text', 'clientid', get_string('clientid', 'hybridteachvc_teams'), ['size' => 50]);
+        $mform->addElement('text', 'clientsecret', get_string('clientsecret', 'hybridteachvc_teams'), ['size' => 50]);
+        $mform->addElement('text', 'useremail', get_string('useremail', 'hybridteachvc_teams'), ['size' => 50]);
 
         $mform->setType('tenantid', PARAM_TEXT);
         $mform->setType('clientid', PARAM_TEXT);

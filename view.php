@@ -42,6 +42,7 @@ use mod_hybridteaching\helpers\roles;
 
 $id = optional_param('id', 0, PARAM_INT);
 $h = optional_param('h', 0, PARAM_INT);
+$err = optional_param('err', 0, PARAM_INT);
 
 if ($id) {
     list ($course, $cm) = get_course_and_cm_from_cmid($id, 'hybridteaching');
@@ -99,17 +100,40 @@ if (!$activesession) {
         $result['target'] = $hasvc ? "_blank" : "_self";
         $result['url'] = base64_encode($url);
     } else {
-        echo $OUTPUT->notification(get_string('nosessions', 'mod_hybridteaching', 'info'));
+        echo $OUTPUT->notification(get_string('nosessions', 'hybridteaching', 'info'));
     }
 } else {
     if (!has_capability('mod/hybridteaching:sessionsactions', $modulecontext) &&
           !groups_is_member($activesession->groupid, $USER->id) && $activesession->groupid != 0) {
         $access = false;
-        echo $OUTPUT->notification(get_string('sessionnoaccess', 'mod_hybridteaching', 'info'));
+        echo $OUTPUT->notification(get_string('sessionnoaccess', 'hybridteaching', 'info'));
     } else {
         $timeinit = $activesession->starttime;
         $timeend = $timeinit + $activesession->duration;
 
+        // Closedoors.
+        $closedoors = '';
+        $isclosedoors = false;
+        $closedoorstime = 0;
+        if ($hybridteaching->closedoorscount > 0) {
+            $isclosedoors = true;
+            switch ($hybridteaching->closedoorsunit) {
+                case 0:
+                    $closedoors = get_string('closedoors_hours', 'hybridteaching', $hybridteaching->closedoorscount);
+                    $multiplydoors = HOURSECS;
+                    break;
+                case 1:
+                    $closedoors = get_string('closedoors_minutes', 'hybridteaching', $hybridteaching->closedoorscount);
+                    $multiplydoors = MINSECS;
+                    break;
+                default:
+                    $closedoors = get_string('closedoors_seconds', 'hybridteaching', $hybridteaching->closedoorscount);
+                    $multiplydoors = 1;
+                    break;
+            }
+            $closedoorstime = $hybridteaching->closedoorscount * $multiplydoors;
+        }
+        
         $isundatedsession = false;
         $isprogress = false;
         $isstart = false;
@@ -123,46 +147,54 @@ if (!$activesession) {
                 $isfinished = $activesession->isfinished;
                 if ($isfinished) {
                     if (has_capability('mod/hybridteaching:sessionsactions', $modulecontext)) {
-                        $status = get_string('status_undated', 'mod_hybridteaching');
+                        $status = get_string('status_undated', 'hybridteaching');
                     } else {
-                        $status = get_string('status_undated_wait', 'mod_hybridteaching');
+                        $status = get_string('status_undated_wait', 'hybridteaching');
                     }
                 } else {
-                    $status = get_string('status_start', 'mod_hybridteaching');
+                    $status = get_string('status_start', 'hybridteaching');
                     if (($activesession->starttime < time() && $activesession->isfinished == 0)) {
                         $isprogress = true;
-                        $status = get_string('status_ready', 'mod_hybridteaching');
                         $viewupdate = true;
+                        $isclosedoors ? $status = get_string('status_progress', 'hybridteaching') : 
+                            $status = get_string('status_ready', 'hybridteaching');
                     } else if ($activesession->starttime > time()) {
                         $duration = $activesession->duration;
                         $activesession = $session->get_last_undated_session();
                         if (!empty($activesession)) {
                             $isprogress = true;
-                            $status = get_string('status_ready', 'mod_hybridteaching');
                             $viewupdate = true;
                             $timeinit = $activesession->starttime;
+                            $isclosedoors ? $status = get_string('status_progress', 'hybridteaching') : 
+                                $status = get_string('status_ready', 'hybridteaching');
                         } else {
                             $isstart = true;
                             $isfinished = true;
                             $nextsessduration = $duration;
                         }
+                    } else {
+                        $isprogress = true;
+                            $viewupdate = true;
+                            $timeinit = $activesession->starttime;
+                            $isclosedoors ? $status = get_string('status_progress', 'hybridteaching') : 
+                                $status = get_string('status_ready', 'hybridteaching');
                     }
                 }
-                $alert = 'alert-info';
+                $isclosedoors ? $alert = 'alert-warning' : $alert = 'alert-info';
                 break;
             case $timeinit < time() && $timeend > time():
-                $status = get_string('status_progress', 'mod_hybridteaching');
+                $status = get_string('status_progress', 'hybridteaching');
                 $isprogress = true;
                 $alert = 'alert-warning';
                 $viewupdate = true;
                 break;
             case $timeinit >= time():
-                $status = get_string('status_start', 'mod_hybridteaching');
+                $status = get_string('status_start', 'hybridteaching');
                 $isstart = true;
                 $alert = 'alert-info';
                 break;
             case $timeend < time():
-                $status = get_string('status_finished', 'mod_hybridteaching');
+                $status = get_string('status_finished', 'hybridteaching');
                 $isfinished = true;
                 $alert = 'alert-danger';
                 if (!$session::session_finished_triggered($activesession->id)) {
@@ -179,29 +211,6 @@ if (!$activesession) {
                 break;
         }
         !isset($status) ? $status = '' : '';
-
-        // Closedoors.
-        $closedoors = '';
-        $isclosedoors = false;
-        $closedoorstime = 0;
-        if ($hybridteaching->closedoorscount > 0) {
-            $isclosedoors = true;
-            switch ($hybridteaching->closedoorsunit) {
-                case 0:
-                    $closedoors = get_string('closedoors_hours', 'mod_hybridteaching', $hybridteaching->closedoorscount);
-                    $multiplydoors = HOURSECS;
-                    break;
-                case 1:
-                    $closedoors = get_string('closedoors_minutes', 'mod_hybridteaching', $hybridteaching->closedoorscount);
-                    $multiplydoors = MINSECS;
-                    break;
-                default:
-                    $closedoors = get_string('closedoors_seconds', 'mod_hybridteaching', $hybridteaching->closedoorscount);
-                    $multiplydoors = 1;
-                    break;
-            }
-            $closedoorstime = $hybridteaching->closedoorscount * $multiplydoors;
-        }
 
         $advanceentrytime = 0;
         $isadvanceentry = false;
@@ -226,10 +235,12 @@ if (!$activesession) {
             } else {
                 if ($timeend > time()) {
                     $canentry = true;
+                } else {
+                    if ($isundatedsession && $timeend === $timeinit) $canentry = true;
                 }
             }
         }
-
+        $result['hasjoinurlcapability'] = has_capability('mod/hybridteaching:viewjoinurl', $modulecontext);
         if ($hybridteaching->waitmoderator) {
             $role = roles::is_moderator($modulecontext, json_decode($hybridteaching->participants, true), $USER->id);
             $issessionmoderator = ($role || has_capability('mod/hybridteaching:sessionsactions', $modulecontext));
@@ -240,15 +251,18 @@ if (!$activesession) {
                     $canentry = false;
                 }
             }
+        } else if ($canentry && !$session->session_started($activesession)) {
+            $role = roles::is_moderator($modulecontext, json_decode($hybridteaching->participants, true), $USER->id);
+            $issessionmoderator = ($role || has_capability('mod/hybridteaching:sessionsactions', $modulecontext));
+            $result['hasjoinurlcapability'] = $issessionmoderator;
         }
         $viewupdate && has_capability('mod/hybridteaching:attendanceregister', $modulecontext) && $hybridteaching->useattendance
-           && $canentry ? $PAGE->requires->js_call_amd('mod_hybridteaching/view', 'init', [$activesession->id, $USER->id]) : '';
+            && $canentry ? $PAGE->requires->js_call_amd('mod_hybridteaching/view', 'init', [$activesession->id, $USER->id]) : '';
 
         $result['isaccess'] = true;
         $result['id'] = $id;
         $result['s'] = !$isfinished ? $activesession->id : 0;
         $result['hascreatecapability'] = has_capability('mod/hybridteaching:sessionsactions', $modulecontext);
-        $result['hasjoinurlcapability'] = has_capability('mod/hybridteaching:viewjoinurl', $modulecontext);
         $result['hasvc'] = $hasvc;
         $result['target'] = $hasvc ? "_blank" : "_self";
         $result['onsubmit'] = $result['target'] == "_blank" ? "setTimeout(function() { location.reload(); }, 4000)" : "";
@@ -287,6 +301,11 @@ if (!$activesession) {
         $result['rotateqr'] = $hybridteaching->rotateqr;
         $result['useattendance'] = $hybridteaching->useattendance;
     }
+}
+if ($err == 1) {
+    // Code 1: error_unable_join: The meeting does not exist in the vc system, has been deleted, or has not been found.
+    $result['message'] = get_string('error_unable_join', 'hybridteaching');
+    $result['alert'] = 'alert-danger';
 }
 notify_controller::show();
 echo $renderer->zone_access($result);

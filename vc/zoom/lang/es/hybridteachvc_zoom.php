@@ -48,3 +48,6 @@ $string['errorwebservice'] = 'Error de webservice de Zoom: {$a}.';
 $string['zoomerr_no_access_token'] = 'No access token returned';
 $string['licenses'] = 'Licencias';
 $string['downloadrecordszoom'] = 'Descargar grabaciones Zoom';
+$string['maxdownloadattempts'] = 'Num. máximo de intentos de descarga de grabaciones';
+$string['maxdownloadattempts_help'] = 'Cuando se haya intentado descargar esta cantidad máxima de intentos se detendrán los intentos de desacarga';
+$string['chatnamefile'] = 'Chat de la reunión';

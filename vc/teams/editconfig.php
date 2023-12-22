@@ -71,6 +71,7 @@ $mform = new htteams_config_edit_form(null, [$config, $type]);
 
 $message = '';
 $error = '';
+$accessmethod = '';
 if ($mform->is_cancelled()) {
     redirect($return);
 } else if ($data = $mform->get_data()) {
@@ -79,15 +80,22 @@ if ($mform->is_cancelled()) {
         $error = $configcontroller->hybridteaching_create_config($data, $type);
         empty($error) ? $message = 'createdconfig' : $message = $error;
         $configid = $data->id;
+        $accessmethod = $data->accessmethod;
     } else {
         $error = $configcontroller->hybridteaching_update_config($data);
         configs::update_config($data);
         empty($error) ? $message = 'updatedconfig' : $message = $error;
         $configid = $data->subpluginconfigid;
+        $accessmethod = $data->accessmethod;
     }
 
     // Add access code and permissions to teams.
-    $url = new moodle_url('./classes/teamsaccess.php', ['id' => $configid] );
+    if ($accessmethod == 0) {
+        $url = new moodle_url('./classes/teamsaccessapp.php', ['id' => $configid] );
+    } else {
+        $url = new moodle_url('./classes/teamsaccess.php', ['id' => $configid] );
+    }
+
     redirect($url);
 }
 

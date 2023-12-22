@@ -28,6 +28,8 @@ require_once($CFG->dirroot . '/mod/hybridteaching/classes/controller/attendance_
 
 class attresumee_options_form extends moodleform {
     public function definition() {
+        global $USER;
+
         $mform = &$this->_form;
         $mform->_attributes['id'] = 'sessionsform' . substr($mform->_attributes['id'], 6);
 
@@ -44,13 +46,16 @@ class attresumee_options_form extends moodleform {
 
         $mform->addElement('header', 'headerusercompletion', get_string('attendanceresumee', 'hybridteaching'));
         $selecteduser = $this->_customdata['selecteduser'];
-        $selectedusers = [];
-        $husers = $attcontroller::hybridteaching_get_instance_users($hid);
-        foreach ($husers as $huser) {
-            $selectedusers[$huser->id] = $huser->lastname . ' ' . $huser->firstname . '';
+        if (has_capability('mod/hybridteaching:sessionsfulltable',
+        context_module::instance($cm->id), $user = $USER->id)) {
+            $selectedusers = [];
+            $husers = $attcontroller::hybridteaching_get_instance_users($hid);
+            foreach ($husers as $huser) {
+                $selectedusers[$huser->id] = $huser->lastname . ' ' . $huser->firstname . '';
+            }
+            $mform->addElement('autocomplete', 'selecteduser', get_string('userfor', 'hybridteaching'), $selectedusers);
+            $mform->setDefault('selecteduser', $selecteduser);
         }
-        $mform->addElement('autocomplete', 'selecteduser', get_string('userfor', 'mod_hybridteaching'), $selectedusers);
-        $mform->setDefault('selecteduser', $selecteduser);
 
         $selecteduser = $attcontroller->load_sessions_attendant($selecteduser);
         $mform->addElement('static', 'attendinfo', '', $attcontroller->hybridteaching_print_attendance_for_user($hid,

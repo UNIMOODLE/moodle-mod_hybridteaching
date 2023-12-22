@@ -44,7 +44,7 @@ class downloadrecords extends \core\task\scheduled_task {
      * @return string
      */
     public function get_name() {
-        return get_string('downloadrecordsteams', 'hybridteachvc_teams');
+        return get_string('downloadrecordsmeet', 'hybridteachvc_meet');
     }
 
     public function execute() {
@@ -61,34 +61,66 @@ class downloadrecords extends \core\task\scheduled_task {
         $download = $DB->get_records_sql($sql);
 
         foreach ($download as $session) {
-            /*$folder = $CFG->dataroot."/repository/hybridteaching/".$session->course;
+            $folder = $CFG->dataroot."/repository/hybridteaching/".$session->course;
             if (!file_exists($folder)) {
                 mkdir($folder, 0777, true);
             }
 
-            $folderfile = $folder."/".$session->htid."-".$session->hsid.'-1.mp4';*/
-
             $meetconfig = $sessionconfig->load_meet_config($session->config);
             $meethandler = new meet_handler($meetconfig);
 
-            $files = $meethandler->search_files(basename($session->joinurl));
-            foreach ($files as $file) {
-                $meethandler->download_file($file);
+            $searchrecordings = $meethandler->search_recordings(basename($session->joinurl));
+            $filenum = 1;
+            foreach ($searchrecordings as $files) {
+                foreach ($files as $file) {
+                    $folderfile = $folder."/".$session->htid."-".$session->hsid.'-'.$filenum.'.mp4';
+                    $content = $meethandler->download_file($file->id);
+                    $sess = $DB->get_record('hybridteaching_session', ['id' => $session->hsid]);
+                    if (!empty($content)) {
+                        $sess->processedrecording = 0;
+                        file_put_contents($folderfile, $content);
+                    } else {
+                        // Save -2 indicates there are not recording.
+                        $sess->processedrecording = -2;
+                    }
+                    $DB->update_record('hybridteaching_session', $sess);
+                    $filenum++;
+                }
             }
-            
 
-            // Save recordingid and prepare to upload.
-            /*$sess = $DB->get_record('hybridteaching_session', ['id' => $session->hsid]);
-            if ($response != false) {
-                $teams = $DB->get_record('hybridteachvc_teams', ['meetingid' => $session->meetingid] );
-                $teams->recordingid = $response;
-                $DB->update_record('hybridteachvc_teams', $teams);
-                $sess->processedrecording = 0;
-            } else {
-                // Save -2 indicates there are not recording.
-                $sess->processedrecording = -2;
-            }
-            $DB->update_record('hybridteaching_session', $sess);*/
+            $searchchats = $meethandler->search_chats(basename($session->joinurl));
+            $chatnum = 1;
+            foreach ($searchchats as $chats) {
+                foreach ($chats as $chat) {
+                    $folderfile = $folder."/".$session->htid."-".$session->hsid.'-'.$chatnum.'-chat.txt';
+                    $content = $meethandler->download_file($chat->id);
+                    if (!empty($content)) {
+                        file_put_contents($folderfile, $content);
+
+                        // Get instance context.
+                        $cm = get_coursemodule_from_instance('hybridteaching', $session->htid);
+                        $context = \context_module::instance($cm->id);
+
+                        // Save .txt in session filestorage.
+                        $filename = get_string('chatnamefile', 'hybridteachvc_meet').'_'.$session->name.$chatnum;
+                        $fileinfo = [
+                            'contextid' => $context->id,
+                            'component' => 'mod_hybridteaching',
+                            'filearea'  => 'chats',
+                            'itemid'    => $session->hsid,
+                            'filepath'  => '/',
+                            'filename'  => $filename.'.txt',
+                        ];
+
+                        $fs = get_file_storage();
+                        $fs->create_file_from_pathname($fileinfo, $folderfile);
+
+                        // Delete chat file from origin download vc moodledata.
+                        unlink($folderfile);
+                    }
+                    $chatnum++;
+                }
+            }            
         }
     }
 }

@@ -44,9 +44,9 @@ class session_filter_duration extends session_filter_type {
      * @return array of comparison operators
      */
     public function get_operators() {
-        return [0 => get_string('equalto', 'mod_hybridteaching'),
-                     1 => get_string('morethan', 'mod_hybridteaching'),
-                     2 => get_string('lessthan', 'mod_hybridteaching'), ];
+        return [0 => get_string('equalto', 'hybridteaching'),
+                     1 => get_string('morethan', 'hybridteaching'),
+                     2 => get_string('lessthan', 'hybridteaching'), ];
     }
 
     /**

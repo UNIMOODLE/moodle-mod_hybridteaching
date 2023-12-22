@@ -13,7 +13,11 @@ Requiere instalación de composer para meet, bajo la carpeta principal de meet c
 7. Asignar los permisos siguientes:
 	- .../auth/calendar.events     Ver y editar eventos en tus calendarios
 	- .../auth/calendar.events.owned		Consultar, crear, modificar y borrar eventos en los calendarios de Google de los que seas propietario
-
+	- .../auth/docs
+	- .../auth/drive
+	- .../auth/drive.metadata
+	- .../auth/drive.metadata.readonly
+	- .../auth/drive.readonly
 
 # Authorized URLS #
 

@@ -72,9 +72,9 @@ class attendance_options_form extends moodleform {
             }
         }
 
-        $mform->addElement('header', 'options', get_string('options', 'mod_hybridteaching'));
+        $mform->addElement('header', 'options', get_string('options', 'hybridteaching'));
         $perpage = [
-            0 => get_string('donotusepaging', 'mod_hybridteaching'),
+            0 => get_string('donotusepaging', 'hybridteaching'),
             10 => 10,
             25 => 25,
             50 => 50,
@@ -84,7 +84,7 @@ class attendance_options_form extends moodleform {
             500 => 500,
             1000 => 1000,
         ];
-        $mform->addElement('select', 'perpage', get_string('sesperpage', 'mod_hybridteaching'), $perpage);
+        $mform->addElement('select', 'perpage', get_string('sesperpage', 'hybridteaching'), $perpage);
         $mform->setDefault('perpage', $perpageval);
 
         $mform->addElement('header', 'filter', get_string('filter'));

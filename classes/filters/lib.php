@@ -145,7 +145,7 @@ class session_filtering {
             case 'starttime':
                 return new session_filter_date('starttime', get_string('date'), $advanced, 'starttime');
             case 'duration':
-                return new session_filter_duration('duration', get_string('duration', 'mod_hybridteaching'),
+                return new session_filter_duration('duration', get_string('duration', 'hybridteaching'),
                     $advanced, 'duration');
             default:
                 return null;

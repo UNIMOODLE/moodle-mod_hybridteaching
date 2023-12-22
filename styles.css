@@ -12,9 +12,8 @@ table.sessionstable .icon.fa-film.fa-film-slash:after{
     top: -8px;
 }
 
-#zoneaccess #joinvc{
-    max-width: 300px;
-    width: 100%;
+#zoneaccess > .d-flex > form#joinvc + form{
+    margin-left: 3rem;
 }
 
 #zoneaccess #registeratt{

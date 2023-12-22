@@ -23,7 +23,7 @@
         <FIELD NAME="emailaccount" TYPE="char" LENGTH="255" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="clientid" TYPE="char" LENGTH="255" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="clientsecret" TYPE="char" LENGTH="255" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
-        <FIELD NAME="token" TYPE="char" LENGTH="500" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="token" TYPE="text" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="eventid" TYPE="char" LENGTH="255" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
       </FIELDS>
       <KEYS>

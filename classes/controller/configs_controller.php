@@ -152,8 +152,10 @@ class configs_controller extends common_controller {
         $pluginmanager = core_plugin_manager::instance();
         $subplugins = $pluginmanager->get_subplugins_of_plugin('mod_hybridteaching');
         $subtypes = [];
+        $subenabled = [];
         foreach ($subplugins as $sub) {
             if ($sub->type == $this->splugintype) {
+                $subenabled[$sub->name] = $sub->is_enabled();
                 $subtypes[] = $sub->name;
             }
         }
@@ -194,6 +196,36 @@ class configs_controller extends common_controller {
               ORDER BY hi.visible DESC, hi.sortorder, hi.id";
         $configs = $DB->get_records_sql($sql, $inparams);
         $configsarray = json_decode(json_encode($configs), true);
+
+        // Insert if subplugin is enabled or disabled.
+        foreach ($configsarray as $key => $element) {
+
+            if (isset($subenabled[$element['type']]) && $subenabled[$element['type']] == 1) {
+                $configsarray[$key]['configenabled'] = true;
+                $element['configenabled'] = true;
+            } else {
+                $configsarray[$key]['configenabled'] = false;
+                $element['configenabled'] = false;
+            }
+        }
+
+        /*
+        // Revisar la ordenación por habilitado/deshabilitado.
+        // Al activar esta ordenación no funcionan las opciones de cambiar de orden, y visible/ocult.
+
+        $sortarray = [];
+
+        foreach ($configsarray as $element) {
+            foreach ($element as $key => $value) {
+                if (!isset($sortarray[$key])) {
+                    $sortarray[$key] = [];
+                }
+                $sortarray[$key][] = $value;
+            }
+        }
+        $orderby = 'configenabled';
+        array_multisort($sortarray[$orderby], SORT_DESC, $configsarray);
+        */
 
         return $configsarray;
     }

@@ -105,6 +105,11 @@ class sessions {
     public function create_unique_session_extended($session, $ht) {
         global $DB;
 
+        $context = \context_course::instance($ht->course);
+        if (!has_capability('hybridteachvc/bbb:use', $context)) {
+            return;
+        }
+
         $bbbconfig = $this->load_bbb_config($ht->config);
         $bbbproxy = new bbbproxy($bbbconfig);
         $meeting = new meeting($bbbconfig);
@@ -261,7 +266,10 @@ class sessions {
                 'isaccess' => true,
                 'url' => base64_encode($url),
             ];
-
+            $meetinginfo = $bbbproxy->get_meeting_info($this->bbbsession->meetingid);
+            if (isset ($meetinginfo['returncode']) && $meetinginfo['returncode'] == 'FAILED') {
+                return $meetinginfo;
+            }
             return $array;
         } else {
             return null;
@@ -269,44 +277,23 @@ class sessions {
     }
 
     /**
-     * Get the return URL.
-     *
-     * @return string The return URL.
-     */
-    /*
-
-    // Not necessary at the moment.
-
-    public function get_returnurl () {
-        global $DB;
-        $htid = $DB->get_field('hybridteaching_session', 'hybridteachingid', ['id' => $this->bbbsession->htsession]);
-        $courseid = $DB->get_field('hybridteaching', 'course', ['id' => $htid]);
-        if ($courseid) {
-            $returnurl = new \moodle_url('/course/view.php', ['id' => $courseid]);
-            return (string) $returnurl;
-        } else {
-            return null;
-        }
-    }
-    */
-
-    /**
      * Get the recording URL.
      *
      * @return string The URL of the recording.
      */
-    public function get_recording () {
+    public function get_recording ($context) {
+
+        if (!has_capability('hybridteachvc/bbb:view', $context)) {
+            return;
+        }
         $bbbconfig = $this->load_bbb_config_from_session();
         $bbbproxy = new bbbproxy($bbbconfig);
 
-        $url = '';
         $response = $bbbproxy->get_url_recording_by_recordid($this->bbbsession->recordingid);
         if ($response['returncode'] == 'SUCCESS') {
-            if ($response['recordingid'] != '') {
-                $url = $response['recordingid'];
-            }
+            return $response;
         }
-        return $url;
+        return;
     }
 
     /**
@@ -367,5 +354,13 @@ class sessions {
         $config = $DB->get_record_sql($sql, ['htid' => $htid, 'groupid' => $groupid,
             'typevc' => $typevc, 'vcreference' => $vcreference, 'starttime' => $starttime, ]);
         return $config;
+    }
+
+    public function get_chat_url ($context) {
+        if (!has_capability('hybridteachvc/bbb:view', $context)) {
+            return '';
+        }
+        return '';
+        
     }
 }

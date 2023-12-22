@@ -31,13 +31,11 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-$string['pluginname'] = 'Youtube Store';
+$string['pluginname'] = 'Youtube híbrido';
 $string['pluginconfig'] = 'Configuración de Youtube Store';
 $string['pluginnewconfig'] = 'Nueva configuración de Youtube Store';
-$string['accountid'] = 'Accountid';
 $string['youtube'] = 'youtube';
 $string['alias'] = 'Youtube';
-$string['pluginname'] = 'Youtube Store';
 $string['accountid'] = 'ID cuenta youtube';
 $string['clientid'] = 'ID cliente youtube';
 $string['clientsecret'] = 'Clave secreta cliente youtube';

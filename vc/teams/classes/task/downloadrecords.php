@@ -66,19 +66,42 @@ class downloadrecords extends \core\task\scheduled_task {
                 mkdir($folder, 0777, true);
             }
 
-            $folderfile = $folder."/".$session->htid."-".$session->hsid.'-1.mp4';
+            $folderfile = $folder."/".$session->htid."-".$session->hsid;
 
             $teamsconfig = $sessionconfig->load_teams_config($session->config);
             $teamshandler = new teams_handler($teamsconfig);
 
             // Call to download recordings.
-            $response = $teamshandler->get_meeting_recordings($folderfile, $session->meetingid, $session->organizer);
+            $responserecording = $teamshandler->get_meeting_recordings($folderfile, $session->meetingid, $session->organizer);
+            // Call to get meeting chatinfo urls.
+            $responsechat = $teamshandler->getchatmeetingurl($session->meetingid, $session->organizer);
 
             // Save recordingid and prepare to upload.
             $sess = $DB->get_record('hybridteaching_session', ['id' => $session->hsid]);
-            if ($response != false) {
+
+            $teams = $DB->get_record('hybridteachvc_teams', ['meetingid' => $session->meetingid] );
+            if ($responserecording != false) {
+                $teams->recordingid = $responserecording;
+                $sess->processedrecording = 0;
+            } else {
+                // Save -2 indicates there are not recording.
+                $sess->processedrecording = -2;
+            }
+            $DB->update_record('hybridteaching_session', $sess);
+
+            if ($responsechat != false) {
+                $teams->chaturl = $responsechat;
+            }
+
+            if ($responserecording != false || $responsechat != false) {
+                $DB->update_record('hybridteachvc_teams', $teams);
+            }
+
+            /*
+            // Old code.
+            if ($responserecording != false) {
                 $teams = $DB->get_record('hybridteachvc_teams', ['meetingid' => $session->meetingid] );
-                $teams->recordingid = $response;
+                $teams->recordingid = $responserecording;
                 $DB->update_record('hybridteachvc_teams', $teams);
                 $sess->processedrecording = 0;
             } else {
@@ -86,6 +109,7 @@ class downloadrecords extends \core\task\scheduled_task {
                 $sess->processedrecording = -2;
             }
             $DB->update_record('hybridteaching_session', $sess);
+            */
         }
     }
 }
