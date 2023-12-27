@@ -91,7 +91,7 @@ function xmldb_hybridteaching_upgrade($oldversion) {
         $dbman->change_field_type($table, $field);
 
         // Meet savepoint reached.
-        upgrade_plugin_savepoint(true, '2023031700.24', 'hybridteachvc', 'meet');
+        upgrade_plugin_savepoint(true, '2023033100.06', 'hybridteachvc', 'meet');
     }
 
     return true;
