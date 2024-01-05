@@ -30,3 +30,4 @@ $string['licenses'] = 'Licenses';
 $string['updatestores'] = 'Upload Onedrive videos';
 $string['subdomain'] = 'Onedrive subdomain';
 $string['hybridteaching'] = 'hybridteaching';
+$string['notuploading'] = 'Cannot uploading recording in courseid';

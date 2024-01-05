@@ -93,8 +93,8 @@ class attendance_controller extends common_controller {
 
         $sessionid != 0 ? $where .= ' AND sessionid = ' . $sessionid . '' : false;
 
-        !empty($fname) ? $fname = " AND u.firstname like '" . $fname . "%' " : '';
-        !empty($lname) ? $lname = " AND u.lastname like '" . $lname . "%' " : '';
+        !empty($fname) ? $fname = " AND UPPER(u.firstname) like '" . $fname . "%' " : '';
+        !empty($lname) ? $lname = " AND UPPER(u.lastname) like '" . $lname . "%' " : '';
         !isset($params['view']) ? $params['view'] = 'bulkform' : '';
 
         $secondarysort = '';
@@ -250,7 +250,9 @@ class attendance_controller extends common_controller {
             $att->status = $status;
             $att->type = $type;
             $att->usermodified = $USER->id;
-            $att->timecreated = $timenow;
+            $att->exempt = 0;
+            $att->connectiontime = 0;
+            $att->timecreated = 0;
             $att->timemodified = $timenow;
             try {
                 $attend = $DB->insert_record('hybridteaching_attendance', $att);
@@ -265,15 +267,17 @@ class attendance_controller extends common_controller {
         $status = self::verify_user_attendance($hybridteaching, $session, $att->id, $neededtime, $timespent);
         $att->type = $type;
         $att->status = $status;
+        $att->exempt = 0;
+        $att->connectiontime = 0;
         $att->usermodified = $USER->id;
         $att->timemodified = $timenow;
         $att->connectiontime = $timespent;
         try {
             $DB->update_record('hybridteaching_attendance', $att);
-
+            list($course, $cm) = get_course_and_cm_from_instance($hybridteaching->id, 'hybridteaching');
             $event = \mod_hybridteaching\event\attendance_updated::create([
                 'objectid' => $hybridteaching->id,
-                'context' => \context_course::instance($hybridteaching->course),
+                'context' => \context_module::instance($cm->id),
                 'other' => [
                     'sessid' => $session->id,
                     'userid' => $userid,
@@ -759,10 +763,10 @@ class attendance_controller extends common_controller {
                 if (!$DB->update_record('hybridteaching_attendance', $att)) {
                     $errormsg = 'errorupdateattendance';
                 } else {
-                    $course = $DB->get_field('hybridteaching', 'course', ['id' => $att->hybridteachingid]);
+                    list($course, $cm) = get_course_and_cm_from_instance($att->hybridteachingid, 'hybridteaching');
                     $event = \mod_hybridteaching\event\attendance_updated::create([
                         'objectid' => $att->hybridteachingid,
-                        'context' => \context_course::instance($course),
+                        'context' => \context_module::instance($cm->id),
                         'other' => [
                             'sessid' => $att->sessionid,
                             'userid' => $att->userid,
@@ -791,6 +795,18 @@ class attendance_controller extends common_controller {
             foreach ($atts as $att) {
                 $action ? $att->visible = 0 : $att->visible = 1;
                 $DB->update_record('hybridteaching_attendance', $att);
+
+                $event = \mod_hybridteaching\event\session_updated::create([
+                    'objectid' => $this->hybridobject->id,
+                    'context' => \context_module::instance($this->hybridobject->course),
+                    'other' => [
+                        'sessid' => $sessid,
+                        'userid' => $att->userid,
+                        'attid' => $att->id,
+                    ],
+                ]);
+    
+                $event->trigger();
             }
         }
     }
@@ -815,11 +831,23 @@ class attendance_controller extends common_controller {
             if ($updateatt) {
                 if (!$DB->update_record('hybridteaching_session', $session)) {
                     $errormsg = 'errorupdateattendance';
-                }
-                $attends = $DB->get_records('hybridteaching_attendance', ['sessionid' => $sessid], '', 'id');
-                foreach ($attends as $att) {
-                    $session->attexempt ? $att->visible = 0 : $att->visible = 1;
-                    $DB->update_record('hybridteaching_attendance', $att);
+                } else {
+                    $attends = $DB->get_records('hybridteaching_attendance', ['sessionid' => $sessid], '', 'id, userid');
+                    foreach ($attends as $att) {
+                        $session->attexempt ? $att->visible = 0 : $att->visible = 1;
+                        $DB->update_record('hybridteaching_attendance', $att);
+                        $event = \mod_hybridteaching\event\session_updated::create([
+                            'objectid' => $this->hybridobject->id,
+                            'context' => \context_module::instance($this->hybridobject->course),
+                            'other' => [
+                                'sessid' => $sessid,
+                                'userid' => $att->userid,
+                                'attid' => $att->id,
+                            ],
+                        ]);
+            
+                        $event->trigger();
+                    }
                 }
             }
         }
@@ -929,6 +957,10 @@ class attendance_controller extends common_controller {
         global $DB;
 
         $leavedearly = false;
+        if (is_int($session)) $session = $DB->get_record('hybridteaching_session', ['id' => $session]);
+        if (!$session) {
+            return false;
+        }
         if ($session->isfinished && $att->connectiontime) {
             $logs = self::hybridteaching_get_attendance_entry_end_times($att->id);
             $logs['lastaction'] == 0 && $logs['end'] < ($session->starttime + $session->duration) ? $leavedearly = true : false;

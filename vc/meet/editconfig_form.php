@@ -50,51 +50,23 @@ class htmeet_config_edit_form extends moodleform {
             $client->logout();
         }
 
-        /*if (empty($this->current->instance)) {
-            $clientislogged = optional_param('client_islogged', false, PARAM_BOOL);
-
-            // Was logged in before submitting the form and the google session expired after submitting the form.
-            if ($clientislogged && !$client->check_login()) {
-                $mform->addElement('html', html_writer::div(get_string('sessionexpired', 'googlemeet') .
-                    $client->print_login_popup(), 'mdl-align alert alert-danger googlemeet_loginbutton'
-                ));
-
-                // Whether the customer is enabled and if not logged in to the Google account.
-            } else if ($client->enabled && !$client->check_login()) {
-                $mform->addElement('html', html_writer::div(get_string('logintoyourgoogleaccount', 'googlemeet') .
-                    $client->print_login_popup(), 'mdl-align alert alert-info googlemeet_loginbutton'
-                ));
-            }
-
-            // If is logged in, shows Google account information.
-            if ($client->check_login()) {
-                $mform->addElement('html', $client->print_user_info('calendar'));
-                $mform->addElement('hidden', 'client_islogged', true);
-            }
-
-        } else {
-            $mform->addElement('hidden', 'client_islogged', false);
-        }*/
         $mform->setType('client_islogged', PARAM_BOOL);
 
         $mform->addElement('header', 'header', get_string('configgeneralsettings', 'hybridteaching'));
         $mform->addElement('hidden', 'id');
         $mform->addElement('hidden', 'type');
         $mform->addElement('hidden', 'subpluginconfigid');
+        $mform->addElement('hidden', 'categories', '', "id='categories'");
         $mform->addElement('text', 'configname', get_string('configname', 'hybridteaching'));
-        $categories = core_course_category::get_all();
-        $options[0] = get_string('all');
-        foreach ($categories as $category) {
-            $options[$category->id] = $category->name;
-        }
 
-        $mform->addElement('select', 'category', get_string('categories'), $options);
+        $mform->addElement('html', '<button type="button" class="btn btn-outline-primary ml-3" data-toggle="modal" 
+            data-target="#categoriesmodal">'.get_string('categories').'</button>');
 
         $mform->setType('id', PARAM_INT);
         $mform->setType('type', PARAM_COMPONENT);
         $mform->setType('subpluginconfigid', PARAM_INT);
         $mform->setType('configname', PARAM_TEXT);
-        $mform->setType('category', PARAM_INT);
+        $mform->setType('categories', PARAM_TEXT);
 
         $mform->setDefault('type', get_string($type, 'hybridteachvc_'.$type));
 

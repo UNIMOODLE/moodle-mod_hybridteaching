@@ -51,7 +51,7 @@ class downloadrecords extends \core\task\scheduled_task {
 
         $sessionconfig = new sessions();
 
-        $sql = "SELECT hs.id AS hsid, ht.id AS htid, ht.course, ht.config, bbb.meetingid
+        $sql = "SELECT hs.id AS hsid, ht.id AS htid, ht.course, ht.config, hs.name, bbb.meetingid
                   FROM {hybridteaching_session} hs
             INNER JOIN {hybridteachvc_bbb} bbb ON bbb.htsession = hs.id
             INNER JOIN {hybridteaching} ht ON ht.id = hs.hybridteachingid
@@ -65,10 +65,13 @@ class downloadrecords extends \core\task\scheduled_task {
             }
 
             $bbbconfig = $sessionconfig->load_bbb_config($session->config);
+            if ($bbbconfig == false) {
+                continue;
+            }
             $meeting = new meeting($bbbconfig);
             $response = $meeting->get_meeting_recordings($session->meetingid);
 
-            if ($response['returncode'] == 'SUCCESS') {
+            if (isset($response['returncode']) && $response['returncode'] == 'SUCCESS') {
                 if ($response['recordingid'] != '') {
                     $bbb = $DB->get_record('hybridteachvc_bbb', ['meetingid' => $session->meetingid] );
                     $bbb->recordingid = $response['recordingid'];
@@ -78,7 +81,11 @@ class downloadrecords extends \core\task\scheduled_task {
                     $session->processedrecording = 0;
                     $session->storagereference = -1;
                     $DB->update_record('hybridteaching_session', $session);
+                } else {
+                    mtrace(get_string('recordingnotfound','hybridteachvc_bbb', ['course' => $session->course, 'name' => $session->name]));
                 }
+            } else {
+                mtrace(get_string('recordingnotfound','hybridteachvc_bbb', ['course' => $session->course, 'name' => $session->name]));
             }
         }
     }

@@ -134,8 +134,8 @@ class hybridteaching_admin_plugins_configs extends admin_setting {
             $enabled = $config['visible'];
             $configid = $config['id'];
             $configname = $config['configname'];
-            $categoryname = !empty($config['category']) ? $DB->get_field('course_categories',
-                'name', ['id' => $config['category']]) : get_string('all');
+            $categoryname = !empty($config['categories']) ? 
+                get_string('categoryselect', 'hybridteaching') : get_string('all');
             $configcategories = $categoryname;
             $configversion = $config['version'];
             $configtype = $config['type'];

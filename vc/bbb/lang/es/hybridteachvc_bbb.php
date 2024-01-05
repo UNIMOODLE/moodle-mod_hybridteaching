@@ -52,3 +52,5 @@ $string['downloadrecordsbbb'] = 'Descargar grabaciones BigBlueButton';
 $string['bbb:view'] = 'Ver BigBlueButton';
 $string['bbb:use'] = 'Generar videconferencias BigBlueButton';
 $string['bbb:record'] = 'Almacenar grabaciones BigBlueButton';
+
+$string['recordingnotfound'] = 'No se encontró la grabación en el curso {$a->course}: \'{$a->name}\'';

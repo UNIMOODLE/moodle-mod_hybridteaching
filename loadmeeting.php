@@ -126,9 +126,10 @@ if (!empty($sid)) {
             $url = new moodle_url('/mod/hybridteaching/view.php', ['id' => $id]);
             $url = base64_encode($url);
 
+            list($course, $cm) = get_course_and_cm_from_instance($hybridteaching->id, 'hybridteaching');
             $event = \mod_hybridteaching\event\session_finished::create([
                 'objectid' => $hybridteaching->id,
-                'context' => \context_course::instance($hybridteaching->course),
+                'context' => \context_module::instance($cm->id),
                 'other' => [
                     'sessid' => $activesession->id,
                 ],
@@ -140,7 +141,7 @@ if (!empty($sid)) {
         }
     }
 } else {
-    if ($hybridteaching->undatedsession) {
+    if (!$hybridteaching->sessionscheduling) {
         $sessioncontroller = new sessions_controller($hybridteaching);
         $session = new stdClass();
         $session->name = get_string('recurringses', 'hybridteaching') . ' ' . $hybridteaching->name;
@@ -198,6 +199,13 @@ if (!empty($sid)) {
 }
 
 $nexturl = base64_decode($url);
+
+$event = \mod_hybridteaching\event\session_joined::create([
+    'objectid' => $hybridteaching->id,
+    'context' => $modulecontext,
+]);
+
+$event->trigger();
 
 require_login($course->id, true);
 if (!$finishsession && !has_capability('mod/hybridteaching:sessionsfulltable', $PAGE->context)) {

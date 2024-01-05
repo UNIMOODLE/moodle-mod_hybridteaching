@@ -46,6 +46,8 @@ Feature: A teacher consult the attendance in a hybridteaching sessions
     And I click on "hybridteaching example" "link" in the "hybridteaching example" activity
     When I click on "Attendance" "link"
     And I click on "Students attendance" "button"
-    Then I should see "One / Student"
+    Then I should see "Total attendance registered"
     And I click on "Information" "link"
-    And I should see "Attendance resumee"
+    And I should see "Attendance resume"
+    And I should see "Attended sessions: 1/1"
+    And I should see "Valid attendances: 1/1"

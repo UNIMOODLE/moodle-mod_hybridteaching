@@ -67,6 +67,9 @@ class downloadrecords extends \core\task\scheduled_task {
             }
 
             $meetconfig = $sessionconfig->load_meet_config($session->config);
+            if ($meetconfig == false) {
+                continue;
+            }
             $meethandler = new meet_handler($meetconfig);
 
             $searchrecordings = $meethandler->search_recordings(basename($session->joinurl));

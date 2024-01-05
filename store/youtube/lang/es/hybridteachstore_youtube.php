@@ -45,3 +45,4 @@ $string['errorwebservice'] = 'Error de webservice de Youtube: {$a}.';
 $string['err_no_access_token'] = 'No access token returned';
 $string['licenses'] = 'Licencias';
 $string['updatestores'] = 'Subir vídeos YouTube';
+$string['notuploading'] = 'No se pudo subir la grabación en el cursoid';

@@ -42,12 +42,11 @@ Feature: A student download a file from a hybridteaching session
     Then I click on "Add" "button" in the "[data-fieldtype='submit']" "css_element"
     And I log out
 
-  Scenario: Student join a videoconference
+  Scenario: Student download a file
     Given I log in as "student1"
     And I am on "testhybridteaching" course homepage
     And I click on "hybridteaching example" "link" in the "hybridteaching example" activity
-    When I click on "More" "link" in the ".secondary-navigation .moremenu .more-nav .dropdownmoremenu" "css_element"
-    And I click on "Sessions" "link"
+    When I click on "More" if it exists otherwise "Sessions"
     And I should see "logo_isyc.png" in the "hybridteachingsessions" "table"
     Then I click on "logo_isyc.png" "link"
     And I wait "2" seconds

@@ -35,7 +35,7 @@ class session_record_downloaded extends \core\event\base {
      */
     public function get_description() {
         return 'User with id ' . $this->userid . ' has downloaded the session with id ' .
-            $this->objectid;
+            $this->other['sessid'] . ' for hybridteaching instance with id ' . $this->objectid;
     }
 
     /**

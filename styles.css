@@ -37,3 +37,69 @@ table.sessionstable .icon.fa-film.fa-film-slash:after{
 #zoneaccess #showqr label{
     display: block;
 }
+
+#categoriesmodal .modal-dialog{
+    max-width: 800px;
+}
+
+#categoriesmodal .header-listing{
+    border: 1px solid #CED4DA;
+    border-radius: 8px 8px 0 0;
+    background-color: #F3F3F3;
+    color: #92989D;
+    font-weight: 700;
+}
+
+#categoriesmodal .header-listing > div{
+    padding: 0.75rem 1.25rem;
+    border: 1px solid transparent;
+}
+
+#categoriesmodal .category-listing{
+    overflow-y: auto;
+    max-height: 50vh;
+}
+
+#categoriesmodal .list-group-item{
+    padding: 0;
+}
+
+#categoriesmodal .list-group-item > div{
+    padding: 0.75rem 1.25rem;
+}
+
+#categoriesmodal .listitem-category.collapsed{
+    background-color: #ffffff;
+}
+
+#categoriesmodal .listitem-category.collapsed:hover{
+    background-color: #f8f9fa;
+}
+
+#categoriesmodal .listitem-category{
+    background-color: #F3F3F3;
+}
+
+#categoriesmodal .listitem-category .list-group-item{
+    border-right: 0;
+}
+
+#categoriesmodal .listitem-category .list-group-item:last-child{
+    margin-bottom: 1rem;
+}
+
+#categoriesmodal .custom-checkbox .custom-control-label{
+    cursor: pointer;
+}
+
+#categoriesmodal .custom-checkbox .custom-control-label::before{
+    border-radius: 0.25rem;
+}
+
+#categoriesmodal [data-toggle="collapse"]{
+    cursor: pointer;
+}
+
+#categoriesmodal [data-toggle="collapse"][aria-expanded="true"] i.fa-angle-down:before{
+    content: "\f106";
+}

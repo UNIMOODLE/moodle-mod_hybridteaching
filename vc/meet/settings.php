@@ -31,6 +31,16 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-    $settings->add(new admin_setting_configcheckbox('hybridteachvc_meet/enabled',
-        new lang_string('enabled', 'hybridteaching'),
-        new lang_string('enabled_help', 'hybridteaching'), 1));
+ $item = new admin_setting_configcheckbox('hybridteachvc_meet/enabled',
+    new lang_string('enabled', 'hybridteaching'),
+    new lang_string('enabled_help', 'hybridteaching'), 1);
+
+    $item->set_updatedcallback(function () {
+        global $DB;
+        if (get_config('hybridteachvc_meet', 'enabled') == false) {
+            $sql = "UPDATE {hybridteaching_configs} SET visible=0 WHERE type='meet'";
+            $DB->execute($sql);
+        }
+    });    
+    
+ $settings->add($item);

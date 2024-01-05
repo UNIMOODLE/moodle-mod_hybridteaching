@@ -82,10 +82,10 @@ class hybridteaching_external extends external_api {
             $attendance->timemodified = $timemodified;
             $DB->update_record('hybridteaching_attendance', $attendance);
 
-            $course = $DB->get_field('hybridteaching', 'course', ['id' => $attendance->hybridteachingid]);
+            list($course, $cm) = get_course_and_cm_from_instance($attendance->hybridteachingid, 'hybridteaching');
             $event = \mod_hybridteaching\event\attendance_updated::create([
                 'objectid' => $attendance->hybridteachingid,
-                'context' => \context_course::instance($course),
+                'context' => \context_module::instance($cm->id),
                 'other' => [
                     'sessid' => $attendance->sessionid,
                     'userid' => $attendance->userid,
@@ -141,6 +141,23 @@ class hybridteaching_external extends external_api {
             $session->modifiedby = $USER->id;
             $session->timemodified = $timemodified;
             $DB->update_record('hybridteaching_session', $session);
+
+            list($course, $cm) = get_course_and_cm_from_instance($session->hybridteachingid, 'hybridteaching');
+            $attends = $DB->get_records('hybridteaching_attendance', ['sessionid' => $sessid], '', 'id, userid');
+            foreach ($attends as $att) {
+                $event = \mod_hybridteaching\event\session_updated::create([
+                    'objectid' => $session->hybridteachingid,
+                    'context' => \context_module::instance($cm->id),
+                    'other' => [
+                        'sessid' => $sessid,
+                        'userid' => $att->userid,
+                        'attid' => $att->id,
+                    ],
+                ]);
+    
+                $event->trigger();
+            }
+
         }
         return json_encode($session);
     }
@@ -247,6 +264,18 @@ class hybridteaching_external extends external_api {
             'sesspass' => !empty($sesspass) ? $passstring . $sesspass : $passstring . $unknown,
             'sessurl' => !empty($joinurl) ? $joinurlstring . $joinurl : $joinurlstring . $unknown,
         ];
+
+        list($course, $cm) = get_course_and_cm_from_instance($session->hybridteachingid, 'hybridteaching');
+        $event = \mod_hybridteaching\event\session_info_viewed::create([
+            'objectid' => $session->hybridteachingid,
+            'context' => \context_module::instance($cm->id),
+            'other' => [
+                'sessid' => !empty($session) ? $session->id : null,
+            ],
+        ]);
+
+        $event->trigger();
+
         return json_encode($modalinfo);
     }
 
@@ -284,9 +313,12 @@ class hybridteaching_external extends external_api {
         $params = self::validate_parameters(
             self::get_user_has_recording_capability_parameters(), ["typevc" => $typevc, 'pagecontext' => $pagecontext]
         );
+        if (empty($typevc)) {
+            return json_encode('notypevc');
+        }
         $context = context::instance_by_id($pagecontext, MUST_EXIST);
         $capability = 'hybridteachvc/' . $typevc . ':record';
-        //$context = $DB->get_record('context', ['id' => 2033], '*', IGNORE_MISSING);
+
         return json_encode(has_capability($capability, $context, $USER, true));
     }
 

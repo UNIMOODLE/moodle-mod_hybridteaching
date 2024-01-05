@@ -195,14 +195,6 @@ $capabilities = [
             'student' => CAP_ALLOW,
         ],
     ],
-    'mod/hybridteaching:manage_recordings' => [
-        'captype' => 'read',
-        'contextlevel' => CONTEXT_COURSE,
-        'archetypes' => [
-            'editingteacher' => CAP_ALLOW,
-            'manager' => CAP_ALLOW,
-        ],
-    ],
     'mod/hybridteaching:viewhiddenitems' => [
         'captype' => 'read',
         'contextlevel' => CONTEXT_COURSE,

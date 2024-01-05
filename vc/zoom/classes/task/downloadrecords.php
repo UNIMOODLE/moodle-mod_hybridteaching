@@ -84,6 +84,9 @@ class downloadrecords extends \core\task\scheduled_task {
 
             // Connect to API to download recording.
             $zoomconfig = $sessionconfig->load_zoom_config($session->config);
+            if ($zoomconfig == false) {
+                continue;
+            }
             $service = new webservice($zoomconfig);
             $response = null;
             try {
@@ -92,7 +95,12 @@ class downloadrecords extends \core\task\scheduled_task {
                 $response = false;
             }
 
-            if ($session->downloadattempts > 5) {
+            $maxdownloadattempts = get_config('hybridteaching', 'downloadattempts');
+            if (!is_numeric($maxdownloadattempts) || $maxdownloadattempts <= 0) {
+                $maxdownloadattempts = 5;
+            }
+
+            if ($session->downloadattempts > $maxdownloadattempts) {
                 // Save -2 indicates there are not recording.
                 $sessionupdate = $DB->get_record('hybridteaching_session', ['id' => $session->hsid]);
                 $sessionupdate->processedrecording = -2;
@@ -108,10 +116,13 @@ class downloadrecords extends \core\task\scheduled_task {
                         if ((!file_exists($folderfilerecording)) || (file_exists($folderfilerecording) &&
                             ($file->file_size != $filesize))) {
                                 $responsefile = $service->_make_call_download($file->download_url);
-
-                                $filerecording = fopen($folderfilerecording, "w+");
-                                fputs($filerecording, (string)$responsefile);
-                                fclose($filerecording);
+                                if (!$responsefile) {
+                                    mtrace(get_string('recordingnotdownload', 'hybridteachvc_zoom',['course'=>$session->course, 'name'=>$session->name]));
+                                } else {
+                                    $filerecording = fopen($folderfilerecording, "w+");
+                                    fputs($filerecording, (string)$responsefile);
+                                    fclose($filerecording);
+                                }
 
                                 // Save processedrecording in hybridteaching_session=0: ready to upload to store.
                                 $sessionprocessed = $DB->get_record('hybridteaching_session', ['id' => $session->hsid]);
@@ -136,7 +147,7 @@ class downloadrecords extends \core\task\scheduled_task {
                         $fileinfo = [
                             'contextid' => $context->id,
                             'component' => 'mod_hybridteaching',
-                            'filearea'  => 'session',
+                            'filearea'  => 'chats',
                             'itemid'    => $session->hsid,
                             'filepath'  => '/',
                             'filename'  => $filename.'.txt',
@@ -145,7 +156,7 @@ class downloadrecords extends \core\task\scheduled_task {
                         $fs = get_file_storage();
 
                         // Checking name.
-                        $files = $fs->get_area_files($context->id, 'mod_hybridteaching', 'session', $session->hsid);
+                        $files = $fs->get_area_files($context->id, 'mod_hybridteaching', 'chats', $session->hsid);
                         foreach ($files as $file) {
                             if ($file->get_filename() == $fileinfo['filename']) {
                                 // Change name chat.

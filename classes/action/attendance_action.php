@@ -246,6 +246,25 @@ switch ($action) {
         break;
 }
 
+if ($action == 'disable' || $action == 'enable') {
+    $users = $DB->get_records('hybridteaching_attendance', ['id' => $attid], '', 'DISTINCT userid');
+    list($course, $cm) = get_course_and_cm_from_instance($hybridteachingid, 'hybridteaching');
+    foreach($users as $user) {
+        $event = \mod_hybridteaching\event\attendance_updated::create([
+            'objectid' => $hybridteachingid,
+            'context' => \context_module::instance($cm->id),
+            'other' => [
+                'sessid' => $sessionid,
+                'userid' => $user->userid,
+                'attid' => $attid,
+            ],
+        ]);
+
+        $event->trigger();
+    }
+
+}
+
 if (empty($mform)) {
     redirect($return);
 }

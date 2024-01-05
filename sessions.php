@@ -62,6 +62,13 @@ $PAGE->set_heading(format_string($course->fullname));
 $PAGE->set_context($context);
 $PAGE->activityheader->disable();
 
+$event = \mod_hybridteaching\event\session_viewed::create([
+    'objectid' => $hybridteaching->id,
+    'context' => $context,
+]);
+
+$event->trigger();
+
 echo $OUTPUT->header();
 if ($slist == SESSION_LIST) {
     echo $OUTPUT->heading(get_string('sessions', 'hybridteaching'));

@@ -35,7 +35,7 @@ class session_manage_viewed extends \core\event\base {
      */
     public function get_description() {
         return 'User with id ' . $this->userid . ' has seen manage view from session with id ' .
-            $this->objectid;
+            $this->other['sessid'];
     }
 
     /**

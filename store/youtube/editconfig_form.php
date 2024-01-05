@@ -52,20 +52,17 @@ class htyoutube_config_edit_form extends moodleform {
         $mform->addElement('hidden', 'id');
         $mform->addElement('hidden', 'type');
         $mform->addElement('hidden', 'subpluginconfigid');
+        $mform->addElement('hidden', 'categories', '', "id='categories'");
         $mform->addElement('text', 'configname', get_string('configname', 'hybridteaching'));
-        $categories = core_course_category::get_all();
-        $options[0] = get_string('all');
-        foreach ($categories as $category) {
-            $options[$category->id] = $category->name;
-        }
 
-        $mform->addElement('select', 'category', get_string('categories'), $options);
+        $mform->addElement('html', '<button type="button" class="btn btn-outline-primary ml-3" data-toggle="modal" 
+            data-target="#categoriesmodal">'.get_string('categories').'</button>');
 
         $mform->setType('id', PARAM_INT);
         $mform->setType('type', PARAM_COMPONENT);
         $mform->setType('subpluginconfigid', PARAM_INT);
         $mform->setType('configname', PARAM_TEXT);
-        $mform->setType('category', PARAM_INT);
+        $mform->setType('categories', PARAM_TEXT);
 
         $mform->setDefault('type', get_string($type, 'hybridteachstore_'.$type));
 

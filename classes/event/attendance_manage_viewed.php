@@ -34,8 +34,8 @@ class attendance_manage_viewed extends \core\event\base {
      *
      */
     public function get_description() {
-        return 'User with id ' . $this->userid . ' has seen the manage attendance view with id ' .
-            $this->objectid;
+        return 'User with id ' . $this->userid . ' has seen the manage attendance view for session with id ' .
+            $this->other['sessid'];
     }
 
     /**

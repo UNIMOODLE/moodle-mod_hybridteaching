@@ -98,7 +98,6 @@ function hybridteaching_add_instance($moduleinstance, $mform = null) {
     }
 
     if (empty($moduleinstance->duration) && !$moduleinstance->sessionscheduling) {
-        $moduleinstance->undatedsession = 1;
         $moduleinstance->starttime = time();
     }
 
@@ -144,12 +143,6 @@ function hybridteaching_update_instance($moduleinstance, $mform = null) {
     } else {
         $moduleinstance->config = 0;
         $moduleinstance->typevc = '';
-    }
-
-    if (empty($moduleinstance->duration) && !$moduleinstance->sessionscheduling) {
-        $moduleinstance->undatedsession = 1;
-    } else {
-        $moduleinstance->undatedsession = 0;
     }
 
     // If there is not sessionscheduling, change time in the unique session.
@@ -468,4 +461,108 @@ function hybridteaching_extend_settings_navigation(settings_navigation $settings
             $hybridteachingnode->add_node($settingsnode);
         }
     }
+}
+
+function hybrid_build_category_array($category) {
+    $categoryarray = [
+        'id' => $category->id,
+        'name' => format_text($category->name),
+        'categories' => [],
+    ];
+
+    $subcategories = $category->get_children();
+    foreach ($subcategories as $subcategory) {
+        $subcategoryarray = hybrid_build_category_array($subcategory);
+        if (!empty($subcategoryarray)) {
+            $categoryarray['categories'][] = $subcategoryarray;
+        }
+    }
+
+    $categoryarray = array_filter($categoryarray, function($array) {
+        return !empty($array);
+    });
+
+    return $categoryarray;
+}
+
+function hybrid_build_output_categories($arraycategories, $categoryid = 0) {
+    $output = "";
+    foreach ($arraycategories as $key => $category) {
+        $output .= html_writer::start_tag("li", [
+            "id" => "listitem-category-" . $category["id"],
+            "class" => "listitem listitem-category list-group-item list-group-item-action collapsed",
+        ]);
+        $output .= html_writer::start_div("", ["class" => "category-listing-header d-flex"]);
+        $output .= html_writer::start_div("", ["class" => "custom-control custom-checkbox mr-1"]);
+        $output .= html_writer::tag("input", "", [
+            "id" => "checkboxcategory-" . $category["id"],
+            "type" => "checkbox", "class" => "custom-control-input",
+            "data-parent" => "#category-listing-content-" . $categoryid,
+        ]);
+        $output .= html_writer::tag(
+            "label", "",
+            ["class" => "custom-control-label", "for" => "checkboxcategory-" . $category["id"]]
+        );
+        $output .= html_writer::end_div();// ... .custom-checkbox
+        $output .= html_writer::start_div("", [
+            "class" => "d-flex px-0", "data-toggle" => "collapse",
+            "data-target" => "#category-listing-content-" . $category["id"],
+            "aria-controls" => "category-listing-content-" . $category["id"],
+        ]);
+        $output .= html_writer::start_div("", ["class" => "categoryname d-flex align-items-center"]);
+        $output .= $category["name"];
+        if (!empty($category["categories"])) {
+            $output .= html_writer::tag("i", "", ["class" => "fa fa-angle-down ml-2"]);
+        }
+        $output .= html_writer::end_div();// ....categoryname
+        $output .= html_writer::end_div();// ... .data-toggle
+        $output .= html_writer::end_div();// ... .d-flex
+        $output .= html_writer::start_tag("ul", [
+            "id" => "category-listing-content-" . $category["id"],
+            "class" => "collapse", "data-parent" => "#category-listing-content-" . $categoryid,
+        ]);
+        if (!empty($category["categories"])) {
+            $output .= hybrid_build_output_categories($category["categories"], $category["id"]);
+        }
+        $output .= html_writer::end_tag("ul");// ... #category-listing-content-x
+        $output .= html_writer::end_tag("li");// ... .listitem.listitem-category.list-group-item
+    }
+    return $output;
+}
+
+function hybrid_get_categories_for_modal() {
+    $categoriesall = core_course_category::top()->get_children();
+    $categoryarray = [];
+    foreach ($categoriesall as $cat) {
+        $categoryarray[] = hybrid_build_category_array($cat);
+    }
+
+    if (!empty($categoryarray)) {
+        $outputcategories = html_writer::start_div("", ["class" => "course-category-listing"]);
+        $outputcategories .= html_writer::start_div("", ["class" => "header-listing"]);
+        $outputcategories .= html_writer::start_div("", ["class" => "d-flex"]);
+        $outputcategories .= html_writer::start_div("", ["class" => "custom-control custom-checkbox mr-1"]);
+        $outputcategories .= html_writer::tag(
+            "input", "", ["id" => "course-category-select-all", "type" => "checkbox", "class" => "custom-control-input"]
+        );
+        $outputcategories .= html_writer::tag("label", "", ["class" => "custom-control-label", "for" => "course-category-select-all"]);
+        $outputcategories .= html_writer::end_div(); // ... .custom-checkbox
+        $outputcategories .= html_writer::start_div("", ["class" => "col px-0 d-flex"]);
+        $outputcategories .= html_writer::start_div("", ["class" => "header-categoryname"]);
+        $outputcategories .= get_string('name', 'core');
+        $outputcategories .= html_writer::end_div(); // ...... .header-categoryname
+        $outputcategories .= html_writer::end_div(); // ... .col
+        $outputcategories .= html_writer::end_div(); // ... .d-flex
+        $outputcategories .= html_writer::end_div(); // ... .header-listing
+        $outputcategories .= html_writer::start_div("", ["class" => "category-listing"]);
+        $outputcategories .= html_writer::start_tag("ul", ["id" => "category-listing-content-0", "class" => "m-0 pl-0"]);
+        $outputcategories .= hybrid_build_output_categories($categoryarray);
+        $outputcategories .= html_writer::end_tag("ul"); // ... #category-listing-content-0
+        $outputcategories .= html_writer::end_div(); // ... .category-listing
+        $outputcategories .= html_writer::end_div(); // ... .course-category-listing
+
+        $templatecontext['output_categoriescourses'] = $outputcategories;
+    }
+
+    return $templatecontext;
 }

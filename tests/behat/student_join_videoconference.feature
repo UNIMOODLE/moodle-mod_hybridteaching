@@ -25,7 +25,9 @@ Feature: A student join a videoconference in a hybridteaching activity
       | Zoom client ID | *YOUR_ZOOM_CLIENT_ID* |
       | Zoom client secret | *YOUR_ZOOM_CLIENT_SECRET* |
       | Zoom license email | *YOUR_ZOOM_LICENSE_EMAIL* |
-    And I select "Category 1" from the "id_category" singleselect
+    And I click on "Course categories" "button"
+    And I click on "checkboxcategory-1" "checkbox"
+    And I click on "Save changes" "button"
     And I click on "Add setting" "button"
     And I should see "config created successfully"
     And I should see "Videoconference subplugin test" in the "hybridteachingpluginsconfigs" "table"
@@ -37,7 +39,6 @@ Feature: A student join a videoconference in a hybridteaching activity
     And I should see "Adding a new Hybrid teaching"
     And I set the following fields to these values:
       | Name | hybridteaching example |
-    And I click on "Use videoconferencing access" "checkbox"
     And I select "Videoconference subplugin test (zoom)" from the "typevc" singleselect
     And I press "Save and display"
     And I click on "Join videoconference" "button"
@@ -59,4 +60,4 @@ Feature: A student join a videoconference in a hybridteaching activity
     And I am on "testhybridteaching" course homepage
     When I click on "hybridteaching example" "link" in the "hybridteaching example" activity
     Then I press "Join videoconference"
-    And I wait "3" seconds
+    And I wait "5" seconds

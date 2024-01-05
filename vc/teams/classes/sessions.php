@@ -176,8 +176,35 @@ class sessions {
         return $config;
     }
 
+    /**
+     * Loads the teams configuration from the session.
+     *
+     * @return mixed The loaded Teams configuration.
+     */
+    public function load_teams_config_from_session() {
+        global $DB;
+        $sql = "SELECT h.config
+                FROM {hybridteaching} h
+                JOIN {hybridteaching_session} hs ON hs.hybridteachingid = h.id
+                WHERE hs.id = :htsession";
+
+        $configpartial = $DB->get_record_sql($sql, ['htsession' => $this->teamssession->htsession]);
+        $config = $this->load_teams_config($configpartial->config);
+        return $config;
+    }
+
     public function get_zone_access() {
         if ($this->teamssession) {
+            $teamsconfig = $this->load_teams_config_from_session();
+            if (!$teamsconfig) {
+                // No exists config teams or its hidden.
+                return [
+                    'returncode' => 'FAILED',
+                ];
+            }
+
+            // Not check if a meeting teams exists, in Teams if you cancel it from calendar
+            // the meeting still exists and is not deleted.
             $array = [
                 'id' => $this->teamssession->id,
                 'ishost' => true,
@@ -211,6 +238,9 @@ class sessions {
         if (!has_capability('hybridteachvc/teams:view', $context)) {
             return '';
         }
-        return $this->teamssession->chaturl;
+        if (isset($this->teamssession->chaturl)) {
+            return $this->teamssession->chaturl;
+        }
+        return '';
     }
 }

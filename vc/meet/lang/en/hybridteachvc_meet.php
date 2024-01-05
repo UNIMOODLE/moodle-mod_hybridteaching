@@ -48,3 +48,7 @@ $string['alreadyloggedmeet'] = 'You are already logged for this meet config';
 $string['loggingerrormeet'] = 'Error logging into your google account';
 $string['downloadrecordsmeet'] = 'Download Meet recordings';
 $string['chatnamefile'] = 'Chat meeting';
+
+$string['meet:view'] = 'Access Meet';
+$string['meet:use'] = 'Generate Meet meetings';
+$string['meet:record'] = 'Store Meet recordings';

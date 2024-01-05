@@ -37,6 +37,9 @@ https://DOMINIO-MOODLE/mod/hybridteaching/store/youtube/classes/youtubeaccess.ph
 
 
 
-TEMPORALMENTE:
-Las páginas test_youtube3.php y test_youtube4.php se deben eliminar.
+** INFO ABOUT DOWNLOAD RECORDINGS:
+No hay opciones en la API para poder descargar vídeos, hay opciones para visualizarlos pero la API no tiene métodos para descargarlos.
+API: https://developers.google.com/youtube/v3
+API DOC: https://developers.google.com/youtube/v3/docs/videos
+https://developers.google.com/youtube/terms/api-services-terms-of-service
 

@@ -75,6 +75,9 @@ class sessions {
         }
 
         $zoomconfig = $this->load_zoom_config($ht->config);
+        if (!$zoomconfig) {
+            return false;
+        }
 
         $service = new \hybridteachvc_zoom\webservice($zoomconfig);
         if (!get_config('hybridteaching', 'reusesession')) {
@@ -198,17 +201,54 @@ class sessions {
         return $zoomconfig;
     }
 
+    /**
+     * Loads the zoom configuration from the session.
+     *
+     * @return mixed The loaded zoom configuration.
+     */
+    public function load_zoom_config_from_session() {
+        global $DB;
+        $sql = "SELECT h.config
+                FROM {hybridteaching} h
+                JOIN {hybridteaching_session} hs ON hs.hybridteachingid = h.id
+                WHERE hs.id = :htsession";
+
+        $configpartial = $DB->get_record_sql($sql, ['htsession' => $this->zoomsession->htsession]);
+        $config = $this->load_zoom_config($configpartial->config);
+        return $config;
+    }
+
     public function get_zone_access() {
         if ($this->zoomsession) {
-            $array = [
-                'id' => $this->zoomsession->id,
-                'ishost' => true,
-                'isaccess' => true,
-                'url' => base64_encode($this->zoomsession->starturl),
-            ];
-            return $array;
-        } else {
-            return null;
+            $zoomconfig = $this->load_zoom_config_from_session();
+            if (!$zoomconfig) {
+                // No exists config zoom or its hidden.
+                return [
+                    'returncode' => 'FAILED',
+                ];
+            }
+            try {
+                $service = new \hybridteachvc_zoom\webservice($zoomconfig);
+                $meeting = $service->get_meeting_webinar_info($this->zoomsession->meetingid, 0);
+                if (isset($meeting->start_url)) {
+                    $array = [
+                        'id' => $this->zoomsession->id,
+                        'ishost' => true,
+                        'isaccess' => true,
+                        'url' => base64_encode($meeting->start_url),
+                    ];
+                    return $array;
+                } else {
+                    return [
+                        'returncode' => 'FAILED',
+                    ];
+                }
+            } catch (\Exception $e) {
+                // No exists zoom meeting.
+                return [
+                    'returncode' => 'FAILED',
+                ];
+            }
         }
     }
 

@@ -146,13 +146,17 @@ class youtube_handler {
                 return null;   // Incorrect upload? Check posible valor at uploadStatus.
             }
         } catch (\Google_Service_Exception $e) {
-            print "Caught Google service Exception ".$e->getCode(). " message is ".$e->getMessage();
-            print "Stack trace is ".$e->getTraceAsString();
+            $message = json_decode($e->getMessage());
+            mtrace(get_string('notuploading','hybridteachstore_youtube').' '.$store->course.": '".$store->name."': ");
+            if (isset($message->error->message)) {
+                mtrace($message->error->message);
+            } else {
+                mtrace($e->getMessage());
+            }
         } catch (\Exception $e) {
-            print "Caught Google service Exception ".$e->getCode(). " message is ".$e->getMessage();
-            print "Stack trace is ".$e->getTraceAsString();
+            mtrace("Caught Google service Exception ".$e->getCode(). " message is ".$e->getMessage());
+            mtrace("Stack trace is ".$e->getTraceAsString());
         }
-
     }
 
     public function savetoken ($configyt) {

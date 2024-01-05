@@ -53,3 +53,5 @@ $string['downloadrecordsbbb'] = 'Download BigBlueButton records';
 $string['bbb:view'] = 'Access BigBlueButton';
 $string['bbb:use'] = 'Generate BigBlueButton meetings';
 $string['bbb:record'] = 'Store BigBlueButton recordings';
+
+$string['recordingnotfound'] = 'Recording not found in courseid {$a->course}: \'{$a->name}\'';

@@ -46,7 +46,7 @@ class sessions {
         $sql = "SELECT *
         FROM {hybridteachstore_onedrive_co} od
         INNER JOIN {hybridteaching_configs} htc ON htc.subpluginconfigid=od.id
-            WHERE htc.id=:storagereference";
+            WHERE htc.id=:storagereference AND htc.visible=1";
 
         $config = $DB->get_record_sql ($sql, ['storagereference' => $storagereference]);
         return $config;
@@ -54,9 +54,23 @@ class sessions {
 
     public function get_recording($processedrecording, $storagereference,  $htid, $sid) {
         $config = $this->load_config($storagereference);
-
+        if (!$config) {
+            return '';
+        }
         $recording = new \hybridteachstore_onedrive\onedrive_handler($config);
         $url = $recording->get_urlrecording ($processedrecording);
+        return $url;
+    }
+
+    public function download_recording($processedrecording, $storagereference, $htid, $sid) {
+        global $DB;
+        $config = $this->load_config($storagereference);
+        if (!$config) {
+            return '';
+        }
+
+        $recording = new \hybridteachstore_onedrive\onedrive_handler($config);
+        $url = $recording->downloadrecording ($processedrecording);
         return $url;
     }
 

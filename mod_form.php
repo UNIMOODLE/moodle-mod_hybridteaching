@@ -108,8 +108,9 @@ class mod_hybridteaching_mod_form extends moodleform_mod {
             $mform->setType('cmgroupmode', PARAM_INT);
         }
 
-        $mform->addElement('advcheckbox', 'undatedsession', '', get_string('undatedsession', 'hybridteaching'), null, [0, 1]);
-        $mform->setDefault('undatedsession', 0);
+        $mform->addElement('advcheckbox', 'reusesession', '', get_string('undatedsession', 'hybridteaching'), null, [0, 1]);
+        $mform->setDefault('reusesession', 0);
+        $mform->disabledIf('reusesession', 'usevideoconference', 'notchecked');
 
         $mform->addElement('date_time_selector', 'starttime', get_string('starttime', 'hybridteaching'), ['optional' => true]);
 
@@ -272,6 +273,9 @@ class mod_hybridteaching_mod_form extends moodleform_mod {
 
         // Add standard buttons.
         $this->add_action_buttons();
+
+        // Load default adminsettings.
+        $this->apply_admin_defaults();
     }
 
 

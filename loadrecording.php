@@ -37,44 +37,96 @@ require_once(__DIR__.'/classes/controller/sessions_controller.php');
 $cid = required_param('cid', PARAM_INT);
 $sid = required_param('sid', PARAM_INT);
 $id = required_param('id', PARAM_INT);
+$download = optional_param('download', 0, PARAM_BOOL);
 require_login($cid);
 
 $session = $DB->get_record('hybridteaching_session', ['id' => $sid], '*', MUST_EXIST );
 
 $cm = get_coursemodule_from_instance ('hybridteaching', $session->hybridteachingid);
 $context = context_module::instance($cm->id);
+
 $urlrecording = '';
-if (has_capability('mod/hybridteaching:viewrecordings', $context)) {
-    if ($session->userecordvc == 1 && $session->processedrecording >= 0) {
-        if ($session->storagereference > 0) {
-            $classstorage = sessions_controller::get_subpluginstorage_class($session->storagereference);
-            $config = helper::subplugin_config_exists($session->storagereference, 'store');
-            if ($config && $classstorage) {
-                sessions_controller::require_subplugin_store($classstorage['type']);
-                $classname = $classstorage['classname'];
-                $sessionrecording = new $classname();
-                $urlrecording = $sessionrecording->get_recording ($session->processedrecording,
-                    $session->storagereference, $session->hybridteachingid, $sid);
-            }
-        } else if ($session['storagereference'] == -1) {
-            // For use case to BBB or a videconference type storage.
-            $config = helper::subplugin_config_exists($session['vcreference'], 'vc');
-            if ($config) {
-                sessions_controller::require_subplugin_session($session['typevc']);
-                $classname = sessions_controller::get_subpluginvc_class($session['typevc']);
-                $sessionrecording = new $classname($session['id']);
-                $urlrecording = $sessionrecording->get_recording($session['id']);
+
+// Get url recording if download is false.
+if ($download == false) {
+    if (has_capability('mod/hybridteaching:viewrecordings', $context)) {
+        if ($session->userecordvc == 1 && $session->processedrecording >= 0) {
+            if ($session->storagereference > 0) {
+                $classstorage = sessions_controller::get_subpluginstorage_class($session->storagereference);
+                $config = helper::subplugin_config_exists($session->storagereference, 'store');
+                if ($config && $classstorage) {
+                    sessions_controller::require_subplugin_store($classstorage['type']);
+                    $classname = $classstorage['classname'];
+                    $sessionrecording = new $classname();
+                    $urlrecording = $sessionrecording->get_recording($session->processedrecording,
+                        $session->storagereference, $session->hybridteachingid, $sid);
+
+                    list($course, $cm) = get_course_and_cm_from_instance($session->hybridteachingid, 'hybridteaching');
+                    $event = \mod_hybridteaching\event\session_record_viewed::create([
+                        'objectid' => $session->hybridteachingid,
+                        'context' => \context_module::instance($cm->id),
+                        'other' => [
+                            'sessid' => $sid,
+                        ],
+                    ]);
+            
+                    $event->trigger();
+                }
+            } else if ($session['storagereference'] == -1) {
+                // For use case to BBB or a videconference type storage.
+                $config = helper::subplugin_config_exists($session['vcreference'], 'vc');
+                if ($config) {
+                    sessions_controller::require_subplugin_session($session['typevc']);
+                    $classname = sessions_controller::get_subpluginvc_class($session['typevc']);
+                    $sessionrecording = new $classname($session['id']);
+                    $urlrecording = $sessionrecording->get_recording($session['id']);
+                }
             }
         }
+    }
+} else {
+    // Download recording if download is true.
+    if (has_capability('mod/hybridteaching:downloadrecordings', $context)) {
+        if ($session->userecordvc == 1 && $session->processedrecording >= 0) {
+            if ($session->storagereference > 0) {
+                $ht = $DB->get_record('hybridteaching', ['id' => $session->hybridteachingid], '*', MUST_EXIST );
 
-        if ($urlrecording != '') {
-            redirect($urlrecording);
-        } else {
-            redirect (new moodle_url('/mod/hybridteaching/sessions.php', ['id' => $id, 'l' => 1]));
+                // You can download if can manage sessionsfulltable (supposed teacher)
+                // or view and downloadrecords in ht (supposed student).
+                if ($ht->downloadrecords && has_capability('mod/hybridteaching:view', $context)
+                    || has_capability('mod/hybridteaching:sessionsfulltable', $context)) {
+                        $classstorage = sessions_controller::get_subpluginstorage_class($session->storagereference);
+                        $config = helper::subplugin_config_exists($session->storagereference, 'store');
+                    if ($config && $classstorage) {
+                        sessions_controller::require_subplugin_store($classstorage['type']);
+                        $classname = $classstorage['classname'];
+                        $sessionrecording = new $classname();
+                        $urlrecording = $sessionrecording->download_recording($session->processedrecording,
+                            $session->storagereference, $session->hybridteachingid, $sid);
+
+                        list($course, $cm) = get_course_and_cm_from_instance($session->hybridteachingid, 'hybridteaching');
+                        $event = \mod_hybridteaching\event\session_record_downloaded::create([
+                            'objectid' => $session->hybridteachingid,
+                            'context' => \context_module::instance($cm->id),
+                            'other' => [
+                                'sessid' => $sid,
+                            ],
+                        ]);
+                
+                        $event->trigger();
+                    }
+                }
+            }
         }
-
     }
 }
+if ($urlrecording != '') {
+    redirect($urlrecording);
+} else {
+    redirect (new moodle_url('/mod/hybridteaching/sessions.php', ['id' => $id, 'l' => 1]));
+}
+
+
 
 
 

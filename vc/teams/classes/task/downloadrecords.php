@@ -53,7 +53,7 @@ class downloadrecords extends \core\task\scheduled_task {
 
         $sessionconfig = new sessions();
 
-        $sql = "SELECT hs.id AS hsid, ht.id AS htid, ht.course, ht.config, teams.meetingid, teams.organizer
+        $sql = "SELECT hs.id AS hsid, ht.id AS htid, ht.course, ht.config, hs.name, teams.meetingid, teams.organizer
                   FROM {hybridteaching_session} hs
             INNER JOIN {hybridteachvc_teams} teams ON teams.htsession = hs.id
             INNER JOIN {hybridteaching} ht ON ht.id = hs.hybridteachingid
@@ -69,10 +69,14 @@ class downloadrecords extends \core\task\scheduled_task {
             $folderfile = $folder."/".$session->htid."-".$session->hsid;
 
             $teamsconfig = $sessionconfig->load_teams_config($session->config);
+            if ($teamsconfig == false){
+                continue;
+            }
+
             $teamshandler = new teams_handler($teamsconfig);
 
             // Call to download recordings.
-            $responserecording = $teamshandler->get_meeting_recordings($folderfile, $session->meetingid, $session->organizer);
+            $responserecording = $teamshandler->get_meeting_recordings($folderfile, $session->meetingid, $session->organizer, $session->course, $session->name);
             // Call to get meeting chatinfo urls.
             $responsechat = $teamshandler->getchatmeetingurl($session->meetingid, $session->organizer);
 
@@ -96,20 +100,6 @@ class downloadrecords extends \core\task\scheduled_task {
             if ($responserecording != false || $responsechat != false) {
                 $DB->update_record('hybridteachvc_teams', $teams);
             }
-
-            /*
-            // Old code.
-            if ($responserecording != false) {
-                $teams = $DB->get_record('hybridteachvc_teams', ['meetingid' => $session->meetingid] );
-                $teams->recordingid = $responserecording;
-                $DB->update_record('hybridteachvc_teams', $teams);
-                $sess->processedrecording = 0;
-            } else {
-                // Save -2 indicates there are not recording.
-                $sess->processedrecording = -2;
-            }
-            $DB->update_record('hybridteaching_session', $sess);
-            */
         }
     }
 }

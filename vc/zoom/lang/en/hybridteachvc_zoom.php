@@ -51,3 +51,6 @@ $string['downloadrecordszoom'] = 'Download Zoom records';
 $string['maxdownloadattempts'] = 'Max download attempts for recordings';
 $string['maxdownloadattempts_help'] = 'When downloading has been attempted this maximum number of times, attempts to download the recording will stop.';
 $string['chatnamefile'] = 'Chat meeting';
+$string['zoom:view'] = 'Access Zoom';
+$string['zoom:use'] = 'Generate Zoom meetings';
+$string['zoom:record'] = 'Store Zoom recordings';

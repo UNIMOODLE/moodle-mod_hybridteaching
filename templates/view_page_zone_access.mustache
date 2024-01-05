@@ -132,54 +132,60 @@
 				{{/hascreatecapability}}
 				{{^hascreatecapability}}
 					{{^isfinished}}
-						{{#hasvc}}
-							{{#hasjoinurlcapability}}
-									<form action="./loadmeeting.php" target="{{target}}" onsubmit="{{onsubmit}}" id="joinvc">
-										<input type="hidden" name="id" value="{{id}}">
-										<input type="hidden" name="s" value="{{s}}">
-										<input type="hidden" name="url" value="{{url}}">
-										<label>{{#str}} labeljoinvc, mod_hybridteaching {{/str}}:</label>
-										<button type="submit" class="btn btn-success">{{#str}} joinvc, mod_hybridteaching {{/str}}</button>
-									</form>
-							{{/hasjoinurlcapability}}
-						{{/hasvc}}
+						{{#canentry}}
+							{{#hasvc}}
+								{{#hasjoinurlcapability}}
+										<form action="./loadmeeting.php" target="{{target}}" onsubmit="{{onsubmit}}" id="joinvc">
+											<input type="hidden" name="id" value="{{id}}">
+											<input type="hidden" name="s" value="{{s}}">
+											<input type="hidden" name="url" value="{{url}}">
+											<label>{{#str}} labeljoinvc, mod_hybridteaching {{/str}}:</label>
+											<button type="submit" class="btn btn-success">{{#str}} joinvc, mod_hybridteaching {{/str}}</button>
+										</form>
+								{{/hasjoinurlcapability}}
+							{{/hasvc}}
+						{{/canentry}}
 					{{/isfinished}}
 					{{^isfinished}}
-						{{# useattendance}}
-							{{^ rotateqr}}
-								{{# usepassword}}
-									<form action="./passwordaccess.php" target="_self" method="post" id="registeratt">
-										<input type="hidden" name="id" value="{{instance}}">
-										<input type="hidden" name="attaction" value="1">
-										<label>{{# str}} labelattendwithpassword, mod_hybridteaching {{/ str}}:</label><br>
-										<div class="d-flex align-items-center">
-											<br><label for="qrpass" class="mb-0 mr-2">{{# str}} attendwithpassword, mod_hybridteaching {{/ str}}</label>
-											<input type="password" name="qrpass" value=""><br>
-										</div>
-										<br><button type="submit" class="btn btn-dark d-block ml-auto">{{# str}} markattendance, mod_hybridteaching {{/ str}}</button>
-									</form><br>
-								{{/ usepassword}}
-							{{/ rotateqr}}
-						{{/ useattendance}}
+						{{#canentry}}
+							{{# useattendance}}
+								{{^ rotateqr}}
+									{{# usepassword}}
+										<form action="./passwordaccess.php" target="_self" method="post" id="registeratt">
+											<input type="hidden" name="id" value="{{instance}}">
+											<input type="hidden" name="attaction" value="1">
+											<label>{{# str}} labelattendwithpassword, mod_hybridteaching {{/ str}}:</label><br>
+											<div class="d-flex align-items-center">
+												<br><label for="qrpass" class="mb-0 mr-2">{{# str}} attendwithpassword, mod_hybridteaching {{/ str}}</label>
+												<input type="password" name="qrpass" value=""><br>
+											</div>
+											<br><button type="submit" class="btn btn-dark d-block ml-auto">{{# str}} markattendance, mod_hybridteaching {{/ str}}</button>
+										</form><br>
+									{{/ usepassword}}
+								{{/ rotateqr}}
+							{{/ useattendance}}
+						{{/canentry}}
 					{{/isfinished}}
 				{{/hascreatecapability}}
 			</div>
 			{{^hascreatecapability}}
 				{{^isfinished}}
 					{{# useattendance}}
-						<form action="./passwordaccess.php" target="_self" method="post" id="finishatt">
-							<input type="hidden" name="id" value="{{instance}}">
-							<input type="hidden" name="attaction" value="0">
-							<br>
-							<button type="submit" class="btn btn-danger">{{# str}} finishattend, mod_hybridteaching {{/ str}}</button>
-						</form>
+						{{#canentry}}
+							<form action="./passwordaccess.php" target="_self" method="post" id="finishatt">
+								<input type="hidden" name="id" value="{{instance}}">
+								<input type="hidden" name="attaction" value="0">
+								<br>
+								<button type="submit" class="btn btn-danger">{{# str}} finishattend, mod_hybridteaching {{/ str}}</button>
+							</form>
+						{{/canentry}}
 					{{/ useattendance}}
 				{{/isfinished}}
 			{{/hascreatecapability}}
 			{{#hascreatecapability}}
 				{{^isfinished}}
 					{{#isprogress}}
-						<form action="./loadmeeting.php" id="finishsession" target="{{target}}" onsubmit="{{onsubmit}}">
+						<form action="./loadmeeting.php" id="finishsession" onsubmit="{{onsubmit}}">
 							<input type="hidden" name="id" value="{{id}}">
 							<input type="hidden" name="s" value="{{s}}">
 							<input type="hidden" name="url" value="{{url}}">
@@ -280,7 +286,7 @@
 					{{^isfinished}}
 						</div>
 						<div class="d-flex">
-						<form action="./loadmeeting.php" id="finishsession" target="{{target}}" onsubmit="{{onsubmit}}">
+						<form action="./loadmeeting.php" id="finishsession" onsubmit="{{onsubmit}}">
 							<input type="hidden" name="id" value="{{id}}">
 							<input type="hidden" name="s" value="{{s}}">
 							<input type="hidden" name="url" value="{{url}}">

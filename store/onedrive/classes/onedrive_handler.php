@@ -245,7 +245,37 @@ class onedrive_handler {
         }
 
         return $url;
+    }
 
+    public function downloadrecording($processedrecording) {
+        global $DB;
+        require_once(__DIR__ . '/../vendor/autoload.php');
+        $this->refreshtoken();
+
+        $graph = new Graph();
+        $graph->setAccessToken($this->config->accesstoken);
+
+        $recording = $DB->get_record('hybridteachstore_onedrive', ['id' => $processedrecording]);
+        if (!isset($recording->weburl) || $recording->weburl == '') {
+            return;
+        }
+
+        // Download recording.
+        try {
+            $path = "/me/drive/root:/".get_string('hybridteaching', 'hybridteachstore_onedrive')."/".$recording->weburl;
+            $graphresponse = $graph->createRequest("GET", $path)
+                ->setReturnType(Model\DriveItem::class)
+                ->execute();
+
+            $response = json_decode(json_encode($graphresponse), true);
+            if (isset($response['@microsoft.graph.downloadUrl'])) {
+                return $response['@microsoft.graph.downloadUrl'];
+            }
+
+        } catch (\Throwable $e) {
+            return '';
+        }
+        return '';
     }
 
 }

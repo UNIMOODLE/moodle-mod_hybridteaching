@@ -51,3 +51,7 @@ $string['alreadyloggedmeet'] = 'Ya has iniciado sesión para esta configuración
 $string['loggingerrormeet'] = 'Error de inicio de sesión en su cuenta de Google';
 $string['downloadrecordsmeet'] = 'Descargar grabaciones Meet';
 $string['chatnamefile'] = 'Chat de meet';
+
+$string['meet:view'] = 'Ver Meet';
+$string['meet:use'] = 'Generar videconferencias Meet';
+$string['meet:record'] = 'Almacenar grabaciones Meet';

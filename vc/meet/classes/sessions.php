@@ -160,9 +160,33 @@ class sessions {
         return $config;
     }
 
+    /**
+     * Loads the Meet configuration from the session.
+     *
+     * @return mixed The loaded Meet configuration.
+     */
+    public function load_meet_config_from_session() {
+        global $DB;
+        $sql = "SELECT h.config
+                FROM {hybridteaching} h
+                JOIN {hybridteaching_session} hs ON hs.hybridteachingid = h.id
+                WHERE hs.id = :htsession";
+
+        $configpartial = $DB->get_record_sql($sql, ['htsession' => $this->meetsession->htsession]);
+        $config = $this->load_meet_config($configpartial->config);
+        return $config;
+    }
 
     public function get_zone_access() {
         if ($this->meetsession) {
+            $meetconfig = $this->load_meet_config_from_session();
+            if (!$meetconfig) {
+                // No exists config meet or its hidden.
+                return [
+                    'returncode' => 'FAILED',
+                ];
+            }
+
             $array = [
                 'id' => $this->meetsession->id,
                 'ishost' => true,

@@ -41,7 +41,6 @@ class attuserfilter_options_form extends moodleform {
         $mform->setDefault('id', $id);
         $mform->setType('id', PARAM_INT);
 
-        $attcontroller = new attendance_controller();
         $fname = $this->_customdata['fname'];
         $lname = $this->_customdata['lname'];
         $view = $this->_customdata['view'];

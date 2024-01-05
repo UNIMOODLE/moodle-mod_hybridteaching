@@ -12,7 +12,9 @@ Feature: An admin configure a subplugin in the hybridteaching plugin
       | Config name  | videoconference configuration example |
       | Url del servidor BigBlueButton  | http://example.com/ |
       | Clave secreta de BigBlueButton | secretkey |
-    And I select "Category 1" from the "id_category" singleselect
+    And I click on "Course categories" "button"
+    And I click on "checkboxcategory-1" "checkbox"
+    And I click on "Save changes" "button"
     And I click on "Add setting" "button"
     And I should see "config created successfully"
     Then I should see "videoconference configuration example" in the "hybridteachingpluginsconfigs" "table"

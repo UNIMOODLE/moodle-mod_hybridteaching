@@ -67,7 +67,12 @@ function xmldb_hybridteachstore_onedrive_upgrade($oldversion) {
         if ($dbman->field_exists($table, $field)) {
             $dbman->drop_field($table, $field);
         }
-
+    }
+    if ($oldversion < 2023081605) {
+        $field = new xmldb_field('downloadurl');
+        if ($dbman->field_exists($table, $field)) {
+            $dbman->drop_field($table, $field);
+        }
     }
 
     return true;

@@ -45,3 +45,4 @@ $string['errorwebservice'] = 'Youtube webservice error: {$a}.';
 $string['err_no_access_token'] = 'No access token returned';
 $string['licenses'] = 'Licenses';
 $string['updatestores'] = 'Upload YouTube videos';
+$string['notuploading'] = 'Cannot uploading recording in courseid';

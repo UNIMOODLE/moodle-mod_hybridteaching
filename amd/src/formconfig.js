@@ -87,7 +87,7 @@ export const init = () => {
     ELEMENT_SELECTOR.sessionscheduling().addEventListener('change', () => useSessionsScheduling());
     ELEMENT_SELECTOR.permisionscontainer().querySelector('[name="hybridteaching_participant_selection"').disabled = true;
     ELEMENT_SELECTOR.typeVC().addEventListener('change', (e) => vcInitialStatus(e.target));
-    ELEMENT_SELECTOR.typeVC().addEventListener('change', (e) => useVCRecord());
+    ELEMENT_SELECTOR.typeVC().addEventListener('change', () => useVCRecord());
     ELEMENT_SELECTOR.sessionscheduling().addEventListener('change', (e) => useGroupMode(e.target));
 };
 
@@ -125,7 +125,7 @@ const useAttendance = (e = ELEMENT_SELECTOR.useAttendance()) => {
         modStandardGrade.setAttribute('style', 'display:block');
     } else {
         formi.forEach(input => {
-            if (input.type !== 'hidden') {
+            if (input.type !== 'hidden' && input.getAttribute('readonly') === null) {
                 input.value = '';
             }
         });
@@ -179,7 +179,7 @@ const useVC = (e = ELEMENT_SELECTOR.useVC()) => {
         recordoptions.closest('.form-group').setAttribute('style', 'display:none');
         typeVC.closest('.form-group').setAttribute('style', 'display:none');
         accessformi.forEach(accesinput => {
-            if (accesinput.type !== 'hidden') {
+            if (accesinput.type !== 'hidden' && accesinput.getAttribute('readonly') === null) {
                 accesinput.value = 0;
             }
         });
@@ -194,6 +194,10 @@ const useVC = (e = ELEMENT_SELECTOR.useVC()) => {
 
         plistold = participantList.value;
         sectionAudience.setAttribute('style', 'display:none');
+        if (document.getElementById('norecordingcap') !== null) {
+            document.getElementById('norecordingcap').setAttribute('style', 'display:none');
+        }
+        document.getElementById('id_reusesession').checked = false;
     }
     useVCRecord();
 };
@@ -205,8 +209,7 @@ const useVCRecord = async(e = ELEMENT_SELECTOR.useVCRecord()) => {
     const norecordingcap = await getString('norecordingmoderation', 'hybridteaching');
     userrecordingcapability(typevc, ELEMENT_SELECTOR.pagecontext()).done(r => {
         let response = JSON.parse(r);
-        if (!response) {
-            // eslint-disable-next-line no-console
+        if (!response && response != 'notypevc') {
             ELEMENT_SELECTOR.useVCRecord().checked = false;
             ELEMENT_SELECTOR.useVCRecord().setAttribute('disabled', 'true');
             if (document.getElementById('norecordingcap') !== null && ELEMENT_SELECTOR.useVC().checked) {

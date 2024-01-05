@@ -37,6 +37,7 @@ defined('MOODLE_INTERNAL') || die();
 global $CFG;
 
 require_once('common_controller.php');
+require_once('configs_controller.php');
 require_once($CFG->dirroot . '/mod/hybridteaching/classes/helper.php');
 require_once($CFG->dirroot . '/mod/hybridteaching/classes/helpers/calendar_helpers.php');
 
@@ -52,9 +53,8 @@ class sessions_controller extends common_controller {
     /**
      * Constructs a new instance of the class.
      *
-     * @param stdClass|null $hybridobject An object of stdClass or null.
-     * @param string|null $table The table name or null.
-     * @throws Some_Exception_Class Description of exception.
+     * @param stdClass $hybridobject The hybrid object to initialize the instance with. Defaults to null.
+     * @throws Some_Exception_Class A description of the exception that may be thrown.
      * @return void
      */
     public function __construct(stdClass $hybridobject = null) {
@@ -70,14 +70,18 @@ class sessions_controller extends common_controller {
         }
     }
 
+
     /**
-     * Retrieves a list of sessions for the current hybrid teaching module.
+     * Loads sessions from the database based on the given parameters.
      *
-     * @param int $page page number to display.
-     * @param int $recordsperpage number of records to display per page.
-     * @param array $params optional parameters to filter the query results.
-     * @param string $operator comparison operator to use in the WHERE clause.
-     * @return array An array of session objects.
+     * @param int $page The page number to load.
+     * @param int $recordsperpage The number of records to load per page.
+     * @param array $params Additional parameters to filter the sessions.
+     * @param string $extraselect Additional SQL select statement.
+     * @param string $operator The operator to use for the start time filter.
+     * @param string $sort The column to sort the sessions by.
+     * @param string $dir The direction of the sorting.
+     * @return array The loaded sessions as an array.
      */
     public function load_sessions($page = 0, $recordsperpage = 0, $params = [], $extraselect = '',
           $operator = self::OPERATOR_GREATER_THAN, $sort = 'starttime', $dir = 'DESC') {
@@ -103,14 +107,13 @@ class sessions_controller extends common_controller {
         return $sessionsarray;
     }
 
+    
     /**
-     * Creates a session for the hybrid teaching object.
+     * Creates a session.
      *
-     * @param object $data An object containing the data for the new session.
-     *                     It should contain a hybridteachingid, instance,
-     *                     duration, and timetype property.
-     * @throws Exception If the function cannot create a session.
-     * @return void
+     * @param mixed $data The data for creating the session.
+     * @throws Some_Exception_Class If an error occurs during session creation.
+     * @return mixed The created session.
      */
     public function create_session($data) {
         $session = null;
@@ -150,11 +153,14 @@ class sessions_controller extends common_controller {
         return $session;
     }
 
+
     /**
-     * Creates a new session with a unique ID and saves it to the database.
+     * Create a unique session.
      *
-     * @param array $data An array of session data to be saved.
-     * @throws Exception If there is an error inserting the session into the database.
+     * @param mixed $session The session data.
+     * @param int $countsess The count of sessions.
+     * @throws Some_Exception_Class Description of exception.
+     * @return mixed The created session.
      */
     public function create_unique_session($session, $countsess = 0) {
         global $DB;
@@ -270,6 +276,17 @@ class sessions_controller extends common_controller {
             $subpluginsession->update_session_extended($session, $this->hybridobject);
         }
 
+        list($course, $cm) = get_course_and_cm_from_instance($this->hybridobject->id, 'hybridteaching');
+        $event = \mod_hybridteaching\event\session_updated::create([
+            'objectid' => $this->hybridobject->id,
+            'context' => \context_module::instance($cm->id),
+            'other' => [
+                'sessid' => !empty($session) ? $session->id : null,
+            ],
+        ]);
+
+        $event->trigger();
+
         return $errormsg;
     }
 
@@ -365,9 +382,10 @@ class sessions_controller extends common_controller {
             }
         }
 
+        list($course, $cm) = get_course_and_cm_from_instance($this->hybridobject->id, 'hybridteaching');
         $event = \mod_hybridteaching\event\session_deleted::create([
             'objectid' => $this->hybridobject->id,
-            'context' => \context_course::instance($this->hybridobject->course),
+            'context' => \context_module::instance($cm->id),
             'other' => [
                 'sessid' => $id,
             ],
@@ -378,11 +396,11 @@ class sessions_controller extends common_controller {
         return $errormsg;
     }
 
+
     /**
-     * Deletes all sessions associated with the given module instance.
+     * Deletes all sessions associated with the hybrid teaching object.
      *
-     * @param object $moduleinstance The module instance object
-     * @throws Exception If an error occurs while deleting sessions
+     * @throws Some_Exception_Class description of exception
      */
     public function delete_all_sessions() {
         global $DB;
@@ -428,12 +446,11 @@ class sessions_controller extends common_controller {
         return $sessiondata;
     }
 
+
     /**
-     * Retrieve the next session from the database using the given hybridteaching ID.
+     * Retrieves the next session for a hybrid teaching object.
      *
-     * @param int $htid
-     * @throws Some_Exception_Class Description of the exception that can be thrown.
-     * @return mixed The next session data.
+     * @return mixed The next session record or null if no session is found.
      */
     public function get_next_session() {
         global $DB;
@@ -455,13 +472,11 @@ class sessions_controller extends common_controller {
         return $nextsession;
     }
 
+
     /**
-     * Retrieves the last session from the hybrid teaching session table based on the provided hybrid teaching ID.
+     * Retrieves the last session for the specified hybrid teaching ID.
      *
-     * @param int $htid The ID of the hybrid teaching.
-     * @global object $DB The global database object.
-     * @throws None
-     * @return mixed The last session record from the hybrid teaching session table.
+     * @return mixed The last session record or null if not found.
      */
     public function get_last_session() {
         global $DB;
@@ -478,15 +493,13 @@ class sessions_controller extends common_controller {
     }
 
 
+
     /**
-     * Counts the number of sessions for a given hybrid teaching object.
+     * Counts the number of sessions based on the given parameters.
      *
-     * @param array $params An optional array of parameters to filter the sessions by.
-     *                      Defaults to an empty array.
-     *                      - hybridteachingid: The ID of the hybrid teaching object to count sessions for.
-     * @global moodle_database $DB The Moodle database object.
-     * @throws Exception If the database query fails.
-     * @return int The number of sessions for the given hybrid teaching object and parameters.
+     * @param array $params an array of parameters to filter the sessions
+     * @param string $operator the operator to use for filtering the sessions (default: self::OPERATOR_GREATER_THAN)
+     * @return int the number of sessions that match the given parameters
      */
     public function count_sessions($params = [], $operator = self::OPERATOR_GREATER_THAN) {
         return count($this->load_sessions(0, 0, $params, '', $operator));
@@ -570,7 +583,6 @@ class sessions_controller extends common_controller {
      * Fills the session data for update.
      *
      * @param mixed $data The data to fill the session with.
-     * @global object $USER The global user object.
      * @return object The updated session object.
      */
     public function fill_session_data_for_update($data) {
@@ -590,10 +602,13 @@ class sessions_controller extends common_controller {
         return $session;
     }
 
+
     /**
-     * Includes the required subplugin session file for the specified typevc.
+     * A description of the entire PHP function.
      *
-     * @param string $typevc the type of VC to require the session file for
+     * @param datatype $type description
+     * @throws Some_Exception_Class description of exception
+     * @return void
      */
     public static function require_subplugin_session($type) {
         global $CFG;
@@ -622,20 +637,25 @@ class sessions_controller extends common_controller {
         return $classname;
     }
 
+
     /**
-     * Includes the required subplugin session file for the specified typevc.
+     * Require a subplugin store.
      *
-     * @param string $typevc the type of VC to require the session file for
+     * @param string $type The type of the subplugin store.
      */
     public static function require_subplugin_store($type) {
         global $CFG;
         require_once($CFG->dirroot.'/mod/hybridteaching/store/'.$type.'/classes/sessions.php');
     }
 
+
     /**
-     * Save session storage config id.
+     * Calculate storage, based on the course category configured in storage settings.
      *
-     * @param object The session object to calculate to save.
+     * @param mixed $session The session parameter.
+     * @param mixed $courseid The course ID parameter.
+     * @throws Some_Exception_Class Description of exception.
+     * @return void
      */
     public static function savestorage($session, $courseid) {
         // Calculate storage, based on the course category configured in storage settings.
@@ -656,12 +676,29 @@ class sessions_controller extends common_controller {
             if ($element != '') {
                 // Check that there is some direct configuration for the element category.
                 // Otherwise, check another level in the array.
-                $config = $DB->get_records ('hybridteaching_configs',
-                    [
-                        'subplugintype' => 'store',
-                        'category' => $element,
-                        'visible' => 1,
-                    ], 'sortorder', 'id', 0, 1);
+                $params = [
+                    'visible' => 1,
+                    'subplugintype' => 'store',
+                    'category' => $element,
+                ];
+
+                $categoriescond = configs_controller::get_categories_conditions($params);
+                $incategories = '';
+                if (!empty($categoriescond)) {
+                    $incategories = $categoriescond['conditions'];
+                    $categoriesparams = $categoriescond['inparams'];
+                }
+
+                if (!empty($categoriesparams)) {
+                    unset($params['category']);
+                    $params = array_merge($params, $categoriesparams);
+                }
+        
+                $sql = "SELECT hi.*
+                            FROM {hybridteaching_configs} hi
+                            WHERE hi.visible = ? AND hi.subplugintype = ? $incategories 
+                        ORDER BY hi.visible DESC, hi.sortorder, hi.id";
+                $config = $DB->get_records_sql($sql, $params);
                 if ($config) {
                     // Convert in the first element from array.
                     $config = reset($config);
@@ -675,12 +712,14 @@ class sessions_controller extends common_controller {
 
         // If no category has been assigned directly, check if there are any category with "All".
         if ($store == 0) {
-            $config = $DB->get_records ('hybridteaching_configs',
-                [
-                    'subplugintype' => 'store',
-                    'category' => 0,
-                    'visible' => 1,
-                ], 'sortorder', 'id', 0, 1);
+            $select = "" . $DB->sql_like('subplugintype', ':subplugintype') . " AND categories = :categories
+                AND visible = :visible";
+            $params = [
+                'subplugintype' => 'store',
+                'categories' => 0,
+                'visible' => 1,
+            ];
+            $config = $DB->get_records_select('hybridteaching_configs', $select, $params, 'sortorder', 'id', 0, 1);
             if ($config) {
                 $config = reset ($config);
                 if ($config) {
@@ -696,10 +735,12 @@ class sessions_controller extends common_controller {
         }
     }
 
+
     /**
-     * Get type of storage by storagereference
+     * Retrieves the subplugin storage class based on the given storage reference.
      *
-     * @param int The storagereference to get the type.
+     * @param mixed $storagereference The reference to the storage.
+     * @return array|null An array containing the classname and type of the subplugin storage, or null if not found.
      */
     public static function get_subpluginstorage_class($storagereference) {
         global $DB;
@@ -777,7 +818,6 @@ class sessions_controller extends common_controller {
      * Check if a session configuration exists.
      *
      * @param object $session The session object.
-     * @global object $DB The global database object.
      * @return bool Whether the session configuration exists or not.
      */
     public static function get_sessionconfig_exists($session) : bool {
@@ -795,7 +835,6 @@ class sessions_controller extends common_controller {
      * Checks if the session has started.
      *
      * @param mixed $session The session object.
-     * @global object $DB The global database object.
      * @return bool Returns true if the session has started, false otherwise.
      */
     public function session_started($session) : bool {
@@ -817,7 +856,6 @@ class sessions_controller extends common_controller {
      * Checks if a session has been finished.
      *
      * @param int $sessionid The ID of the session.
-     * @global moodle_database $DB The global database object.
      * @throws Exception
      * @return bool Returns true if the session has been finished, false otherwise.
      */
@@ -852,10 +890,11 @@ class sessions_controller extends common_controller {
                    AND duration > 0';
         $sessions = $DB->get_records_sql($sql, [$hid, 0, time()]);
         if ($sessions) {
+            list($course, $cm) = get_course_and_cm_from_instance($hid, 'hybridteaching');
             foreach ($sessions as $session) {
                 $event = \mod_hybridteaching\event\session_finished::create([
                     'objectid' => $hid,
-                    'context' => \context_course::instance($this->hybridobject->course),
+                    'context' => \context_module::instance($cm->id),
                     'other' => [
                         'sessid' => $session->id,
                     ],

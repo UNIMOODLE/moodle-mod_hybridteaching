@@ -45,6 +45,8 @@ class configs extends configs_controller {
         $meetrecords->emailaccount = $data->emailaccount;
         $meetrecords->clientid = $data->clientid;
         $meetrecords->clientsecret = $data->clientsecret;
+        $meetrecords->token = 0;
+        $meetrecords->eventid = 0;
         $id = $DB->insert_record('hybridteachvc_meet_config', $meetrecords);
         return $id;
     }

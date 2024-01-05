@@ -61,17 +61,81 @@ if ($hassiteconfig) {
         $generalsettings->add(new admin_setting_configselect('hybridteaching/resultsperpage',
             get_string('resultsperpage', 'hybridteaching'), get_string('sessresultsperpage_desc', 'hybridteaching'), 25, $options));
 
-        $generalsettings->add(new admin_setting_configcheckbox('hybridteaching/reusesession',
-            get_string('reusesession', 'hybridteaching'), get_string('reusesession_desc', 'hybridteaching'), 0));
-
-        $generalsettings->add(new admin_setting_configcheckbox('hybridteaching/configsubcategories',
-            get_string('configsubcategories', 'hybridteaching'), get_string('configsubcategories_desc', 'hybridteaching'), 0));
-
         $vcsettings->add(new admin_setting_heading(
             'headerconfigvc',
             get_string('headerconfigvc', 'hybridteaching'),
             ''
         ));
+
+        $name = new lang_string('defaultsettings', 'mod_hybridteaching');
+        $description = new lang_string('defaultsettings_help', 'hybridteaching');
+        $generalsettings->add(new admin_setting_heading('defaultsettings', $name, $description));
+        
+        $showdescription = new admin_setting_configcheckbox('hybridteaching/showdescription',
+            new lang_string('showdescription'),
+            new lang_string('showdescription_help'), 1);
+        $showdescription->set_locked_flag_options(admin_setting_flag::ENABLED, false);
+        $generalsettings->add($showdescription);
+        
+        $useattendance = new admin_setting_configcheckbox('hybridteaching/useattendance',
+            new lang_string('useattendance', 'hybridteaching'),
+            new lang_string('useattendance_help', 'hybridteaching'), 1);
+        $useattendance->set_locked_flag_options(admin_setting_flag::ENABLED, false);
+        $generalsettings->add($useattendance);
+        
+        $usevideoconference = new admin_setting_configcheckbox('hybridteaching/usevideoconference',
+            new lang_string('usevideoconference', 'hybridteaching'),
+            new lang_string('usevideoconference_help', 'hybridteaching'), 1);
+        $usevideoconference->set_locked_flag_options(admin_setting_flag::ENABLED, false);
+        $generalsettings->add($usevideoconference);
+        
+        $userecordvc = new admin_setting_configcheckbox('hybridteaching/userecordvc',
+            new lang_string('userecordvc', 'hybridteaching'),
+            new lang_string('userecordvc_help', 'hybridteaching'), 1);
+        $generalsettings->add($userecordvc);
+        
+        $name = new lang_string('sessionssettings', 'mod_hybridteaching');
+        $description = new lang_string('sessionssettings_help', 'hybridteaching');
+        $generalsettings->add(new admin_setting_heading('sessionssettings', $name, $description));
+        
+        $sessionscheduling = (new admin_setting_configcheckbox('hybridteaching/sessionscheduling',
+            get_string('sessionscheduling', 'hybridteaching'), get_string('sessionscheduling_desc', 'hybridteaching'), 0));
+        $sessionscheduling->set_locked_flag_options(admin_setting_flag::ENABLED, false);
+        $generalsettings->add($sessionscheduling);
+        
+        $reusesession = (new admin_setting_configcheckbox('hybridteaching/reusesession',
+            get_string('reusesession', 'hybridteaching'), get_string('reusesession_desc', 'hybridteaching'), 0));
+        $reusesession->set_locked_flag_options(admin_setting_flag::ENABLED, false);
+        $generalsettings->add($reusesession);
+
+        $waitmoderator = (new admin_setting_configcheckbox('hybridteaching/waitmoderator',
+            get_string('waitmoderator', 'hybridteaching'), get_string('waitmoderator_desc', 'hybridteaching'), 0));
+        $waitmoderator->set_locked_flag_options(admin_setting_flag::ENABLED, false);
+        $generalsettings->add($waitmoderator);
+
+        $userslimit = new admin_setting_configtext('hybridteaching/userslimit',
+        get_string('userslimit', 'hybridteaching'), get_string('userslimit_desc', 'hybridteaching'), 300, PARAM_INT, 6);
+        $userslimit->set_locked_flag_options(admin_setting_flag::ENABLED, false);
+        $generalsettings->add($userslimit);
+
+        $name = new lang_string('attendancesettings', 'mod_hybridteaching');
+        $description = new lang_string('attendancesettings_help', 'hybridteaching');
+        $generalsettings->add(new admin_setting_heading('attendancesettings', $name, $description));
+
+        $useqr = (new admin_setting_configcheckbox('hybridteaching/useqr',
+            get_string('useqr', 'hybridteaching'), get_string('useqr_desc', 'hybridteaching'), 0));
+        $useqr->set_locked_flag_options(admin_setting_flag::ENABLED, false);
+        $generalsettings->add($useqr);
+
+        $rotateqr = (new admin_setting_configcheckbox('hybridteaching/rotateqr',
+            get_string('rotateqr', 'hybridteaching'), get_string('rotateqr_desc', 'hybridteaching'), 0));
+        $rotateqr->set_locked_flag_options(admin_setting_flag::ENABLED, false);
+        $generalsettings->add($rotateqr);
+
+        $studentpassword = (new admin_setting_configpasswordunmask('hybridteaching/studentpassword',
+            get_string('studentpassword', 'hybridteaching'), get_string('studentpassword_desc', 'hybridteaching'), PARAM_TEXT));
+        $studentpassword->set_locked_flag_options(admin_setting_flag::ENABLED, false);
+        $generalsettings->add($studentpassword);
 
         $vcsettings->add(new hybridteaching_admin_plugins_configs(
             'managevideoconferenceplugins',

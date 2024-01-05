@@ -387,7 +387,7 @@ class teams_handler {
      * @param int $organizerid The id  of the organizer to download the recording from.
      * @return string $recordingid The id of the recording downloaded.
      */
-    public function get_meeting_recordings ($folderfile, $meetingid, $organizerid) {
+    public function get_meeting_recordings ($folderfile, $meetingid, $organizerid, $course, $name) {
         $token = $this->refreshtoken();
         $graph = new Graph();
         $graph->setAccessToken($token);
@@ -401,11 +401,14 @@ class teams_handler {
                 ->setReturnType(Model\RecordingInfo::class)
                 ->execute();
         } catch (\Exception $e) {
-            print "\nRecording does not exist from meetingid: ".$meetingid."<br>";
+            mtrace(get_string('recordingnotfound', 'hybridteachvc_teams', ['course'=>$course, 'name' => $name, 'meetingid' => $meetingid]));
             return;
         }
         $result = json_decode(json_encode($graphresponse), true);
 
+        if (empty($result)) {
+            mtrace(get_string('recordingnoexists', 'hybridteachvc_teams', ['course'=>$course, 'name' => $name, 'meetingid' => $meetingid]));
+        }
         $count = 0;
         foreach ($result as $rec) {
             if (isset($rec['id'])) {
@@ -419,7 +422,7 @@ class teams_handler {
                         ->createRequest("GET", $urlrequest."/onlineMeetings/$meetingid/recordings/$recordingid/content")
                         ->download($pathfile);
                 } catch (\Exception $e) {
-                    print "\nCan't download record from meetingid: ".$meetingid."<br>";
+                    mtrace(get_string('recordingnotdownload', 'hybridteachvc_teams', ['course'=>$course, 'name' => $name, 'meetingid' => $meetingid]));
                 }
                 $result = json_decode(json_encode($graphresponse), true);
             }
@@ -476,6 +479,33 @@ class teams_handler {
             }
             return '';
         }
+    }
+
+    /**
+     * Get meeting info.
+     *
+     * @param int $meetingid The meeting id to get the chat url.
+     * @param int $organizerid The id  of the organizer to get the chat url meeting.
+     * @return mix $infomeeting The url of the chat meetingo.
+     */
+    public function getmeetinginfo ($meetingid, $organizerid) {
+        $token = $this->refreshtoken();
+        $graph = new Graph();
+        $graph->setAccessToken($token);
+        $urlrequest = $this->geturlrequest ($organizerid);
+
+        // Get meeting chat info.
+        try {
+            $graphresponse = $graph
+                ->createRequest("GET", $urlrequest."/onlineMeetings/$meetingid")
+                ->setReturnType(Model\MeetingInfo::class)
+                ->execute();
+        } catch (\Exception $e) {
+            print "\nNot exists meetingid: ".$meetingid."<br>";
+            return null;
+        }
+        $result = json_decode(json_encode($graphresponse), true);
+        return $result;
     }
 
     public function get_meeting_transcripts ($folderfile, $meetingid, $organizerid) {

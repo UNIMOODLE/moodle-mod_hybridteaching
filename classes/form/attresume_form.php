@@ -26,7 +26,7 @@ defined('MOODLE_INTERNAL') || die;
 require_once($CFG->libdir.'/formslib.php');
 require_once($CFG->dirroot . '/mod/hybridteaching/classes/controller/attendance_controller.php');
 
-class attresumee_options_form extends moodleform {
+class attresume_options_form extends moodleform {
     public function definition() {
         global $USER;
 
@@ -44,7 +44,7 @@ class attresumee_options_form extends moodleform {
         $attcontroller = new attendance_controller();
         $selecteduser = $this->_customdata['selecteduser'];
 
-        $mform->addElement('header', 'headerusercompletion', get_string('attendanceresumee', 'hybridteaching'));
+        $mform->addElement('header', 'headerusercompletion', get_string('attendanceresume', 'hybridteaching'));
         $selecteduser = $this->_customdata['selecteduser'];
         if (has_capability('mod/hybridteaching:sessionsfulltable',
         context_module::instance($cm->id), $user = $USER->id)) {

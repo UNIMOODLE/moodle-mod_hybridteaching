@@ -104,7 +104,7 @@ class sessions {
      */
     public function create_unique_session_extended($session, $ht) {
         global $DB;
-
+        
         $context = \context_course::instance($ht->course);
         if (!has_capability('hybridteachvc/bbb:use', $context)) {
             return;
@@ -247,6 +247,13 @@ class sessions {
 
         if ($this->bbbsession) {
             $bbbconfig = $this->load_bbb_config_from_session();
+            if (!$bbbconfig) {
+                // No exists config bbb or its hidden.
+                return [
+                    'returncode' => 'FAILED',
+                ];
+            }
+
             $bbbproxy = new bbbproxy($bbbconfig);
 
             $role = self::get_user_meeting_role($this->bbbsession);
@@ -287,8 +294,11 @@ class sessions {
             return;
         }
         $bbbconfig = $this->load_bbb_config_from_session();
-        $bbbproxy = new bbbproxy($bbbconfig);
+        if (!$bbbconfig) {
+            return;
+        }
 
+        $bbbproxy = new bbbproxy($bbbconfig);       
         $response = $bbbproxy->get_url_recording_by_recordid($this->bbbsession->recordingid);
         if ($response['returncode'] == 'SUCCESS') {
             return $response;
@@ -311,7 +321,8 @@ class sessions {
         $meetingrole = 'VIEWER';
         $hybridteaching = $DB->get_record('hybridteaching', ['id' => $DB->get_field('hybridteaching_session', 'hybridteachingid',
             ['id' => $session->htsession], IGNORE_MISSING), ], 'id, course, participants', IGNORE_MISSING);
-        $context = \context_course::instance($hybridteaching->course);
+        list($course, $cm) = get_course_and_cm_from_instance($hybridteaching->id, 'hybridteaching');
+        $context = \context_module::instance($cm->id);
         $role = roles::is_moderator($context, json_decode($hybridteaching->participants, true), $USER->id);
         if ($role) {
             $meetingrole = 'MODERATOR';

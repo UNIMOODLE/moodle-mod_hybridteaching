@@ -35,7 +35,7 @@ class session_info_viewed extends \core\event\base {
      */
     public function get_description() {
         return 'User with id ' . $this->userid . ' has seen the session info with id ' .
-            $this->objectid;
+            $this->other['sessid'] . ' for hybridteaching instance with id ' . $this->objectid;
     }
 
     /**

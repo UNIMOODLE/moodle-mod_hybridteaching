@@ -53,7 +53,7 @@ class backup_hybridteaching_activity_structure_step extends backup_activity_stru
         $hybridteaching = new backup_nested_element('hybridteaching', ['id'], [
             'course', 'name', 'intro', 'introformat', 'useattendance',
             'usevideoconference', 'userecordvc', 'typevc', 'config', 'sessionscheduling',
-            'undatedsession', 'starttime', 'duration', 'timezone', 'grade', 'maxgradeattendance',
+            'reusesession', 'starttime', 'duration', 'timezone', 'grade', 'maxgradeattendance',
             'maxgradeattendanceunit', 'participants', 'waitmoderator', 'advanceentrycount',
             'advanceentryunit', 'closedoorscount', 'closedoorsunit', 'userslimit',
             'graceperiod', 'graceperiodunit', 'disablecam', 'disablemic', 'disableprivatechat',

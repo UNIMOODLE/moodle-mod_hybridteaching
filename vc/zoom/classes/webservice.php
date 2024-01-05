@@ -374,7 +374,7 @@ class webservice {
             $data['auto_recording'] = HTZOOM_RECORDING_DISABLED;
         }
 
-        $data['type'] = $ht->undatedsession ? HTZOOM_RECURRING_MEETING : HTZOOM_SCHEDULED_MEETING;
+        $data['type'] = $ht->sessionscheduling ? HTZOOM_SCHEDULED_MEETING : HTZOOM_RECURRING_MEETING;
 
         if ($data['type'] == HTZOOM_SCHEDULED_MEETING) {
             // Convert timestamp to ISO-8601. The API seems to insist that it end with 'Z' to indicate UTC.
@@ -406,7 +406,7 @@ class webservice {
      * @return stdClass The call response.
      */
     public function create_meeting($zoom, $ht) {
-        $zoom->undatedsession = $ht->undatedsession;
+        $zoom->undatedsession = $ht->sessionscheduling ? 0 : 1;
         $url = 'users/'.$this->emaillicense.'/meetings';
         $response = $this->_make_call($url, $this->_database_to_api($zoom, $ht), 'post');
         return $response;
@@ -419,7 +419,7 @@ class webservice {
      * @return void
      */
     public function update_meeting($zoom, $ht) {
-        $zoom->undatedsession = $ht->undatedsession;
+        $zoom->undatedsession = $ht->sessionscheduling ? 0 : 1;
         $url = 'meetings/' . $zoom->meetingid;
         $this->_make_call($url, $this->_database_to_api($zoom, $ht), 'patch');
     }

@@ -60,7 +60,7 @@ class updatestores extends \core\task\scheduled_task {
         $storeonedrive = $DB->get_records_sql($sql);
 
         // Process:
-        // 1.  upload to onedrive
+        // 1. upload to onedrive
         // 2. save record as upload to onedrive
         // 3. delete file from moodledata.
 
@@ -108,6 +108,8 @@ class updatestores extends \core\task\scheduled_task {
 
                     // Delete video from origin download vc moodledata.
                     unlink ($videopath);
+                } else {
+                    mtrace(get_string('notuploading', 'hybridteachstore_onedrive').' '.$store->course.": '".$store->name."': ");
                 }
             }
         }

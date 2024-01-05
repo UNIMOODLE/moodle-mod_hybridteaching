@@ -64,6 +64,18 @@ if (!empty($sid)) {
     unset($sessionobj->id);
     $sessionobj->duration = $sessionobj->duration / MINSECS;
     $sessionobj->durationgroup['duration'] = $sessionobj->duration;
+
+    if (!empty($sessionobj->sessionid)) {
+        $event = \mod_hybridteaching\event\session_manage_viewed::create([
+            'objectid' => $hybridteaching->id,
+            'context' => $context,
+            'other' => [
+                'sessid' => $sessionobj->sessionid,
+            ],
+        ]);
+    
+        $event->trigger();
+    }
 }
 
 $sessioncontroller = new sessions_controller($hybridteaching);
@@ -91,10 +103,6 @@ if ($mform->is_cancelled()) {
     }
     redirect($return);
 }
-
-$PAGE->set_heading($SITE->fullname);
-$PAGE->set_title($SITE->fullname);
-$PAGE->set_context($context);
 
 echo $OUTPUT->header();
 

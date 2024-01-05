@@ -31,10 +31,20 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-$settings->add(new admin_setting_configcheckbox('hybridteachvc_zoom/enabled',
+$item = new admin_setting_configcheckbox('hybridteachvc_zoom/enabled',
     new lang_string('enabled', 'hybridteaching'),
-    new lang_string('enabled_help', 'hybridteaching'), 1));
+    new lang_string('enabled_help', 'hybridteaching'), 1);
+
+$item->set_updatedcallback(function () {
+    global $DB;
+    if (get_config('hybridteachvc_zoom', 'enabled') == false) {
+        $sql = "UPDATE {hybridteaching_configs} SET visible=0 WHERE type='zoom'";
+        $DB->execute($sql);
+    }
+});
+
+$settings->add($item);
 
 $settings->add(new admin_setting_configtext('hybridteachvc_zoom/maxdownloadattempts',
     get_string('maxdownloadattempts', 'hybridteachvc_zoom'),
-    get_string('maxdownloadattempts_help', 'hybridteachvc_zoom'), ''));
+    get_string('maxdownloadattempts_help', 'hybridteachvc_zoom'), 5, PARAM_INT));

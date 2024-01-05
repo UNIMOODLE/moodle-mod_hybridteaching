@@ -78,8 +78,7 @@ switch ($action) {
         $sessioncontroller->enable_data($sesionid, true, 'hybridteaching_session');
         break;
     case 'delete':
-        if ($hybridteaching->undatedsession && $session->isfinished
-              || !$hybridteaching->undatedsession && (time() < $session->starttime
+        if ($session->isfinished ||(time() < $session->starttime
               || time() > ($session->starttime + $session->duration))) {
             $sessioncontroller->delete_session($sesionid, $hybridteachingid);
         } else {
@@ -135,9 +134,8 @@ switch ($action) {
             $sessionsids = explode('_', $sessionsids);
             foreach ($sessionsids as $sessid) {
                 $session = $DB->get_record('hybridteaching_session', ['id' => $sessid], '*', MUST_EXIST);
-                if ($hybridteaching->undatedsession && $session->isfinished
-                      || !$hybridteaching->undatedsession && (time() < $session->starttime
-                      || time() > ($session->starttime + $session->duration))) {
+                if ($session->isfinished || (time() < $session->starttime
+                    || time() > ($session->starttime + $session->duration))) {
                     $sessioncontroller->delete_session($sessid);
                 } else {
                     notify_controller::notify_problem(get_string('error:deleteinprogress', 'hybridteaching'));

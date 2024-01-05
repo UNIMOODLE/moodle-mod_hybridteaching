@@ -36,7 +36,9 @@ use mod_hybridteaching\plugininfo\hybridteachvc;
 require_once('../../../../config.php');
 require_once('editconfig_form.php');
 require_once('../../classes/controller/configs_controller.php');
+require_once('../../lib.php');
 require_once('classes/configs.php');
+$PAGE->requires->js_call_amd('mod_hybridteaching/categoriesmodal', 'init');
 
 $type = optional_param('type', "", PARAM_COMPONENT);
 $configid = optional_param('id', 0, PARAM_INT);
@@ -100,4 +102,6 @@ $PAGE->set_context($context);
 echo $OUTPUT->header();
 echo $OUTPUT->heading(get_string('pluginname', 'hybridteaching'));
 $mform->display();
+$templatecontext = hybrid_get_categories_for_modal();
+echo $OUTPUT->render_from_template('mod_hybridteaching/categoriesmodal', $templatecontext);
 echo $OUTPUT->footer();

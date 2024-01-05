@@ -60,9 +60,24 @@ class behat_hybridteaching extends behat_base {
 
     /**
      * @Given /^I confirm the dialog$/
-     * @throws \Behat\Mink\Exception\DriverException
+     * 
      */
     public function iConfirmTheDialog() {
         $this->getSession()->getDriver()->executeScript('window.confirm = function () { return true; };');
+    }
+
+    /**
+     * Click on the 'More' link if it exists, otherwise click on 'Sessions'.
+     *
+     * @Given /^I click on "More" if it exists otherwise "Sessions"$/
+     */
+    public function iClickOnMoreIfExistsOtherwiseSessions() {
+        $morebutton = $this->getSession()->getPage()->find('css', '.secondary-navigation .moremenu .more-nav .dropdownmoremenu');
+
+        if ($morebutton !== null && $morebutton->isVisible()) {
+            $morebutton->click();
+        }
+    
+        $this->getSession()->getPage()->findLink('Sessions')->click();
     }
 }

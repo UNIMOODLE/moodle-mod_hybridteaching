@@ -39,7 +39,9 @@ require_once(dirname(__FILE__).'/controller/sessions_controller.php');
 
 class mod_hybridteaching_observer {
     public static function session_finished(\mod_hybridteaching\event\session_finished $event) {
-        self::update_users_grade($event->objectid, $event->other['sessid']);
+        global $DB;
+        $userid = $DB->get_records('hybridteaching_attendance', ['sessionid' => $event->other['sessid']], '', 'userid');
+        self::update_users_grade($event->objectid, $event->other['sessid'], $userid);
         self::set_session_state($event->other['sessid']);
     }
 
@@ -54,6 +56,8 @@ class mod_hybridteaching_observer {
     }
 
     public static function session_updated(\mod_hybridteaching\event\session_updated $event) {
+        isset($event->other['userid']) ? $userid  = $event->other['userid'] : $userid = null;
+        self::update_users_grade($event->objectid, $event->other['sessid'], $userid);
     }
 
     public static function session_deleted(\mod_hybridteaching\event\session_deleted $event) {

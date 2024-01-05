@@ -44,4 +44,5 @@ Feature: A student consult his attendance in a hybridteaching sessions
     When I click on "Attendance" "link"
     Then I should see "hybridteaching example"
     And I click on "Logs" "link"
-    And I should see "Participation time:"
+    And I should see "Enters the session"
+    And I should see "Exits the session"

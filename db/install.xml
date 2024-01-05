@@ -17,7 +17,7 @@
         <FIELD NAME="typevc" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" COMMENT="The type of videoconference plugin"/>
         <FIELD NAME="config" TYPE="int" LENGTH="6" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Configuracion utilizada en la videoconferencia."/>
         <FIELD NAME="sessionscheduling" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Utilizar programación de sesiones."/>
-        <FIELD NAME="undatedsession" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Permitir acceso en cualquier momento."/>
+        <FIELD NAME="reusesession" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Permitir acceso en cualquier momento."/>
         <FIELD NAME="starttime" TYPE="int" LENGTH="11" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Inicio de sesión."/>
         <FIELD NAME="duration" TYPE="int" LENGTH="6" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Duración."/>
         <FIELD NAME="timezone" TYPE="char" LENGTH="50" NOTNULL="false" SEQUENCE="false" COMMENT="Timezone to format start_time, like &quot;America/Los_Angeles&quot;. For scheduled meeting only."/>
@@ -68,7 +68,7 @@
         <FIELD NAME="type" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" COMMENT="Subplugin type"/>
         <FIELD NAME="subplugintype" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="subpluginconfigid" TYPE="int" LENGTH="11" NOTNULL="true" SEQUENCE="false" COMMENT="Id from the subplugins tables"/>
-        <FIELD NAME="category" TYPE="int" LENGTH="11" NOTNULL="false" SEQUENCE="false" COMMENT="Available category for this plugin"/>
+        <FIELD NAME="categories" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Available categories for this config"/>
         <FIELD NAME="version" TYPE="char" LENGTH="255" NOTNULL="false" DEFAULT="0" SEQUENCE="false" COMMENT="Subplugin version"/>
         <FIELD NAME="visible" TYPE="int" LENGTH="1" NOTNULL="false" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="sortorder" TYPE="int" LENGTH="11" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
@@ -95,7 +95,7 @@
         <FIELD NAME="typevc" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" COMMENT="The type of videoconference plugin"/>
         <FIELD NAME="userecordvc" TYPE="int" LENGTH="11" NOTNULL="false" SEQUENCE="false" COMMENT="Allow recordings"/>
         <FIELD NAME="vcreference" TYPE="int" LENGTH="11" NOTNULL="false" SEQUENCE="false" COMMENT="Vc reference"/>
-        <FIELD NAME="processedrecording" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Session recording. -1: no downloaded from vc yet (ready for download), 0: downloaded from vc, positive number: activity id storage"/>
+        <FIELD NAME="processedrecording" TYPE="int" LENGTH="11" NOTNULL="false" SEQUENCE="false" COMMENT="Session recording. -1: no downloaded from vc yet (ready for download), 0: downloaded from vc, positive number: activity id storage"/>
         <FIELD NAME="storagereference" TYPE="int" LENGTH="11" NOTNULL="false" SEQUENCE="false" COMMENT="Recording reference"/>
         <FIELD NAME="visiblerecord" TYPE="int" LENGTH="1" NOTNULL="false" DEFAULT="1" SEQUENCE="false"/>
         <FIELD NAME="isfinished" TYPE="int" LENGTH="1" NOTNULL="false" DEFAULT="0" SEQUENCE="false" COMMENT="Session finished flag"/>

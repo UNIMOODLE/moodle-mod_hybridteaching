@@ -94,5 +94,47 @@ function xmldb_hybridteaching_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, '2023033100.06', 'hybridteachvc', 'meet');
     }
 
+    if ($oldversion < '2023031700.30') {
+
+        // Rename field categories on table hybridteaching_configs to NEWNAMEGOESHERE.
+        $table = new xmldb_table('hybridteaching_configs');
+        $field = new xmldb_field('category', XMLDB_TYPE_INTEGER, 11, null, null, null, null, 'subpluginconfigid');
+
+        // Launch rename field categories.
+        $dbman->rename_field($table, $field, 'categories');
+
+        $field = new xmldb_field('categories', XMLDB_TYPE_TEXT, null, null, null, null, null, 'subpluginconfigid');
+
+        // Launch change of type for field categories.
+        $dbman->change_field_type($table, $field);
+
+        // Hybridteaching savepoint reached.
+        upgrade_mod_savepoint(true, '2023031700.30', 'hybridteaching');
+    }
+
+    if ($oldversion < '2023031700.31') {
+
+        // Rename field categories on table hybridteaching_configs to NEWNAMEGOESHERE.
+        $table = new xmldb_table('hybridteaching');
+        $field = new xmldb_field('undatedsession', XMLDB_TYPE_INTEGER, 1, null, null, null, null, 'sessionscheduling');
+
+        // Launch rename field categories.
+        $dbman->rename_field($table, $field, 'reusesession');
+
+        // Hybridteaching savepoint reached.
+        upgrade_mod_savepoint(true, '2023031700.31', 'hybridteaching');
+    }
+
+    if ($oldversion < '2023031700.32') {
+        $table = new xmldb_table('hybridteaching_session');
+        $field = new xmldb_field('processedrecording', XMLDB_TYPE_INTEGER, 11, null, null, null, null, 'vcreference');
+
+        // Launch change of type for field categories.
+        $dbman->change_field_type($table, $field);
+
+        // Hybridteaching savepoint reached.
+        upgrade_mod_savepoint(true, '2023031700.32', 'hybridteaching');
+    }
+
     return true;
 }

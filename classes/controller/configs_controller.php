@@ -79,7 +79,12 @@ class configs_controller extends common_controller {
         $config->configname = $data->configname;
         $config->type = $this->hybridobject->type;
         $config->subplugintype = $this->splugindir;
-        $config->category = $data->category;
+        if (!empty($data->categories)) {
+            $categories = explode(",", $data->categories);
+            $config->categories = json_encode($categories);
+        } else {
+            $config->categories = 0;
+        }
         $config->version = $plugin->version;
         $config->visible = 1;
         $config->timecreated = time();
@@ -104,7 +109,12 @@ class configs_controller extends common_controller {
         $config = new stdClass();
         $config->id = $data->id;
         $config->configname = $data->configname;
-        $config->category = $data->category;
+        if (!empty($data->categories)) {
+            $categories = explode(",", $data->categories);
+            $config->categories = json_encode($categories);
+        } else {
+            $config->categories = 0;
+        }
         $config->timemodified = time();
         $config->modifiedby = $USER->id;
         if (!$DB->update_record('hybridteaching_configs', $config)) {
@@ -175,7 +185,7 @@ class configs_controller extends common_controller {
             $inparams = array_merge($inparams, $params);
         }
 
-        $categoriescond = $this->get_categories_conditions($params);
+        $categoriescond = $this->get_categories_conditions($params, $subenabled);
         $incategories = '';
         $categoriesparams = [];
         if (!empty($categoriescond)) {
@@ -190,8 +200,6 @@ class configs_controller extends common_controller {
 
         $sql = "SELECT hi.*
                   FROM {hybridteaching_configs} hi
-            LEFT JOIN {course_categories} c
-                    ON hi.category = c.id
                  WHERE hi.type $insql $conditions $incategories
               ORDER BY hi.visible DESC, hi.sortorder, hi.id";
         $configs = $DB->get_records_sql($sql, $inparams);
@@ -199,7 +207,6 @@ class configs_controller extends common_controller {
 
         // Insert if subplugin is enabled or disabled.
         foreach ($configsarray as $key => $element) {
-
             if (isset($subenabled[$element['type']]) && $subenabled[$element['type']] == 1) {
                 $configsarray[$key]['configenabled'] = true;
                 $element['configenabled'] = true;
@@ -265,46 +272,42 @@ class configs_controller extends common_controller {
      *               - conditions: The SQL conditions for filtering categories.
      *               - inparams: An array of values to be used as parameters in the SQL conditions.
      */
-    public function get_categories_conditions($params) {
+    public static function get_categories_conditions($params, $subenabled = null) {
+        global $DB;
         $conditions = '';
+        $configsavailable = [];
+        $configscategory = [];
         $inparams = [];
 
         if (isset($params['category'])) {
-            if (get_config('hybridteaching', 'configsubcategories')) {
-                $conditionscategory = $this->get_subcategories($params['category']);
-                $conditions .= " AND category " . $conditionscategory['insql'];
-                $inparams = $inparams + $conditionscategory['inparams'];
+            $configs = $DB->get_records('hybridteaching_configs', ['visible' => 1]);
+
+            if (!empty($subenabled)) {
+                foreach ($configs as $key => $element) {
+                    if (isset($subenabled[$element->type]) && $subenabled[$element->type] == 1) {
+                        $configsavailable[] = ['id' => $element->id, 'categories' => $element->categories];
+                    }
+                }    
+                
+                foreach ($configsavailable as $config) {
+                    if ($config['categories'] == 0 || in_array($params['category'], json_decode($config['categories']))) {
+                        $configscategory[] = $config['id'];
+                    }
+                }
             } else {
-                $conditions .= " AND (category = ? OR category = ?)";
-                $inparams = [$params['category'], "0"];
+                foreach ($configs as $config) {
+                    if ($config->categories == 0 || in_array($params['category'], json_decode($config->categories))) {
+                        $configscategory[] = $config->id;
+                    }
+                }
+            }
+
+            if (!empty($configscategory)) {
+                [$insql, $inparams] = $DB->get_in_or_equal($configscategory);
+                $conditions = " AND hi.id " . $insql;
             }
         }
 
         return ['conditions' => $conditions, 'inparams' => $inparams];
-    }
-
-    /**
-     * Retrieves the sql and params from subcategories for a given category.
-     *
-     * @param mixed $category The ID of the category.
-     * @throws Some_Exception_Class A description of the exception that can be thrown.
-     * @return array An array containing the SQL and parameters for retrieving the subcategories.
-     */
-    public function get_subcategories($category) {
-        global $DB;
-
-        if (!empty($category)) {
-            $params = ['id' => $category, 'visible' => 1];
-            $path = $DB->get_field('course_categories', 'path', $params);
-            $superiorcategories = strpos($path, $category);
-            if ($superiorcategories !== false) {
-                $superiorcategories = substr($path, 1, $superiorcategories + strlen($category));
-                $patharray = explode("/", $superiorcategories);
-                // Add all option.
-                array_push($patharray, "0");
-                [$insql, $inparams] = $DB->get_in_or_equal($patharray);
-                return ['insql' => $insql, 'inparams' => $inparams];
-            }
-        }
     }
 }

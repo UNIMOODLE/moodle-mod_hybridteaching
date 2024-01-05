@@ -51,3 +51,8 @@ $string['downloadrecordszoom'] = 'Descargar grabaciones Zoom';
 $string['maxdownloadattempts'] = 'Num. máximo de intentos de descarga de grabaciones';
 $string['maxdownloadattempts_help'] = 'Cuando se haya intentado descargar esta cantidad máxima de intentos se detendrán los intentos de desacarga';
 $string['chatnamefile'] = 'Chat de la reunión';
+$string['recordingnotdownload'] ='Cannot download recording from courseid {$a->course}: \'{$a->name}\'';
+
+$string['zoom:view'] = 'Ver Zoom';
+$string['zoom:use'] = 'Generar videconferencias Zoom';
+$string['zoom:record'] = 'Almacenar grabaciones Zoom';
