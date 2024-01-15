@@ -50,6 +50,7 @@ $hybridteaching->context = $context;
 $url = new moodle_url('/mod/hybridteaching/attendance.php', ['id' => $id, 'editing' => 1]);
 $attendancerender = new hybridteaching_attendance_render($hybridteaching);
 
+$PAGE->navbar->add(get_string('attendance', 'hybridteaching'));
 $PAGE->set_url($url);
 $PAGE->set_title(format_string($hybridteaching->name));
 $PAGE->set_heading(format_string($course->fullname));

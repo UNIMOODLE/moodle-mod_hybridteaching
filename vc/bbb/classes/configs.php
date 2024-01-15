@@ -42,7 +42,6 @@ class configs {
         $records = new stdClass();
         $records->serverurl = $data->serverurl;
         $records->sharedsecret = $data->sharedsecret;
-        $records->pollinterval = $data->pollinterval;
         $records->timecreated = time();
         $records->createdby = $USER->id;
         $id = $DB->insert_record('hybridteachvc_bbb_config', $records);
@@ -55,7 +54,6 @@ class configs {
         $records->id = $data->subpluginconfigid;
         $records->serverurl = $data->serverurl;
         $records->sharedsecret = $data->sharedsecret;
-        $records->pollinterval = $data->pollinterval;
         $records->timemodified = time();
         $records->modifiedby = $USER->id;
         $DB->update_record('hybridteachvc_bbb_config', $records);

@@ -67,6 +67,7 @@ if ($hassiteconfig) {
             ''
         ));
 
+        $timeunits = array("0" => new lang_string('hours'), "1" => new lang_string('minutes'), "2" => new lang_string('seconds'));
         $name = new lang_string('defaultsettings', 'mod_hybridteaching');
         $description = new lang_string('defaultsettings_help', 'hybridteaching');
         $generalsettings->add(new admin_setting_heading('defaultsettings', $name, $description));
@@ -93,47 +94,96 @@ if ($hassiteconfig) {
             new lang_string('userecordvc', 'hybridteaching'),
             new lang_string('userecordvc_help', 'hybridteaching'), 1);
         $generalsettings->add($userecordvc);
+        $userecordvc->set_locked_flag_options(admin_setting_flag::ENABLED, false);
+        $userecordvc->add_dependent_on(new lang_string('usevideoconference', 'hybridteaching'));
         
         $name = new lang_string('sessionssettings', 'mod_hybridteaching');
         $description = new lang_string('sessionssettings_help', 'hybridteaching');
         $generalsettings->add(new admin_setting_heading('sessionssettings', $name, $description));
         
         $sessionscheduling = (new admin_setting_configcheckbox('hybridteaching/sessionscheduling',
-            get_string('sessionscheduling', 'hybridteaching'), get_string('sessionscheduling_desc', 'hybridteaching'), 0));
+            new lang_string('sessionscheduling', 'hybridteaching'), new lang_string('sessionscheduling_desc', 'hybridteaching'), 0));
         $sessionscheduling->set_locked_flag_options(admin_setting_flag::ENABLED, false);
         $generalsettings->add($sessionscheduling);
         
         $reusesession = (new admin_setting_configcheckbox('hybridteaching/reusesession',
-            get_string('reusesession', 'hybridteaching'), get_string('reusesession_desc', 'hybridteaching'), 0));
+            new lang_string('reusesession', 'hybridteaching'), new lang_string('reusesession_desc', 'hybridteaching'), 0));
         $reusesession->set_locked_flag_options(admin_setting_flag::ENABLED, false);
         $generalsettings->add($reusesession);
 
+        $advanceentrycount = (new admin_setting_configtext('hybridteaching/advanceentrycount',
+            new lang_string('advanceentrycount', 'hybridteaching'), new lang_string('advanceentrycount_help', 'hybridteaching'), 10, PARAM_INT));
+        $advanceentrycount->set_locked_flag_options(admin_setting_flag::ENABLED, false);
+        $advanceentrycount->add_dependent_on(new lang_string('sessionscheduling', 'hybridteaching'));
+
+        $advanceentryunit = (new admin_setting_configselect('hybridteaching/advanceentryunit',
+            new lang_string('advanceentryunit', 'hybridteaching'), new lang_string('advanceentryunit_help', 'hybridteaching'), 1, $timeunits));
+        $advanceentryunit->set_locked_flag_options(admin_setting_flag::ENABLED, false);
+
+        $generalsettings->add($advanceentrycount);
+        $generalsettings->add($advanceentryunit);
+
+        $closedoorscount = (new admin_setting_configtext('hybridteaching/closedoorscount',
+            new lang_string('closedoorscount', 'hybridteaching'), new lang_string('closedoorscount_help', 'hybridteaching'), 10, PARAM_INT));
+        $closedoorscount->set_locked_flag_options(admin_setting_flag::ENABLED, false);
+
+        $closedoorsunit = (new admin_setting_configselect('hybridteaching/closedoorsunit',
+            new lang_string('closedoorsunit', 'hybridteaching'), new lang_string('closedoorsunit_help', 'hybridteaching'), 1, $timeunits));
+        $closedoorsunit->set_locked_flag_options(admin_setting_flag::ENABLED, false);
+
+        $generalsettings->add($closedoorscount);
+        $generalsettings->add($closedoorsunit);
+
         $waitmoderator = (new admin_setting_configcheckbox('hybridteaching/waitmoderator',
-            get_string('waitmoderator', 'hybridteaching'), get_string('waitmoderator_desc', 'hybridteaching'), 0));
+            new lang_string('waitmoderator', 'hybridteaching'), new lang_string('waitmoderator_desc', 'hybridteaching'), 0));
         $waitmoderator->set_locked_flag_options(admin_setting_flag::ENABLED, false);
         $generalsettings->add($waitmoderator);
 
         $userslimit = new admin_setting_configtext('hybridteaching/userslimit',
-        get_string('userslimit', 'hybridteaching'), get_string('userslimit_desc', 'hybridteaching'), 300, PARAM_INT, 6);
+        new lang_string('userslimit', 'hybridteaching'), new lang_string('userslimit_desc', 'hybridteaching'), 300, PARAM_INT);
         $userslimit->set_locked_flag_options(admin_setting_flag::ENABLED, false);
         $generalsettings->add($userslimit);
+
+        $graceperiod = (new admin_setting_configtext('hybridteaching/graceperiod',
+        new lang_string('graceperiod', 'hybridteaching'), new lang_string('graceperiod_help', 'hybridteaching'), 10, PARAM_INT));
+        $graceperiod->set_locked_flag_options(admin_setting_flag::ENABLED, false);
+
+        $graceperiodunit = (new admin_setting_configselect('hybridteaching/graceperiodunit',
+        new lang_string('graceperiodunit', 'hybridteaching'), new lang_string('graceperiodunit_help', 'hybridteaching'), 1, $timeunits));
+        $graceperiodunit->set_locked_flag_options(admin_setting_flag::ENABLED, false);
+
+        $generalsettings->add($graceperiod);
+        $generalsettings->add($graceperiodunit);
 
         $name = new lang_string('attendancesettings', 'mod_hybridteaching');
         $description = new lang_string('attendancesettings_help', 'hybridteaching');
         $generalsettings->add(new admin_setting_heading('attendancesettings', $name, $description));
 
+        $validateattendance = (new admin_setting_configtext('hybridteaching/validateattendance',
+        new lang_string('validateattendance', 'hybridteaching'), new lang_string('validateattendance_help', 'hybridteaching'), 10, PARAM_INT));
+        $validateattendance->set_locked_flag_options(admin_setting_flag::ENABLED, false);
+
+        $attendanceunit = (new admin_setting_configselect('hybridteaching/attendanceunit',
+        new lang_string('attendanceunit', 'hybridteaching'), new lang_string('attendanceunit_help', 'hybridteaching'), 1, [
+            0 => 'hours', 1 => 'minutes', 2 => 'seconds', 3 => '%',
+        ]));
+        $attendanceunit->set_locked_flag_options(admin_setting_flag::ENABLED, false);
+
+        $generalsettings->add($validateattendance);
+        $generalsettings->add($attendanceunit);
+
         $useqr = (new admin_setting_configcheckbox('hybridteaching/useqr',
-            get_string('useqr', 'hybridteaching'), get_string('useqr_desc', 'hybridteaching'), 0));
+            new lang_string('useqr', 'hybridteaching'), new lang_string('useqr_desc', 'hybridteaching'), 0));
         $useqr->set_locked_flag_options(admin_setting_flag::ENABLED, false);
         $generalsettings->add($useqr);
 
         $rotateqr = (new admin_setting_configcheckbox('hybridteaching/rotateqr',
-            get_string('rotateqr', 'hybridteaching'), get_string('rotateqr_desc', 'hybridteaching'), 0));
+            new lang_string('rotateqr', 'hybridteaching'), new lang_string('rotateqr_desc', 'hybridteaching'), 0));
         $rotateqr->set_locked_flag_options(admin_setting_flag::ENABLED, false);
         $generalsettings->add($rotateqr);
 
         $studentpassword = (new admin_setting_configpasswordunmask('hybridteaching/studentpassword',
-            get_string('studentpassword', 'hybridteaching'), get_string('studentpassword_desc', 'hybridteaching'), PARAM_TEXT));
+            new lang_string('studentpassword', 'hybridteaching'), new lang_string('studentpassword_desc', 'hybridteaching'), PARAM_TEXT));
         $studentpassword->set_locked_flag_options(admin_setting_flag::ENABLED, false);
         $generalsettings->add($studentpassword);
 

@@ -68,13 +68,11 @@ class htbbb_config_edit_form extends moodleform {
         $mform->addRule('configname', null, 'maxlength', 255, 'client');
 
         $mform->addElement('header', 'subplugin', get_string('pluginname', 'hybridteachvc_bbb'));
-        $mform->addElement('text', 'serverurl', get_string('serverurl', 'hybridteachvc_bbb'));
-        $mform->addElement('text', 'sharedsecret', get_string('sharedsecret', 'hybridteachvc_bbb'));
-        $mform->addElement('text', 'pollinterval', get_string('pollinterval', 'hybridteachvc_bbb'));
+        $mform->addElement('text', 'serverurl', get_string('serverurl', 'hybridteachvc_bbb'), ['size' => 60]);
+        $mform->addElement('passwordunmask', 'sharedsecret', get_string('sharedsecret', 'hybridteachvc_bbb'));
 
         $mform->setType('serverurl', PARAM_TEXT);
         $mform->setType('sharedsecret', PARAM_TEXT);
-        $mform->setType('pollinterval', PARAM_TEXT);
 
         $mform->addRule('serverurl', null, 'required', null, 'client');
         $mform->addRule('sharedsecret', null, 'required', null, 'client');

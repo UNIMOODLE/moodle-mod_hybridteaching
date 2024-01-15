@@ -249,7 +249,7 @@ class hybridteaching_attendance_render extends \table_sql implements dynamic_tab
              ['sesskey' => sesskey(), 'view' => $view, 'sessionid' => $sessionid]);
 
         $operator = $this->get_operator();
-        $attendancecount = $attendancecontroller->count_attendance( $fname, $lname, $selectedsession, $params, $operator);
+        $attendancecount = 0;
         $returnurl = new moodle_url('/mod/hybridteaching/attendance.php?id='.$this->cm->id.'');
         if ($view == 'attendlog') {
             $buildparams = ['attid' => $attid, 'h' => $hybridteachingid, 'id' => $id,
@@ -270,6 +270,7 @@ class hybridteaching_attendance_render extends \table_sql implements dynamic_tab
             $attendancelist = $attendancecontroller->load_attendance($page, $perpage, $params, $extrasql,
                 $operator, $sort, $dir, $view, $sessionid, $fname, $lname);
             $attendanceassist = $attendancecontroller->load_attendance_assistance($params, $extrasql, $operator);
+            $attendancecount = $attendancecontroller->count_attendance( $fname, $lname, $selectedsession, $params, $operator);
         }
         $view == 'studentattendance' ? $baseurl = new moodle_url('/mod/hybridteaching/attendance.php?view=' .
             $view, ['id' => $id, 'sort' => $sort, 'dir' => $dir, 'perpage' => $perpage,
@@ -976,11 +977,8 @@ class hybridteaching_attendance_render extends \table_sql implements dynamic_tab
         $attuser = $attendancecontroller->load_sessions_attendant($participation);
         $userpicture = $OUTPUT->user_picture($attuser);
         $attendanceid = $attid;
-        $roundedgrade = null;
-        if (isset($usertotalgrade->items[0])) {
-            $gradevalue = $usertotalgrade->items[0]->grades[$participation->userid]->grade;
-            $roundedgrade = ($gradevalue !== null) ? round($gradevalue, 2) : null;
-        }
+        $gradevalue = $usertotalgrade->items[0]->grades[$participation->userid]->grade;
+        $roundedgrade = ($gradevalue !== null) ? round($gradevalue, 2) : null;
         $body = [
             'class' => '',
             'pfp' => $userpicture,
@@ -1145,8 +1143,8 @@ class hybridteaching_attendance_render extends \table_sql implements dynamic_tab
             }
         }
         // Add filters.
-        if (isset($attresume)) {
-            $attresume->display();
+        if (isset($attresumee)) {
+            $attresumee->display();
         }
         $optionsform->display();
         if (isset($sessionoptions) && $editing) {

@@ -42,17 +42,6 @@ function xmldb_hybridteaching_upgrade($oldversion) {
     global $DB, $CFG;
     $dbman = $DB->get_manager(); // Loads ddl manager and xmldb classes.
 
-    if ($oldversion < '2023031700.19') {
-        $table = new xmldb_table('hybridteachvc_meet');
-        $field = new xmldb_field('url', XMLDB_TYPE_CHAR, '255', null, XMLDB_NOTNULL, null, null, 'htsession');
-
-        // Launch rename field joinurl.
-        $dbman->rename_field($table, $field, 'joinurl');
-
-        // Meet savepoint reached.
-        upgrade_plugin_savepoint(true, '2023033100.03', 'hybridteachvc', 'meet');
-    }
-
     if ($oldversion < '2023031700.21') {
         $table = new xmldb_table('hybridteaching_session');
         $field = new xmldb_field('visiblerecord', XMLDB_TYPE_INTEGER, '1', null, null, null, '1', 'storagereference');
@@ -134,6 +123,32 @@ function xmldb_hybridteaching_upgrade($oldversion) {
 
         // Hybridteaching savepoint reached.
         upgrade_mod_savepoint(true, '2023031700.32', 'hybridteaching');
+    }
+
+    if ($oldversion < '2023031700.33') {
+        $table = new xmldb_table('hybridteaching_session');
+        $field = new xmldb_field('visiblechat', XMLDB_TYPE_INTEGER, '1', null, null, null, '1', 'visiblerecord');
+
+        // Conditionally launch add field visible.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Hybridteaching savepoint reached.
+        upgrade_mod_savepoint(true, '2023031700.33', 'hybridteaching');
+    }
+
+
+    if ($oldversion < '2023031700.33') {
+        $table = new xmldb_table('hybridteachvc_meet');
+        $field = new xmldb_field('url', XMLDB_TYPE_CHAR, '255', null, XMLDB_NOTNULL, null, null, 'htsession');
+
+        if ($dbman->field_exists($table, $field)) {
+            $dbman->rename_field($table, $field, 'joinurl');
+
+            // Meet savepoint reached.
+            upgrade_plugin_savepoint(true, '2023031700.33', 'hybridteachvc', 'meet');
+        }
     }
 
     return true;

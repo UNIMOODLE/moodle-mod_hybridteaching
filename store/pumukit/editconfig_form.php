@@ -70,9 +70,9 @@ class htpumukit_config_edit_form extends moodleform {
         $mform->addRule('configname', null, 'maxlength', 255, 'client');
 
         $mform->addElement('header', 'subplugin', get_string('pluginname', 'hybridteachstore_pumukit'));
-        $mform->addElement('text', 'url', get_string('url', 'hybridteachstore_pumukit'));
-        $mform->addElement('text', 'user', get_string('user', 'hybridteachstore_pumukit'));
-        $mform->addElement('text', 'secret', get_string('secret', 'hybridteachstore_pumukit'));
+        $mform->addElement('text', 'url', get_string('url', 'hybridteachstore_pumukit'), ['size' => 40]);
+        $mform->addElement('text', 'user', get_string('user', 'hybridteachstore_pumukit'), ['size' => 40]);
+        $mform->addElement('passwordunmask', 'secret', get_string('secret', 'hybridteachstore_pumukit'), ['size' => 40]);
 
         $mform->setType('url', PARAM_TEXT);
         $mform->setType('user', PARAM_TEXT);

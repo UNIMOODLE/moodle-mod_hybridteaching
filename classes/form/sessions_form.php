@@ -158,12 +158,12 @@ class sessions_form extends moodleform {
             $mform->addElement('date_selector', 'sessionenddate', get_string('repeatuntil', 'hybridteaching'),
                 $attributes);
             $mform->disabledIf('sessionenddate', 'addmultiply', 'notchecked');
-        }
 
-        $mform->addElement('header', 'headeradotheroptions', get_string('otheroptions', 'hybridteaching'));
-        $mform->addElement('checkbox', 'replicatedoc', '', get_string('replicatedoc', 'hybridteaching'));
-        $mform->setDefault('replicatedoc', '1');
-        $mform->addElement('checkbox', 'caleneventpersession', '', get_string('caleneventpersession', 'hybridteaching'));
+            $mform->addElement('header', 'headeradotheroptions', get_string('otheroptions', 'hybridteaching'));
+            $mform->addElement('checkbox', 'replicatedoc', '', get_string('replicatedoc', 'hybridteaching'));
+            $mform->setDefault('replicatedoc', '1');
+            $mform->addElement('checkbox', 'caleneventpersession', '', get_string('caleneventpersession', 'hybridteaching'));
+        }
 
         if (empty($session)) {
             $this->add_action_buttons(true, get_string('add'));

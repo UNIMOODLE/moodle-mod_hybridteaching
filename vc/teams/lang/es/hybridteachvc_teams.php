@@ -48,5 +48,5 @@ $string['teams:use'] = 'Generar videconferencias Teams';
 $string['teams:record'] = 'Almacenar grabaciones Teams';
 
 $string['recordingnotfound'] = 'No se encontró la grabación en el curso {$a->course}: \'{$a->name}\'  con meetingid: {$a->meetingid}';
-$string['recordingnotdownload'] ='No se pudo descargar la grabación en el curso {$a->course} : \'{$a->name}\' con meetingid {$a->meetingid}';
-$string['recordingnoexists'] ='No existe grabación en el curso  {$a->course} : \'{$a->name}\' con meetingid {$a->meetingid}';
+$string['recordingnotdownload'] = 'No se pudo descargar la grabación en el curso {$a->course} : \'{$a->name}\' con meetingid {$a->meetingid}';
+$string['recordingnoexists'] = 'No existe grabación en el curso  {$a->course} : \'{$a->name}\' con meetingid {$a->meetingid}';

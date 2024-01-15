@@ -222,7 +222,9 @@ const useVCRecord = async(e = ELEMENT_SELECTOR.useVCRecord()) => {
                 document.getElementById('id_sectiongeneralcontainer').appendChild(capnode);
             }
         } else {
-            ELEMENT_SELECTOR.useVCRecord().removeAttribute('disabled');
+            if (!ELEMENT_SELECTOR.useVCRecord().closest('.fitem').querySelector('.fa-lock')) {
+                ELEMENT_SELECTOR.useVCRecord().removeAttribute('disabled');
+            }
             if (document.getElementById('norecordingcap') !== null && ELEMENT_SELECTOR.useVC().checked) {
                 document.getElementById('norecordingcap').setAttribute('style', 'display:none');
             }

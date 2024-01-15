@@ -70,11 +70,11 @@ class htonedrive_config_edit_form extends moodleform {
         $mform->addRule('configname', null, 'maxlength', 255, 'client');
 
         $mform->addElement('header', 'subplugin', get_string('pluginname', 'hybridteachstore_onedrive'));
-        $mform->addElement('text', 'tenantid', get_string('tenantid', 'hybridteachstore_onedrive'));
-        $mform->addElement('text', 'clientid', get_string('clientid', 'hybridteachstore_onedrive'));
-        $mform->addElement('text', 'clientsecret', get_string('clientsecret', 'hybridteachstore_onedrive'));
-        $mform->addElement('text', 'subdomain', get_string('subdomain', 'hybridteachstore_onedrive'));
-        $mform->addElement('text', 'useremail', get_string('useremail', 'hybridteachstore_onedrive'));
+        $mform->addElement('text', 'tenantid', get_string('tenantid', 'hybridteachstore_onedrive'), ['size' => 40]);
+        $mform->addElement('text', 'clientid', get_string('clientid', 'hybridteachstore_onedrive'), ['size' => 40]);
+        $mform->addElement('passwordunmask', 'clientsecret', get_string('clientsecret', 'hybridteachstore_onedrive'), ['size' => 40]);
+        $mform->addElement('text', 'subdomain', get_string('subdomain', 'hybridteachstore_onedrive'), ['size' => 30]);
+        $mform->addElement('text', 'useremail', get_string('useremail', 'hybridteachstore_onedrive'), ['size' => 40]);
 
         $mform->setType('tenantid', PARAM_TEXT);
         $mform->setType('clientid', PARAM_TEXT);

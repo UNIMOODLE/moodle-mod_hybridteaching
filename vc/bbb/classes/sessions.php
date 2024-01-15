@@ -205,7 +205,7 @@ class sessions {
     public function load_bbb_config($configid) {
         global $DB;
 
-        $sql = "SELECT bi.serverurl, bi.sharedsecret, bi.pollinterval
+        $sql = "SELECT bi.serverurl, bi.sharedsecret
                   FROM {hybridteaching_configs} hi
                   JOIN {hybridteachvc_bbb_config} bi ON bi.id = hi.subpluginconfigid
                  WHERE hi.id = :configid AND hi.visible = 1";

@@ -146,7 +146,12 @@ class teams_handler {
         $allowattendeetoenablecamera = $ht->disablecam ? false : true;
         $allowattendeetoenablemic = $ht->disablemic ? false : true;
         $allowmeetingchat = $ht->disablepublicchat ? 'disabled' : 'enabled';
-        if ($ht->userecordvc && $ht->initialrecord) {
+
+        // Get instance context.
+        $cm = get_coursemodule_from_instance ('hybridteaching', $ht->id);
+        $context = \context_module::instance($cm->id);
+
+        if ($ht->userecordvc && $ht->initialrecord && has_capability('hybridteachvc/teams:record', $context)) {
             $recordautomatically = true;
         } else {
             $recordautomatically = false;
@@ -315,6 +320,13 @@ class teams_handler {
                 'isDialInBypassEnabled' => false,
             ],
         ];
+
+        $allowrecording = false;
+        if (has_capability('hybridteachvc/teams:record', $context)) {
+            $allowrecording = true;
+        }
+        $data['allowRecording'] = $allowrecording;
+
         if (!empty($participants)) {
             $data['allowedPresenters'] = 'roleIsPresenter';
             $data['participants'] = [
@@ -388,6 +400,7 @@ class teams_handler {
      * @return string $recordingid The id of the recording downloaded.
      */
     public function get_meeting_recordings ($folderfile, $meetingid, $organizerid, $course, $name) {
+        global $DB;
         $token = $this->refreshtoken();
         $graph = new Graph();
         $graph->setAccessToken($token);
@@ -401,30 +414,60 @@ class teams_handler {
                 ->setReturnType(Model\RecordingInfo::class)
                 ->execute();
         } catch (\Exception $e) {
-            mtrace(get_string('recordingnotfound', 'hybridteachvc_teams', ['course'=>$course, 'name' => $name, 'meetingid' => $meetingid]));
+            mtrace(get_string('recordingnotfound', 'hybridteachvc_teams',
+                [
+                    'course' => $course,
+                    'name' => $name,
+                    'meetingid' => $meetingid,
+                ]));
             return;
         }
         $result = json_decode(json_encode($graphresponse), true);
 
         if (empty($result)) {
-            mtrace(get_string('recordingnoexists', 'hybridteachvc_teams', ['course'=>$course, 'name' => $name, 'meetingid' => $meetingid]));
+            mtrace(get_string('recordingnoexists', 'hybridteachvc_teams',
+            [
+                'course' => $course,
+                'name' => $name,
+                'meetingid' => $meetingid,
+            ]));
         }
         $count = 0;
+
         foreach ($result as $rec) {
             if (isset($rec['id'])) {
-                $count++;
-                $pathfile = $folderfile.'-'.$count.'.mp4';
-                $recordingid = $rec['id'];
-                try {
-                    // Connect to recordingContentUrl to download.
-                    $graphresponse = $graph
-                        ->setApiVersion("beta")
-                        ->createRequest("GET", $urlrequest."/onlineMeetings/$meetingid/recordings/$recordingid/content")
-                        ->download($pathfile);
-                } catch (\Exception $e) {
-                    mtrace(get_string('recordingnotdownload', 'hybridteachvc_teams', ['course'=>$course, 'name' => $name, 'meetingid' => $meetingid]));
+                // This $download is for various recordings in the same meetingid: for reuse the url meeting.
+                $recorders = $DB->get_records ('hybridteachvc_teams', ['meetingid' => $meetingid], '', 'id, recordingid');
+                $download = true;
+                foreach ($recorders as $recorder) {
+                    // If is the same recordingid, is already download. So, dont download.
+                    if ($rec['id'] == $recorder->recordingid) {
+                        $download = false;
+                        break;
+                    }
                 }
-                $result = json_decode(json_encode($graphresponse), true);
+                if ($download) {
+                    $count++;
+                    $pathfile = $folderfile.'-'.$count.'.mp4';
+                    $recordingid = $rec['id'];
+                    try {
+                        // Connect to recordingContentUrl to download.
+                        $graphresponse = $graph
+                            ->setApiVersion("beta")
+                            ->createRequest("GET", $urlrequest."/onlineMeetings/$meetingid/recordings/$recordingid/content")
+                            ->download($pathfile);
+                    } catch (\Exception $e) {
+                        mtrace(get_string('recordingnotdownload', 'hybridteachvc_teams',
+                            [
+                                'course' => $course,
+                                'name' => $name,
+                                'meetingid' => $meetingid,
+                            ]));
+                    }
+
+                    $result = json_decode(json_encode($graphresponse), true);
+                    break;
+                }
             }
         }
 

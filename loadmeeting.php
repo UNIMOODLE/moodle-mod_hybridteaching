@@ -170,7 +170,8 @@ if (!empty($sid)) {
                 $url = $resultsaccess['url'];
                 $ishost = $resultsaccess['ishost'];
             } else {
-                if (has_capability('mod/hybridteaching:sessionsactions', $modulecontext)) {
+                if (has_capability('mod/hybridteaching:sessionsactions', $modulecontext) ||
+                        roles::is_moderator($modulecontext, json_decode($hybridteaching->participants, true), $USER->id)) {
                     if ($activesession = $DB->get_record('hybridteaching_session', ['id' => $session->id], '*', MUST_EXIST)) {
                         // If must save recordings, save the id of storage.
                         if ($activesession->userecordvc) {

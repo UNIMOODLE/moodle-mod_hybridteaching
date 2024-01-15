@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - https://moodle.org/
+// This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -12,7 +12,7 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 // Project implemented by the "Recovery, Transformation and Resilience Plan.
 // Funded by the European Union - Next GenerationEU".
@@ -21,6 +21,7 @@
 // Valladolid, Complutense de Madrid, UPV/EHU, León, Salamanca,
 // Illes Balears, Valencia, Rey Juan Carlos, La Laguna, Zaragoza, Málaga,
 // Córdoba, Extremadura, Vigo, Las Palmas de Gran Canaria y Burgos.
+
 /**
  * Display information about all the mod_hybridteaching modules in the requested course. *
  * @package    mod_hybridteaching
@@ -29,13 +30,27 @@
  * @author     ISYC <soporte@isyc.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-defined('MOODLE_INTERNAL') || die();
 
-$plugin->component = 'hybridteachvc_bbb';
-$plugin->release = '0.1.0';
-$plugin->version = 2023033100.15;
-$plugin->requires = 2022041900;
-$plugin->maturity = MATURITY_ALPHA;
-$plugin->dependencies = [
-    'mod_bigbluebuttonbn' => 2022112800,
-];
+/**
+ * Execute hybridteachvc_zoom upgrade from the given old version.
+ *
+ * @param int $oldversion
+ * @return bool
+ */
+
+function xmldb_hybridteachvc_bbb_upgrade($oldversion) {
+    global $DB;
+    $dbman = $DB->get_manager(); // Loads ddl manager and xmldb classes.
+
+    if ($oldversion < '2023033100.15') {
+
+        // Delete old field exitsonzoom on hybridteachvc_zoom.
+        $table = new xmldb_table('hybridteachvc_bbb_config');
+        $field = new xmldb_field('pollinterval', XMLDB_TYPE_INTEGER, '1');
+        if ($dbman->field_exists($table, $field)) {
+            $dbman->drop_field($table, $field);
+        }
+    }
+
+    return true;
+}

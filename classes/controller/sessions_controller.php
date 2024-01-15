@@ -744,8 +744,8 @@ class sessions_controller extends common_controller {
      */
     public static function get_subpluginstorage_class($storagereference) {
         global $DB;
-        $sql = 'SELECT type FROM {hybridteaching_configs}
-            WHERE id = :storagereference AND subplugintype = "store"';
+        $sql = "SELECT type FROM {hybridteaching_configs}
+            WHERE id = :storagereference AND subplugintype = 'store'";
         $object = $DB->get_record_sql($sql, ['storagereference' => $storagereference]);
 
         if ($object->type) {
@@ -810,6 +810,20 @@ class sessions_controller extends common_controller {
             $DB->update_record('hybridteaching_session', $session);
         } else {
             $session->visiblerecord = 1;
+            $DB->update_record('hybridteaching_session', $session);
+        }
+    }
+
+
+    public static function set_chat_visibility($sessid) {
+        global $DB;
+
+        $session = $DB->get_record('hybridteaching_session', ['id' => $sessid]);
+        if ($session->visiblechat == 1) {
+            $session->visiblechat = 0;
+            $DB->update_record('hybridteaching_session', $session);
+        } else {
+            $session->visiblechat = 1;
             $DB->update_record('hybridteaching_session', $session);
         }
     }

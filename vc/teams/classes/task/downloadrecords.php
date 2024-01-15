@@ -57,7 +57,8 @@ class downloadrecords extends \core\task\scheduled_task {
                   FROM {hybridteaching_session} hs
             INNER JOIN {hybridteachvc_teams} teams ON teams.htsession = hs.id
             INNER JOIN {hybridteaching} ht ON ht.id = hs.hybridteachingid
-                 WHERE hs.typevc = 'teams' AND hs.userecordvc = 1 AND hs.processedrecording = -1";
+                 WHERE hs.typevc = 'teams' AND hs.userecordvc = 1 AND hs.processedrecording = -1
+                 AND teams.recordingid IS NULL";
         $download = $DB->get_records_sql($sql);
 
         foreach ($download as $session) {
@@ -69,21 +70,23 @@ class downloadrecords extends \core\task\scheduled_task {
             $folderfile = $folder."/".$session->htid."-".$session->hsid;
 
             $teamsconfig = $sessionconfig->load_teams_config($session->config);
-            if ($teamsconfig == false){
+            if ($teamsconfig == false) {
                 continue;
             }
 
             $teamshandler = new teams_handler($teamsconfig);
 
             // Call to download recordings.
-            $responserecording = $teamshandler->get_meeting_recordings($folderfile, $session->meetingid, $session->organizer, $session->course, $session->name);
+            $responserecording = $teamshandler->get_meeting_recordings ($folderfile, $session->meetingid, $session->organizer,
+                $session->course, $session->name);
+
             // Call to get meeting chatinfo urls.
             $responsechat = $teamshandler->getchatmeetingurl($session->meetingid, $session->organizer);
 
             // Save recordingid and prepare to upload.
             $sess = $DB->get_record('hybridteaching_session', ['id' => $session->hsid]);
 
-            $teams = $DB->get_record('hybridteachvc_teams', ['meetingid' => $session->meetingid] );
+            $teams = $DB->get_record('hybridteachvc_teams', ['meetingid' => $session->meetingid, 'htsession' => $session->hsid] );
             if ($responserecording != false) {
                 $teams->recordingid = $responserecording;
                 $sess->processedrecording = 0;

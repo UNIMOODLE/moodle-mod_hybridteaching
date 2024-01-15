@@ -17,7 +17,13 @@ Feature: A student join a videoconference in a hybridteaching activity
       | teacher1 | testhybridteaching | editingteacher |
       | student1 | testhybridteaching | student |
     When I log in as "admin"
-    And I navigate to "Plugins > Manage videoconference settings" in site administration
+    And I wait "2" seconds
+    And I click on "Site administration" "link"
+    And I wait "1" seconds
+    And I click on "Plugins" "link"
+    And I wait "1" seconds
+    And I click on "Manage videoconference settings" "link"
+    And I wait "1" seconds
     And I select "Zoom" from the "jump" singleselect
     And I set the following fields to these values:
       | Config name  | Videoconference subplugin test |
@@ -41,6 +47,7 @@ Feature: A student join a videoconference in a hybridteaching activity
       | Name | hybridteaching example |
     And I select "Videoconference subplugin test (zoom)" from the "typevc" singleselect
     And I press "Save and display"
+    And I wait "1" seconds
     And I click on "Join videoconference" "button"
     And I wait "1" seconds
     And I switch to the main window
@@ -59,5 +66,6 @@ Feature: A student join a videoconference in a hybridteaching activity
     Given I log in as "student1"
     And I am on "testhybridteaching" course homepage
     When I click on "hybridteaching example" "link" in the "hybridteaching example" activity
+    And I wait "1" seconds
     Then I press "Join videoconference"
     And I wait "5" seconds

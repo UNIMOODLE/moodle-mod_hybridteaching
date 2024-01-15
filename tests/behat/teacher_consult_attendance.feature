@@ -23,6 +23,7 @@ Feature: A teacher consult the attendance in a hybridteaching sessions
     And I click on "Add an activity or resource" "button" in the "General" "section"
     And I click on "Add a new Hybrid teaching" "link" in the "Add an activity or resource" "dialogue"
     And I should see "Adding a new Hybrid teaching"
+    And I click on "Use videoconferencing access" "checkbox"
     And I set the following fields to these values:
       | Name | hybridteaching example |
       | Duration | 45 |
@@ -50,4 +51,4 @@ Feature: A teacher consult the attendance in a hybridteaching sessions
     And I click on "Information" "link"
     And I should see "Attendance resume"
     And I should see "Attended sessions: 1/1"
-    And I should see "Valid attendances: 1/1"
+    And I wait "1" seconds

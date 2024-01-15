@@ -88,6 +88,9 @@ switch ($action) {
     case 'visiblerecord':
         $sessioncontroller->set_record_visibility($sesionid);
         break;
+    case 'visiblechat':
+        $sessioncontroller->set_chat_visibility($sesionid);
+        break;
     case 'bulkupdateduration':
     case 'bulkupdatestarttime':
         $sessid = optional_param_array('session', '', PARAM_SEQUENCE);

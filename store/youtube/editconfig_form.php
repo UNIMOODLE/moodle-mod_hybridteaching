@@ -70,9 +70,9 @@ class htyoutube_config_edit_form extends moodleform {
         $mform->addRule('configname', null, 'maxlength', 255, 'client');
 
         $mform->addElement('header', 'subplugin', get_string('pluginname', 'hybridteachstore_youtube'));
-        $mform->addElement('text', 'clientid', get_string('clientid', 'hybridteachstore_youtube'));
-        $mform->addElement('text', 'clientsecret', get_string('clientsecret', 'hybridteachstore_youtube'));
-        $mform->addElement('text', 'emaillicense', get_string('emaillicense', 'hybridteachstore_youtube'));
+        $mform->addElement('text', 'clientid', get_string('clientid', 'hybridteachstore_youtube'), ['size' => 80]);
+        $mform->addElement('passwordunmask', 'clientsecret', get_string('clientsecret', 'hybridteachstore_youtube'), ['size' => 50]);
+        $mform->addElement('text', 'emaillicense', get_string('emaillicense', 'hybridteachstore_youtube'), ['size' => 40]);
 
         $mform->setType('clientid', PARAM_TEXT);
         $mform->setType('clientsecret', PARAM_TEXT);

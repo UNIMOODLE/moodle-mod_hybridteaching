@@ -82,7 +82,7 @@ class sessions {
         $teamsconfig = $this->load_teams_config($ht->config);
         if ($teamsconfig) {
             $teams = new teams_handler($teamsconfig);
-            if (!get_config('hybridteaching', 'reusesession')) {
+            if (!get_config('hybridteaching', 'reusesession') && $ht->reusesession == 0) {
                 try {
                     $response = $teams->createmeeting($session, $ht);
                 } catch (\Exception $e) {

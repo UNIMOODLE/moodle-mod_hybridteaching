@@ -258,7 +258,7 @@ if (!$activesession) {
             $result['hasjoinurlcapability'] = $issessionmoderator;
         }
         if (!has_capability('mod/hybridteaching:sessionsactions', $modulecontext) && !$session::get_sessionconfig_exists($activesession)
-            && $isundatedsession) {
+            && $isundatedsession && $hybridteaching->usevideoconference) {
             $viewupdate = false;
             $canentry = false;
             $status = get_string('status_undated_wait', 'hybridteaching');

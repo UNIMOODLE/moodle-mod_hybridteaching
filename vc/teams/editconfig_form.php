@@ -54,7 +54,7 @@ class htteams_config_edit_form extends moodleform {
         $mform->addElement('hidden', 'categories', '', "id='categories'");
         $mform->addElement('text', 'configname', get_string('configname', 'hybridteaching'));
 
-        $mform->addElement('html', '<button type="button" class="btn btn-outline-primary ml-3" data-toggle="modal" 
+        $mform->addElement('html', '<button type="button" class="btn btn-outline-primary ml-3" data-toggle="modal"
             data-target="#categoriesmodal">'.get_string('categories').'</button>');
 
         $mform->setType('id', PARAM_INT);
@@ -72,8 +72,8 @@ class htteams_config_edit_form extends moodleform {
         $mform->addElement('select', 'accessmethod', get_string('accessmethod', 'hybridteachvc_teams'), ['app', 'behaf user']);
         $mform->addElement('text', 'tenantid', get_string('tenantid', 'hybridteachvc_teams'), ['size' => 50]);
         $mform->addElement('text', 'clientid', get_string('clientid', 'hybridteachvc_teams'), ['size' => 50]);
-        $mform->addElement('text', 'clientsecret', get_string('clientsecret', 'hybridteachvc_teams'), ['size' => 50]);
-        $mform->addElement('text', 'useremail', get_string('useremail', 'hybridteachvc_teams'), ['size' => 50]);
+        $mform->addElement('passwordunmask', 'clientsecret', get_string('clientsecret', 'hybridteachvc_teams'), ['size' => 50]);
+        $mform->addElement('text', 'useremail', get_string('useremail', 'hybridteachvc_teams'), ['size' => 40]);
 
         $mform->setType('tenantid', PARAM_TEXT);
         $mform->setType('clientid', PARAM_TEXT);

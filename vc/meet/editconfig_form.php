@@ -74,9 +74,9 @@ class htmeet_config_edit_form extends moodleform {
         $mform->addRule('configname', null, 'maxlength', 255, 'client');
 
         $mform->addElement('header', 'subplugin', get_string('pluginname', 'hybridteachvc_meet'));
-        $mform->addElement('text', 'emailaccount', get_string('emailaccount', 'hybridteachvc_meet'));
-        $mform->addElement('text', 'clientid', get_string('clientid', 'hybridteachvc_meet'));
-        $mform->addElement('text', 'clientsecret', get_string('clientsecret', 'hybridteachvc_meet'));
+        $mform->addElement('text', 'emailaccount', get_string('emailaccount', 'hybridteachvc_meet'), ['size' => 40]);
+        $mform->addElement('text', 'clientid', get_string('clientid', 'hybridteachvc_meet'), ['size' => 40]);
+        $mform->addElement('passwordunmask', 'clientsecret', get_string('clientsecret', 'hybridteachvc_meet'), ['size' => 40]);
 
         $mform->setType('emailaccount', PARAM_TEXT);
         $mform->setType('clientid', PARAM_TEXT);

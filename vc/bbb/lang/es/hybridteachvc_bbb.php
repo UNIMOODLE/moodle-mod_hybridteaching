@@ -35,7 +35,6 @@ $string['pluginconfig'] = 'Configuración de bbb híbrido';
 $string['pluginnewconfig'] = 'Nueva configuración de bbb híbrido';
 $string['serverurl'] = 'Url del servidor BigBlueButton';
 $string['sharedsecret'] = 'Clave secreta de BigBlueButton';
-$string['pollinterval'] = 'Intervalo de sondeo (en segundos) para actualizar el estado de la sala';
 $string['bbb'] = 'bbb';
 $string['alias'] = 'BBB';
 

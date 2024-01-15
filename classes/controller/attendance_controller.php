@@ -158,7 +158,7 @@ class attendance_controller extends common_controller {
             $where .= ' AND starttime + duration '.$operator.' :starttime';
         }
         if (!empty($extraselect)) {
-            $where .= " AND $extraselect";
+            $where .= " AND $extraselect ";
         }
         if (!empty($params['userid'])) {
             if ($params['view'] == 'studentattendance') {
@@ -708,7 +708,7 @@ class attendance_controller extends common_controller {
                        {hybridteaching_session} s ON (at.sessionid = s.id)
                   JOIN {user} u ON (u.id = at.userid)
                  WHERE at.hybridteachingid = :hid
-                   AND at.connectiontime != 0
+                   AND (at.connectiontime != 0 OR at.status = 1)
                    AND at.visible = 1" .
                     $fname . $lname . "
               GROUP BY at.userid, u.lastname, u.id

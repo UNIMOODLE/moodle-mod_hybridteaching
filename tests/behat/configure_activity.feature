@@ -32,5 +32,5 @@ Feature: Configure a hybridteaching activity in course page
       | Grade to pass | 5 |
       | Attendance for maximum score | 10 |
     And I press "Save and return to course"
-    And I turn editing mode off
+    And I wait "1" seconds
     Then I should see "Test hybridteaching activity 1" in the "Topic 1" "section"

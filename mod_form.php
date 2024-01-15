@@ -276,6 +276,9 @@ class mod_hybridteaching_mod_form extends moodleform_mod {
 
         // Load default adminsettings.
         $this->apply_admin_defaults();
+
+        // Load group elements config.
+        $this->load_admin_settings();
     }
 
 
@@ -384,4 +387,32 @@ class mod_hybridteaching_mod_form extends moodleform_mod {
             get_string('mod_form_field_participant_list', 'hybridteaching'), $html);
     }
 
+    /**
+      * Function used for loading admin settings of grouped elements.
+      *
+      * @return void
+      */
+    private function load_admin_settings() : void {
+        $groupconfigs = [
+            'closedoorscount',
+            'closedoorsunit',
+            'advanceentrycount',
+            'advanceentryunit,',
+            'graceperiod',
+            'graceperiodunit',
+            'validateattendance',
+            'attendanceunit',
+        ];
+        foreach ($groupconfigs as $element) {
+            if ($elementconfig = get_config('hybridteaching', $element)) {
+                $this->_form->setDefault($element, $elementconfig);
+            }
+            if ($elementlocked = get_config('hybridteaching', $element . '_locked')) {
+                $this->_form->addElement('hidden',  $element . '_locked',  true);
+                $this->_form->setType($element . '_locked', PARAM_BOOL);
+                $this->_form->disabledIf($element, $element . '_locked', 'eq', true);
+            }
+        }
+
+    }
 }
