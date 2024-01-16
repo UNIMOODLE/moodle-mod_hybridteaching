@@ -677,7 +677,7 @@ class hybridteaching_sessions_render extends \table_sql implements dynamic_table
         $fileurl = '';
         $filestorage = new file_storage();
         if (!has_capability('mod/hybridteaching:viewchat', $this->context) ||
-              (!has_capability('mod/hybridteaching:sessionsactions', $this->context) && $session->visiblechat == 0)) {
+              (!has_capability('mod/hybridteaching:sessionsactions', $this->context) && $session['visiblechat'] == 0)) {
             return '';
         }
         $files = $filestorage->get_area_files($this->context->id, 'mod_hybridteaching', 'chats', $session['id']);
