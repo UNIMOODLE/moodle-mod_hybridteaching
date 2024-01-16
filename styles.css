@@ -1,8 +1,8 @@
-table.sessionstable .icon.fa-film{
+table.sessionstable .lastcol .icon[class*='fa-']{
     position: relative;
 }
 
-table.sessionstable .icon.fa-film.fa-film-slash:after{
+table.sessionstable .lastcol .icon[class*='fa-'][class*='-slash']:after{
     position: absolute;
     content: "/";
     color: inherit;
