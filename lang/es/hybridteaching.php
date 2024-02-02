@@ -67,6 +67,9 @@ $string['closedoors'] = 'Cierre de puertas';
 $string['closedoors_help'] = 'Pasado este tiempo los estudiantes no pueden unirse.';
 $string['userslimit'] = 'Límite de usuarios';
 $string['userslimit_help'] = 'Solo aplicable a observadores, no moderadores';
+$string['wellcomemessage'] = 'Mensaje de bienvenida';
+$string['wellcomemessage_help'] = 'Mensaje de bienvenida a mostrar al entrar a la videoconferencia';
+
 
 $string['disablewebcam'] = 'Desactivar las cámaras web';
 $string['disablemicro'] = 'Desactivar los micrófonos';
@@ -108,7 +111,7 @@ $string['sessions'] = 'Sesiones';
 $string['import'] = 'Importar';
 $string['export'] = 'Exportar';
 
-$string['hybridteaching:addinstance'] = 'Añade una nueva docencia híbrida';
+$string['hybridteaching:addinstance'] = 'Añade una nueva Docencia híbrida';
 $string['hybridteaching:view'] = 'Ver docencia híbrida';
 $string['hybridteaching:viewjoinurl'] = 'Ver url de inicio';
 $string['hybridteaching:programschedule'] = 'Programación de docencia híbrida';
@@ -510,3 +513,11 @@ $string['attendanceunit_help'] = 'Unidad de tiempo para la asistencia';
 $string['graceperiod_help'] = 'Tiempo que tienen los usuarios desde el inicio de la sesión a partir del cual, no se les validará la entrada';
 $string['graceperiodunit'] = 'Unidad de periodo de gracia';
 $string['graceperiodunit_help'] = 'Unidad de tiempo del periodo de gracia';
+$string['updatecalen'] = 'Actualizar evento del calendario';
+
+$string['sessiontobecreated'] = 'Sesión pendiente de ser creada';
+$string['recordingdisabled'] = 'Las grabaciones no están activadas. Descarga no permitida.';
+$string['hybridteaching:manageactivity'] = 'Gestionar configuración docencia híbrida';
+$string['cannotmanageactivity'] = 'No tiene permisos para actualizar {$a}';
+
+$string['nouseconfig'] = 'Esta configuración no aplica para las videoconferencias de {$a}.';

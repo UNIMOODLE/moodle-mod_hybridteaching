@@ -22,11 +22,15 @@
  * @author     ISYC <soporte@isyc.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+
+namespace mod_hybridteaching\form;
+
+use mod_hybridteaching\controller\attendance_controller;
+
 defined('MOODLE_INTERNAL') || die;
 require_once($CFG->libdir.'/formslib.php');
-require_once($CFG->dirroot . '/mod/hybridteaching/classes/controller/attendance_controller.php');
 
-class attresume_options_form extends moodleform {
+class attresume_options_form extends \moodleform {
     public function definition() {
         global $USER;
 
@@ -47,7 +51,7 @@ class attresume_options_form extends moodleform {
         $mform->addElement('header', 'headerusercompletion', get_string('attendanceresume', 'hybridteaching'));
         $selecteduser = $this->_customdata['selecteduser'];
         if (has_capability('mod/hybridteaching:sessionsfulltable',
-        context_module::instance($cm->id), $user = $USER->id)) {
+              \context_module::instance($cm->id), $user = $USER->id)) {
             $selectedusers = [];
             $husers = $attcontroller::hybridteaching_get_instance_users($hid);
             foreach ($husers as $huser) {

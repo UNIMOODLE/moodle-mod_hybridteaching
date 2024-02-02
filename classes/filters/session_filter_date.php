@@ -14,9 +14,9 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
-defined('MOODLE_INTERNAL') || die();
+namespace mod_hybridteaching\filters;
 
-require_once($CFG->dirroot.'/mod/hybridteaching/classes/filters/lib.php');
+use html_writer;
 
 class session_filter_date extends session_filter_type {
     /**
@@ -126,7 +126,7 @@ class session_filter_date extends session_filter_type {
         $before = $data['before'];
         $field  = $this->_field;
 
-        $a = new stdClass();
+        $a = new \stdClass();
         $a->label  = $this->_label;
         $a->after  = userdate($after);
         $a->before = userdate($before);

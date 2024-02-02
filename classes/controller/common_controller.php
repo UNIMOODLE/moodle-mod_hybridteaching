@@ -31,6 +31,10 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+namespace mod_hybridteaching\controller;
+
+use stdClass;
+
 class common_controller {
     const OPERATOR_GREATER_THAN = ">";
     const OPERATOR_LESS_THAN = "<";

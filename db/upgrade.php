@@ -31,13 +31,13 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-/**
- * Execute mod_hybridteaching upgrade from the given old version.
- *
- * @param int $oldversion
- * @return bool
- */
 
+/**
+ * Upgrades the hybridteaching module from a specific version to the current version.
+ *
+ * @param int $oldversion The old version of the module that is being upgraded from.
+ * @return bool True if the upgrade is successful, false otherwise.
+ */
 function xmldb_hybridteaching_upgrade($oldversion) {
     global $DB, $CFG;
     $dbman = $DB->get_manager(); // Loads ddl manager and xmldb classes.
@@ -68,19 +68,6 @@ function xmldb_hybridteaching_upgrade($oldversion) {
 
         // Hybridteaching savepoint reached.
         upgrade_mod_savepoint(true, '2023031700.22', 'hybridteaching');
-    }
-
-    if ($oldversion < '2023031700.24') {
-
-        // Changing type of field token on table hybridteachvc_meet_config to text.
-        $table = new xmldb_table('hybridteachvc_meet_config');
-        $field = new xmldb_field('token', XMLDB_TYPE_TEXT, null, null, XMLDB_NOTNULL, null, null, 'clientsecret');
-
-        // Launch change of type for field token.
-        $dbman->change_field_type($table, $field);
-
-        // Meet savepoint reached.
-        upgrade_plugin_savepoint(true, '2023033100.06', 'hybridteachvc', 'meet');
     }
 
     if ($oldversion < '2023031700.30') {
@@ -138,16 +125,11 @@ function xmldb_hybridteaching_upgrade($oldversion) {
         upgrade_mod_savepoint(true, '2023031700.33', 'hybridteaching');
     }
 
-
-    if ($oldversion < '2023031700.33') {
-        $table = new xmldb_table('hybridteachvc_meet');
-        $field = new xmldb_field('url', XMLDB_TYPE_CHAR, '255', null, XMLDB_NOTNULL, null, null, 'htsession');
-
-        if ($dbman->field_exists($table, $field)) {
-            $dbman->rename_field($table, $field, 'joinurl');
-
-            // Meet savepoint reached.
-            upgrade_plugin_savepoint(true, '2023031700.33', 'hybridteachvc', 'meet');
+    if ($oldversion < '2023031700.40') {
+        $table = new xmldb_table('hybridteaching');
+        $field = new xmldb_field('wellcomemessage', XMLDB_TYPE_CHAR, '255', null, null, null, null, 'userslimit');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
         }
     }
 

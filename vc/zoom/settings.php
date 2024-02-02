@@ -24,12 +24,14 @@
 
 /**
  * Display information about all the mod_hybridteaching modules in the requested course. *
- * @package    mod_hybridteaching
+ * @package    hybridteachvc_zoom
  * @copyright  2023 Proyecto UNIMOODLE
  * @author     UNIMOODLE Group (Coordinator) <direccion.area.estrategia.digital@uva.es>
  * @author     ISYC <soporte@isyc.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+
+defined('MOODLE_INTERNAL') || die();
 
 $item = new admin_setting_configcheckbox('hybridteachvc_zoom/enabled',
     new lang_string('enabled', 'hybridteaching'),
@@ -48,3 +50,7 @@ $settings->add($item);
 $settings->add(new admin_setting_configtext('hybridteachvc_zoom/maxdownloadattempts',
     get_string('maxdownloadattempts', 'hybridteachvc_zoom'),
     get_string('maxdownloadattempts_help', 'hybridteachvc_zoom'), 5, PARAM_INT));
+
+$settings->add(new admin_setting_configcheckbox('hybridteachvc_zoom/enabledrecording',
+    get_string('userecordvc', 'hybridteaching'),
+    get_string('userecordvc_help', 'hybridteaching'), 1));

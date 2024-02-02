@@ -4,10 +4,11 @@ define([
     const manualattendance = async(e) => {
         var att = e.currentTarget;
         var attid = att.closest('tr').querySelector('[id^="' + 'attendance' + '"]').value;
+        var id = document.getElementsByName('id')[0].value;
         if (att.checked) {
-            set_manual_attendance(attid, 1);
+            set_manual_attendance(attid, 1, id);
         } else {
-            set_manual_attendance(attid, 0);
+            set_manual_attendance(attid, 0, id);
         }
     };
 
@@ -16,13 +17,15 @@ define([
      *
      * @param {integer} attid
      * @param {array} status
+     * @param {string} id (cmid)
      * @returns response with the modified slot information.
      */
-    const set_manual_attendance = (attid, status) => ajax.call([{
+    const set_manual_attendance = (attid, status, id) => ajax.call([{
         methodname: 'mod_hybridteaching_set_manual_attendance',
         args: {
             attid,
             status,
+            id,
         },
     }])[0].done(response => {
         return response;

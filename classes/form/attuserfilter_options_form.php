@@ -22,11 +22,14 @@
  * @author     ISYC <soporte@isyc.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+
+namespace mod_hybridteaching\form;
+
 defined('MOODLE_INTERNAL') || die;
 require_once($CFG->libdir.'/formslib.php');
 require_once($CFG->dirroot . '/mod/hybridteaching/classes/controller/attendance_controller.php');
 
-class attuserfilter_options_form extends moodleform {
+class attuserfilter_options_form extends \moodleform {
     public function definition() {
         global $OUTPUT, $CFG;
 
@@ -53,15 +56,15 @@ class attuserfilter_options_form extends moodleform {
         $selectedsession = $this->_customdata['sessid'];
         $attfilter = $this->_customdata['attfilter'];
 
-        $url = new moodle_url($CFG->wwwroot . '/mod/hybridteaching/attendance.php?view=' .
+        $url = new \moodle_url($CFG->wwwroot . '/mod/hybridteaching/attendance.php?view=' .
             $view . '&sessionid=' . $selectedsession . '&sort=' . $sort . '&dir=' . $dir .
             '&perpage=' . $perpage . '&attfilter=' . $attfilter . '&groupid=' . $groupid,
             ['id' => $id, 'att' => $attid, 'fname' => $fname, 'lname' => $lname]);
 
         $mform->addElement('header', 'userfilter', get_string('user'));
         $mform->addElement('static', 'fnameselect', get_string('firstname'), $OUTPUT->initials_bar($fname, 'firstinitial',
-            '', 'fname', new moodle_url($url)));
+            '', 'fname', new \moodle_url($url)));
         $mform->addElement('static', 'lnameselect', get_string('lastname'), $OUTPUT->initials_bar($lname, 'lastinitial',
-            '', 'lname', new moodle_url($url)));
+            '', 'lname', new \moodle_url($url)));
     }
 }

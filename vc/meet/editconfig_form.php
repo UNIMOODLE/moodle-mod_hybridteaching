@@ -24,7 +24,7 @@
 
 /**
  * Display information about all the mod_hybridteaching modules in the requested course. *
- * @package    mod_hybridteaching
+ * @package    hybridteachvc_meet
  * @copyright  2023 Proyecto UNIMOODLE
  * @author     UNIMOODLE Group (Coordinator) <direccion.area.estrategia.digital@uva.es>
  * @author     ISYC <soporte@isyc.com>
@@ -38,17 +38,17 @@ defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->libdir.'/formslib.php');
 
+/**
+ * Class htmeet_config_edit_form.
+ */
 class htmeet_config_edit_form extends moodleform {
+    /**
+     * Defines the form for configuring the googlemeet plugin.
+     */
     public function definition() {
         // $config = get_config('googlemeet');
         $mform = $this->_form;
         list($config, $type) = $this->_customdata;
-        $client = new webservice();
-
-        $logout = optional_param('logout', 0, PARAM_BOOL);
-        if ($logout) {
-            $client->logout();
-        }
 
         $mform->setType('client_islogged', PARAM_BOOL);
 
@@ -59,7 +59,7 @@ class htmeet_config_edit_form extends moodleform {
         $mform->addElement('hidden', 'categories', '', "id='categories'");
         $mform->addElement('text', 'configname', get_string('configname', 'hybridteaching'));
 
-        $mform->addElement('html', '<button type="button" class="btn btn-outline-primary ml-3" data-toggle="modal" 
+        $mform->addElement('html', '<button type="button" class="btn btn-outline-primary ml-3" data-toggle="modal"
             data-target="#categoriesmodal">'.get_string('categories').'</button>');
 
         $mform->setType('id', PARAM_INT);

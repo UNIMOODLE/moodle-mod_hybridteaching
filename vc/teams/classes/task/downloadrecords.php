@@ -51,6 +51,12 @@ class downloadrecords extends \core\task\scheduled_task {
 
         global $DB, $CFG;
 
+        $enabledrecording = get_config('hybridteachvc_teams','enabledrecording');
+        if (!$enabledrecording) {
+            mtrace(get_string('recordingdisabled', 'hybridteaching'));
+            return;
+        }
+
         $sessionconfig = new sessions();
 
         $sql = "SELECT hs.id AS hsid, ht.id AS htid, ht.course, ht.config, hs.name, teams.meetingid, teams.organizer

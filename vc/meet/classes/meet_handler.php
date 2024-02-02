@@ -24,7 +24,7 @@
 
 /**
  * Display information about all the mod_hybridteaching modules in the requested course. *
- * @package    mod_hybridteaching
+ * @package    hybridteachvc_meet
  * @copyright  2023 Proyecto UNIMOODLE
  * @author     UNIMOODLE Group (Coordinator) <direccion.area.estrategia.digital@uva.es>
  * @author     ISYC <soporte@isyc.com>
@@ -33,7 +33,11 @@
 
 namespace hybridteachvc_meet;
 
+/**
+ * Class meet_handler.
+ */
 class meet_handler {
+    /** @var \Google_Client The client object. */
     public $client;
 
     /**
@@ -161,7 +165,6 @@ class meet_handler {
      *
      * @param mixed $session the session object
      * @param mixed $meetdata the meetdata object
-     * @throws Some_Exception_Class description of exception
      * @return mixed the updated event object
      */
     public function update_meeting_event($session, $meetdata) {
@@ -219,7 +222,6 @@ class meet_handler {
      * Saves the token to the database.
      *
      * @param mixed $configmeet The meet configuration object.
-     * @throws Some_Exception_Class Description of exception (if any).
      * @return void
      */
     public function save_token($configmeet) {
@@ -266,7 +268,7 @@ class meet_handler {
                 $pagetoken = $response->pageToken;
             } while ($pagetoken != null);
             return $recordings;
-        }catch(\Exception $e) {
+        } catch(\Exception $e) {
             echo "Error Message: ".$e;
         }
     }
@@ -296,7 +298,7 @@ class meet_handler {
                 $pagetoken = $response->pageToken;
             } while ($pagetoken != null);
             return $chats;
-        }catch(\Exception $e) {
+        } catch(\Exception $e) {
             echo "Error Message: ".$e;
         }
     }
@@ -329,10 +331,9 @@ class meet_handler {
      * @param string $calendarid The ID of the calendar.
      * @param string $eventid The ID of the event.
      * @param string $fileid The ID of the file to attach.
-     * @throws Some_Exception_Class Description of exception.
      * @return void
      */
-    public function addAttachment($calendarservice, $driveservice, $calendarid, $eventid, $fileid) {
+    public function add_attachment($calendarservice, $driveservice, $calendarid, $eventid, $fileid) {
         $file = $driveservice->files->get($fileid);
         $event = $calendarservice->events->get($calendarid, $eventid);
         $attachments = $event->attachments;
@@ -347,7 +348,7 @@ class meet_handler {
         ]);
 
         $calendarservice->events->patch($calendarid, $eventid, $changes, [
-          'supportsAttachments' => TRUE,
+          'supportsAttachments' => true,
         ]);
     }
 }

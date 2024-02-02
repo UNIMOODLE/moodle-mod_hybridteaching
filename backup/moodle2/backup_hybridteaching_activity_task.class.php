@@ -36,11 +36,8 @@ global $CFG;
 require_once($CFG->dirroot.'/mod/hybridteaching/backup/moodle2/backup_hybridteaching_stepslib.php');
 
 /**
- * Backup task that provides all the settings and steps to perform one complete backup of the activity.
+ * Class backup_hybridteaching_activity_task
  *
- * @package   mod_hybridteaching
- * @copyright 2023 isyc <isyc@example.com>
- * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class backup_hybridteaching_activity_task extends backup_activity_task {
     /**

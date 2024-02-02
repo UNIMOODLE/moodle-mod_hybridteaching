@@ -44,3 +44,7 @@ $item->set_updatedcallback(function () {
 });
 
 $settings->add($item);
+
+$settings->add(new admin_setting_configcheckbox('hybridteachvc_teams/enabledrecording',
+    get_string('userecordvc', 'hybridteaching'),
+    get_string('userecordvc_help', 'hybridteaching'), 1));

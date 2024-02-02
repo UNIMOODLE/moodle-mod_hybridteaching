@@ -24,7 +24,7 @@
 
 /**
  * Display information about all the mod_hybridteaching modules in the requested course. *
- * @package    mod_hybridteaching
+ * @package    hybridteachvc_meet
  * @copyright  2023 Proyecto UNIMOODLE
  * @author     UNIMOODLE Group (Coordinator) <direccion.area.estrategia.digital@uva.es>
  * @author     ISYC <soporte@isyc.com>
@@ -37,10 +37,33 @@
  * @param int $oldversion
  * @return bool
  */
-
 function xmldb_hybridteachvc_meet_upgrade($oldversion) {
     global $DB;
     $dbman = $DB->get_manager(); // Loads ddl manager and xmldb classes.
+
+    if ($oldversion < '2023031700.24') {
+        // Changing type of field token on table hybridteachvc_meet_config to text.
+        $table = new xmldb_table('hybridteachvc_meet_config');
+        $field = new xmldb_field('token', XMLDB_TYPE_TEXT, null, null, XMLDB_NOTNULL, null, null, 'clientsecret');
+
+        // Launch change of type for field token.
+        $dbman->change_field_type($table, $field);
+
+        // Meet savepoint reached.
+        upgrade_plugin_savepoint(true, '2023033100.07', 'hybridteachvc', 'meet');
+    }
+
+    if ($oldversion < '2023031700.33') {
+        $table = new xmldb_table('hybridteachvc_meet');
+        $field = new xmldb_field('url', XMLDB_TYPE_CHAR, '255', null, XMLDB_NOTNULL, null, null, 'htsession');
+
+        if ($dbman->field_exists($table, $field)) {
+            $dbman->rename_field($table, $field, 'joinurl');
+
+            // Meet savepoint reached.
+            upgrade_plugin_savepoint(true, '2023031700.33', 'hybridteachvc', 'meet');
+        }
+    }
 
     if ($oldversion < '2023033100.04') {
 

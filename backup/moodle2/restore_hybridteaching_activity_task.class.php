@@ -36,8 +36,8 @@ defined('MOODLE_INTERNAL') || die();
 require_once($CFG->dirroot . '/mod/hybridteaching/backup/moodle2/restore_hybridteaching_stepslib.php'); // Because it exists (must).
 
 /**
- * hybridteaching restore task that provides all the settings and steps to perform one
- * complete restore of the activity
+ * Class restore_hybridteaching_activity_task
+ *
  */
 class restore_hybridteaching_activity_task extends restore_activity_task {
 
@@ -85,11 +85,11 @@ class restore_hybridteaching_activity_task extends restore_activity_task {
 
     }
 
+
     /**
-     * Define the restore log rules that will be applied
-     * by the {@link restore_logs_processor} when restoring
-     * hybridteaching logs. It must return one array
-     * of {@link restore_log_rule} objects
+     * Defines and returns an array of restore log rules.
+     * 
+     * @return array the array of restore log rules
      */
     public static function define_restore_log_rules() {
         $rules = [];
@@ -104,15 +104,11 @@ class restore_hybridteaching_activity_task extends restore_activity_task {
         return $rules;
     }
 
+
     /**
-     * Define the restore log rules that will be applied
-     * by the {@link restore_logs_processor} when restoring
-     * course logs. It must return one array
-     * of {@link restore_log_rule} objects
+     * Define restore log rules for course.
      *
-     * Note this rules are applied when restoring course logs
-     * by the restore final task, but are defined here at
-     * activity level. All them are rules not linked to any module instance (cmid = 0)
+     * @return array
      */
     public static function define_restore_log_rules_for_course() {
         $rules = [];

@@ -45,6 +45,16 @@ $capabilities = [
         ],
         'clonepermissionsfrom' => 'moodle/course:manageactivities',
     ],
+    'mod/hybridteaching:manageactivity' => [
+        'riskbitmask' => RISK_XSS,
+        'captype' => 'write',
+        'contextlevel' => CONTEXT_COURSE,
+        'archetypes' => [
+            'editingteacher' => CAP_ALLOW,
+            'manager' => CAP_ALLOW,
+        ],
+        'clonepermissionsfrom' => 'moodle/course:manageactivities',
+    ],
 
     'mod/hybridteaching:view' => [
         'captype' => 'read',
@@ -97,6 +107,7 @@ $capabilities = [
         ],
     ],
     'mod/hybridteaching:import' => [
+        'riskbitmask' => RISK_XSS,
         'captype' => 'read',
         'contextlevel' => CONTEXT_COURSE,
         'archetypes' => [
@@ -146,7 +157,7 @@ $capabilities = [
             'teacher' => CAP_ALLOW,
             'editingteacher' => CAP_ALLOW,
             'manager' => CAP_ALLOW,
-            'user' => CAP_ALLOW,
+            'student' => CAP_ALLOW,
         ],
     ],
     'mod/hybridteaching:attendanceregister' => [

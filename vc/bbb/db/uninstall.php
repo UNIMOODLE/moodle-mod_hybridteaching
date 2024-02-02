@@ -24,7 +24,7 @@
 
 /**
  * Display information about all the mod_hybridteaching modules in the requested course. *
- * @package    mod_hybridteaching
+ * @package    hybridteachvc_bbb
  * @copyright  2023 Proyecto UNIMOODLE
  * @author     UNIMOODLE Group (Coordinator) <direccion.area.estrategia.digital@uva.es>
  * @author     ISYC <soporte@isyc.com>
@@ -41,6 +41,9 @@ function xmldb_hybridteachvc_bbb_uninstall() {
     return true;
 }
 
+/**
+ * Deletes BBB configurations from the hybrid teaching database.
+ */
 function delete_bbb_configs() {
     global $DB;
     $DB->delete_records('hybridteaching_configs', ['type' => get_string('bbb', 'hybridteachvc_bbb')]);

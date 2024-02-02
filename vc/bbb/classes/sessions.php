@@ -24,7 +24,7 @@
 
 /**
  * Display information about all the mod_hybridteaching modules in the requested course. *
- * @package    mod_hybridteaching
+ * @package    hybridteachvc_bbb
  * @copyright  2023 Proyecto UNIMOODLE
  * @author     UNIMOODLE Group (Coordinator) <direccion.area.estrategia.digital@uva.es>
  * @author     ISYC <soporte@isyc.com>
@@ -45,7 +45,11 @@ require_once($CFG->dirroot.'/mod/hybridteaching/classes/controller/sessions_cont
 
 use mod_bigbluebuttonbn\plugin;
 
+/**
+ * Class sessions.
+ */
 class sessions {
+    /** @var object The session object. */
     protected $bbbsession;
 
     /**
@@ -65,8 +69,7 @@ class sessions {
      * Loads a session using the provided session ID.
      *
      * @param string $htsessionid The session ID.
-     * @throws Some_Exception_Class Description of the exception.
-     * @return mixed The loaded session.
+     * @return object The loaded session.
      */
     public function load_session($htsessionid) {
         global $DB;
@@ -76,8 +79,7 @@ class sessions {
     /**
      * Set the session with the given session ID.
      *
-     * @param datatype $htsessionid The session ID to set.
-     * @throws Some_Exception_Class Description of exception
+     * @param int $htsessionid The session ID to set.
      * @return void
      */
     public function set_session($htsessionid) {
@@ -87,7 +89,7 @@ class sessions {
     /**
      * Retrieves the session for the current instance.
      *
-     * @return mixed The session object.
+     * @return object The session object.
      */
     public function get_session() {
         return $this->bbbsession;
@@ -98,24 +100,28 @@ class sessions {
      * and stores the data returned from it in the hybridteachvc_bbb table if the response
      * is not false.
      *
-     * @param mixed $session the data to be passed to the create_meeting function
-     * @throws
-     * @return mixed the response from the create_meeting function
+     * @param object $session the data to be passed to the create_meeting function
+     * @param object $ht the hybridteaching instance
+     * @return bool
      */
     public function create_unique_session_extended($session, $ht) {
         global $DB;
-        
+
         $context = \context_course::instance($ht->course);
         if (!has_capability('hybridteachvc/bbb:use', $context)) {
             return;
         }
 
         $bbbconfig = $this->load_bbb_config($ht->config);
+        if (!$bbbconfig) {
+            return false;
+        }
+
         $bbbproxy = new bbbproxy($bbbconfig);
         $meeting = new meeting($bbbconfig);
         $response = $meeting->create_meeting($session, $ht);
 
-        if (!get_config('hybridteaching', 'reusesession')) {
+        if (!get_config('hybridteaching', 'reusesession') && $ht->reusesession == 0) {
             $response = $meeting->create_meeting($session, $ht);
         } else {
             $bbb = null;
@@ -129,8 +135,6 @@ class sessions {
                 if ($bbbvcexpired) {
                     $response = [];
                     $response['meetingID'] = $bbb->meetingid;
-                    $response['moderatorPW'] = $bbb->moderatorpass;
-                    $response['attendeePW'] = $bbb->viewerpass;
                     $response['createTime'] = $bbb->createtime;
                     $response['returncode'] = 'SUCCESS';
                 } else {
@@ -150,27 +154,23 @@ class sessions {
         }
     }
 
-    public function update_session_extended($data) {
-        // No requires action.
-    }
 
     /**
-     * Deletes a session and its corresponding BBB meeting via the webservice (if exists).
+     * Delete an extended session.
      *
-     * @param mixed $id The ID of the session to delete.
-     * @throws Some_Exception_Class description of exception
-     * @return Some_Return_Value
+     * @param object $htsession The session object.
+     * @param int $configid The config ID.
      */
     public function delete_session_extended($htsession, $configid) {
         global $DB;
         $bbbconfig = $this->load_bbb_config($configid);
         if (!empty($bbbconfig)) {
             $bbb = $DB->get_record('hybridteachvc_bbb', ['htsession' => $htsession]);
-            if (isset($bbb->meetingid) && isset($bbb->moderatorpass)) {
+            if (isset($bbb->meetingid)) {
                 // If exists meeting, delete it.
                 $meeting = new meeting($bbbconfig);
                 if (isset($meeting)) {
-                    $meeting->end_meeting($bbb->meetingid, $bbb->moderatorpass);
+                    $meeting->end_meeting($bbb->meetingid);
                 }
             }
         }
@@ -188,8 +188,6 @@ class sessions {
         $newbbb = new \stdClass();
         $newbbb->htsession = $data->id;   // Session id.
         $newbbb->meetingid = $response['meetingID'];
-        $newbbb->moderatorpass = $response['moderatorPW'];
-        $newbbb->viewerpass = $response['attendeePW'];
         $newbbb->createtime = $response['createTime'];
 
         return $newbbb;
@@ -239,7 +237,6 @@ class sessions {
      * checks if the role is for starting a meeting or joining a meeting,
      * and returns the access URL (either starturl or joinurl) based on the role.
      *
-     * @throws Some_Exception_Class This function does not throw any exceptions.
      * @return array|null Returns an array with the zone access information or null if there is no session available.
      */
     public function get_zone_access() {
@@ -251,6 +248,7 @@ class sessions {
                 // No exists config bbb or its hidden.
                 return [
                     'returncode' => 'FAILED',
+                    'message' => get_string('noconfig', 'hybridteaching'),
                 ];
             }
 
@@ -279,26 +277,30 @@ class sessions {
             }
             return $array;
         } else {
-            return null;
+            return [
+                'returncode' => 'FAILED',
+                'message' => get_string('error_unable_join', 'hybridteaching'),
+            ];
         }
     }
 
     /**
      * Get the recording URL.
      *
+     * @param object $context The context object.
      * @return string The URL of the recording.
      */
-    public function get_recording ($context) {
-
+    public function get_recording($context) {
         if (!has_capability('hybridteachvc/bbb:view', $context)) {
             return;
         }
+
         $bbbconfig = $this->load_bbb_config_from_session();
         if (!$bbbconfig) {
             return;
         }
 
-        $bbbproxy = new bbbproxy($bbbconfig);       
+        $bbbproxy = new bbbproxy($bbbconfig);
         $response = $bbbproxy->get_url_recording_by_recordid($this->bbbsession->recordingid);
         if ($response['returncode'] == 'SUCCESS') {
             return $response;
@@ -310,9 +312,6 @@ class sessions {
      * Retrieves the role of the user in a meeting.
      *
      * @param object $session The session object for the meeting.
-     * @global object $DB The global database object.
-     * @global object $USER The global user object.
-     * @throws Some_Exception_Class A description of the exception that can be thrown.
      * @return string The role of the user in the meeting ('VIEWER' or 'MODERATOR').
      */
     public static function get_user_meeting_role($session) : String {
@@ -350,6 +349,16 @@ class sessions {
         return $joinurl;
     }
 
+    /**
+     * Get the last BBB in hybrid teaching session based on the provided parameters.
+     *
+     * @param int $htid The hybrid teaching ID
+     * @param int $groupid The group ID
+     * @param string $typevc The type of video conference
+     * @param int $vcreference The video conference reference
+     * @param string $starttime The start time
+     * @return object The last BBB in the hybrid teaching session
+     */
     public function get_last_bbb_in_hybrid($htid, $groupid, $typevc, $vcreference, $starttime) {
         global $DB;
 
@@ -367,11 +376,15 @@ class sessions {
         return $config;
     }
 
+    /**
+     * Get the chat URL for the given context.
+     *
+     * @param object $context
+     */
     public function get_chat_url ($context) {
         if (!has_capability('hybridteachvc/bbb:view', $context)) {
             return '';
         }
         return '';
-        
     }
 }

@@ -84,5 +84,5 @@ $functions = [
         'ajax' => true,
         'loginrequired' => true,
         'capabilities' => '', // Capabilities check in form.
-    ]
+    ],
 ];

@@ -33,11 +33,13 @@
 
 define('NO_OUTPUT_BUFFERING', true);
 
-require_once('../../../../config.php');
-require_once('../controller/sessions_controller.php');
-require_once($CFG->dirroot.'/mod/hybridteaching/classes/controller/notify_controller.php');
-require_once('../output/sessions_render.php');
-require_once('../form/sessions_form.php');
+use mod_hybridteaching\output\sessions_render;
+use mod_hybridteaching\form\bulk_update_duration_form;
+use mod_hybridteaching\form\bulk_update_starttime_form;
+
+require_once('../../../config.php');
+
+require_sesskey();
 
 $action = required_param('action', PARAM_ALPHANUMEXT);
 $moduleid = required_param('id', PARAM_INT);
@@ -48,7 +50,7 @@ $slist = optional_param('l', 1, PARAM_INT);
 list($course, $cm) = get_course_and_cm_from_cmid($moduleid, 'hybridteaching');
 
 $hybridteaching = $DB->get_record('hybridteaching', ['id' => $cm->instance], '*', MUST_EXIST);
-$url = new moodle_url('/mod/hybridteaching/classes/action/session_action.php');
+$url = new moodle_url('/mod/hybridteaching/action/session_action.php');
 $PAGE->set_url($url);
 $context = context_module::instance($cm->id);
 $PAGE->set_context($context);
@@ -63,7 +65,7 @@ $returnparams = [
 
 $return = new moodle_url('/mod/hybridteaching/sessions.php', $returnparams);
 $hybridteaching = $DB->get_record('hybridteaching', ['id' => $hybridteachingid], '*', MUST_EXIST);
-$sessioncontroller = new sessions_controller($hybridteaching, 'hybridteaching_session');
+$sessioncontroller = new mod_hybridteaching\controller\sessions_controller($hybridteaching, 'hybridteaching_session');
 $sessionslist = $sessioncontroller->load_sessions();
 $mform = null;
 if ($sesionid) {
@@ -82,7 +84,7 @@ switch ($action) {
               || time() > ($session->starttime + $session->duration))) {
             $sessioncontroller->delete_session($sesionid, $hybridteachingid);
         } else {
-            notify_controller::notify_problem(get_string('error:deleteinprogress', 'hybridteaching'));
+            mod_hybridteaching\controller\notify_controller::notify_problem(get_string('error:deleteinprogress', 'hybridteaching'));
         }
         break;
     case 'visiblerecord':
@@ -106,7 +108,7 @@ switch ($action) {
         ];
 
         $formparams = compact('sesslist', 'cm', 'hybridteaching', 'slist');
-        $sessionrender = new hybridteaching_sessions_render($hybridteaching, $slist);
+        $sessionrender = new sessions_render($hybridteaching, $slist);
         $mform = ($action === 'bulkupdateduration') ? new bulk_update_duration_form($url, $formparams)
             : new bulk_update_starttime_form($url, $formparams);
 
@@ -141,7 +143,8 @@ switch ($action) {
                     || time() > ($session->starttime + $session->duration))) {
                     $sessioncontroller->delete_session($sessid);
                 } else {
-                    notify_controller::notify_problem(get_string('error:deleteinprogress', 'hybridteaching'));
+                    mod_hybridteaching\controller\notify_controller::notify_problem(
+                        get_string('error:deleteinprogress', 'hybridteaching'));
                 }
             }
             redirect($return, get_string('sessiondeleted', 'hybridteaching'));
@@ -168,7 +171,7 @@ switch ($action) {
                         'confirm' => 1, 'sesskey' => sesskey(), 'id' => $moduleid,
                         'l' => $slist, 'h' => $hybridteachingid, ];
 
-        $url = new moodle_url('/mod/hybridteaching/classes/action/session_action.php', $params);
+        $url = new moodle_url('/mod/hybridteaching/action/session_action.php', $params);
         echo $OUTPUT->header();
         echo $OUTPUT->confirm($message, $url, $return);
         echo $OUTPUT->footer();

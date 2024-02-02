@@ -50,3 +50,4 @@ $string['teams:record'] = 'Store Teams recordings';
 $string['recordingnotfound'] = 'Recording not found in courseid {$a->course}: \'{$a->name}\'  with meetingid: {$a->meetingid}';
 $string['recordingnotdownload'] = 'Cannot download recording from courseid {$a->course}: \'{$a->name}\'  with meetingid: {$a->meetingid}';
 $string['recordingnoexists'] = 'Recording not exists in courseid {$a->course} : \'{$a->name}\' with meetingid {$a->meetingid}';
+$string['emailorganizatornotfound'] = 'The organizers email was not found in the selected Teams organization.';

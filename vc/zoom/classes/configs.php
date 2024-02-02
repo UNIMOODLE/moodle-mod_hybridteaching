@@ -24,19 +24,39 @@
 
 /**
  * Display information about all the mod_hybridteaching modules in the requested course. *
- * @package    mod_hybridteaching
+ * @package    hybridteachvc_zoom
  * @copyright  2023 Proyecto UNIMOODLE
  * @author     UNIMOODLE Group (Coordinator) <direccion.area.estrategia.digital@uva.es>
  * @author     ISYC <soporte@isyc.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-class configs extends configs_controller {
+namespace hybridteachvc_zoom;
+
+use stdClass;
+
+/**
+ * Class configs.
+ */
+class configs extends \mod_hybridteaching\controller\configs_controller {
+    /**
+     * Load a specific configuration by ID.
+     *
+     * @param int $configid The ID of the configuration to load.
+     * @return object The configuration data.
+     */
     public static function load_config($configid) {
         global $DB;
         $zoomdata = $DB->get_record('hybridteachvc_zoom_config', ['id' => $configid]);
         return $zoomdata;
     }
+    
+    /**
+     * Create a new configuration record in the database.
+     *
+     * @param object $data 
+     * @return int
+     */
     public static function create_config($data) {
         global $DB, $USER;
         $zoomrecords = new stdClass();
@@ -50,6 +70,11 @@ class configs extends configs_controller {
         return $id;
     }
 
+    /**
+     * Updates the configuration data in the database with the provided $data.
+     *
+     * @param object $data The data to update the configuration with.
+     */
     public static function update_config($data) {
         global $DB, $USER;
         $zoomrecords = new stdClass();
@@ -63,6 +88,11 @@ class configs extends configs_controller {
         $DB->update_record('hybridteachvc_zoom_config', $zoomrecords);
     }
 
+    /**
+     * Deletes a configuration by its ID.
+     *
+     * @param int $configid Configuration ID to delete.
+     */
     public static function delete_config($configid) {
         global $DB;
         $configid = ['id' => $configid];

@@ -24,7 +24,7 @@
 
 /**
  * Display information about all the mod_hybridteaching modules in the requested course. *
- * @package    mod_hybridteaching
+ * @package    hybridteachvc_zoom
  * @copyright  2023 Proyecto UNIMOODLE
  * @author     UNIMOODLE Group (Coordinator) <direccion.area.estrategia.digital@uva.es>
  * @author     ISYC <soporte@isyc.com>
@@ -51,7 +51,7 @@ $string['downloadrecordszoom'] = 'Descargar grabaciones Zoom';
 $string['maxdownloadattempts'] = 'Num. máximo de intentos de descarga de grabaciones';
 $string['maxdownloadattempts_help'] = 'Cuando se haya intentado descargar esta cantidad máxima de intentos se detendrán los intentos de desacarga';
 $string['chatnamefile'] = 'Chat de la reunión';
-$string['recordingnotdownload'] ='Cannot download recording from courseid {$a->course}: \'{$a->name}\'';
+$string['recordingnotdownload'] = 'Cannot download recording from courseid {$a->course}: \'{$a->name}\'';
 
 $string['zoom:view'] = 'Ver Zoom';
 $string['zoom:use'] = 'Generar videconferencias Zoom';

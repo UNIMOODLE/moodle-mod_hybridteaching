@@ -24,7 +24,7 @@
 
 /**
  * Display information about all the mod_hybridteaching modules in the requested course. *
- * @package    mod_hybridteaching
+ * @package    hybridteachvc_zoom
  * @copyright  2023 Proyecto UNIMOODLE
  * @author     UNIMOODLE Group (Coordinator) <direccion.area.estrategia.digital@uva.es>
  * @author     ISYC <soporte@isyc.com>
@@ -39,11 +39,6 @@ defined('MOODLE_INTERNAL') || die();
 require_once($CFG->dirroot.'/mod/hybridteaching/vc/zoom/locallib.php');
 require_once($CFG->dirroot.'/lib/filelib.php');
 
-
-
-// Some plugins already might include this library, like mod_bigbluebuttonbn.
-// Hacky, but need to create whitelist of plugins that might have JWT library.
-// NOTE: Remove file_exists checks and the JWT library in mod when versions prior to Moodle 3.7 is no longer supported.
 if (!class_exists('Firebase\JWT\JWT')) {
     if (file_exists($CFG->dirroot.'/lib/php-jwt/src/JWT.php')) {
         require_once($CFG->dirroot.'/lib/php-jwt/src/JWT.php');
@@ -58,6 +53,9 @@ if (!class_exists('Firebase\JWT\JWT')) {
 
 define('HTZOOM_API_URL', 'https://api.zoom.us/v2/');
 
+/**
+ * Class webservice.
+ */
 class webservice {
 
     /**
@@ -104,6 +102,7 @@ class webservice {
 
     /**
      * The constructor for the webservice class.
+     * @param object $zoomconfig The Zoom config object.
      * @throws \moodle_exception Moodle exception is thrown for missing config settings.
      */
     public function __construct($zoomconfig) {
@@ -146,7 +145,7 @@ class webservice {
     /**
      * Makes a REST call.
      *
-     * @param string $url The URL to append to the API URL
+     * @param string $path The URL to append to the API URL
      * @param array|string $data The data to attach to the call.
      * @param string $method The HTTP method to use.
      * @return stdClass The call's result in JSON format.
@@ -192,6 +191,15 @@ class webservice {
     }
 
 
+    /**
+     * Make a call to download data from a specified path using the given method.
+     *
+     * @param string $path The path from which to download data
+     * @param array $data An optional array of data to be sent with the request
+     * @param string $method An optional string representing the HTTP method to be used
+     * @throws \moodle_exception If an error occurs during the web service call
+     * @return mixed The raw response from the server
+     */
     public function _make_call_download($path, $data = array(), $method = 'get') {
 
         $url = $path;
@@ -321,6 +329,12 @@ class webservice {
         return $foundroles;
     }
 
+    /**
+     * Retrieves the list of users from the API.
+     *
+     * @return mixed The list of users or false if not found
+     * @throws \moodle_exception When an error occurs
+     */
     public function get_users() {
         $founduser = false;
         $url = 'users/';
@@ -343,10 +357,9 @@ class webservice {
      * The database and the API use different fields and formats for the same information. This function changes the
      * database fields to the appropriate API request fields.
      *
-     * @param stdClass $zoom The zoom meeting to format.
+     * @param object $zoom The zoom meeting to format.
+     * @param object $ht The zoom meeting to format.
      * @return array The formatted meetings for the meeting.
-     * @todo Add functionality for 'alternative_hosts' => $zoom->option_alternative_hosts in $data['settings']
-     * @todo Make UCLA data fields and API data fields match?
      */
     protected function _database_to_api($zoom, $ht) {
         global $CFG;
@@ -360,21 +373,25 @@ class webservice {
             $data['timezone'] = date_default_timezone_get();
         }
 
-        /*  ESTA OPCION DE auto_recording NO FUNCIONA EN LA API CORRECTAMENTE
-            SE ACTIVA/DESACTIVA DESDE LA CUENTA, NO DESDE LA REUNION:
-            si la cuenta lo tiene activado, se activa
-            Si la cuenta lo tiene desactivado, se queda desactivado,
-            no funciona auto_recording.
-            Comprobar más adelante por si lo hubieran arreglado en la api.
-         */
-        if (isset($ht->initialrecord) && $ht->initialrecord == 1) {
-            $data['auto_recording'] = HTZOOM_RECORDING_CLOUD;
-        }
-        if (isset($ht->userecordvc) && $ht->userecordvc == 0) {
+        // Get instance context.
+        $cm = get_coursemodule_from_instance ('hybridteaching', $ht->id);
+        $context = \context_module::instance($cm->id);
+
+        /* This auto_recording option does not work in the api correctly,
+            since it is activated/deactivated from the account and not from the meeting.
+            If the account has it activated, it is activated
+            If the account has it deactivated, it remains deactivated.
+        */
+        $enabledrecording = get_config('enabledrecording','hybridteachvc_zoom');
+        if ($ht->userecordvc && has_capability('hybridteachvc/zoom:record', $context) && $enabledrecording) {
+            if (isset($ht->initialrecord) && $ht->initialrecord == 1) {
+                $data['auto_recording'] = HTZOOM_RECORDING_CLOUD;
+            }
+        } else {
             $data['auto_recording'] = HTZOOM_RECORDING_DISABLED;
         }
 
-        $data['type'] = $ht->sessionscheduling ? HTZOOM_SCHEDULED_MEETING : HTZOOM_RECURRING_MEETING;
+        $data['type'] = $ht->reusesession ? HTZOOM_RECURRING_MEETING : HTZOOM_SCHEDULED_MEETING;
 
         if ($data['type'] == HTZOOM_SCHEDULED_MEETING) {
             // Convert timestamp to ISO-8601. The API seems to insist that it end with 'Z' to indicate UTC.
@@ -402,8 +419,9 @@ class webservice {
      * Create a meeting/webinar on Zoom.
      * Take a $zoom object as returned from the Moodle form and respond with an object that can be saved to the database.
      *
-     * @param stdClass $zoom The meeting to create.
-     * @return stdClass The call response.
+     * @param object $zoom The meeting to create.
+     * @param object $ht The hybridteaching object
+     * @return object The call response.
      */
     public function create_meeting($zoom, $ht) {
         $zoom->undatedsession = $ht->sessionscheduling ? 0 : 1;
@@ -415,7 +433,8 @@ class webservice {
     /**
      * Update a meeting/webinar on Zoom.
      *
-     * @param stdClass $zoom The meeting to update.
+     * @param object $zoom The meeting to update.
+     * @param object $ht The hybridteaching object
      * @return void
      */
     public function update_meeting($zoom, $ht) {
@@ -505,7 +524,7 @@ class webservice {
      * @return mixed The response from the API call.
      */
     public function get_past_meetings_uuid($id) {
-        $url = '/past_meetings/'.$id.'/configs';
+        $url = '/past_meetings/'.$id.'/instances';
         $response = null;
         try {
             $response = $this->_make_call($url);
@@ -612,10 +631,10 @@ class webservice {
     /**
      * Creates a meeting calendar.
      *
-     * @param mixed $ht The ht parameter description.
-     * @param mixed $zoom The zoom parameter description.
+     * @param object $ht The hybridteaching instance.
+     * @param object $zoom The zoom meeting.
      * @throws \moodle_exception The exception thrown.
-     * @return mixed The return value description.
+     * @return mixed
      */
     public function create_meeting_calendar($ht, $zoom) {
 
@@ -678,7 +697,6 @@ class webservice {
     /**
      * Stores token and expiration in cache, returns token from OAuth call.
      *
-     * @param cache $cache
      * @throws \moodle_exception
      * @return string access token
      */

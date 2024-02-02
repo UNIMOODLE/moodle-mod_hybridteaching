@@ -33,23 +33,22 @@
 
 define('NO_OUTPUT_BUFFERING', true);
 
-require('../../../../config.php');
-require_once('../../adminlib.php');
-require_once('../controller/configs_controller.php');
+require('../../../config.php');
 
 $action = required_param('action', PARAM_ALPHANUMEXT);
 $configid = required_param('id', PARAM_INT);
 $confirm = optional_param('confirm', 0, PARAM_BOOL);
 $section = optional_param('section', '', PARAM_COMPONENT);
 
-$PAGE->set_url('/mod/hybridteaching/classes/action/config_action.php');
+$PAGE->set_url('/mod/hybridteaching/action/config_action.php');
 $PAGE->set_context(context_system::instance());
 
 require_admin();
 require_sesskey();
 
 $hybridconfig = $DB->get_record('hybridteaching_configs', ['id' => $configid], '*', MUST_EXIST);
-$configcontroller = new configs_controller($hybridconfig, 'hybridteach'.$hybridconfig->subplugintype);
+$configcontroller = new mod_hybridteaching\controller\configs_controller($hybridconfig,
+    'hybridteach'.$hybridconfig->subplugintype);
 $configids = $configcontroller->hybridteaching_get_configs();
 
 $sortorder = array_values($configids);

@@ -31,6 +31,8 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+namespace mod_hybridteaching;
+
 class helper {
     /**
      * Generate the hours format from the given seconds.
@@ -70,7 +72,7 @@ class helper {
         $config = $DB->get_record('hybridteaching_configs', ['id' => $configid, 'visible' => 1]);
 
         if ($config) {
-            $pluginmanager = core_plugin_manager::instance();
+            $pluginmanager = \core_plugin_manager::instance();
             $subplugins = $pluginmanager->get_subplugins_of_plugin('mod_hybridteaching');
             $find = false;
 

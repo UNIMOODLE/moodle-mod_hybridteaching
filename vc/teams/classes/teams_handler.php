@@ -151,7 +151,9 @@ class teams_handler {
         $cm = get_coursemodule_from_instance ('hybridteaching', $ht->id);
         $context = \context_module::instance($cm->id);
 
-        if ($ht->userecordvc && $ht->initialrecord && has_capability('hybridteachvc/teams:record', $context)) {
+        $enabledrecording = get_config('hybridteachvc_teams', 'enabledrecording');
+
+        if ($ht->userecordvc && $ht->initialrecord && has_capability('hybridteachvc/teams:record', $context) && $enabledrecording) {
             $recordautomatically = true;
         } else {
             $recordautomatically = false;
@@ -277,6 +279,8 @@ class teams_handler {
         $organiz = '';
         if (isset($organizatorteams['id'])) {
             $organiz = $organizatorteams['id'];
+        } else {
+            throw new \moodle_exception (get_string('emailorganizatornotfound','hybridteachvc_teams'), 'Teams');
         }
         $urlrequest = $this->geturlrequest($organiz);
 
@@ -289,13 +293,10 @@ class teams_handler {
                 ->execute();
 
         } catch (\Exception $e) {
-            print "Caught Teams service Exception ".$e->getCode(). " message is ".$e->getMessage();
-            print "Stack trace is ".$e->getTraceAsString();
-            return;
+            throw new \moodle_exception ($e->getMessage(), 'Teams');
         }
 
         $result = json_decode(json_encode($graphresponse), true);
-
         $joinurl = $result['onlineMeeting']['joinUrl'];
 
         // Get the event meeting.
@@ -322,7 +323,7 @@ class teams_handler {
         ];
 
         $allowrecording = false;
-        if (has_capability('hybridteachvc/teams:record', $context)) {
+        if (has_capability('hybridteachvc/teams:record', $context) && $enabledrecording) {
             $allowrecording = true;
         }
         $data['allowRecording'] = $allowrecording;
@@ -341,9 +342,7 @@ class teams_handler {
                 ->setReturnType(Model\OnlineMeeting::class)
                 ->execute();
         } catch (\Exception $e) {
-            print "Caught Teams service Exception ".$e->getCode(). " message is ".$e->getMessage();
-            print "Stack trace is ".$e->getTraceAsString();
-            return;
+            throw new \moodle_exception ($e->getMessage(), 'Teams');
         }
 
         $result = json_decode(json_encode($graphresponse), true);

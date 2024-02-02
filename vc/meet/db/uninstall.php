@@ -24,7 +24,7 @@
 
 /**
  * Display information about all the mod_hybridteaching modules in the requested course. *
- * @package    mod_hybridteaching
+ * @package    hybridteachvc_meet
  * @copyright  2023 Proyecto UNIMOODLE
  * @author     UNIMOODLE Group (Coordinator) <direccion.area.estrategia.digital@uva.es>
  * @author     ISYC <soporte@isyc.com>
@@ -41,6 +41,11 @@ function xmldb_hybridteachvc_meet_uninstall() {
     return true;
 }
 
+/**
+ * Deletes meet configurations from the hybridteaching_configs table.
+ *
+ * @return void
+ */
 function delete_meet_configs() {
     global $DB;
     $DB->delete_records('hybridteaching_configs', ['type' => get_string('meet', 'hybridteachvc_meet')]);

@@ -31,8 +31,11 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+namespace hybridteachstore_onedrive;
 
-class configs extends configs_controller {
+use stdClass;
+
+class configs extends \mod_hybridteaching\controller\configs_controller {
     public static function load_config($configid) {
         global $DB;
         $data = $DB->get_record('hybridteachstore_onedrive_co', ['id' => $configid]);

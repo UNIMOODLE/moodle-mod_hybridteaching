@@ -24,7 +24,7 @@
 
 /**
  * Display information about all the mod_hybridteaching modules in the requested course. *
- * @package    mod_hybridteaching
+ * @package    hybridteachvc_zoom
  * @copyright  2023 Proyecto UNIMOODLE
  * @author     UNIMOODLE Group (Coordinator) <direccion.area.estrategia.digital@uva.es>
  * @author     ISYC <soporte@isyc.com>
@@ -41,6 +41,9 @@ function xmldb_hybridteachvc_zoom_uninstall() {
     return true;
 }
 
+/**
+ * Deletes zoom configurations from the hybridteaching_configs table.
+ */
 function delete_zoom_configs() {
     global $DB;
     $DB->delete_records('hybridteaching_configs', ['type' => get_string('zoom', 'hybridteachvc_zoom')]);

@@ -31,11 +31,9 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-defined('MOODLE_INTERNAL') || die();
-
-require_once(dirname(__FILE__).'/helpers/grades.php');
-require_once(dirname(__FILE__).'/controller/attendance_controller.php');
-require_once(dirname(__FILE__).'/controller/sessions_controller.php');
+use mod_hybridteaching\controller\sessions_controller;
+use mod_hybridteaching\controller\attendance_controller;
+use mod_hybridteaching\helpers\grades;
 
 class mod_hybridteaching_observer {
     public static function session_finished(\mod_hybridteaching\event\session_finished $event) {

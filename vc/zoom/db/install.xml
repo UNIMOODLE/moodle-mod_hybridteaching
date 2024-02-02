@@ -23,6 +23,18 @@
       </KEYS>
     </TABLE>
 
+    <TABLE NAME="hybridteachvc_zoom_records" COMMENT="Info about details zoom meeting vc">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="11" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="htsession" TYPE="int" LENGTH="11" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Hybridteaching session id"/>
+        <FIELD NAME="meetingid" TYPE="int" LENGTH="11" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="uuid" TYPE="char" LENGTH="30" NOTNULL="true" SEQUENCE="false" COMMENT="uuids meeting"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id" COMMENT="The unique id for this zoom records vc."/>
+      </KEYS>
+    </TABLE>
+
     <TABLE NAME="hybridteachvc_zoom_config" COMMENT="Zoom configs">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="11" NOTNULL="true" SEQUENCE="true"/>

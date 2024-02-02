@@ -31,11 +31,12 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-defined('MOODLE_INTERNAL') || die();
 
-require_once('common_controller.php');
+namespace mod_hybridteaching\controller;
 
-class configs_controller extends common_controller {
+use stdClass;
+
+class configs_controller extends \mod_hybridteaching\controller\common_controller {
     protected $splugindir;
     protected $splugintype;
 
@@ -137,8 +138,8 @@ class configs_controller extends common_controller {
         if (!$DB->delete_records('hybridteaching_configs', ['id' => $configid])) {
             $errormsg = 'errordeleteconfig';
         } else {
-            require_once('../../'.$this->splugindir.'/'.$this->hybridobject->type.'/classes/configs.php');
-            configs::delete_config($subpluginconfigid);
+            call_user_func('hybridteach' . $this->splugindir . '_' .
+                $this->hybridobject->type . "\\configs::delete_config", $subpluginconfigid);
             $htmodules = $DB->get_records('hybridteaching', ['config' => $configid]);
             foreach ($htmodules as $htmodule) {
                 $htmodule->config = 0;
@@ -159,7 +160,7 @@ class configs_controller extends common_controller {
     public function hybridteaching_get_configs($params = null) {
         global $DB;
 
-        $pluginmanager = core_plugin_manager::instance();
+        $pluginmanager = \core_plugin_manager::instance();
         $subplugins = $pluginmanager->get_subplugins_of_plugin('mod_hybridteaching');
         $subtypes = [];
         $subenabled = [];
@@ -287,8 +288,8 @@ class configs_controller extends common_controller {
                     if (isset($subenabled[$element->type]) && $subenabled[$element->type] == 1) {
                         $configsavailable[] = ['id' => $element->id, 'categories' => $element->categories];
                     }
-                }    
-                
+                }
+
                 foreach ($configsavailable as $config) {
                     if ($config['categories'] == 0 || in_array($params['category'], json_decode($config['categories']))) {
                         $configscategory[] = $config['id'];

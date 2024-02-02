@@ -24,7 +24,7 @@
 
 /**
  * Display information about all the mod_hybridteaching modules in the requested course. *
- * @package    mod_hybridteaching
+ * @package    hybridteachvc_bbb
  * @copyright  2023 Proyecto UNIMOODLE
  * @author     UNIMOODLE Group (Coordinator) <direccion.area.estrategia.digital@uva.es>
  * @author     ISYC <soporte@isyc.com>
@@ -37,16 +37,29 @@
  * @param int $oldversion
  * @return bool
  */
-
 function xmldb_hybridteachvc_bbb_upgrade($oldversion) {
     global $DB;
     $dbman = $DB->get_manager(); // Loads ddl manager and xmldb classes.
 
     if ($oldversion < '2023033100.15') {
 
-        // Delete old field exitsonzoom on hybridteachvc_zoom.
+        // Delete old field pollinterval on hybridteachvc_bbb_config.
         $table = new xmldb_table('hybridteachvc_bbb_config');
         $field = new xmldb_field('pollinterval', XMLDB_TYPE_INTEGER, '1');
+        if ($dbman->field_exists($table, $field)) {
+            $dbman->drop_field($table, $field);
+        }
+    }
+
+    if ($oldversion < '2023033100.17') {
+
+        // Delete old field moderatorpass and viewerpass on hybridteachvc_bbb, deprecated in BBB.
+        $table = new xmldb_table('hybridteachvc_bbb');
+        $field = new xmldb_field('moderatorpass', XMLDB_TYPE_CHAR, '255');
+        if ($dbman->field_exists($table, $field)) {
+            $dbman->drop_field($table, $field);
+        }
+        $field = new xmldb_field('viewerpass', XMLDB_TYPE_CHAR, '255');
         if ($dbman->field_exists($table, $field)) {
             $dbman->drop_field($table, $field);
         }

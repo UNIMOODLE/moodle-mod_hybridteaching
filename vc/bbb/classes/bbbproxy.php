@@ -23,7 +23,7 @@
 // Córdoba, Extremadura, Vigo, Las Palmas de Gran Canaria y Burgos.
 /**
  * Display information about all the mod_hybridteaching modules in the requested course. *
- * @package    mod_hybridteaching
+ * @package    hybridteachvc_bbb
  * @copyright  2023 Proyecto UNIMOODLE
  * @author     UNIMOODLE Group (Coordinator) <direccion.area.estrategia.digital@uva.es>
  * @author     ISYC <soporte@isyc.com>
@@ -35,6 +35,9 @@ namespace hybridteachvc_bbb;
 use mod_bigbluebuttonbn\local\proxy\proxy_base;
 use mod_bigbluebuttonbn\local\proxy\curl;
 
+/**
+ * Class bbbproxy.
+ */
 class bbbproxy extends proxy_base {
     /**
      * Minimum poll interval for remote bigbluebutton server in seconds.
@@ -46,15 +49,17 @@ class bbbproxy extends proxy_base {
      */
     const DEFAULT_POLL_INTERVAL = 5;
 
+    /** @var object $bbbinstance Api with credentials, url... */
     protected $bbbinstance;
 
-    /*
-    **
-     * Constructor for the proxy, with url for api
+    
+    /**
+     * Constructor for the class.
      *
-    */
+     * @param object $bbbinstance
+     */
     public function __construct($bbbinstance) {
-        $this->bbbinstance = $bbbinstance;  // Api with credentials, url...
+        $this->bbbinstance = $bbbinstance;
     }
 
     /**
@@ -106,8 +111,6 @@ class bbbproxy extends proxy_base {
             'returncode' => (string) $xml->returncode,
             'meetingID' => (string) $xml->meetingID,
             'internalMeetingID' => (string) $xml->internalMeetingID,
-            'attendeePW' => (string) $xml->attendeePW,
-            'moderatorPW' => (string) $xml->moderatorPW,
             'createTime' => (string) $xml->createTime,
         ];
     }
@@ -116,11 +119,10 @@ class bbbproxy extends proxy_base {
      * End a meeting.
      *
      * @param string $meetingid
-     * @param array $modpw
      */
-    public function end_meeting($meetingid, $modpw) {
+    public function end_meeting($meetingid) {
         try {
-            $xml = $this->fetch_endpoint_xml_config('end', ['meetingID' => $meetingid, 'password' => $modpw]);
+            $xml = $this->fetch_endpoint_xml_config('end', ['meetingID' => $meetingid]);
             self::assert_returned_xml($xml, ['meetingid' => $meetingid]);
         } catch (\Exception $e) {
             // No action for endmeeting.
@@ -246,11 +248,11 @@ class bbbproxy extends proxy_base {
         ];
     }
 
-     /**
-      * Get meeting recording by recordingid
-      *
-      * @param recordingid $recordingid
-      */
+    /**
+     * Get meeting recording by recordingid
+     *
+     * @param recordingid $recordingid
+     */
     public function get_url_recording_by_recordid($recordingid) {
         $data = [
             'recordID' => $recordingid,
@@ -293,7 +295,6 @@ class bbbproxy extends proxy_base {
     /**
      * Ensure that the remote server was contactable.
      *
-     * @param instance $instance
      */
     public function require_working_server(): void {
         $version = null;

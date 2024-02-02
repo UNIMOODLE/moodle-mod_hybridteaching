@@ -24,7 +24,7 @@
 
 /**
  * Display information about all the mod_hybridteaching modules in the requested course. *
- * @package    mod_hybridteaching
+ * @package    hybridteachvc_meet
  * @copyright  2023 Proyecto UNIMOODLE
  * @author     UNIMOODLE Group (Coordinator) <direccion.area.estrategia.digital@uva.es>
  * @author     ISYC <soporte@isyc.com>
@@ -40,29 +40,61 @@ defined('MOODLE_INTERNAL') || die();
 
 require_once('meet_handler.php');
 
+/**
+ * Class sessions.
+ */
 class sessions {
+    /** @var stdClass $meetsession The Meet session. */
     protected $meetsession;
 
+    /**
+     * Constructor for the class.
+     *
+     * @param int $htsessionid session ID
+     */
     public function __construct($htsessionid = null) {
         if (!empty($htsessionid)) {
             $this->meetsession = $this->load_session($htsessionid);
         }
     }
 
+    /**
+     * Load a session by ID.
+     *
+     * @param int $htsessionid session ID
+     * @return object
+     */
     public function load_session($htsessionid) {
         global $DB;
         $this->meetsession = $DB->get_record('hybridteachvc_meet', ['htsession' => $htsessionid]);
         return $this->meetsession;
     }
 
+    /**
+     * Get the session.
+     *
+     * @return meetsession
+     */
     public function get_session() {
         return $this->meetsession;
     }
 
+    /**
+     * Set the session for the PHP function.
+     *
+     * @param int $htsessionid session ID
+     */
     public function set_session($htsessionid) {
         $this->meetsession = $this->load_session($htsessionid);
     }
 
+    /**
+     * Create a unique session extended.
+     *
+     * @param object $session The session object
+     * @param object $ht The hybrid teaching object
+     * @return int
+     */
     public function create_unique_session_extended($session, $ht) {
         global $DB;
 
@@ -112,18 +144,13 @@ class sessions {
         return $meetsession->id;
     }
 
-    public function update_session_extended($session, $ht) {
-        global $DB;
-
-        /*$existsmeet = $DB->get_field('hybridteachvc_meet', 'id', ['htsession' => $session->id]);
-        if ($existsmeet) {
-            $subpluginconfigid = $DB->get_field('hybridteaching_configs', 'subpluginconfigid', ['id' => $ht->config]);
-            $meetconfig = $DB->get_record('hybridteachvc_meet_config', ['id' => $subpluginconfigid]);
-            $client = new meet_handler($meetconfig);
-            $client->update_meeting_event($session, $existsmeet);
-        }*/
-    }
-
+    /**
+     * Deletes an extended session.
+     *
+     * @param object $htsession
+     * @param int $configid
+     * @return void
+     */
     public function delete_session_extended($htsession, $configid) {
         global $DB;
         $meetconfig = $this->load_meet_config($configid);
@@ -177,6 +204,11 @@ class sessions {
         return $config;
     }
 
+    /**
+     * Retrieves the zone access information.
+     *
+     * @return array The zone access information.
+     */
     public function get_zone_access() {
         if ($this->meetsession) {
             $meetconfig = $this->load_meet_config_from_session();
@@ -199,23 +231,39 @@ class sessions {
         }
     }
 
+    /**
+     * Get the last meeting in a hybrid teaching session.
+     *
+     * @param int $htid The hybrid teaching ID
+     * @param int $groupid The group ID
+     * @param string $typevc The type of video conference
+     * @param string $vcreference The video conference reference
+     * @param int $starttime The start time
+     * @return object The configuration record
+     */
     public function get_last_meet_in_hybrid($htid, $groupid, $typevc, $vcreference, $starttime) {
         global $DB;
 
         $sql = 'SELECT hm.*
                   FROM {hybridteachvc_meet} hm
             INNER JOIN {hybridteaching_session} hs ON hm.htsession = hs.id
-                 WHERE hs.hybridteachingid = :htid AND hs.groupid = :groupid 
+                 WHERE hs.hybridteachingid = :htid AND hs.groupid = :groupid
                    AND hs.typevc = :typevc AND hs.vcreference = :vcreference
                    AND hs.starttime < :starttime
               ORDER BY hm.id DESC
                  LIMIT 1';
 
-        $config = $DB->get_record_sql($sql, ['htid' => $htid, 'groupid' => $groupid, 
-            'typevc' => $typevc, 'vcreference' => $vcreference, 'starttime' => $starttime]);
+        $config = $DB->get_record_sql($sql, ['htid' => $htid, 'groupid' => $groupid,
+            'typevc' => $typevc, 'vcreference' => $vcreference, 'starttime' => $starttime, ]);
         return $config;
     }
 
+    /**
+     * Get the chat URL for the given context.
+     *
+     * @param object $context Context object.
+     * @return string
+     */
     public function get_chat_url ($context) {
         if (!has_capability('hybridteachvc/meet:view', $context)) {
             return '';

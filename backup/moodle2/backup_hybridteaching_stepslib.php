@@ -32,11 +32,9 @@
  */
 
 /**
- * Define all the backup steps that will be used by the backup_hybridteaching_activity_task.
+ * Class backup_hybridteaching_activity_structure_step
  *
- * @package   mod_hybridteaching
- * @copyright 2023 isyc <isyc@example.com>
- * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * This class is for backuping the structure of a hybrid teaching activity.
  */
 class backup_hybridteaching_activity_structure_step extends backup_activity_structure_step {
     /**

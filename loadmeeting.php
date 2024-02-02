@@ -32,10 +32,11 @@
  */
 
 use mod_hybridteaching\helpers\roles;
+use mod_hybridteaching\controller\attendance_controller;
+use mod_hybridteaching\controller\sessions_controller;
+use mod_hybridteaching\controller\notify_controller;
+
 require_once(dirname(dirname(dirname(__FILE__))).'/config.php');
-require_once(__DIR__.'/classes/controller/sessions_controller.php');
-require_once(__DIR__.'/classes/controller/notify_controller.php');
-require_once($CFG->dirroot.'/mod/hybridteaching/classes/controller/attendance_controller.php');
 
 $id = required_param('id', PARAM_INT);
 $url = optional_param('url', '', PARAM_RAW);
@@ -71,11 +72,12 @@ if (!empty($sid)) {
                 $resultsaccess = $sessionvc->get_zone_access();
                 if ($resultsaccess == null ||
                     (isset($resultsaccess['returncode']) && $resultsaccess['returncode'] == 'FAILED') ) {
-                        $url = new moodle_url('/mod/hybridteaching/view.php', ['id' => $id, 'err' => 1]);
-                        redirect($url);
+                        $message = isset($resultsaccess['message']) ? $resultsaccess['message'] : get_string('error_unable_join', 'hybridteaching');
+                        notify_controller::notify_problem($message);
+                } else {
+                    $url = $resultsaccess['url'];
+                    $ishost = $resultsaccess['ishost'];
                 }
-                $url = $resultsaccess['url'];
-                $ishost = $resultsaccess['ishost'];
                 if ($activesession->isfinished) {
                     $regex = '/=[A-Za-z0-9]+/i';
                     preg_match($regex, base64_decode($url), $match);
@@ -104,17 +106,22 @@ if (!empty($sid)) {
                         $url = new moodle_url('/mod/hybridteaching/view.php', ['id' => $id]);
                         redirect($url, get_string('vcconfigremoved', 'hybridteaching'), null, 'error');
                     }
-                    strlen($activesession->name) <= 1 ? $activesession->name .= '-' : '';
-                    $sessionvc->create_unique_session_extended($activesession, $hybridteaching);
+                    strlen($activesession->name) <= 1 ? $activesession->name .= '-' : '';                   
+                    try {
+                        $sessionvc->create_unique_session_extended($activesession, $hybridteaching);
+                    } catch (\moodle_exception $e) {
+                        notify_controller::notify_problem($e->getMessage());
+                    }
                     $sessionvc->set_session($activesession->id);
                     $resultsaccess = $sessionvc->get_zone_access();
                     if ($resultsaccess == null ||
                         (isset($resultsaccess['returncode']) && $resultsaccess['returncode'] == 'FAILED') ) {
-                            $url = new moodle_url('/mod/hybridteaching/view.php', ['id' => $id, 'err' => 1]);
-                            redirect($url);
+                            $message = isset($resultsaccess['message']) ? $resultsaccess['message'] : get_string('error_unable_join', 'hybridteaching');
+                            notify_controller::notify_problem($message);
+                    } else {
+                        $url = $resultsaccess['url'];
+                        $ishost = $resultsaccess['ishost'];
                     }
-                    $url = $resultsaccess['url'];
-                    $ishost = $resultsaccess['ishost'];
                 }
             }
         }
@@ -164,11 +171,12 @@ if (!empty($sid)) {
                 $resultsaccess = $sessionvc->get_zone_access();
                 if ($resultsaccess == null ||
                     (isset($resultsaccess['returncode']) && $resultsaccess['returncode'] == 'FAILED') ) {
-                        $url = new moodle_url('/mod/hybridteaching/view.php', ['id' => $id, 'err' => 1]);
-                        redirect($url);
+                        $message = isset($resultsaccess['message']) ? $resultsaccess['message'] : get_string('error_unable_join', 'hybridteaching');
+                        notify_controller::notify_problem($message);
+                } else {
+                    $url = $resultsaccess['url'];
+                    $ishost = $resultsaccess['ishost'];
                 }
-                $url = $resultsaccess['url'];
-                $ishost = $resultsaccess['ishost'];
             } else {
                 if (has_capability('mod/hybridteaching:sessionsactions', $modulecontext) ||
                         roles::is_moderator($modulecontext, json_decode($hybridteaching->participants, true), $USER->id)) {
@@ -183,16 +191,21 @@ if (!empty($sid)) {
                         $url = new moodle_url('/mod/hybridteaching/view.php', ['id' => $id]);
                         redirect($url, get_string('vcconfigremoved', 'hybridteaching'), null, 'error');
                     }
-                    $sessionvc->create_unique_session_extended($session, $hybridteaching);
+                    try {
+                        $sessionvc->create_unique_session_extended($session, $hybridteaching);                    
+                    } catch (\Exception $e) {
+                        notify_controller::notify_problem($e->getMessage());
+                    }
                     $sessionvc->set_session($session->id);
                     $resultsaccess = $sessionvc->get_zone_access();
                     if ($resultsaccess == null ||
                         (isset($resultsaccess['returncode']) && $resultsaccess['returncode'] == 'FAILED') ) {
-                            $url = new moodle_url('/mod/hybridteaching/view.php', ['id' => $id, 'err' => 1]);
-                            redirect($url);
+                            $message = isset($resultsaccess['message']) ? $resultsaccess['message'] : get_string('error_unable_join', 'hybridteaching');
+                            notify_controller::notify_problem($message);
+                    } else {
+                        $url = $resultsaccess['url'];
+                        $ishost = $resultsaccess['ishost'];
                     }
-                    $url = $resultsaccess['url'];
-                    $ishost = $resultsaccess['ishost'];
                 }
             }
         }

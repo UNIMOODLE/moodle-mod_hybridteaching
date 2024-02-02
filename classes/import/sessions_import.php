@@ -14,6 +14,14 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
+namespace mod_hybridteaching\import;
+
+use stdClass;
+use csv_import_reader;
+use mod_hybridteaching\controller\notify_controller;
+use mod_hybridteaching\controller\sessions_controller;
+use DateTime;
+
 defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->dirroot.'/mod/hybridteaching/classes/controller/sessions_controller.php');

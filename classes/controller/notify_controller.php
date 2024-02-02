@@ -31,6 +31,8 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+namespace mod_hybridteaching\controller;
+
 class notify_controller {
 
     /**
@@ -86,7 +88,7 @@ class notify_controller {
         if (!isset($SESSION->mod_hybridteaching_notifyqueue)) {
             $SESSION->mod_hybridteaching_notifyqueue = [];
         }
-        $m = new stdclass();
+        $m = new \stdclass();
         $m->type = $messagetype;
         $m->message = $message;
         $SESSION->mod_hybridteaching_notifyqueue[] = $m;

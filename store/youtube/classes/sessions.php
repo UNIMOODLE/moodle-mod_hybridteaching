@@ -45,8 +45,18 @@ class sessions {
         return $url;
     }
 
-    public function delete_session_extended($htsession, $configid) {
+    public function delete_session_extended($htsession, $config) {
         global $DB;
+
+        // Read the store instance config.
+        $configyt = $DB->get_record('hybridteachstore_youtube_con', ['id' => $config->subpluginconfigid]);
+        $videocode = $DB->get_field('hybridteachstore_youtube', 'code', ['sessionid' => $htsession]);
+        if (isset($videocode) && isset($configyt)){
+            // Delete video in youtube.
+            $youtubeclient = new youtube_handler($configyt);
+            $youtubeclient->deletefile($videocode);
+            
+        }
         $DB->delete_records('hybridteachstore_youtube', ['sessionid' => $htsession]);
     }
 }

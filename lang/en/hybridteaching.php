@@ -67,6 +67,8 @@ $string['closedoors'] = 'Close doors';
 $string['closedoors_help'] = 'After this time, students cannot join.';
 $string['userslimit'] = 'User limit';
 $string['userslimit_help'] = 'Only applicable to observers, not moderators.';
+$string['wellcomemessage'] = 'Wellcome message';
+$string['wellcomemessage_help'] = 'Welcome message to display when entering the videoconference';
 
 $string['disablewebcam'] = 'Disable webcams';
 $string['disablemicro'] = 'Disable microphones';
@@ -510,3 +512,11 @@ $string['attendanceunit_help'] = 'Validate attendance time unit';
 $string['graceperiod_help'] = 'Time since session start, where new user attendance, will not be valid for session grades';
 $string['graceperiodunit'] = 'Grace period unit';
 $string['graceperiodunit_help'] = 'Grace period time unit';
+$string['updatecalen'] = 'Update calendar event';
+
+$string['sessiontobecreated'] = 'Session to be created';
+$string['recordingdisabled'] = 'Recordings are not activated. Download not allowed.';
+$string['hybridteaching:manageactivity'] = 'Manage settings hybridteaching';
+$string['cannotmanageactivity'] = 'You don\'t have permissions to update {$a}';
+
+$string['nouseconfig'] = 'This config does not apply for {$a} videoconferences.';

@@ -24,19 +24,39 @@
 
 /**
  * Display information about all the mod_hybridteaching modules in the requested course. *
- * @package    mod_hybridteaching
+ * @package    hybridteachvc_bbb
  * @copyright  2023 Proyecto UNIMOODLE
  * @author     UNIMOODLE Group (Coordinator) <direccion.area.estrategia.digital@uva.es>
  * @author     ISYC <soporte@isyc.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-class configs {
+namespace hybridteachvc_bbb;
+
+use stdClass;
+
+/**
+ * Class configs.
+ */
+class configs extends \mod_hybridteaching\controller\configs_controller {
+    /**
+     * Load a specific configuration by ID.
+     *
+     * @param int $configid The ID of the configuration to load.
+     * @return object The loaded configuration data, or null if not found.
+     */
     public static function load_config($configid) {
         global $DB;
         $bbbdata = $DB->get_record('hybridteachvc_bbb_config', ['id' => $configid]);
         return $bbbdata;
     }
+    
+    /**
+     * Creates a configuration record in the database based on the provided data.
+     *
+     * @param mixed $data The data used to create the configuration record.
+     * @return int The ID of the newly created configuration record.
+     */
     public static function create_config($data) {
         global $DB, $USER;
         $records = new stdClass();
@@ -48,6 +68,11 @@ class configs {
         return $id;
     }
 
+    /**
+     * Update the configuration with the given data.
+     *
+     * @param object $data The data to update the configuration with.
+     */
     public static function update_config($data) {
         global $DB, $USER;
         $records = new stdClass();
@@ -59,6 +84,11 @@ class configs {
         $DB->update_record('hybridteachvc_bbb_config', $records);
     }
 
+    /**
+     * Deletes a configuration by its ID.
+     *
+     * @param int $configid Configuration ID to delete.
+     */
     public static function delete_config($configid) {
         global $DB;
         $configid = ['id' => $configid];

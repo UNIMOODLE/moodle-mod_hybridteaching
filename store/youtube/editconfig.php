@@ -31,10 +31,11 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+use mod_hybridteaching\controller\configs_controller;
+use hybridteachstore_youtube\configs;
+
 require_once('../../../../config.php');
 require_once('editconfig_form.php');
-require_once('../../classes/controller/configs_controller.php');
-require_once('classes/configs.php');
 require_once('../../lib.php');
 $PAGE->requires->js_call_amd('mod_hybridteaching/categoriesmodal', 'init');
 

@@ -31,7 +31,11 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-class configs extends configs_controller {
+namespace hybridteachstore_youtube;
+
+use stdClass;
+
+class configs extends \mod_hybridteaching\controller\configs_controller {
     public static function load_config($configid) {
         global $DB;
         $data = $DB->get_record('hybridteachstore_youtube_con', ['id' => $configid]);

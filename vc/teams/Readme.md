@@ -6,6 +6,7 @@ Obtener: idcliente, idtenant (inquilino), secretclient.
 
 1. Añadir URI de redirección:
 https://NOMBRE DEL DOMINIO/mod/hybridteaching/vc/teams/classes/teamsaccess.php
+https://NOMBRE DEL DOMINIO/mod/hybridteaching/vc/teams/classes/teamsaccessapp.php
 
 
 2. Asignar permisos de aplicación, si se van a crear configuraciones para aplicación:

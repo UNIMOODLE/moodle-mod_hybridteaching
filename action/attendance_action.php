@@ -33,11 +33,14 @@
 
 define('NO_OUTPUT_BUFFERING', true);
 
-require('../../../../config.php');
-require_once('../controller/attendance_controller.php');
-require_once('../controller/sessions_controller.php');
-require('../output/attendance_render.php');
-require_once('../form/attendance_form.php');
+use mod_hybridteaching\controller\attendance_controller;
+use mod_hybridteaching\output\attendance_render;
+use mod_hybridteaching\form\bulk_set_attendance_form;
+use mod_hybridteaching\form\bulk_set_exempt_form;
+use mod_hybridteaching\form\bulk_set_session_exempt_form;
+
+
+require('../../../config.php');
 
 $action = optional_param('action', '', PARAM_ALPHANUMEXT);
 $moduleid = required_param('id', PARAM_INT);
@@ -52,13 +55,14 @@ $log = optional_param('log', 0, PARAM_INT);
 list($course, $cm) = get_course_and_cm_from_cmid($moduleid, 'hybridteaching');
 
 $hybridteaching = $DB->get_record('hybridteaching', ['id' => $cm->instance], '*', MUST_EXIST);
-$url = new moodle_url('/mod/hybridteaching/classes/action/attendance_action.php');
+$url = new moodle_url('/mod/hybridteaching/action/attendance_action.php');
 $PAGE->set_url($url);
 $context = context_module::instance($cm->id);
 $PAGE->set_context($context);
 $PAGE->set_cm($cm, $course);
 
 require_login();
+require_sesskey();
 
 $returnparams = [
     'id' => $moduleid,
@@ -100,6 +104,10 @@ switch ($action) {
             redirect($return = new moodle_url($CFG->wwwroot . '/mod/hybridteaching/attendance.php',
                 ['id' => $moduleid, 'sessionid' => 0, 'view' => 'studentattendance', 'attid' => $attid, 'userid' => $userid]));
         }
+        if ($view == 'studentattsessions') {
+            redirect($return = new moodle_url($CFG->wwwroot . '/mod/hybridteaching/attendance.php',
+                ['id' => $moduleid, 'sessionid' => $sessionid, 'view' => 'attendlog', 'userid' => $userid, 'attid' => $attid]));
+        }
         break;
     case 'userinf':
         redirect($return = new moodle_url($CFG->wwwroot . '/mod/hybridteaching/attendance.php',
@@ -140,7 +148,7 @@ switch ($action) {
             'action' => $action,
         ];
         $formparams = compact('attendslist', 'cm', 'hybridteaching', 'sessionid', 'view', 'userid');
-        $attendancerenderer = new hybridteaching_attendance_render($hybridteaching, $attendslist);
+        $attendancerenderer = new attendance_render($hybridteaching, $attendslist);
         $mform = ($action === 'bulksetattendance') ? new bulk_set_attendance_form($url, $formparams)
             : false;
         if ($mform->is_cancelled()) {
@@ -186,7 +194,7 @@ switch ($action) {
             'action' => $action,
         ];
         $formparams = compact('attendslist', 'cm', 'hybridteaching', 'sessionid', 'view', 'userid');
-        $attendancerenderer = new hybridteaching_attendance_render($hybridteaching, $attendslist);
+        $attendancerenderer = new attendance_render($hybridteaching, $attendslist);
         $mform = ($action === 'bulksetexempt') ? new bulk_set_exempt_form($url, $formparams)
             : false;
         if ($mform->is_cancelled()) {
@@ -225,7 +233,7 @@ switch ($action) {
         ];
 
         $formparams = compact('sessionslist', 'cm', 'hybridteaching', 'sessionid', 'view');
-        $attendancerenderer = new hybridteaching_attendance_render($hybridteaching, $sessionslist);
+        $attendancerenderer = new attendance_render($hybridteaching, $sessionslist);
         $mform = ($action === 'bulksetsessionexempt') ? new bulk_set_session_exempt_form($url, $formparams)
             : false;
         if ($mform->is_cancelled()) {
@@ -249,7 +257,7 @@ switch ($action) {
 if ($action == 'disable' || $action == 'enable') {
     $users = $DB->get_records('hybridteaching_attendance', ['id' => $attid], '', 'DISTINCT userid');
     list($course, $cm) = get_course_and_cm_from_instance($hybridteachingid, 'hybridteaching');
-    foreach($users as $user) {
+    foreach ($users as $user) {
         $event = \mod_hybridteaching\event\attendance_updated::create([
             'objectid' => $hybridteachingid,
             'context' => \context_module::instance($cm->id),

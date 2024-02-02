@@ -80,51 +80,50 @@ class sessions {
         }
 
         $teamsconfig = $this->load_teams_config($ht->config);
-        if ($teamsconfig) {
-            $teams = new teams_handler($teamsconfig);
-            if (!get_config('hybridteaching', 'reusesession') && $ht->reusesession == 0) {
+        if (!$teamsconfig) {
+            return false;
+        }
+        $teams = new teams_handler($teamsconfig);
+        if (!get_config('hybridteaching', 'reusesession') && $ht->reusesession == 0) {
+            try {
+                $response = $teams->createmeeting($session, $ht);
+            } catch (\moodle_exception $e) {
+                throw $e;
+            }
+        } else {
+            $lastteams = null;
+            if (isset($session->vcreference)) {
+                $lastteams = $this->get_last_teams_in_hybrid($session->hybridteachingid,
+                    $session->groupid, $session->typevc, $session->vcreference,
+                    $session->starttime);
+            }
+            if (!empty($lastteams)) {
+                $response = [];
+                $response['id'] = $lastteams->meetingid;
+                $response['meetingCode'] = $lastteams->meetingcode;
+                $response['participants']['organizer']['identity']['user']['id'] = $lastteams->organizer;
+                $response['joinUrl'] = $lastteams->joinurl;
+            } else {
                 try {
                     $response = $teams->createmeeting($session, $ht);
                 } catch (\Exception $e) {
-                    return false;
-                }
-            } else {
-                $lastteams = null;
-                if (isset($session->vcreference)) {
-                    $lastteams = $this->get_last_teams_in_hybrid($session->hybridteachingid,
-                        $session->groupid, $session->typevc, $session->vcreference,
-                        $session->starttime);
-                }
-                if (!empty($lastteams)) {
-                    $response = [];
-                    $response['id'] = $lastteams->meetingid;
-                    $response['meetingCode'] = $lastteams->meetingcode;
-                    $response['participants']['organizer']['identity']['user']['id'] = $lastteams->organizer;
-                    $response['joinUrl'] = $lastteams->joinurl;
-                } else {
-                    try {
-                        $response = $teams->createmeeting($session, $ht);
-                    } catch (\Exception $e) {
-                        return false;
-                    }
+                    throw $e;
                 }
             }
+        }
 
-            if (isset($response['joinUrl']) && isset($response['meetingCode'])
-                && isset($response['participants']['organizer']['identity']['user']['id']) && isset($response['id'])) {
-                $teams = new \stdClass();
-                $teams->htsession = $session->id;
-                $teams->meetingid = $response['id'];
-                $teams->meetingcode = $response['meetingCode'];
-                $teams->organizer = $response['participants']['organizer']['identity']['user']['id'];
-                $teams->joinurl = $response['joinUrl'];
+        if (isset($response['joinUrl']) && isset($response['meetingCode'])
+            && isset($response['participants']['organizer']['identity']['user']['id']) && isset($response['id'])) {
+            $teams = new \stdClass();
+            $teams->htsession = $session->id;
+            $teams->meetingid = $response['id'];
+            $teams->meetingcode = $response['meetingCode'];
+            $teams->organizer = $response['participants']['organizer']['identity']['user']['id'];
+            $teams->joinurl = $response['joinUrl'];
 
-                if (!$teams->id = $DB->insert_record('hybridteachvc_teams', $teams)) {
-                    return false;
-                }
+            if (!$teams->id = $DB->insert_record('hybridteachvc_teams', $teams)) {
+                return false;
             }
-        } else {
-            return false;
         }
     }
 
@@ -136,8 +135,7 @@ class sessions {
      * Deletes a session and its corresponding meeting via the webservice (if exists).
      *
      * @param mixed $id The ID of the session to delete.
-     * @throws Some_Exception_Class description of exception
-     * @return Some_Return_Value
+     * @throws Exception
      */
     public function delete_session_extended($htsession, $configid) {
         global $DB;
@@ -200,10 +198,11 @@ class sessions {
                 // No exists config teams or its hidden.
                 return [
                     'returncode' => 'FAILED',
+                    'message' => get_string('noconfig', 'hybridteaching'),
                 ];
             }
 
-            // Not check if a meeting teams exists, in Teams if you cancel it from calendar
+            // Not check if a meeting teams exists, cause in Teams if you cancel it from calendar
             // the meeting still exists and is not deleted.
             $array = [
                 'id' => $this->teamssession->id,
@@ -213,7 +212,10 @@ class sessions {
             ];
             return $array;
         } else {
-            return null;
+            return [
+                'returncode' => 'FAILED',
+                'message' => get_string('error_unable_join', 'hybridteaching'),
+            ];
         }
     }
 

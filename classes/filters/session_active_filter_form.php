@@ -14,47 +14,13 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
+namespace mod_hybridteaching\filters;
+
 defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->libdir.'/formslib.php');
 
-class session_add_filter_form extends moodleform {
-    public function definition() {
-        global $SESSION;
-
-        $mform       =& $this->_form;
-        $fields      = $this->_customdata['fields'];
-        $extraparams = $this->_customdata['extraparams'];
-
-        $mform->addElement('header', 'newfilter', get_string('newfilter', 'filters'));
-
-        foreach ($fields as $ft) {
-            $ft->setup_form($mform);
-        }
-
-        // In case we wasnt to track some page params.
-        if ($extraparams) {
-            foreach ($extraparams as $key => $value) {
-                $mform->addElement('hidden', $key, $value);
-                $mform->setType($key, PARAM_RAW);
-            }
-        }
-
-        // Add buttons.
-        $replacefiltersbutton = $mform->createElement('submit', 'replacefilters', get_string('replacefilters', 'filters'),
-            null, '', ['class' => 'btn btn-secondary']);
-        $addfilterbutton = $mform->createElement('submit', 'addfilter', get_string('addfilter', 'filters'), null,
-            '', ['class' => 'btn btn-secondary']);
-        $buttons = array_filter([
-            empty($SESSION->session_filtering) ? null : $replacefiltersbutton,
-            $addfilterbutton,
-        ]);
-
-        $mform->addGroup($buttons);
-    }
-}
-
-class session_active_filter_form extends moodleform {
+class session_active_filter_form extends \moodleform {
 
     /**
      * Form definition.

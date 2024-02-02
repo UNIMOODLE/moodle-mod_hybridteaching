@@ -33,7 +33,7 @@
 
 
 require(__DIR__.'/../../config.php');
-require(__DIR__.'/classes/output/attendance_render.php');
+use mod_hybridteaching\output\attendance_render;
 global $USER;
 // Course module id.
 $id = required_param('id', PARAM_INT);
@@ -48,7 +48,7 @@ require_capability('mod/hybridteaching:attendance', $context);
 $hybridteaching = $DB->get_record('hybridteaching', ['id' => $cm->instance], '*', MUST_EXIST);
 $hybridteaching->context = $context;
 $url = new moodle_url('/mod/hybridteaching/attendance.php', ['id' => $id, 'editing' => 1]);
-$attendancerender = new hybridteaching_attendance_render($hybridteaching);
+$attendancerender = new attendance_render($hybridteaching);
 
 $PAGE->navbar->add(get_string('attendance', 'hybridteaching'));
 $PAGE->set_url($url);

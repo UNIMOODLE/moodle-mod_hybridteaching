@@ -47,8 +47,10 @@ const ELEMENT_SELECTOR = {
     groupmode: () => document.getElementById('id_groupmode'),
     cmgroupmode: () => cmgroupmodeselector,
     pagecontext: () => get_page_context(document.getElementsByTagName('body')[0].getAttribute('class')),
+    welcomemsg: () => document.getElementById('id_wellcomemessage'),
 };
 var plistold = ELEMENT_SELECTOR.participantList().value;
+var welcomemsgold = ELEMENT_SELECTOR.welcomemsg().value;
 
 /**
  * Gets user recording capability on current vctype
@@ -248,6 +250,16 @@ const useVCRecord = async(e = ELEMENT_SELECTOR.useVCRecord()) => {
         }
     });
 
+    let welcomemsg = ELEMENT_SELECTOR.welcomemsg();
+    if (typevc === 'bbb') {
+        welcomemsg.closest('.fitem').setAttribute('style', 'display:flex');
+        welcomemsg.value = welcomemsgold;
+    } else {
+        if (is_element_displayed(welcomemsg)) {
+            welcomemsg.closest('.fitem').setAttribute('style', 'display:none');
+            welcomemsg.value = '';
+        }
+    }
 };
 
 const useGroupMode = async(e = ELEMENT_SELECTOR.sessionscheduling()) => {
@@ -331,23 +343,50 @@ const vcInitialStatus = (e) => {
 
 const vcInitialStatusDisplay = async(vc, store, conditions, vctype) => {
     const nostateconfig = await getString('noinitialstateconfig', 'mod_hybridteaching');
+    const nouseconfigstr = await getString('nouseconfig', 'mod_hybridteaching', vctype);
     let disabledOptions = conditions;
     vc.forEach(input => {
         if (disabledOptions.includes(input.id)) {
-            input.closest('.row.fitem').setAttribute('style', 'display:none;');
+            input.setAttribute('disabled', 'true');
             input.value = 0;
+            input.checked = false;
+            if (input.closest('.form-check').querySelector('.nouseconfig')) {
+                let nouseconfigmsg = input.closest('.form-check').querySelector('.nouseconfig');
+                input.closest('.form-check').removeChild(nouseconfigmsg);
+            }
+            let nouseconfig = document.createElement('p');
+            nouseconfig.append(nouseconfigstr);
+            nouseconfig.setAttribute('class', 'text-info nouseconfig');
+            input.closest('.form-check').appendChild(nouseconfig);
         } else {
-            input.closest('.row.fitem').setAttribute('style', 'display:flex;');
+            input.removeAttribute('disabled');
             input.value = 1;
+            if (input.closest('.form-check').querySelector('.nouseconfig')) {
+                let nouseconfigmsg = input.closest('.form-check').querySelector('.nouseconfig');
+                input.closest('.form-check').removeChild(nouseconfigmsg);
+            }
         }
     });
     store.forEach(input => {
         if (disabledOptions.includes(input.id)) {
-            input.closest('.row.fitem').setAttribute('style', 'display:none;');
+            input.setAttribute('disabled', 'true');
             input.value = 0;
+            input.checked = false;
+            if (input.closest('.form-check').querySelector('.nouseconfig')) {
+                let nouseconfigmsg = input.closest('.form-check').querySelector('.nouseconfig');
+                input.closest('.form-check').removeChild(nouseconfigmsg);
+            }
+            let nouseconfig = document.createElement('p');
+            nouseconfig.append(nouseconfigstr);
+            nouseconfig.setAttribute('class', 'text-info nouseconfig');
+            input.closest('.form-check').appendChild(nouseconfig);
         } else {
-            input.closest('.row.fitem').setAttribute('style', 'display:flex;');
+            input.removeAttribute('disabled');
             input.value = 1;
+            if (input.closest('.form-check').querySelector('.nouseconfig')) {
+                let nouseconfigmsg = input.closest('.form-check').querySelector('.nouseconfig');
+                input.closest('.form-check').removeChild(nouseconfigmsg);
+            }
         }
     });
     if (vctype === 'meet') {

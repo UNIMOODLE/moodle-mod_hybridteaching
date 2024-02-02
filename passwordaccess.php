@@ -34,8 +34,9 @@
 require(__DIR__.'/../../config.php');
 require_login();
 require_once(__DIR__.'/lib.php');
-require_once($CFG->dirroot.'/mod/hybridteaching/classes/controller/sessions_controller.php');
-require_once($CFG->dirroot.'/mod/hybridteaching/classes/controller/attendance_controller.php');
+use mod_hybridteaching\controller\sessions_controller;
+use mod_hybridteaching\controller\attendance_controller;
+
 global $USER;
 $id = optional_param('id', 0, PARAM_INT);
 $hybridteaching = $DB->get_record('hybridteaching', ['id' => $id], '*', MUST_EXIST);

@@ -32,7 +32,9 @@
  */
 
 require_once(dirname(dirname(dirname(__FILE__))).'/config.php');
-require_once(__DIR__.'/classes/controller/sessions_controller.php');
+
+use mod_hybridteaching\controller\sessions_controller;
+use mod_hybridteaching\helper;
 
 $cid = required_param('cid', PARAM_INT);
 $sid = required_param('sid', PARAM_INT);
@@ -69,7 +71,7 @@ if ($download == false) {
                             'sessid' => $sid,
                         ],
                     ]);
-            
+
                     $event->trigger();
                 }
             } else if ($session['storagereference'] == -1) {
@@ -112,7 +114,7 @@ if ($download == false) {
                                 'sessid' => $sid,
                             ],
                         ]);
-                
+
                         $event->trigger();
                     }
                 }

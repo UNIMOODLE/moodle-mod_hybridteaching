@@ -14,9 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
-defined('MOODLE_INTERNAL') || die();
-
-require_once($CFG->dirroot.'/mod/hybridteaching/classes/filters/lib.php');
+namespace mod_hybridteaching\filters;
 
 class session_filter_select extends session_filter_type {
     /**
@@ -107,7 +105,7 @@ class session_filter_select extends session_filter_type {
     public function get_label($data) {
         $value = $data['value'];
 
-        $a = new stdClass();
+        $a = new \stdClass();
         $a->label    = $this->_label;
         $a->value    = '"'.s($this->_options[$value]).'"';
         $a->operator = get_string('isequalto', 'filters');

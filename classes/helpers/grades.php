@@ -22,12 +22,16 @@
  * @author     ISYC <soporte@isyc.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+
+namespace mod_hybridteaching\helpers;
+
+use mod_hybridteaching\controller\attendance_controller;
+
 defined('MOODLE_INTERNAL') || die();
 
 require_once(dirname(__FILE__).'../../../../../config.php');
 require_login();
 require_once($CFG->libdir . '/gradelib.php');
-require_once($CFG->dirroot . '/mod/hybridteaching/classes/controller/attendance_controller.php');
 
 class grades {
     const ATTENDED_SESSIONS = 1;
@@ -54,22 +58,26 @@ class grades {
 
         list($course, $cm) = get_course_and_cm_from_cmid($cmid, 'hybridteaching');
 
-        if (!is_array($userids) && !is_null($userids)) $userids = [0 => $userids];
+        !is_array($userids) && !is_null($userids) ? $userids = [0 => $userids] : '';
         if (empty($userids)) {
-            $context = context_module::instance($cm->id);
+            $context = \context_module::instance($cm->id);
             $userids = array_keys(get_enrolled_users($context, '', 0, 'u.id'));
         }
 
         $grades = [];
+        $completion = new \completion_info($course);
         foreach ($userids as $userid) {
-            if (is_object($userid)) $userid = $userid->userid;
-            $grades[$userid] = new stdClass();
+            is_object($userid) ? $userid = $userid->userid : '';
+            $grades[$userid] = new \stdClass();
             $grades[$userid]->userid = $userid;
 
             if ($this->has_taken_attendance($ht->id, $userid)) {
                 $grades[$userid]->rawgrade = $this->get_instance_grade_for($ht, $userid);
                 if (isset($grades[$userid]->rawrgrade)) {
                     $grades[$userid]->rawrgrade < 0 ? $grades[$userid]->rawrgrade = 0 : '';
+                }
+                if ($completion->is_enabled($cm) && $ht->completionattendance) {
+                    $completion->update_state($cm, COMPLETION_UNKNOWN, $userid);
                 }
             } else {
                 $grades[$userid]->rawgrade = null;
@@ -273,15 +281,15 @@ class grades {
 
         list($course, $cm) = get_course_and_cm_from_cmid($cmid, 'hybridteaching');
 
-        if (!is_array($userids)) $userids = [0 => $userids];
+        !is_array($userids) ? $userids = [0 => $userids] : '';
         if (empty($userids)) {
-            $context = context_module::instance($cm->id);
+            $context = \context_module::instance($cm->id);
             $userids = array_keys(get_enrolled_users($context, '', 0, 'u.id'));
         }
 
         $attcontroller = new attendance_controller($ht);
         foreach ($userids as $userid) {
-            if (is_object($userid)) $userid = $userid->userid;
+            is_object($userid) ? $userid = $userid->userid : '';
             if ($this->has_taken_attendance($ht->id, $userid, $sessid) && !$this->is_session_exempt($sessid)) {
                 if ($att = $this->has_valid_attendance($ht->id, $sessid, $userid)) {
                     $getlastattend = $attcontroller::hybridteaching_get_last_attend($att->id, $userid);

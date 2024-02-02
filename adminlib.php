@@ -33,14 +33,29 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-require_once($CFG->libdir . '/adminlib.php');
-require_once($CFG->dirroot . '/mod/hybridteaching/classes/controller/configs_controller.php');
+use mod_hybridteaching\controller\configs_controller;
 
+require_once($CFG->libdir . '/adminlib.php');
+
+/**
+ * Class hybridteaching_admin_plugins_configs
+ *
+ */
 class hybridteaching_admin_plugins_configs extends admin_setting {
+    /** @var string The type of the subplugin. */
     protected $splugintype;
+
+    /** @var string The directory of the subplugin. */
     protected $splugindir;
+
     /**
-     * Calls parent::__construct with specific arguments
+     * Constructor for the class.
+     *
+     * @param string $name
+     * @param string $visiblename
+     * @param string $description
+     * @param string $defaultsetting
+     * @param string $splugintype
      */
     public function __construct($name, $visiblename, $description, $defaultsetting, $splugintype) {
         $this->nosave = true;
@@ -120,7 +135,7 @@ class hybridteaching_admin_plugins_configs extends admin_setting {
         $printed = [];
         $spacer = $OUTPUT->pix_icon('spacer', '', 'moodle', ['class' => 'iconsmall']);
 
-        $url = new moodle_url('/mod/hybridteaching/classes/action/config_action.php',
+        $url = new moodle_url('/mod/hybridteaching/action/config_action.php',
             ['sesskey' => sesskey(), 'section' => $section]);
         $configcontroller = new configs_controller(null, $this->splugintype);
         $configlist = $configcontroller->hybridteaching_get_configs();
@@ -134,7 +149,7 @@ class hybridteaching_admin_plugins_configs extends admin_setting {
             $enabled = $config['visible'];
             $configid = $config['id'];
             $configname = $config['configname'];
-            $categoryname = !empty($config['categories']) ? 
+            $categoryname = !empty($config['categories']) ?
                 get_string('categoryselect', 'hybridteaching') : get_string('all');
             $configcategories = $categoryname;
             $configversion = $config['version'];
@@ -213,6 +228,11 @@ class hybridteaching_admin_plugins_configs extends admin_setting {
         return highlight($query, $return);
     }
 
+    /**
+     * Creates a subplugin select element for the hybrid teaching plugin.
+     *
+     * @return url_select The subplugin select element.
+     */
     public function create_subplugin_select() {
         $subpluginsarray = [];
         $pluginmanager = core_plugin_manager::instance();

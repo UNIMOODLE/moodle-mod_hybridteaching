@@ -32,7 +32,7 @@
  */
 
 
-use mod_hybridteaching\plugininfo\hybridteachvc;
+use mod_hybridteaching\controller\sessions_controller;
 
 define('SESSION_LIST', 1);
 define('PROGRAM_SESSION_LIST', 2);
@@ -53,11 +53,10 @@ function hybridteaching_supports($feature) {
         case FEATURE_GRADE_HAS_GRADE:
         case FEATURE_GROUPS:
         case FEATURE_GROUPINGS:
-            // ...case FEATURE_MOD_PURPOSE
-            // MOD_PURPOSE_COMMUNICATION
         case FEATURE_BACKUP_MOODLE2:
-            // ...case FEATURE_ADVANCED_GRADING.
             return true;
+        case FEATURE_MOD_PURPOSE: 
+            return MOD_PURPOSE_COMMUNICATION;            
         default:
             return null;
     }
@@ -107,12 +106,6 @@ function hybridteaching_add_instance($moduleinstance, $mform = null) {
         $sessioncontroller = new sessions_controller($moduleinstance);
         $moduleinstance->groupid = 0;
         $session = (object) $sessioncontroller->create_session($moduleinstance);
-
-        if (!empty($moduleinstance->typevc) && !empty($moduleinstance->usevideoconference)) {
-            $classname = sessions_controller::get_subpluginvc_class($moduleinstance->typevc);
-            $sessionvc = new $classname($session->id);
-            $sessionvc->create_unique_session_extended($session, $moduleinstance);
-        }
     }
 
     hybridteaching_grade_item_update($moduleinstance);
@@ -132,6 +125,13 @@ function hybridteaching_add_instance($moduleinstance, $mform = null) {
  */
 function hybridteaching_update_instance($moduleinstance, $mform = null) {
     global $CFG, $DB;
+
+    $context = context_module::instance($moduleinstance->coursemodule);
+
+    // The user does not have the capability to modify this activity.
+    if (!has_capability('mod/hybridteaching:manageactivity', $context)) {
+        throw new \moodle_exception('cannotmanageactivity', 'hybridteaching', '', $moduleinstance->modulename);
+    }
 
     $moduleinstance->timemodified = time();
     $moduleinstance->id = $moduleinstance->instance;
@@ -279,7 +279,40 @@ function mod_hybridteaching_pluginfile($course, $cm, $context, $filearea, $args,
 
 
 /**
- * Add a get_coursemodule_info function in case any forum type wants to add 'extra' information
+ * Mark the activity competion status after updating a student attendance.
+ *
+ * @param  stdClass $hybridteaching   hybridteaching object
+ * @param  stdClass $course  course object
+ * @param  stdClass $cm      course module object
+ * @param  stdClass $context context object
+ */
+function hybridteaching_view($hybridteaching, $course, $cm, $context) {
+    global $DB;
+
+    // Trigger course_module_viewed event.
+
+    $params = array(
+        'context' => $context,
+        'objectid' => $hybridteaching->id
+    );
+
+    $event = \mod_hybridteaching\event\course_module_viewed::create($params);
+    $event->add_record_snapshot('course_modules', $cm);
+    $event->add_record_snapshot('course', $course);
+    $event->add_record_snapshot('hybridteaching', $hybridteaching);
+    $event->trigger();
+
+    // Completion.
+    $completion = new completion_info($course);
+    $completion->set_module_viewed($cm);
+    
+    if ($completion->is_enabled($cm) && $hybridteaching->completionattendance) {
+        $completion->update_state($cm, COMPLETION_UNKNOWN);
+    }
+}
+
+/**
+ * Add a get_coursemodule_info function in case any hybridteaching type wants to add 'extra' information
  * for the course (see resource).
  *
  * Given a course_module object, this function returns any "extra" information that may be needed
@@ -333,7 +366,7 @@ function mod_hybridteaching_get_completion_active_rule_descriptions($cm) {
         switch ($key) {
             case 'completionattendance':
                 if (!empty($val)) {
-                    $descriptions[] = get_string('completionattendancedesc', 'forum', $val);
+                    $descriptions[] = get_string('completionattendancedesc', 'hybridteaching', $val);
                 }
                 break;
             default:
@@ -443,12 +476,12 @@ function hybridteaching_extend_settings_navigation(settings_navigation $settings
     }
 
     if (has_capability('mod/hybridteaching:import', $context)) {
-        $nodes[] = ['url' => new moodle_url('/mod/hybridteaching/import.php', ['id' => $cm->id]),
+        $nodes[] = ['url' => new moodle_url('/mod/hybridteaching/import.php', ['id' => $cm->id, 'sesskey' => sesskey()]),
                     'title' => get_string('import', 'hybridteaching'), ];
     }
 
     if (has_capability('mod/hybridteaching:export', $context)) {
-        $nodes[] = ['url' => new moodle_url('/mod/hybridteaching/export.php', ['id' => $cm->id]),
+        $nodes[] = ['url' => new moodle_url('/mod/hybridteaching/export.php', ['id' => $cm->id, 'sesskey' => sesskey()]),
                     'title' => get_string('export', 'hybridteaching'), ];
     }
 
@@ -463,6 +496,12 @@ function hybridteaching_extend_settings_navigation(settings_navigation $settings
     }
 }
 
+/**
+ * Builds an array representation of the given category and its subcategories.
+ *
+ * @param object $category The category to build the array for.
+ * @return array The array representation of the category and its subcategories.
+ */
 function hybrid_build_category_array($category) {
     $categoryarray = [
         'id' => $category->id,
@@ -485,6 +524,13 @@ function hybrid_build_category_array($category) {
     return $categoryarray;
 }
 
+/**
+ * Build output categories recursively.
+ *
+ * @param array $arraycategories The array of categories.
+ * @param int $categoryid The category ID.
+ * @return string The generated HTML output.
+ */
 function hybrid_build_output_categories($arraycategories, $categoryid = 0) {
     $output = "";
     foreach ($arraycategories as $key => $category) {
@@ -530,6 +576,11 @@ function hybrid_build_output_categories($arraycategories, $categoryid = 0) {
     return $output;
 }
 
+/**
+ * Get categories for modal.
+ *
+ * @return array
+ */
 function hybrid_get_categories_for_modal() {
     $categoriesall = core_course_category::top()->get_children();
     $categoryarray = [];
@@ -545,7 +596,8 @@ function hybrid_get_categories_for_modal() {
         $outputcategories .= html_writer::tag(
             "input", "", ["id" => "course-category-select-all", "type" => "checkbox", "class" => "custom-control-input"]
         );
-        $outputcategories .= html_writer::tag("label", "", ["class" => "custom-control-label", "for" => "course-category-select-all"]);
+        $outputcategories .= html_writer::tag("label", "", ["class" => "custom-control-label",
+            "for" => "course-category-select-all"]);
         $outputcategories .= html_writer::end_div(); // ... .custom-checkbox
         $outputcategories .= html_writer::start_div("", ["class" => "col px-0 d-flex"]);
         $outputcategories .= html_writer::start_div("", ["class" => "header-categoryname"]);

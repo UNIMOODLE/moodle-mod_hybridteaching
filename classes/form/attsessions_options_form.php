@@ -22,12 +22,16 @@
  * @author     ISYC <soporte@isyc.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+
+namespace mod_hybridteaching\form;
+
+use mod_hybridteaching\controller\attendance_controller;
+use mod_hybridteaching\controller\sessions_controller;
+
 defined('MOODLE_INTERNAL') || die;
 require_once($CFG->libdir.'/formslib.php');
-require_once($CFG->dirroot . '/mod/hybridteaching/classes/controller/sessions_controller.php');
-require_once($CFG->dirroot . '/mod/hybridteaching/classes/controller/attendance_controller.php');
 
-class attsessions_options_form extends moodleform {
+class attsessions_options_form extends \moodleform {
     public function definition() {
         global $CFG, $USER, $DB;
         $mform = &$this->_form;

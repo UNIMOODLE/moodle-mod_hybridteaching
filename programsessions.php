@@ -32,8 +32,9 @@
  */
 
 require_once(__DIR__.'/../../config.php');
-require_once(__DIR__.'/classes/form/sessions_form.php');
-require_once(__DIR__.'/classes/controller/sessions_controller.php');
+
+use mod_hybridteaching\controller\sessions_controller;
+use mod_hybridteaching\form\sessions_form;
 
 // Course module id.
 $id = required_param('id', PARAM_INT);
@@ -73,7 +74,7 @@ if (!empty($sid)) {
                 'sessid' => $sessionobj->sessionid,
             ],
         ]);
-    
+
         $event->trigger();
     }
 }

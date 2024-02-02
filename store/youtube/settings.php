@@ -31,6 +31,19 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-    $settings->add(new admin_setting_configcheckbox('hybridteachstore_youtube/enabled',
-        new lang_string('enabled', 'hybridteaching'),
-        new lang_string('enabled_help', 'hybridteaching'), 1));
+defined('MOODLE_INTERNAL') || die();
+
+$item = new admin_setting_configcheckbox('hybridteachstore_youtube/enabled',
+    new lang_string('enabled', 'hybridteaching'),
+    new lang_string('enabled_help', 'hybridteaching'), 1);
+
+$item->set_updatedcallback(function () {
+    global $DB;
+    if (get_config('hybridteachstore_youtube', 'enabled') == false) {
+        $sql = "UPDATE {hybridteaching_configs} SET visible=0 WHERE type='youtube'";
+        $DB->execute($sql);
+    }
+});
+
+$settings->add($item);
+

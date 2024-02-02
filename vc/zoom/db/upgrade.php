@@ -24,7 +24,7 @@
 
 /**
  * Display information about all the mod_hybridteaching modules in the requested course. *
- * @package    mod_hybridteaching
+ * @package    hybridteachvc_zoom
  * @copyright  2023 Proyecto UNIMOODLE
  * @author     UNIMOODLE Group (Coordinator) <direccion.area.estrategia.digital@uva.es>
  * @author     ISYC <soporte@isyc.com>
@@ -37,7 +37,6 @@
  * @param int $oldversion
  * @return bool
  */
-
 function xmldb_hybridteachvc_zoom_upgrade($oldversion) {
     global $DB;
     $dbman = $DB->get_manager(); // Loads ddl manager and xmldb classes.
@@ -55,6 +54,23 @@ function xmldb_hybridteachvc_zoom_upgrade($oldversion) {
         $field = new xmldb_field('downloadattempts', XMLDB_TYPE_INTEGER, '11', null, null, null, null, 'optionparticipantsvideo');
         if (!$dbman->field_exists($table, $field)) {
             $dbman->add_field($table, $field);
+        }
+    }
+
+    if ($oldversion < '2023033100.12') {
+        $table = new xmldb_table('hybridteachvc_zoom_records');
+
+        // Adding fields to table hybridteachvc_zoom_records.
+        $table->add_field('id', XMLDB_TYPE_INTEGER, '11', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
+        $table->add_field('htsession', XMLDB_TYPE_INTEGER, '11', XMLDB_NOTNULL, null, null, null);
+        $table->add_field('meetingid', XMLDB_TYPE_INTEGER, '11', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('uuid', XMLDB_TYPE_CHAR, '30', null, null, null, null);
+
+        // Adding keys to table hybridteachvc_zoom_records.
+        $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+
+        if (!$dbman->table_exists($table)) {
+            $dbman->create_table($table);
         }
     }
 

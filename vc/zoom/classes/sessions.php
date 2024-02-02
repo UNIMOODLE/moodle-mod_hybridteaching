@@ -24,7 +24,7 @@
 
 /**
  * Display information about all the mod_hybridteaching modules in the requested course. *
- * @package    mod_hybridteaching
+ * @package    hybridteachvc_zoom
  * @copyright  2023 Proyecto UNIMOODLE
  * @author     UNIMOODLE Group (Coordinator) <direccion.area.estrategia.digital@uva.es>
  * @author     ISYC <soporte@isyc.com>
@@ -37,25 +37,50 @@ defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->dirroot.'/mod/hybridteaching/vc/zoom/classes/webservice.php');
 
+/**
+ * Class sessions.
+ */
 class sessions {
+    /** @var object $zoomsession The current zoom session. */
     protected $zoomsession;
 
+    /**
+     * Constructor for the class.
+     *
+     * @param int $htsessionid The ID of the session.
+     */
     public function __construct($htsessionid = null) {
         if (!empty($htsessionid)) {
             $this->set_session($htsessionid);
         }
     }
 
+    /**
+     * Load a session by session ID.
+     *
+     * @param int $htsessionid The ID of the session to load.
+     * @return Some_Return_Value
+     */
     public function load_session($htsessionid) {
         global $DB;
         $this->zoomsession = $DB->get_record('hybridteachvc_zoom', ['htsession' => $htsessionid]);
         return $this->zoomsession;
     }
 
+    /**
+     * Get the current session.
+     *
+     * @return mixed
+     */
     public function get_session() {
         return $this->zoomsession;
     }
 
+    /**
+     * Set the session for the PHP function.
+     *
+     * @param int $htsessionid The ID of the session.
+     */
     public function set_session($htsessionid) {
         $this->zoomsession = $this->load_session($htsessionid);
     }
@@ -63,12 +88,13 @@ class sessions {
     /**
      * Creates a unique session extended for a Zoom meeting config.
      *
-     * @param mixed $session The data to create the meeting.
+     * @param object $session The data to create the meeting.
+     * @param object $ht The hybridteaching object
      * @throws Exception If the meeting creation fails.
      */
     public function create_unique_session_extended($session, $ht) {
         global $DB;
-        
+
         $context = \context_course::instance($ht->course);
         if (!has_capability('hybridteachvc/zoom:use', $context)) {
             return;
@@ -80,7 +106,7 @@ class sessions {
         }
 
         $service = new \hybridteachvc_zoom\webservice($zoomconfig);
-        if (!get_config('hybridteaching', 'reusesession')) {
+        if (!get_config('hybridteaching', 'reusesession') && $ht->reusesession == 0) {
             $response = $service->create_meeting($session, $ht);
         } else {
             $zoom = null;
@@ -117,6 +143,7 @@ class sessions {
      * Updates a Zoom session with new data.
      *
      * @param mixed $data The data to update the Zoom session with.
+     * @param object $ht The hybridteaching object
      * @throws Exception If there is an error updating the Zoom session.
      * @return string An error message if there was an error updating the Zoom session, otherwise null.
      */
@@ -218,6 +245,11 @@ class sessions {
         return $config;
     }
 
+    /**
+     * Retrieves the zone access for the current session's Zoom meeting.
+     *
+     * @return array Returns an array containing the session ID, host status, access status, and the URL to join the meeting.
+     */
     public function get_zone_access() {
         if ($this->zoomsession) {
             $zoomconfig = $this->load_zoom_config_from_session();
@@ -225,6 +257,7 @@ class sessions {
                 // No exists config zoom or its hidden.
                 return [
                     'returncode' => 'FAILED',
+                    'message' => get_string('noconfig', 'hybridteaching'),
                 ];
             }
             try {
@@ -241,24 +274,36 @@ class sessions {
                 } else {
                     return [
                         'returncode' => 'FAILED',
+                        'message' => get_string('error_unable_join', 'hybridteaching'),
                     ];
                 }
             } catch (\Exception $e) {
                 // No exists zoom meeting.
                 return [
                     'returncode' => 'FAILED',
+                    'message' => get_string('error_unable_join', 'hybridteaching'),
                 ];
             }
         }
     }
 
+    /**
+     * Get the last Zoom in hybrid teaching session based on the provided parameters.
+     *
+     * @param int $htid
+     * @param int $groupid
+     * @param string $typevc
+     * @param int $vcreference
+     * @param string $starttime Start time of the meeting
+     * @return object|false $config The Zoom config record on success, or false on failure.
+     */
     public function get_last_zoom_in_hybrid($htid, $groupid, $typevc, $vcreference, $starttime) {
         global $DB;
 
         $sql = 'SELECT hm.*
                   FROM {hybridteachvc_zoom} hm
             INNER JOIN {hybridteaching_session} hs ON hm.htsession = hs.id
-                 WHERE hs.hybridteachingid = :htid AND hs.groupid = :groupid 
+                 WHERE hs.hybridteachingid = :htid AND hs.groupid = :groupid
                    AND hs.typevc = :typevc AND hs.vcreference = :vcreference
                    AND hs.starttime < :starttime
               ORDER BY hm.id DESC
@@ -269,6 +314,12 @@ class sessions {
         return $config;
     }
 
+    /**
+     * Retrieves the chat URL for the given context.
+     *
+     * @param object $context The context for which to retrieve the chat URL.
+     * @return string The chat URL for the given context.
+     */
     public function get_chat_url ($context) {
         if (!has_capability('hybridteachvc/zoom:view', $context)) {
             return '';

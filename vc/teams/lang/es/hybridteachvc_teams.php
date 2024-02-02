@@ -50,3 +50,4 @@ $string['teams:record'] = 'Almacenar grabaciones Teams';
 $string['recordingnotfound'] = 'No se encontró la grabación en el curso {$a->course}: \'{$a->name}\'  con meetingid: {$a->meetingid}';
 $string['recordingnotdownload'] = 'No se pudo descargar la grabación en el curso {$a->course} : \'{$a->name}\' con meetingid {$a->meetingid}';
 $string['recordingnoexists'] = 'No existe grabación en el curso  {$a->course} : \'{$a->name}\' con meetingid {$a->meetingid}';
+$string['emailorganizatornotfound'] = 'El email del organizador no se ha encontrado en la organización de Teams seleccionada.';

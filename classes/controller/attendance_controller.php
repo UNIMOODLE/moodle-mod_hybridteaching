@@ -31,18 +31,18 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+namespace mod_hybridteaching\controller;
+
+use mod_hybridteaching\helpers\grades;
+use mod_hybridteaching\helper;
+
 defined('MOODLE_INTERNAL') || die();
 global $CFG;
 
-require_once('common_controller.php');
-require_once('sessions_controller.php');
-require_once($CFG->dirroot . '/mod/hybridteaching/classes/helper.php');
-require_once($CFG->dirroot . '/mod/hybridteaching/classes/helpers/grades.php');
 require_once(dirname(__FILE__).'../../../../../config.php');
 require_login();
 
-class attendance_controller extends common_controller {
-
+class attendance_controller extends \mod_hybridteaching\controller\common_controller {
     const ACTIVE = 1;
     const INACTIVE = 2;
     const EXEMPT = 3;
@@ -50,6 +50,7 @@ class attendance_controller extends common_controller {
     const SESSIONEXEMPT = 5;
     const NOTSESSIONEXEMPT = 6;
     const EMPTY = "-";
+
     /**
      * Retrieves a list of attendance for the current hybrid teaching module.
      *
@@ -84,8 +85,10 @@ class attendance_controller extends common_controller {
             $groupby = ' ha.id ';
         }
         if (isset($params['groupid'])) {
-            $params['groupid'] > 0 ? $where .= ' AND hs.groupid = ' . $params['groupid'] : '';
-            $params['groupid'] == 0 ? $where .= ' AND hs.groupid = 0' : '';
+            if ($params['view'] != 'studentattsessions') {
+                $params['groupid'] > 0 ? $where .= ' AND hs.groupid = ' . $params['groupid'] : '';
+                $params['groupid'] == 0 ? $where .= ' AND hs.groupid = 0' : '';
+            }
         }
         if (!empty($extraselect)) {
             $where .= " AND $extraselect";
@@ -110,6 +113,11 @@ class attendance_controller extends common_controller {
             FROM {hybridteaching_session} hs
            WHERE hs.hybridteachingid = :hybridteachingid ' . $where . ' ' . '
           ORDER BY ' . $sort . ' ' . $dir . ', visible desc';
+        } else if ($params['view'] == 'studentattsessions') {
+            $sql = 'SELECT *
+                      FROM {hybridteaching_session}
+                     WHERE hybridteachingid = :hybridteachingid ' . $where . '
+                  ORDER BY ' . $sort . ' ' . $dir;
         } else {
             $sql = 'SELECT ha.id, ha.sessionid, hs.name, hs.starttime, hs.duration, hs.typevc, ha.visible, ha.grade,
                             ha.userid, CASE WHEN ha.connectiontime = 0 THEN -1 ELSE ha.type END as type, ha.status,
@@ -370,6 +378,7 @@ class attendance_controller extends common_controller {
         global $DB, $USER;
         !$userid ? $userid = $USER->id : '';
         $att = self::hybridteaching_get_attendance($session, $userid);
+        $notify = '';
         if (!$att) {
             $att = new \StdClass();
             // Creates an empty attendance, for registering the log, if log isn't valid, delete the attendance.
@@ -805,7 +814,7 @@ class attendance_controller extends common_controller {
                         'attid' => $att->id,
                     ],
                 ]);
-    
+
                 $event->trigger();
             }
         }
@@ -845,7 +854,7 @@ class attendance_controller extends common_controller {
                                 'attid' => $att->id,
                             ],
                         ]);
-            
+
                         $event->trigger();
                     }
                 }
@@ -957,7 +966,7 @@ class attendance_controller extends common_controller {
         global $DB;
 
         $leavedearly = false;
-        if (is_int($session)) $session = $DB->get_record('hybridteaching_session', ['id' => $session]);
+        is_int($session) ? $session = $DB->get_record('hybridteaching_session', ['id' => $session]) : '';
         if (!$session) {
             return false;
         }
@@ -1062,5 +1071,12 @@ class attendance_controller extends common_controller {
             }
         }
         return $usesattendance;
+    }
+
+    public function get_session_attendance($sessionid, $userid) {
+        global $DB;
+
+        return $DB->get_record('hybridteaching_attendance', ['sessionid' => $sessionid,
+            'userid' => $userid, ], '*', IGNORE_MISSING);
     }
 }

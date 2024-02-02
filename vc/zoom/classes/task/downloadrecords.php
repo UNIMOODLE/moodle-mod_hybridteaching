@@ -24,7 +24,7 @@
 
 /**
  * Display information about all the mod_hybridteaching modules in the requested course. *
- * @package    mod_hybridteaching
+ * @package    hybridteachvc_zoom
  * @copyright  2023 Proyecto UNIMOODLE
  * @author     UNIMOODLE Group (Coordinator) <direccion.area.estrategia.digital@uva.es>
  * @author     ISYC <soporte@isyc.com>
@@ -36,6 +36,9 @@ namespace hybridteachvc_zoom\task;
 use hybridteachvc_zoom\sessions;
 use hybridteachvc_zoom\webservice;
 
+/**
+ * Class downloadrecords.
+ */
 class downloadrecords extends \core\task\scheduled_task {
 
     /**
@@ -47,8 +50,17 @@ class downloadrecords extends \core\task\scheduled_task {
         return get_string('downloadrecordszoom', 'hybridteachvc_zoom');
     }
 
+    /**
+     * Executes the function to download and process Zoom recordings for hybrid teaching sessions.
+     */
     public function execute() {
         global $DB, $CFG;
+
+        $enabledrecording = get_config('hybridteachvc_zoom', 'enabledrecording');
+        if (!$enabledrecording) {
+            mtrace(get_string('recordingdisabled', 'hybridteaching'));
+            return;
+        }
 
         $sessionconfig = new sessions();
 
@@ -82,6 +94,18 @@ class downloadrecords extends \core\task\scheduled_task {
             $zoom->downloadattempts ++;
             $DB->update_record('hybridteachvc_zoom', $zoom);
 
+            // Calculate maxdownloadattempts.
+            $maxdownloadattempts = get_config('hybridteaching', 'downloadattempts');
+            if (!is_numeric($maxdownloadattempts) || $maxdownloadattempts <= 0) {
+                $maxdownloadattempts = 5;
+            }
+            if ($session->downloadattempts > $maxdownloadattempts) {
+                // Save -2 indicates there are not recording, or there are maxdownloadattempts.
+                $sessionupdate = $DB->get_record('hybridteaching_session', ['id' => $session->hsid]);
+                $sessionupdate->processedrecording = -2;
+                $DB->update_record('hybridteaching_session', $sessionupdate);
+            }
+
             // Connect to API to download recording.
             $zoomconfig = $sessionconfig->load_zoom_config($session->config);
             if ($zoomconfig == false) {
@@ -90,86 +114,104 @@ class downloadrecords extends \core\task\scheduled_task {
             $service = new webservice($zoomconfig);
             $response = null;
             try {
-                $response = $service->get_meeting_recordings($session->meetingid);
+                $response = $service->get_past_meetings_uuid($session->meetingid);
             } catch (\Exception $e) {
                 $response = false;
             }
-
-            $maxdownloadattempts = get_config('hybridteaching', 'downloadattempts');
-            if (!is_numeric($maxdownloadattempts) || $maxdownloadattempts <= 0) {
-                $maxdownloadattempts = 5;
-            }
-
-            if ($session->downloadattempts > $maxdownloadattempts) {
-                // Save -2 indicates there are not recording.
-                $sessionupdate = $DB->get_record('hybridteaching_session', ['id' => $session->hsid]);
-                $sessionupdate->processedrecording = -2;
-                $DB->update_record('hybridteaching_session', $sessionupdate);
-            }
-
-            if ($response != false && isset($response->recording_files)) {
-                $count = 1;
-                foreach ($response->recording_files as $file) {
-                    if ((strtolower($file->file_type) == 'mp4')) {
-                        $folderfilerecording = $folderfile."-".$count.'.'.strtolower($file->file_type);
-                        $filesize = @filesize($folderfile);
-                        if ((!file_exists($folderfilerecording)) || (file_exists($folderfilerecording) &&
-                            ($file->file_size != $filesize))) {
-                                $responsefile = $service->_make_call_download($file->download_url);
-                                if (!$responsefile) {
-                                    mtrace(get_string('recordingnotdownload', 'hybridteachvc_zoom',['course'=>$session->course, 'name'=>$session->name]));
-                                } else {
-                                    $filerecording = fopen($folderfilerecording, "w+");
-                                    fputs($filerecording, (string)$responsefile);
-                                    fclose($filerecording);
-                                }
-
-                                // Save processedrecording in hybridteaching_session=0: ready to upload to store.
-                                $sessionprocessed = $DB->get_record('hybridteaching_session', ['id' => $session->hsid]);
-                                $sessionprocessed->processedrecording = 0;
-                                $DB->update_record('hybridteaching_session', $sessionprocessed);
+            if ($response) {
+                foreach ($response->meetings as $meet) {
+                    if (!$DB->record_exists('hybridteachvc_zoom_records',
+                        ['uuid' => $meet->uuid, 'meetingid' => $session->meetingid])) {
+                        // Download recording from uuid.
+                        $responserecording = $service->get_meeting_recordings($meet->uuid);
+                        $isdownloaded = self::downloadfiles ($responserecording, $folderfile, $service, $session);
+                        if ($isdownloaded) {
+                            $details = new \stdClass();
+                            $details->htsession = $session->hsid;
+                            $details->meetingid = $session->meetingid;
+                            $details->uuid = $meet->uuid;
+                            $DB->insert_record('hybridteachvc_zoom_records', $details);
                         }
-                    }
-                    if ($file->file_type == "CHAT") {
-                        $responsechat = $service->_make_call_download($file->download_url);
-                        $suffix = '-chat.txt';
-                        $folderfilechat = $folderfile.$suffix;
-                        $filechat = fopen($folderfilechat, "w+");
-                        fputs($filechat, (string) $responsechat);
-                        fclose($filechat);
-
-                        // Get instance context.
-                        $cm = get_coursemodule_from_instance('hybridteaching', $session->htid);
-                        $context = \context_module::instance($cm->id);
-
-                        // Save .txt in session filestorage.
-                        $filename = get_string('chatnamefile', 'hybridteachvc_zoom').' '.$session->name;
-                        $fileinfo = [
-                            'contextid' => $context->id,
-                            'component' => 'mod_hybridteaching',
-                            'filearea'  => 'chats',
-                            'itemid'    => $session->hsid,
-                            'filepath'  => '/',
-                            'filename'  => $filename.'.txt',
-                        ];
-
-                        $fs = get_file_storage();
-
-                        // Checking name.
-                        $files = $fs->get_area_files($context->id, 'mod_hybridteaching', 'chats', $session->hsid);
-                        foreach ($files as $file) {
-                            if ($file->get_filename() == $fileinfo['filename']) {
-                                // Change name chat.
-                                $fileinfo['filename'] = $filename.' ('.count($files).').txt';
-                            }
-                        }
-                        $fs->create_file_from_pathname($fileinfo, $folderfilechat);
-
-                        // Delete chat file from origin download vc moodledata.
-                        unlink ($folderfilechat);
                     }
                 }
             }
         }
+    }
+
+    /**
+     * Download files from the response and save them in the specified folder.
+     *
+     * @param mixed $response The response object containing recording files
+     * @param string $folderfile The folder where the files will be saved
+     * @param mixed $service The service object used for making calls
+     * @param object $session The session object for the recording
+     * @return bool Whether any files were downloaded
+     */
+    public static function downloadfiles($response, $folderfile, $service, $session) {
+        global $DB;
+
+        $isdownloaded = false;
+        foreach ($response->recording_files as $file) {
+            if ((strtolower($file->file_type) == 'mp4')) {
+                $folderfilerecording = $folderfile.'-1.'.strtolower($file->file_type);
+                $filesize = @filesize($folderfile);
+                if ((!file_exists($folderfilerecording)) || (file_exists($folderfilerecording) &&
+                    ($file->file_size != $filesize))) {
+                    $responsefile = $service->_make_call_download($file->download_url);
+                    if (!$responsefile) {
+                        mtrace(get_string('recordingnotdownload', 'hybridteachvc_zoom', ['course' => $session->course, 'name' => $session->name]));
+                    } else {
+                        $filerecording = fopen($folderfilerecording, "w+");
+                        fputs($filerecording, (string)$responsefile);
+                        fclose($filerecording);
+                    }
+
+                    // Save processedrecording in hybridteaching_session=0: ready to upload to store.
+                    $sessionprocessed = $DB->get_record('hybridteaching_session', ['id' => $session->hsid]);
+                    $sessionprocessed->processedrecording = 0;
+                    $DB->update_record('hybridteaching_session', $sessionprocessed);
+                    $isdownloaded = true;
+                }
+            }
+            if ($file->file_type == "CHAT") {
+                $responsechat = $service->_make_call_download($file->download_url);
+                $suffix = '-chat.txt';
+                $folderfilechat = $folderfile.$suffix;
+                $filechat = fopen($folderfilechat, "w+");
+                fputs($filechat, (string) $responsechat);
+                fclose($filechat);
+
+                // Get instance context.
+                $cm = get_coursemodule_from_instance('hybridteaching', $session->htid);
+                $context = \context_module::instance($cm->id);
+
+                // Save .txt in session filestorage.
+                $filename = get_string('chatnamefile', 'hybridteachvc_zoom').' '.$session->name;
+                $fileinfo = [
+                    'contextid' => $context->id,
+                    'component' => 'mod_hybridteaching',
+                    'filearea'  => 'chats',
+                    'itemid'    => $session->hsid,
+                    'filepath'  => '/',
+                    'filename'  => $filename.'.txt',
+                ];
+
+                $fs = get_file_storage();
+
+                // Checking name.
+                $files = $fs->get_area_files($context->id, 'mod_hybridteaching', 'chats', $session->hsid);
+                foreach ($files as $file) {
+                    if ($file->get_filename() == $fileinfo['filename']) {
+                        // Change name chat.
+                        $fileinfo['filename'] = $filename.' ('.count($files).').txt';
+                    }
+                }
+                $fs->create_file_from_pathname($fileinfo, $folderfilechat);
+
+                // Delete chat file from origin download vc moodledata.
+                unlink ($folderfilechat);
+            }
+        }
+        return $isdownloaded;
     }
 }

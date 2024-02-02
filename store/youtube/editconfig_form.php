@@ -55,7 +55,7 @@ class htyoutube_config_edit_form extends moodleform {
         $mform->addElement('hidden', 'categories', '', "id='categories'");
         $mform->addElement('text', 'configname', get_string('configname', 'hybridteaching'));
 
-        $mform->addElement('html', '<button type="button" class="btn btn-outline-primary ml-3" data-toggle="modal" 
+        $mform->addElement('html', '<button type="button" class="btn btn-outline-primary ml-3" data-toggle="modal"
             data-target="#categoriesmodal">'.get_string('categories').'</button>');
 
         $mform->setType('id', PARAM_INT);
@@ -71,7 +71,8 @@ class htyoutube_config_edit_form extends moodleform {
 
         $mform->addElement('header', 'subplugin', get_string('pluginname', 'hybridteachstore_youtube'));
         $mform->addElement('text', 'clientid', get_string('clientid', 'hybridteachstore_youtube'), ['size' => 80]);
-        $mform->addElement('passwordunmask', 'clientsecret', get_string('clientsecret', 'hybridteachstore_youtube'), ['size' => 50]);
+        $mform->addElement('passwordunmask', 'clientsecret',
+            get_string('clientsecret', 'hybridteachstore_youtube'), ['size' => 50]);
         $mform->addElement('text', 'emaillicense', get_string('emaillicense', 'hybridteachstore_youtube'), ['size' => 40]);
 
         $mform->setType('clientid', PARAM_TEXT);

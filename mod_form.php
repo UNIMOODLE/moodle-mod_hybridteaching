@@ -32,17 +32,14 @@
  */
 
 use mod_hybridteaching\helpers\roles;
+use mod_hybridteaching\controller\configs_controller;
+
 defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->dirroot.'/course/moodleform_mod.php');
-require_once('classes/controller/configs_controller.php');
 
 /**
- * Module instance settings form.
- *
- * @package     mod_hybridteaching
- * @copyright   2023 isyc <isyc@example.com>
- * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * Class mod_hybridteaching_mod_form.
  */
 class mod_hybridteaching_mod_form extends moodleform_mod {
 
@@ -175,6 +172,10 @@ class mod_hybridteaching_mod_form extends moodleform_mod {
         $mform->addHelpButton('graceperiod', 'graceperiod', 'hybridteaching');
         $mform->setType('graceperiod', PARAM_INT);
 
+        $mform->addElement('text', 'wellcomemessage', get_string('wellcomemessage','hybridteaching'), ['size' => 80]);
+        $mform->addHelpButton('wellcomemessage','wellcomemessage','hybridteaching');
+        $mform->setType('wellcomemessage', PARAM_TEXT);
+
         // Sección Opciones de bloqueo iniciales de la videoconferencia.
         $mform->addElement('header', 'sectioninitialstates', get_string('sectioninitialstates', 'hybridteaching'));
 
@@ -288,7 +289,6 @@ class mod_hybridteaching_mod_form extends moodleform_mod {
      * @category completion
      * @return array List of added element names, or names of wrapping group elements.
      */
-
     public function add_completion_rules() {
 
         $mform = $this->_form;
@@ -306,10 +306,21 @@ class mod_hybridteaching_mod_form extends moodleform_mod {
         return ['completionattendancegroup'];
     }
 
+    /**
+     * Check if the completion rule is enabled based on the provided data.
+     *
+     * @param array $data The data to be checked for completion rule.
+     * @return bool Returns true if the completion rule is enabled, false otherwise.
+     */
     public function completion_rule_enabled($data) {
         return (!empty($data['completionattendanceenabled']) && $data['completionattendance'] != 0);
     }
 
+    /**
+     * Get data from the parent and modify the completion settings if necessary.
+     *
+     * @return mixed
+     */
     public function get_data() {
         $data = parent::get_data();
         if (!$data) {
@@ -325,6 +336,11 @@ class mod_hybridteaching_mod_form extends moodleform_mod {
         return $data;
     }
 
+    /**
+     * data_preprocessing function.
+     *
+     * @param array $defaultvalues reference to an array of default values
+     */
     public function data_preprocessing(&$defaultvalues) {
         global $DB;
 
@@ -350,13 +366,13 @@ class mod_hybridteaching_mod_form extends moodleform_mod {
 
 
 
-     /**
-      * Function for showing the block for setting participant roles.
-      *
-      * @param MoodleQuickForm $mform
-      * @param array $participantlist
-      * @return void
-      */
+    /**
+     * Function for showing the block for setting participant roles.
+     *
+     * @param MoodleQuickForm $mform
+     * @param array $participantlist
+     * @return void
+     */
     private function hybridteaching_mform_insert_roles_access_mapping(MoodleQuickForm &$mform, array $participantlist): void {
         global $OUTPUT;
         $participantselection = roles::get_participant_selection_data();
@@ -388,16 +404,16 @@ class mod_hybridteaching_mod_form extends moodleform_mod {
     }
 
     /**
-      * Function used for loading admin settings of grouped elements.
-      *
-      * @return void
-      */
+     * Function used for loading admin settings of grouped elements.
+     *
+     * @return void
+     */
     private function load_admin_settings() : void {
         $groupconfigs = [
             'closedoorscount',
             'closedoorsunit',
             'advanceentrycount',
-            'advanceentryunit,',
+            'advanceentryunit',
             'graceperiod',
             'graceperiodunit',
             'validateattendance',

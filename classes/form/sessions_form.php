@@ -22,11 +22,14 @@
  * @author     ISYC <soporte@isyc.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+
+namespace mod_hybridteaching\form;
+
 defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->libdir.'/formslib.php');
 
-class sessions_form extends moodleform {
+class sessions_form extends \moodleform {
     public function definition() {
         global $CFG, $USER, $DB;
         $mform = &$this->_form;
@@ -35,7 +38,7 @@ class sessions_form extends moodleform {
         $cm = $this->_customdata['cm'];
         $session = $this->_customdata['session'];
         !isset($this->_customdata['typevc']) ? $typevc = '' : $typevc = $this->_customdata['typevc'];
-        $modcontext = context_module::instance($cm->id);
+        $modcontext = \context_module::instance($cm->id);
         if (!empty($session)) {
             $defopts = ['maxfiles' => EDITOR_UNLIMITED_FILES, 'noclean' => true, 'context' => $modcontext];
             $session = file_prepare_standard_editor($session, 'description',
@@ -163,6 +166,9 @@ class sessions_form extends moodleform {
             $mform->addElement('checkbox', 'replicatedoc', '', get_string('replicatedoc', 'hybridteaching'));
             $mform->setDefault('replicatedoc', '1');
             $mform->addElement('checkbox', 'caleneventpersession', '', get_string('caleneventpersession', 'hybridteaching'));
+        } else {
+            $mform->addElement('checkbox', 'updatecalen', get_string('updatecalen', 'hybridteaching'));
+            $mform->setType('updatecalen', PARAM_INT);
         }
 
         if (empty($session)) {
@@ -206,115 +212,3 @@ class sessions_form extends moodleform {
     }
 }
 
-
-class bulk_update_duration_form extends moodleform {
-    public function definition() {
-        $mform =& $this->_form;
-        $cm = $this->_customdata['cm'];
-        $ids = $this->_customdata['sesslist'];
-        $hybridteaching = $this->_customdata['hybridteaching'];
-        $slist = $this->_customdata['slist'];
-
-        $mform->addElement('header', 'general', get_string('updatesesduration', 'hybridteaching'));
-        $options = [
-            '1' => get_string('seton', 'hybridteaching'),
-            '2' => get_string('extend', 'hybridteaching'),
-            '3' => get_string('reduce', 'hybridteaching'),
-        ];
-        $mform->addElement('select', 'operation', get_string('updateduration', 'hybridteaching'), $options);
-        $mform->setType('operation', PARAM_INT);
-        $duration[] = &$mform->createElement('text', 'duration', get_string('duration', 'hybridteaching'));
-        $mform->setType('duration', PARAM_INT);
-
-        $options = [
-            '1' => get_string('minutes'),
-            '2' => get_string('hours'),
-        ];
-        $duration[] = &$mform->createElement('select', 'timetype', '', $options);
-        $mform->setType('timetype', PARAM_INT);
-        $mform->addGroup($duration, 'durationgroup', get_string('time'), [' '], false);
-
-        $mform->addElement('hidden', 'action', 'bulkupdateduration');
-        $mform->setType('action', PARAM_INT);
-        addhiddens($mform, $ids, $cm, $hybridteaching, $slist);
-        $submitstring = get_string('updatesessions', 'hybridteaching');
-        $this->add_action_buttons(true, $submitstring);
-    }
-}
-
-
-class bulk_update_starttime_form extends moodleform {
-    public function definition() {
-        $mform =& $this->_form;
-        $cm = $this->_customdata['cm'];
-        $ids = $this->_customdata['sesslist'];
-        $hybridteaching = $this->_customdata['hybridteaching'];
-        $slist = $this->_customdata['slist'];
-
-        $mform->addElement('header', 'general', get_string('updatesesstarttime', 'hybridteaching'));
-        $options = [
-            '3' => get_string('advance', 'hybridteaching'),
-            '2' => get_string('delayin', 'hybridteaching'),
-        ];
-        $mform->addElement('select', 'operation', get_string('updatestarttime', 'hybridteaching'), $options);
-        $mform->setType('operation', PARAM_INT);
-        $starttime[] = &$mform->createElement('text', 'starttime', get_string('starttime', 'hybridteaching'));
-        $mform->setType('starttime', PARAM_INT);
-
-        $options = [
-            '1' => get_string('minutes'),
-            '2' => get_string('hours'),
-        ];
-        $starttime[] = &$mform->createElement('select', 'timetype', '', $options);
-        $mform->setType('timetype', PARAM_INT);
-        $mform->addGroup($starttime, 'starttimegroup', get_string('time'), [' '], false);
-
-        $mform->addElement('hidden', 'action', 'bulkupdatestarttime');
-        $mform->setType('action', PARAM_INT);
-        addhiddens($mform, $ids, $cm, $hybridteaching, $slist);
-        $submitstring = get_string('updatesessions', 'hybridteaching');
-        $this->add_action_buttons(true, $submitstring);
-    }
-}
-
-class session_options_form extends moodleform {
-    public function definition() {
-        $mform =& $this->_form;
-        $id = $this->_customdata['id'];
-        $slist = $this->_customdata['l'];
-
-        $mform->addElement('hidden', 'id');
-        $mform->addElement('hidden', 'l');
-        $mform->setDefault('id', $id);
-        $mform->setDefault('l', $slist);
-        $mform->setType('id', PARAM_INT);
-        $mform->setType('l', PARAM_INT);
-        $mform->addElement('header', 'options', get_string('options', 'hybridteaching'));
-        $perpage = [
-            0 => get_string('donotusepaging', 'hybridteaching'),
-            10 => 10,
-            25 => 25,
-            50 => 50,
-            75 => 75,
-            100 => 100,
-            250 => 250,
-            500 => 500,
-            1000 => 1000,
-        ];
-        $mform->addElement('select', 'perpage', get_string('sesperpage', 'hybridteaching'), $perpage);
-        $mform->setDefault('perpage', get_config('hybridteaching', 'resultsperpage'));
-    }
-}
-
-
-
-function addhiddens($mform, $ids, $cm, $hybridteaching, $slist) {
-    $mform->addElement('hidden', 'ids', $ids);
-    $mform->setType('ids', PARAM_ALPHANUMEXT);
-    $mform->addElement('hidden', 'id', $cm->id);
-    $mform->setType('id', PARAM_INT);
-    $mform->addElement('hidden', 'h', $hybridteaching->id);
-    $mform->setType('h', PARAM_INT);
-    $mform->addElement('hidden', 'l', $slist);
-    $mform->setType('l', PARAM_INT);
-}

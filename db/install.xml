@@ -33,6 +33,7 @@
         <FIELD NAME="userslimit" TYPE="int" LENGTH="6" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Límite de usuarios."/>
         <FIELD NAME="graceperiod" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="time after session starts in seconds for the attendance to count as late arrival"/>
         <FIELD NAME="graceperiodunit" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="wellcomemessage" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false" COMMENT="Welcome message to display when entering the videoconference."/>
         <FIELD NAME="disablecam" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Desactivar las cámaras web."/>
         <FIELD NAME="disablemic" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Desactivar los micrófonos."/>
         <FIELD NAME="disableprivatechat" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Desactivar el chat privado."/>
@@ -95,7 +96,7 @@
         <FIELD NAME="typevc" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" COMMENT="The type of videoconference plugin"/>
         <FIELD NAME="userecordvc" TYPE="int" LENGTH="11" NOTNULL="false" SEQUENCE="false" COMMENT="Allow recordings"/>
         <FIELD NAME="vcreference" TYPE="int" LENGTH="11" NOTNULL="false" SEQUENCE="false" COMMENT="Vc reference"/>
-        <FIELD NAME="processedrecording" TYPE="int" LENGTH="11" NOTNULL="false" SEQUENCE="false" COMMENT="Session recording. -1: no downloaded from vc yet (ready for download), 0: downloaded from vc, positive number: activity id storage"/>
+        <FIELD NAME="processedrecording" TYPE="int" LENGTH="11" NOTNULL="false" SEQUENCE="false" COMMENT="Session recording. -1: no downloaded from vc yet (ready for download), 0: downloaded from vc, -2: no recording, positive number: activity id storage"/>
         <FIELD NAME="storagereference" TYPE="int" LENGTH="11" NOTNULL="false" SEQUENCE="false" COMMENT="Recording reference"/>
         <FIELD NAME="visiblerecord" TYPE="int" LENGTH="1" NOTNULL="false" DEFAULT="1" SEQUENCE="false"/>
         <FIELD NAME="visiblechat" TYPE="int" LENGTH="1" NOTNULL="false" DEFAULT="1" SEQUENCE="false"/>

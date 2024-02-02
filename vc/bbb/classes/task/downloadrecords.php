@@ -23,7 +23,7 @@
 // Córdoba, Extremadura, Vigo, Las Palmas de Gran Canaria y Burgos.
 /**
  * Display information about all the mod_hybridteaching modules in the requested course. *
- * @package    mod_hybridteaching
+ * @package    hybridteachvc_bbb
  * @copyright  2023 Proyecto UNIMOODLE
  * @author     UNIMOODLE Group (Coordinator] <direccion.area.estrategia.digital@uva.es>
  * @author     ISYC <soporte@isyc.com>
@@ -35,8 +35,10 @@ namespace hybridteachvc_bbb\task;
 use hybridteachvc_bbb\sessions;
 use hybridteachvc_bbb\meeting;
 
+/**
+ * Class downloadrecords.
+ */
 class downloadrecords extends \core\task\scheduled_task {
-
     /**
      * Returns name of task.
      *
@@ -46,8 +48,17 @@ class downloadrecords extends \core\task\scheduled_task {
         return get_string('downloadrecordsbbb', 'hybridteachvc_bbb');
     }
 
+    /**
+     * Executes the function to process recording for hybrid teaching sessions in BigBlueButton.
+     */
     public function execute() {
         global $DB, $CFG;
+
+        $enabledrecording = get_config('hybridteachvc_bbb', 'enabledrecording');
+        if (!$enabledrecording) {
+            mtrace(get_string('recordingdisabled', 'hybridteaching'));
+            return;
+        }
 
         $sessionconfig = new sessions();
 
@@ -72,20 +83,26 @@ class downloadrecords extends \core\task\scheduled_task {
             $response = $meeting->get_meeting_recordings($session->meetingid);
 
             if (isset($response['returncode']) && $response['returncode'] == 'SUCCESS') {
+                $sessionresult = $DB->get_record('hybridteaching_session', ['id' => $session->hsid]);
                 if ($response['recordingid'] != '') {
-                    $bbb = $DB->get_record('hybridteachvc_bbb', ['meetingid' => $session->meetingid] );
+                    $bbb = $DB->get_record('hybridteachvc_bbb',
+                        ['meetingid' => $session->meetingid, 'htsession' => $session->hsid]);
                     $bbb->recordingid = $response['recordingid'];
                     $DB->update_record('hybridteachvc_bbb', $bbb);
                     // Save processedrecording in hybridteaching_session=0: ready to upload to store.
-                    $session = $DB->get_record('hybridteaching_session', ['id' => $session->hsid]);
-                    $session->processedrecording = 0;
-                    $session->storagereference = -1;
-                    $DB->update_record('hybridteaching_session', $session);
+                    $sessionresult->processedrecording = 0;
+                    $sessionresult->storagereference = -1;
+                    $DB->update_record('hybridteaching_session', $sessionresult);
                 } else {
-                    mtrace(get_string('recordingnotfound','hybridteachvc_bbb', ['course' => $session->course, 'name' => $session->name]));
+                    $sessionresult->processedrecording = -2;
+                    $sessionresult->storagereference = -1;
+                    $DB->update_record('hybridteaching_session', $sessionresult);
+                    mtrace(get_string('recordingnotfound', 'hybridteachvc_bbb',
+                        ['course' => $session->course, 'name' => $session->name]));
                 }
             } else {
-                mtrace(get_string('recordingnotfound','hybridteachvc_bbb', ['course' => $session->course, 'name' => $session->name]));
+                mtrace(get_string('recordingnotfound','hybridteachvc_bbb',
+                    ['course' => $session->course, 'name' => $session->name]));
             }
         }
     }

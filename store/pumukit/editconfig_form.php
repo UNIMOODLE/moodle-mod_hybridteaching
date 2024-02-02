@@ -55,7 +55,7 @@ class htpumukit_config_edit_form extends moodleform {
         $mform->addElement('hidden', 'categories', '', "id='categories'");
         $mform->addElement('text', 'configname', get_string('configname', 'hybridteaching'));
 
-        $mform->addElement('html', '<button type="button" class="btn btn-outline-primary ml-3" data-toggle="modal" 
+        $mform->addElement('html', '<button type="button" class="btn btn-outline-primary ml-3" data-toggle="modal"
             data-target="#categoriesmodal">'.get_string('categories').'</button>');
 
         $mform->setType('id', PARAM_INT);

@@ -23,7 +23,7 @@
 // Córdoba, Extremadura, Vigo, Las Palmas de Gran Canaria y Burgos.
 /**
  * Display information about all the mod_hybridteaching modules in the requested course. *
- * @package    mod_hybridteaching
+ * @package    hybridteachvc_bbb
  * @copyright  2023 Proyecto UNIMOODLE
  * @author     UNIMOODLE Group (Coordinator) <direccion.area.estrategia.digital@uva.es>
  * @author     ISYC <soporte@isyc.com>
@@ -35,23 +35,28 @@ namespace hybridteachvc_bbb;
 use mod_bigbluebuttonbn\plugin;
 use hybridteachvc_bbb\bbbproxy;
 
+/**
+ * Class meeting.
+ */
 class meeting {
-
+    /** @var object $bbbinstance Api with credentials, url... */
     protected $bbbinstance;
 
     /**
      * Constructor for the meeting object.
      *
-     * @param  $bbbinstance
+     * @param object $bbbinstance
      */
     public function __construct($bbbinstance) {
-        $this->bbbinstance = $bbbinstance;  // Api with credentials, url...
+        $this->bbbinstance = $bbbinstance;
     }
 
     /**
-     * Creates a bigbluebutton meeting, send the message to BBB and returns the response in an array.
+     * Create a meeting using the provided session and ht.
      *
-     * @return array
+     * @param object $session
+     * @param object $ht intance
+     * @return bbbproxy response
      */
     public function create_meeting ($session, $ht) {
         $bbbproxy = new bbbproxy($this->bbbinstance);
@@ -71,8 +76,8 @@ class meeting {
     /**
      * Upload presentation.
      *
-     * @param $session session instance
-     * @param $ht hybridteaching instance
+     * @param object $session session instance
+     * @param object $ht hybridteaching instance
      * @return array|null the representation of the presentations as array
      */
     public function upload_presentation ($session, $ht) {
@@ -99,25 +104,23 @@ class meeting {
     /**
      * Helper to prepare data used for create meeting.
      * Populate the data from session and ht to BBB meeting.
-     * @todo moderatorPW and attendeePW will be removed from create after release of BBB v2.6.
-     * @param $session session instance
-     * @param $ht hybridteaching instance
+     * @param object $session session instance
+     * @param object $ht hybridteaching instance
      * @return array
      */
     protected function create_meeting_data($session, $ht) {
 
         $meetingid = self::get_unique_meetingid_seed();
-        $moderatorpass = plugin::random_password(12);
-        $viewerpass = plugin::random_password(12, $moderatorpass);
 
         $url = new \moodle_url('/course/view.php', ['id' => $ht->course]);
 
         $data = ['meetingID' => $meetingid,
                 'name' => \mod_bigbluebuttonbn\plugin::html2text($session->name, 64),
-                'attendeePW' => $viewerpass,
-                'moderatorPW' => $moderatorpass,
                 'logoutURL' => (string) $url,
         ];
+        if (!is_null($ht->wellcomemessage) && $ht->wellcomemessage != '') {
+            $data['welcome'] = $ht->wellcomemessage;
+        }
 
         /*
         Info: initial states added in BBB:
@@ -134,14 +137,25 @@ class meeting {
                             $ht->hiderecordbutton
         */
 
-        $data['duration'] = $session->duration;
-        $data['record'] = $ht->userecordvc ? 'true' : 'false';
-        if ($data['record'] == 'true' ) {
-            if ($ht->initialrecord) {
-                $data['autoStartRecording'] = 'true';
+        // Get instance context.
+        $cm = get_coursemodule_from_instance ('hybridteaching', $ht->id);
+        $context = \context_module::instance($cm->id);
+
+        $enabledrecording = get_config('enabledrecording', 'hybridteachvc_bbb');
+        // Initially, recording is false. If has permissions, change to true.
+        $data['record'] = false;
+        $data['allowStartStopRecording'] = false;
+        if (has_capability('hybridteachvc/bbb:record', $context) && $enabledrecording) {
+            $data['record'] = $ht->userecordvc ? 'true' : 'false';
+            if ($data['record'] == 'true' ) {
+                if ($ht->initialrecord) {
+                    $data['autoStartRecording'] = 'true';
+                }
+                $data['allowStartStopRecording'] = $ht->hiderecordbutton ? 'false' : 'true';
             }
-            $data['allowStartStopRecording'] = $ht->hiderecordbutton ? 'false' : 'true';
         }
+
+        $data['duration'] = $session->duration;
         $data['muteOnStart'] = 'true';
         if ($ht->userslimit > 0) {
             $data['maxParticipants'] = $ht->userslimit;
@@ -157,14 +171,18 @@ class meeting {
         if ($ht->blockroomdesign) {
             $data['disabledFeatures'] = 'layouts';
         }
+        if ($ht->reusesession) {
+            $data['meetingExpireWhenLastUserLeftInMinutes '] = 0;
+        }
 
         return $data;
     }
 
-
     /**
-     * Helper for preparing metadata used while creating the meeting.
+     * Create meeting metadata.
      *
+     * @param object $session
+     * @param object $ht instance
      * @return array
      */
     protected function create_meeting_metadata ($session, $ht) {
@@ -187,19 +205,22 @@ class meeting {
         return $metadata;
     }
 
-
     /**
-     * Send an end meeting message to BBB server
+     * Ends a meeting using the provided meeting ID.
+     *
+     * @param int $meetingid meet id
      */
-    public function end_meeting($meetingid, $moderatorpassword) {
+    public function end_meeting($meetingid) {
         $bbbproxy = new bbbproxy($this->bbbinstance);
-        $bbbproxy->end_meeting($meetingid, $moderatorpassword);
-
+        $bbbproxy->end_meeting($meetingid);
     }
 
-    /*
-    * Get meeting recordings
-    */
+    /**
+     * Retrieves the meeting recordings for the given meeting ID.
+     *
+     * @param int $meetingid The ID of the meeting
+     * @return array
+     */
     public function get_meeting_recordings($meetingid) {
         $bbbproxy = new bbbproxy($this->bbbinstance);
         return $bbbproxy->get_meeting_recording($meetingid);
@@ -222,7 +243,7 @@ class meeting {
     /**
      * Get information about the origin.
      *
-     * @return stdClass
+     * @return object
      */
     public function get_origin_data() {
         global $CFG;

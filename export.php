@@ -32,7 +32,7 @@
  */
 
 require(__DIR__.'/../../config.php');
-require_once(__DIR__.'/classes/controller/notify_controller.php');
+use mod_hybridteaching\controller\notify_controller;
 
 $id = required_param('id', PARAM_INT);
 
@@ -64,6 +64,7 @@ if ($exportform->is_cancelled()) {
 } else if ($data = $exportform->get_data()) {
     require_sesskey();
     $data->context = $context;
+    $data->hybridteaching = $hybridteaching;
     $filename = get_string('modulenameu', 'hybridteaching') . '_' . date('Ymd');
     $exporter = new mod_hybridteaching\helpers\export($data);
     $exporter->export($filename, $data->format);

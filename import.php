@@ -32,9 +32,9 @@
  */
 
 require(__DIR__.'/../../config.php');
-require_once(__DIR__.'/classes/form/sessions_import_form.php');
-require_once(__DIR__.'/classes/import/sessions_import.php');
-require_once(__DIR__.'/classes/controller/notify_controller.php');
+use mod_hybridteaching\controller\notify_controller;
+use mod_hybridteaching\form\sessions_import_form;
+use mod_hybridteaching\import\sessions_import;
 
 $id = required_param('id', PARAM_INT);
 

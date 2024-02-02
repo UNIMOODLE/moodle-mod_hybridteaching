@@ -34,11 +34,11 @@
 
 require(__DIR__ . '/../../config.php');
 require_once(__DIR__ . '/lib.php');
-require_once($CFG->dirroot . '/mod/hybridteaching/classes/helper.php');
-require_once($CFG->dirroot . '/mod/hybridteaching/classes/controller/sessions_controller.php');
-require_once($CFG->dirroot . '/mod/hybridteaching/classes/controller/notify_controller.php');
 require_once($CFG->dirroot . '/lib/grouplib.php');
 use mod_hybridteaching\helpers\roles;
+use mod_hybridteaching\controller\sessions_controller;
+use mod_hybridteaching\controller\notify_controller;
+use mod_hybridteaching\helper;
 
 $id = optional_param('id', 0, PARAM_INT);
 $h = optional_param('h', 0, PARAM_INT);
@@ -74,6 +74,14 @@ $PAGE->set_context($modulecontext);
 $PAGE->set_activity_record($hybridteaching);
 
 $renderer = $PAGE->get_renderer('mod_hybridteaching');
+
+// Mark viewed and trigger the course_module_viewed event.
+hybridteaching_view(
+    $hybridteaching,
+    $course,
+    $cm,
+    $modulecontext
+);
 
 echo $OUTPUT->header();
 
@@ -155,7 +163,7 @@ if (!$activesession) {
                     if (($activesession->starttime < time() && $activesession->isfinished == 0)) {
                         $isprogress = true;
                         $viewupdate = true;
-                        $isclosedoors ? $status = get_string('status_progress', 'hybridteaching') : 
+                        $isclosedoors ? $status = get_string('status_progress', 'hybridteaching') :
                             $status = get_string('status_ready', 'hybridteaching');
                     } else if ($activesession->starttime > time()) {
                         $duration = $activesession->duration;
@@ -164,7 +172,7 @@ if (!$activesession) {
                             $isprogress = true;
                             $viewupdate = true;
                             $timeinit = $activesession->starttime;
-                            $isclosedoors ? $status = get_string('status_progress', 'hybridteaching') : 
+                            $isclosedoors ? $status = get_string('status_progress', 'hybridteaching') :
                                 $status = get_string('status_ready', 'hybridteaching');
                         } else {
                             $isstart = true;
@@ -175,14 +183,14 @@ if (!$activesession) {
                         $isprogress = true;
                             $viewupdate = true;
                             $timeinit = $activesession->starttime;
-                            $isclosedoors ? $status = get_string('status_progress', 'hybridteaching') : 
+                            $isclosedoors ? $status = get_string('status_progress', 'hybridteaching') :
                                 $status = get_string('status_ready', 'hybridteaching');
                     }
                 }
                 $isclosedoors ? $alert = 'alert-warning' : $alert = 'alert-info';
                 break;
             case $timeinit < time() && $timeend > time():
-                $isclosedoors ? $status = get_string('status_progress', 'hybridteaching') : 
+                $isclosedoors ? $status = get_string('status_progress', 'hybridteaching') :
                     $status = get_string('status_ready', 'hybridteaching');
                 $isprogress = true;
                 $alert = 'alert-warning';
@@ -237,7 +245,7 @@ if (!$activesession) {
                 if ($timeend > time()) {
                     $canentry = true;
                 } else {
-                    if ($isundatedsession && $timeend == $timeinit) $canentry = true;
+                    $isundatedsession && $timeend == $timeinit ? $canentry = true : '';
                 }
             }
         }
@@ -257,8 +265,9 @@ if (!$activesession) {
             $issessionmoderator = ($role || has_capability('mod/hybridteaching:sessionsactions', $modulecontext));
             $result['hasjoinurlcapability'] = $issessionmoderator;
         }
-        if (!has_capability('mod/hybridteaching:sessionsactions', $modulecontext) && !$session::get_sessionconfig_exists($activesession)
-            && $isundatedsession && $hybridteaching->usevideoconference) {
+        if (!has_capability('mod/hybridteaching:sessionsactions', $modulecontext) 
+              && !$session::get_sessionconfig_exists($activesession)
+              && $isundatedsession && $hybridteaching->usevideoconference) {
             $viewupdate = false;
             $canentry = false;
             $status = get_string('status_undated_wait', 'hybridteaching');
@@ -287,7 +296,7 @@ if (!$activesession) {
             if (!empty($nextsessduration)) {
                 $result['duration'] = helper::get_hours_format($nextsessduration);
             } else {
-                $result['duration'] = 'Sin definir';
+                $result['duration'] = get_string('unknown', 'hybridteaching');
             }
         }
         $result['status'] = $status;

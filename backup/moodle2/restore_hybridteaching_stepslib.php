@@ -32,30 +32,37 @@
  */
 
 /**
- * Define all the restore steps that will be used by the restore_hybridteaching_activity_task
- */
-
-/**
- * Structure step to restore one hybridteaching activity
+ * Class restore_hybridteaching_activity_structure_step
+ *
+ * This class is for restoring the structure of a hybrid teaching activity.
  */
 class restore_hybridteaching_activity_structure_step extends restore_activity_structure_step {
 
+    /**
+     * Define the structure for the restore.
+     *
+     * @return datatype
+     */
     protected function define_structure() {
-
         $paths = [];
         $userinfo = $this->get_setting_value('userinfo');
 
         $paths[] = new restore_path_element('hybridteaching', '/activity/hybridteaching');
         $paths[] = new restore_path_element('hybridteaching_session', '/activity/hybridteaching/sessions/session');
         $paths[] = new restore_path_element('hybridteaching_attendance',
-        '/activity/hybridteaching/sessions/session/attendances/attendance');
+            '/activity/hybridteaching/sessions/session/attendances/attendance');
         $paths[] = new restore_path_element('hybridteaching_attend_log',
-        '/activity/hybridteaching/sessions/session/attendances/attendance/logs/log');
+            '/activity/hybridteaching/sessions/session/attendances/attendance/logs/log');
 
         // Return the paths wrapped into standard activity structure.
         return $this->prepare_activity_structure($paths);
     }
 
+    /**
+     * Process the hybridteaching data and insert a new record.
+     *
+     * @param object $data The data to be processed
+     */
     protected function process_hybridteaching($data) {
         global $DB;
 
@@ -76,6 +83,11 @@ class restore_hybridteaching_activity_structure_step extends restore_activity_st
         $this->apply_activity_instance($newitemid);
     }
 
+    /**
+     * Process hybrid teaching session.
+     *
+     * @param mixed $data
+     */
     protected function process_hybridteaching_session($data) {
         global $DB;
 
@@ -88,6 +100,11 @@ class restore_hybridteaching_activity_structure_step extends restore_activity_st
         $this->set_mapping('hybridteaching_session', $oldid, $newitemid);
     }
 
+    /**
+     * Process hybrid teaching attendance.
+     *
+     * @param mixed $data
+     */
     protected function process_hybridteaching_attendance($data) {
         global $DB;
 
@@ -100,6 +117,11 @@ class restore_hybridteaching_activity_structure_step extends restore_activity_st
         $this->set_mapping('hybridteaching_attendance', $oldid, $newitemid);
     }
 
+    /**
+     * Process the hybridteaching attend log.
+     *
+     * @param mixed $data
+     */
     protected function process_hybridteaching_attend_log($data) {
         global $DB;
 
@@ -113,6 +135,10 @@ class restore_hybridteaching_activity_structure_step extends restore_activity_st
         $this->set_mapping('hybridteaching_attend_log', $oldid, $newitemid, true);
     }
 
+    /**
+     * Process to execute after restore.
+     *
+     */
     protected function after_execute() {
         // Add hybridteaching related files, no need to match by itemname (just internally handled context).
         $this->add_related_files('mod_hybridteaching', 'intro', null);

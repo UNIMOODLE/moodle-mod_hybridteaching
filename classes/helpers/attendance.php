@@ -22,13 +22,15 @@
  * @author     ISYC <soporte@isyc.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-use mod_hybridteaching\helpers\roles;
+
+namespace mod_hybridteaching\helpers;
+
+use mod_hybridteaching\controller\attendance_controller;
 
 defined('MOODLE_INTERNAL') || die();
 
 require_once(dirname(__FILE__).'../../../../../config.php');
 require_login();
-require_once(dirname(__FILE__).'/../controller/attendance_controller.php');
 
 class attendance {
     /**
@@ -49,7 +51,7 @@ class attendance {
             return 0;
         }
 
-        $result = ($attendance / $totalusers) * 100;
+        $result = round(($attendance / $totalusers) * 100, 2);
 
         $sessattstring = "{$attendance} / {$totalusers} ({$result}%)";
 

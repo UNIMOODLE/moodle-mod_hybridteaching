@@ -30,8 +30,7 @@ require_once(__DIR__ . '/../../../../lib/behat/behat_base.php');
 /**
  * hybridteaching-related steps definitions.
  *
- * @package    hybridteaching
- * @category   hybridteaching
+ * @package    mod_hybridteaching
  * @copyright  2023 ISYC
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -40,7 +39,7 @@ class behat_hybridteaching extends behat_base {
     /**
      * @Given /^the session date is set to the current date and time plus 1 hour$/
      */
-    public function theSessionDateIsSetToTheCurrentDateAndTimePlusOneHour() {
+    public function the_session_date_is_set_to_the_current_date_and_time_plus_one_hour() {
         $currentdatetime = new \DateTime();
 
         $currentdatetime->modify('+1 hour');
@@ -60,9 +59,9 @@ class behat_hybridteaching extends behat_base {
 
     /**
      * @Given /^I confirm the dialog$/
-     * 
+     *
      */
-    public function iConfirmTheDialog() {
+    public function i_confirm_the_dialog() {
         $this->getSession()->getDriver()->executeScript('window.confirm = function () { return true; };');
     }
 
@@ -71,13 +70,27 @@ class behat_hybridteaching extends behat_base {
      *
      * @Given /^I click on "More" if it exists otherwise "Sessions"$/
      */
-    public function iClickOnMoreIfExistsOtherwiseSessions() {
+    public function i_click_on_more_if_exists_otherwise_sessions() {
         $morebutton = $this->getSession()->getPage()->find('css', '.secondary-navigation .moremenu .more-nav .dropdownmoremenu');
 
         if ($morebutton !== null && $morebutton->isVisible()) {
             $morebutton->click();
         }
-    
+
         $this->getSession()->getPage()->findLink('Sessions')->click();
+    }
+
+    /**
+     * @When /^I click on the element with class "([^"]*)"$/
+     */
+    public function i_click_on_the_element_with_class($class) {
+        $this->getSession()->getPage()->find('css', '.' . $class)->click();
+    }
+
+    /**
+     * @When /^I click on the element with attribute "([^"]*)"$/
+     */
+    public function i_click_on_the_element_with_attribute($attribute) {
+        $this->getSession()->getPage()->find('css', "[$attribute]")->click();
     }
 }

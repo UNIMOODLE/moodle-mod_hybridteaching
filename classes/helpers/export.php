@@ -46,6 +46,8 @@ class export {
 
     protected $context = null;
 
+    protected $hybridteaching = null;
+
     /**
      * Constructs a new instance of the class.
      *
@@ -58,6 +60,7 @@ class export {
         raise_memory_limit(MEMORY_HUGE);
 
         $this->context = $data->context;
+        $this->hybridteaching = $data->hybridteaching;
         if ($data->group === "0") {
             $this->group = get_string('allparticipants');
         } else {
@@ -144,6 +147,7 @@ class export {
 
         $allgroups = get_string('allgroups', 'hybridteaching');
 
+        $params['htid'] = $this->hybridteaching->id;
         $sql = "SELECT hs.id,
                            CASE
                                 WHEN hs.groupid = 0 THEN CONCAT(hs.starttime, ' - All groups')
@@ -152,7 +156,7 @@ class export {
                             END AS dategroup
                   FROM {hybridteaching_session} hs
              LEFT JOIN {groups} g ON g.id = hs.groupid
-                 WHERE 1 = 1 $where
+                 WHERE hs.hybridteachingid = :htid $where
               ORDER BY hs.id";
 
         $sessions = $DB->get_records_sql($sql, $params);
@@ -175,30 +179,39 @@ class export {
         $inparams = [];
         $insql = '';
         if (!empty($this->sessions)) {
-            [$insql, $inparams] = $DB->get_in_or_equal($this->sessions, SQL_PARAMS_NAMED, 'sessions');
+            [$insql, $inparams] = $DB->get_in_or_equal($this->sessions, SQL_PARAMS_NAMED, 'sessions'); 
             $allparams = $allparams + $inparams;
         }
 
-        $where = '';
+        $wheregroups = '';
+        $groups = '';
+        $selectgroups = "'-' AS groupname,";
         if ($params->group != 0) {
             $allparams = $allparams + ['group' => $params->group];
-            $where .= " AND gm.groupid = :group";
+            $wheregroups .= " AND gm.groupid = :group";
+            $groups = " LEFT JOIN {groups_members} gm ON ha.userid = gm.userid
+                        LEFT JOIN {groups} g ON g.id = gm.groupid
+                                    AND g.courseid = :courseid";
+            $selectgroups = "CASE WHEN g.id IS NOT NULL THEN g.name ELSE '-' END AS groupname,";
+            $allparams = $allparams + ['courseid' => $this->hybridteaching->course];
         }
+      
+        $allparams = $allparams + ['htid' => $this->hybridteaching->id];
 
         $sql = "SELECT
                         ha.id,
                         u.id as userid,
                         u.firstname,
                         u.lastname,
-                        CASE WHEN g.id IS NOT NULL THEN g.name ELSE '-' END AS groupname,
+                        $selectgroups
                         u.email,
                         CONCAT(hs.id, ' - ', ha.status) AS attbysess
                   FROM {hybridteaching_attendance} ha
             INNER JOIN {hybridteaching_session} hs ON hs.id = ha.sessionid
+            
             INNER JOIN {user} u ON u.id = ha.userid
-             LEFT JOIN {groups_members} gm ON ha.userid = gm.userid
-             LEFT JOIN {groups} g ON g.id = gm.groupid
-                 WHERE 1 = 1 $where";
+                        $groups
+                 WHERE hs.hybridteachingid = :htid AND hs.id $insql $wheregroups";
 
         $body = $DB->get_records_sql($sql, $allparams);
 

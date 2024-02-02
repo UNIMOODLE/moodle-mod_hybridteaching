@@ -33,9 +33,12 @@
 
 
 defined('MOODLE_INTERNAL') || die;
+
 global $CFG;
+
 require_once("$CFG->libdir/externallib.php");
-require_once(__DIR__.'/classes/controller/sessions_controller.php');
+
+use mod_hybridteaching\controller\sessions_controller;
 
 /**
  * hybridteaching external functions
@@ -55,7 +58,8 @@ class hybridteaching_external extends external_api {
     public static function set_attendance_status_parameters() {
         return new external_function_parameters(
             ["attid" => new external_value(PARAM_INT, "attid"),
-                    'status' => new external_value(PARAM_INT, "status"), ]
+                    'status' => new external_value(PARAM_INT, "status"),
+                    'id' => new external_value(PARAM_TEXT, "id"), ]
         );
     }
 
@@ -64,14 +68,14 @@ class hybridteaching_external extends external_api {
      *
      * @param int $attid The ID of the attendance.
      * @param string $status The status to set for the attendance.
-     * @throws Some_Exception_Class A description of the exception that can be thrown.
+     * @param string $id The hybridteaching course module id.
      * @return string The attendance record in JSON format.
      */
-    public static function set_attendance_status($attid, $status) {
+    public static function set_attendance_status($attid, $status, $id) {
         global $DB, $CFG, $USER;
         $params = self::validate_parameters(
             self::set_attendance_status_parameters(),
-                ["attid" => $attid, 'status' => $status]
+                ["attid" => $attid, 'status' => $status, 'id' => $id]
         );
 
         $attendance = $DB->get_record('hybridteaching_attendance', ['id' => $attid]);
@@ -94,6 +98,16 @@ class hybridteaching_external extends external_api {
             ]);
 
             $event->trigger();
+
+            // Update completion state.
+            $hybridteaching = $DB->get_record('hybridteaching', ['id' => $attendance->hybridteachingid]);
+            !$cm ? $cm = get_coursemodule_from_id('hybridteaching', $id,  0,  false,  MUST_EXIST) : '';
+
+            $completion = new completion_info($course);
+            if ($completion->is_enabled($cm) && $hybridteaching->completionattendance) {
+                $status ? $completion->update_state($cm, COMPLETION_COMPLETE, $attendance->userid) :
+                    $completion->update_state($cm, COMPLETION_INCOMPLETE, $attendance->userid);
+            }
         }
         return json_encode($attendance);
     }
@@ -123,7 +137,6 @@ class hybridteaching_external extends external_api {
      *
      * @param mixed $sessid The ID of the session.
      * @param mixed $attexempt The exemption status to set.
-     * @throws Some_Exception_Class Description of any exceptions that may be thrown.
      * @return string The JSON-encoded session object.
      */
     public static function set_session_exempt($sessid, $attexempt) {
@@ -154,7 +167,7 @@ class hybridteaching_external extends external_api {
                         'attid' => $att->id,
                     ],
                 ]);
-    
+
                 $event->trigger();
             }
 
@@ -162,6 +175,9 @@ class hybridteaching_external extends external_api {
         return json_encode($session);
     }
 
+    /**
+     * info about the returned object
+     */
     public static function set_session_exempt_returns() {
         // TODO.
     }
@@ -231,7 +247,6 @@ class hybridteaching_external extends external_api {
      * Retrieves the modal text for a given session ID.
      *
      * @param int $sessid The ID of the session.
-     * @throws Some_Exception_Class description of exception
      * @return string The JSON-encoded modal information.
      */
     public static function get_modal_text($sessid) {
@@ -280,9 +295,7 @@ class hybridteaching_external extends external_api {
     }
 
     /**
-     * Retrieves the modal text returns.
-     *
-     * @return Some_Return_Value
+     * Info about the returned object
      */
     public static function get_modal_text_returns() {
         // TODO.
@@ -296,15 +309,17 @@ class hybridteaching_external extends external_api {
     public static function get_user_has_recording_capability_parameters() {
         return new external_function_parameters(
             ["typevc" => new external_value(PARAM_TEXT, "typevc"),
-                "pagecontext" => new external_value(PARAM_INT, "pagecontext")]
+                "pagecontext" => new external_value(PARAM_INT, "pagecontext"), ]
         );
     }
 
 
+
     /**
-     * Retrieves the recording capability for a given vc type
-     * @param int $typevc The type of the vc.
-     * @throws Some_Exception_Class description of exception
+     * Get user recording capability.
+     *
+     * @param string $typevc description
+     * @param object $pagecontext description
      * @return string The JSON-encoded capability information.
      */
     public static function get_user_has_recording_capability($typevc, $pagecontext) {
@@ -323,9 +338,7 @@ class hybridteaching_external extends external_api {
     }
 
     /**
-     * Retrieves the modal text returns.
-     *
-     * @return Some_Return_Value
+     * Info about the returned object
      */
     public static function get_user_has_recording_capability_returns() {
         // TODO.

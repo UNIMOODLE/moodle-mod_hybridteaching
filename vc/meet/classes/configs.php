@@ -24,7 +24,7 @@
 
 /**
  * Display information about all the mod_hybridteaching modules in the requested course. *
- * @package    mod_hybridteaching
+ * @package    hybridteachvc_meet
  * @copyright  2023 Proyecto UNIMOODLE
  * @author     UNIMOODLE Group (Coordinator) <direccion.area.estrategia.digital@uva.es>
  * @author     ISYC <soporte@isyc.com>
@@ -32,13 +32,32 @@
  */
 
 
-class configs extends configs_controller {
+namespace hybridteachvc_meet;
+
+use stdClass;
+
+/**
+ * Class configs.
+ */
+class configs extends \mod_hybridteaching\controller\configs_controller {
+    /**
+     * Load config by config ID.
+     *
+     * @param int $configid The ID of the configuration to load.
+     * @return object The loaded configuration data.
+     */
     public static function load_config($configid) {
         global $DB;
         $zoomdata = $DB->get_record('hybridteachvc_meet_config', ['id' => $configid]);
         return $zoomdata;
     }
 
+    /**
+     * Creates a new configuration record in the database.
+     *
+     * @param object $data The data to be used for creating the configuration.
+     * @return int The ID of the newly created configuration record.
+     */
     public static function create_config($data) {
         global $DB;
         $meetrecords = new stdClass();
@@ -51,6 +70,11 @@ class configs extends configs_controller {
         return $id;
     }
 
+    /**
+     * Update the configuration with the given data.
+     *
+     * @param object $data The data to update the configuration
+     */
     public static function update_config($data) {
         global $DB;
         $meetrecords = new stdClass();
@@ -61,6 +85,11 @@ class configs extends configs_controller {
         $DB->update_record('hybridteachvc_meet_config', $meetrecords);
     }
 
+    /**
+     * Delete a configuration by its ID.
+     *
+     * @param int $configid The ID of the configuration to delete
+     */
     public static function delete_config($configid) {
         global $DB;
         $DB->delete_records('hybridteachvc_meet_config', ['id' => $configid]);

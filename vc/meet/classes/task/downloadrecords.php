@@ -24,7 +24,7 @@
 
 /**
  * Display information about all the mod_hybridteaching modules in the requested course. *
- * @package    mod_hybridteaching
+ * @package    hybridteachvc_meet
  * @copyright  2023 Proyecto UNIMOODLE
  * @author     UNIMOODLE Group (Coordinator) <direccion.area.estrategia.digital@uva.es>
  * @author     ISYC <soporte@isyc.com>
@@ -36,6 +36,9 @@ namespace hybridteachvc_meet\task;
 use hybridteachvc_meet\sessions;
 use hybridteachvc_meet\meet_handler;
 
+/**
+ * Class downloadrecords.
+ */
 class downloadrecords extends \core\task\scheduled_task {
 
     /**
@@ -47,9 +50,18 @@ class downloadrecords extends \core\task\scheduled_task {
         return get_string('downloadrecordsmeet', 'hybridteachvc_meet');
     }
 
+    /**
+     * Executes the function to process and save recordings and chats from the hybridteaching_session table.
+     */
     public function execute() {
 
         global $DB, $CFG;
+
+        $enabledrecording = get_config('hybridteachvc_meet', 'enabledrecording');
+        if (!$enabledrecording) {
+            mtrace(get_string('recordingdisabled', 'hybridteaching'));
+            return;
+        }
 
         $sessionconfig = new sessions();
 
@@ -123,7 +135,7 @@ class downloadrecords extends \core\task\scheduled_task {
                     }
                     $chatnum++;
                 }
-            }            
+            }
         }
     }
 }

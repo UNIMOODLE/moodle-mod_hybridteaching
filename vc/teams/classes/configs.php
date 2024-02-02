@@ -31,7 +31,11 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-class configs extends configs_controller {
+namespace hybridteachvc_teams;
+
+use stdClass;
+
+class configs extends \mod_hybridteaching\controller\configs_controller {
     public static function load_config($configid) {
         global $DB;
         $teamsdata = $DB->get_record('hybridteachvc_teams_config', ['id' => $configid]);

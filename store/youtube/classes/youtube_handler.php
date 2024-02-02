@@ -147,7 +147,7 @@ class youtube_handler {
             }
         } catch (\Google_Service_Exception $e) {
             $message = json_decode($e->getMessage());
-            mtrace(get_string('notuploading','hybridteachstore_youtube').' '.$store->course.": '".$store->name."': ");
+            mtrace(get_string('notuploading', 'hybridteachstore_youtube').' '.$store->course.": '".$store->name."': ");
             if (isset($message->error->message)) {
                 mtrace($message->error->message);
             } else {
@@ -164,6 +164,16 @@ class youtube_handler {
 
         $configyt->token = json_encode($this->client->getAccessToken());;
         $DB->update_record('hybridteachstore_youtube_con', $configyt);
+    }
+
+    public function deletefile($code) {
+        try {
+            $youtube = new \Google_Service_YouTube($this->client);
+            $youtube->videos->delete($code);
+        } catch (\Exception $e) {
+            // No action for delete.
+            // ...mtrace($e->getMessage());
+        }
     }
 
 }

@@ -54,10 +54,10 @@ Feature: A student join a videoconference in a hybridteaching activity
     And I wait "1" seconds
     And I switch to a second window
     And I click on "onetrust-reject-all-handler" "button"
-    And I wait "2" seconds
-    And I click on "Iniciar reunión" "button"
-    And I wait "2" seconds
-    And I click on "Únase desde su navegador" "button"
+    And I wait "3" seconds
+    And I click on the element with class "mbTuDeF1"
+    And I wait "3" seconds
+    And I click on the element with attribute "web_client"
     And I wait "5" seconds
     Then I switch to the main window
     And I log out

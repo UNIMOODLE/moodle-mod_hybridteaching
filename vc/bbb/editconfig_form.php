@@ -24,7 +24,7 @@
 
 /**
  * Display information about all the mod_hybridteaching modules in the requested course. *
- * @package    mod_hybridteaching
+ * @package    hybridteachvc_bbb
  * @copyright  2023 Proyecto UNIMOODLE
  * @author     UNIMOODLE Group (Coordinator) <direccion.area.estrategia.digital@uva.es>
  * @author     ISYC <soporte@isyc.com>
@@ -35,6 +35,9 @@
 
  require_once($CFG->libdir.'/formslib.php');
 
+ /**
+  * Custom moodle form.
+  */
 class htbbb_config_edit_form extends moodleform {
     /**
      * Called to define this moodle form
@@ -54,7 +57,7 @@ class htbbb_config_edit_form extends moodleform {
         $mform->addElement('hidden', 'categories', '', "id='categories'");
         $mform->addElement('text', 'configname', get_string('configname', 'hybridteaching'));
 
-        $mform->addElement('html', '<button type="button" class="btn btn-outline-primary ml-3" data-toggle="modal" 
+        $mform->addElement('html', '<button type="button" class="btn btn-outline-primary ml-3" data-toggle="modal"
             data-target="#categoriesmodal">'.get_string('categories').'</button>');
 
         $mform->setType('id', PARAM_INT);

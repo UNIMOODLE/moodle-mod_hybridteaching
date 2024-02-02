@@ -24,20 +24,19 @@
 
 /**
  * Display information about all the mod_hybridteaching modules in the requested course. *
- * @package    mod_hybridteaching
+ * @package    hybridteachvc_zoom
  * @copyright  2023 Proyecto UNIMOODLE
  * @author     UNIMOODLE Group (Coordinator) <direccion.area.estrategia.digital@uva.es>
  * @author     ISYC <soporte@isyc.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-use mod_hybridteaching\plugininfo\hybridteachvc;
+use mod_hybridteaching\controller\configs_controller;
+use hybridteachvc_zoom\configs;
 
 require_once('../../../../config.php');
 require_once('editconfig_form.php');
-require_once('../../classes/controller/configs_controller.php');
 require_once('../../lib.php');
-require_once('classes/configs.php');
 $PAGE->requires->js_call_amd('mod_hybridteaching/categoriesmodal', 'init');
 
 $type = optional_param('type', "", PARAM_COMPONENT);

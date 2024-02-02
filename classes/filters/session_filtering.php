@@ -14,13 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
-defined('MOODLE_INTERNAL') || die();
-
-require_once($CFG->dirroot.'/mod/hybridteaching/classes/filters/text.php');
-require_once($CFG->dirroot.'/mod/hybridteaching/classes/filters/duration.php');
-require_once($CFG->dirroot.'/mod/hybridteaching/classes/filters/date.php');
-require_once($CFG->dirroot.'/mod/hybridteaching/classes/filters/select.php');
-require_once($CFG->dirroot.'/mod/hybridteaching/classes/filters/session_filter_forms.php');
+namespace mod_hybridteaching\filters;
 
 class session_filtering {
     public $_fields;
@@ -124,7 +118,7 @@ class session_filtering {
             case 'groupid':
                 list($course, $cm) = get_course_and_cm_from_cmid($id, 'hybridteaching');
                 $groupmode = groups_get_activity_groupmode($cm);
-                $context = context_module::instance($cm->id);
+                $context = \context_module::instance($cm->id);
                 if (has_capability('mod/hybridteaching:sessionsfulltable', $context)) {
                     $groups = groups_get_all_groups($course->id, 0, $cm->groupingid);
                 } else if ($groupmode == VISIBLEGROUPS) {
@@ -205,79 +199,3 @@ class session_filtering {
 
 }
 
-class session_filter_type {
-    /**
-     * The name of this filter instance.
-     * @var string
-     */
-    public $_name;
-
-    /**
-     * The label of this filter instance.
-     * @var string
-     */
-    public $_label;
-
-    /**
-     * Advanced form element flag
-     * @var bool
-     */
-    public $_advanced;
-
-    /**
-     * Constructor
-     * @param string $name the name of the filter instance
-     * @param string $label the label of the filter instance
-     * @param boolean $advanced advanced form element flag
-     */
-    public function __construct($name, $label, $advanced) {
-        $this->_name     = $name;
-        $this->_label    = $label;
-        $this->_advanced = $advanced;
-    }
-
-    /**
-     * Old syntax of class constructor. Deprecated in PHP7.
-     *
-     * @deprecated since Moodle 3.1
-     */
-    public function session_filter_type($name, $label, $advanced) {
-        debugging('Use of class name as constructor is deprecated', DEBUG_DEVELOPER);
-        self::__construct($name, $label, $advanced);
-    }
-
-    /**
-     * Returns the condition to be used with SQL where
-     * @param array $data filter settings
-     * @return string the filtering condition or null if the filter is disabled
-     */
-    public function get_sql_filter($data) {
-        throw new \moodle_exception('mustbeoveride', 'debug', '', 'get_sql_filter');
-    }
-
-    /**
-     * Retrieves data from the form data
-     * @param stdClass $formdata data submited with the form
-     * @return mixed array filter data or false when filter not set
-     */
-    public function check_data($formdata) {
-        throw new \moodle_exception('mustbeoveride', 'debug', '', 'check_data');
-    }
-
-    /**
-     * Adds controls specific to this filter in the form.
-     * @param moodleform $mform a MoodleForm object to setup
-     */
-    public function setup_form(&$mform) {
-        throw new \moodle_exception('mustbeoveride', 'debug', '', 'setup_form');
-    }
-
-    /**
-     * Returns a human friendly description of the filter used as label.
-     * @param array $data filter settings
-     * @return string active filter label
-     */
-    public function get_label($data) {
-        throw new \moodle_exception('mustbeoveride', 'debug', '', 'get_label');
-    }
-}
