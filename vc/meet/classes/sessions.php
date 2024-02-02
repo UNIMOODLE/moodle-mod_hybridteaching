@@ -144,6 +144,10 @@ class sessions {
         return $meetsession->id;
     }
 
+    public function update_session_extended($data) {
+        // No requires action.
+    }
+
     /**
      * Deletes an extended session.
      *

@@ -154,6 +154,9 @@ class sessions {
         }
     }
 
+    public function update_session_extended($data) {
+        // No requires action.
+    }
 
     /**
      * Delete an extended session.
