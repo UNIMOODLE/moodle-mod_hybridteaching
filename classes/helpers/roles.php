@@ -14,14 +14,23 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
+// Project implemented by the "Recovery, Transformation and Resilience Plan.
+// Funded by the European Union - Next GenerationEU".
+//
+// Produced by the UNIMOODLE University Group: Universities of
+// Valladolid, Complutense de Madrid, UPV/EHU, León, Salamanca,
+// Illes Balears, Valencia, Rey Juan Carlos, La Laguna, Zaragoza, Málaga,
+// Córdoba, Extremadura, Vigo, Las Palmas de Gran Canaria y Burgos.
+
 /**
- * The roles helper class
+ * Display information about all the mod_hybridteaching modules in the requested course. *
  * @package    mod_hybridteaching
  * @copyright  2023 Proyecto UNIMOODLE
  * @author     UNIMOODLE Group (Coordinator) <direccion.area.estrategia.digital@uva.es>
  * @author     ISYC <soporte@isyc.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+
 namespace mod_hybridteaching\helpers;
 
 use cache;
@@ -32,11 +41,7 @@ use mod_hybridteaching\hybridteaching_proxy;
 use stdClass;
 
 /**
- * Class used for roles asignee management
- *
- * @package    mod_hybridteaching
- * @copyright  2023 isyc <isyc@example.com>
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * Class roles.
  */
 class roles {
 
@@ -184,8 +189,8 @@ class roles {
     /**
      * Returns an array to populate a list of participants used in mod_form.js.
      *
-     * @param context $context
-     * @param null|stdClass $hybridactivity
+     * @param context $context Context of the activity
+     * @param null|stdClass $hybridteaching Hybridteaching activity
      * @return array $data
      */
     public static function get_participant_data(context $context, ?stdClass $hybridteaching = null) {
@@ -209,8 +214,8 @@ class roles {
     /**
      * Returns an array to populate a list of participants used in mod_form.php.
      *
-     * @param stdClass|null $hybridteaching
-     * @param context $context
+     * @param stdClass|null $hybridteaching Hybridteaching activity
+     * @param context $context Context of the activity
      *
      * @return array
      */
@@ -365,9 +370,9 @@ class roles {
     /**
      * Evaluate if a user in a context is moderator based on roles and participation rules.
      *
-     * @param context $context
-     * @param array $participantlist
-     * @param int $userid
+     * @param context $context Context of the activity
+     * @param array $participantlist Participant list
+     * @param int $userid ID of the user
      *
      * @return bool
      */

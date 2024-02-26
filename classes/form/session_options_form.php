@@ -29,7 +29,13 @@ defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->libdir.'/formslib.php');
 
+/**
+ * Class session_options_form
+ */
 class session_options_form extends \moodleform {
+    /**
+     * Create all the form elements
+     */
     public function definition() {
         $mform =& $this->_form;
         $id = $this->_customdata['id'];

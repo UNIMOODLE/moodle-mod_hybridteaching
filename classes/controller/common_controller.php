@@ -35,16 +35,23 @@ namespace mod_hybridteaching\controller;
 
 use stdClass;
 
+/**
+ * Class common_controller
+ */
 class common_controller {
+    /** @var string The operator to be used greater than */
     const OPERATOR_GREATER_THAN = ">";
+
+    /** @var string The operator to be used less than */
     const OPERATOR_LESS_THAN = "<";
+
+    /** @var stdClass The hybrid object */
     public $hybridobject;
 
     /**
      * Constructs a new instance of the class.
      *
      * @param stdClass|null $hybridobject The hybrid object to be used
-     * @param string|null $table The table to be used
      */
     public function __construct(stdClass $hybridobject = null) {
         $this->hybridobject = $hybridobject;
@@ -53,7 +60,8 @@ class common_controller {
     /**
      * Returns the number of enabled records in the table.
      *
-     * @global moodle_database $DB Moodle database global object.
+     * @param string $table The name of the table.
+     * @param array $params The parameters to be used in the query.
      * @return int The number of enabled records in the table.
      */
     public function get_enabled_data($table, $params = []) {
@@ -68,7 +76,7 @@ class common_controller {
      *
      * @param mixed $id unique identifier of the data object
      * @param bool $visible determines whether the data object is visible or not
-     * @throws Exception if the database update fails
+     * @param string $table the name of the table where the data object is stored
      */
     public function enable_data($id, $visible, $table) {
         global $DB, $USER;
@@ -85,8 +93,7 @@ class common_controller {
      *
      * @param int $id The ID of the entry to update.
      * @param int $sortorder The new sort order for the entry.
-     * @throws Exception If the database update fails.
-     * @return void
+     * @param string $table The name of the table where the data object is stored.
      */
     public function update_data_sortorder($id, $sortorder, $table) {
         global $DB;

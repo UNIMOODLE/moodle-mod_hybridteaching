@@ -39,6 +39,7 @@ global $CFG;
 require_once("$CFG->libdir/externallib.php");
 
 use mod_hybridteaching\controller\sessions_controller;
+use mod_hybridteaching\helper;
 
 /**
  * hybridteaching external functions
@@ -84,15 +85,17 @@ class hybridteaching_external extends external_api {
             $attendance->status = $status;
             $attendance->usermodified = $USER->id;
             $attendance->timemodified = $timemodified;
+            $session = $DB->get_record('hybridteaching_session', ['id' => $attendance->sessionid]);
+            $status ? $attendance->connectiontime = $session->duration : $attendance->connectiontime = 0;
             $DB->update_record('hybridteaching_attendance', $attendance);
 
             list($course, $cm) = get_course_and_cm_from_instance($attendance->hybridteachingid, 'hybridteaching');
             $event = \mod_hybridteaching\event\attendance_updated::create([
                 'objectid' => $attendance->hybridteachingid,
                 'context' => \context_module::instance($cm->id),
+                'relateduserid' => $attendance->userid,
                 'other' => [
                     'sessid' => $attendance->sessionid,
-                    'userid' => $attendance->userid,
                     'attid' => $attendance->id,
                 ],
             ]);
@@ -224,7 +227,6 @@ class hybridteaching_external extends external_api {
     /**
      * Returns the display actions.
      *
-     * @return datatype The display actions.
      */
     public static function get_display_actions_returns() {
         // TODO.
@@ -259,7 +261,7 @@ class hybridteaching_external extends external_api {
         $joinurl = null;
 
         if (!empty($session->typevc)) {
-            if (sessions_controller::get_sessionconfig_exists($session)) {
+            if (helper::subplugin_config_exists($session->vcreference, 'vc')) {
                 if ($session->typevc == 'bbb') {
                     $sessioncontroller = new sessions_controller();
                     $classname = $sessioncontroller->get_subpluginvc_class($session->typevc);

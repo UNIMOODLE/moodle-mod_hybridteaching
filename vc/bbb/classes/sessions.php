@@ -107,7 +107,8 @@ class sessions {
     public function create_unique_session_extended($session, $ht) {
         global $DB;
 
-        $context = \context_course::instance($ht->course);
+        $cm = get_coursemodule_from_instance('hybridteaching', $ht->id);
+        $context = \context_module::instance($cm->id);
         if (!has_capability('hybridteachvc/bbb:use', $context)) {
             return;
         }
@@ -148,6 +149,7 @@ class sessions {
         if (isset($response['returncode']) && $response['returncode'] == 'SUCCESS') {
             $bbb = $this->populate_htbbb_from_response($session, $response);
             $bbb->id = $DB->insert_record('hybridteachvc_bbb', $bbb);
+            $this->bbbsession = $bbb;
             return true;
         } else {
             return false;
@@ -240,9 +242,10 @@ class sessions {
      * checks if the role is for starting a meeting or joining a meeting,
      * and returns the access URL (either starturl or joinurl) based on the role.
      *
+     * @param bool $userismoderator  Whether or not user is moderator.
      * @return array|null Returns an array with the zone access information or null if there is no session available.
      */
-    public function get_zone_access() {
+    public function get_zone_access($userismoderator = false) {
         global $USER;
 
         if ($this->bbbsession) {
@@ -257,7 +260,11 @@ class sessions {
 
             $bbbproxy = new bbbproxy($bbbconfig);
 
-            $role = self::get_user_meeting_role($this->bbbsession);
+            if ($userismoderator) {
+                $role = 'MODERATOR';
+            } else {
+                $role = 'VIEWER';
+            }
 
             $url = $bbbproxy->get_join_url(
                 $this->bbbsession->meetingid,
@@ -271,7 +278,6 @@ class sessions {
             $array = [
                 'id' => $this->bbbsession->id,
                 'ishost' => true,
-                'isaccess' => true,
                 'url' => base64_encode($url),
             ];
             $meetinginfo = $bbbproxy->get_meeting_info($this->bbbsession->meetingid);

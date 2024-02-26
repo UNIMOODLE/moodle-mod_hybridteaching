@@ -33,6 +33,9 @@
 
 namespace mod_hybridteaching;
 
+/**
+ * Class helper.
+ */
 class helper {
     /**
      * Generate the hours format from the given seconds.
@@ -65,7 +68,7 @@ class helper {
      *
      * @param int $configid The ID of the subplugin config.
      * @param string $type The type of subplugin (vc or storage).
-     * @return mixed Returns the config if found, 0 if no subplugin, -1 if no config.
+     * @return mixed Returns the config if found, false if no subplugin or if no config.
      */
     public static function subplugin_config_exists($configid, $type = 'vc') {
         global $DB;
@@ -93,10 +96,10 @@ class helper {
             if ($find) {
                 return $config;  // Correct.
             } else {
-                return 0;  // No subplugin.
+                return false;  // No subplugin.
             }
         } else {
-            return -1;  // No config.
+            return false;  // No config.
         }
     }
 }

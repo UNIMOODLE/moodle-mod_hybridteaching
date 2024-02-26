@@ -50,7 +50,7 @@ if (!$sessionshow) {
     $sessionshow = $session->get_last_session($hybridteaching->id);
 }
 // If not use of attendance return to main view.
-if ($hybridteaching->useattendance == 0) {
+if (!$hybridteaching->useattendance) {
     throw new moodle_exception('attendancedisabled', 'hybridteaching', $url);
 }
 $context = context_module::instance($cm->id);
@@ -66,7 +66,7 @@ $qrpass = optional_param('qrpass', '', PARAM_TEXT);
 $qrpassflag = false;
 
 $atttype = 0;
-if ($hybridteaching->rotateqr == 1 && $action == 1) {
+if ($hybridteaching->rotateqr == 1 && $action == 1 && !$hybridteaching->studentpassword) {
     $cookiename = 'hybridteaching'.$hybridteaching->id;
     $secrethash = md5($USER->id.$hybridteaching->rotateqrsecret);
     $url = new moodle_url('/mod/hybridteaching/view.php', ['id' => $cm->id]);

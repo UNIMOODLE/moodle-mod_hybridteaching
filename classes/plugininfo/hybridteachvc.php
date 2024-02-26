@@ -33,16 +33,35 @@
 
 namespace mod_hybridteaching\plugininfo;
 
+/**
+ * Class hybridteachvc.
+ */
 class hybridteachvc extends \core\plugininfo\base {
-
+    /**
+     * Return true if the plugin is enabled.
+     *
+     * @return bool
+     */
     public function is_uninstall_allowed() {
         return true;
     }
 
+    /**
+     * Get the settings section name.
+     *
+     * @return string
+     */
     public function get_settings_section_name() {
         return $this->type . '_' . $this->name;
     }
 
+    /**
+     * Load settings for the admin tree.
+     *
+     * @param \part_of_admin_tree $adminroot
+     * @param string $parentnodename Parent node name
+     * @param bool $hassiteconfig Has site configuration
+     */
     public function load_settings(\part_of_admin_tree $adminroot, $parentnodename, $hassiteconfig) {
         global $CFG, $USER, $DB, $OUTPUT, $PAGE; // In case settings.php wants to refer to them.
         $ADMIN = $adminroot; // May be used in settings.php.
@@ -62,9 +81,15 @@ class hybridteachvc extends \core\plugininfo\base {
         if ($adminroot->fulltree) {
             include($this->full_path('settings.php'));
         }
+
         $adminroot->add($this->type . 'plugins', $settings);
     }
 
+    /**
+     * Check if the entity is enabled.
+     *
+     * @return bool
+     */
     public function is_enabled() {
         return !empty(get_config($this->type . '_' . $this->name, 'enabled'));
     }

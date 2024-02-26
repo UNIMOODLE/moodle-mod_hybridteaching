@@ -14,22 +14,23 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
-/**
- * The password and qr helper.
- *
- * @package     mod_hybridteaching
- * @copyright   2023 isyc <isyc@example.com>
- * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
+// Project implemented by the "Recovery, Transformation and Resilience Plan.
+// Funded by the European Union - Next GenerationEU".
+//
+// Produced by the UNIMOODLE University Group: Universities of
+// Valladolid, Complutense de Madrid, UPV/EHU, León, Salamanca,
+// Illes Balears, Valencia, Rey Juan Carlos, La Laguna, Zaragoza, Málaga,
+// Córdoba, Extremadura, Vigo, Las Palmas de Gran Canaria y Burgos.
 
 /**
- * The passwords helper class
+ * Display information about all the mod_hybridteaching modules in the requested course. *
  * @package    mod_hybridteaching
  * @copyright  2023 Proyecto UNIMOODLE
  * @author     UNIMOODLE Group (Coordinator) <direccion.area.estrategia.digital@uva.es>
  * @author     ISYC <soporte@isyc.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+
 namespace mod_hybridteaching\helpers;
 
 defined('MOODLE_INTERNAL') || die();
@@ -38,6 +39,10 @@ require_login();
 require_once($CFG->libdir.'/tcpdf/tcpdf_barcodes_2d.php'); // Used for generating qrcode.
 use TCPDF2DBarcode;
 use html_writer;
+
+/**
+ * Class password.
+ */
 class password {
 
     /**
@@ -58,7 +63,6 @@ class password {
         $barcode = new TCPDF2DBarcode($qrcodeurl, 'QRCODE');
         $image = $barcode->getBarcodePngData(12, 12);
         echo html_writer::img('data:image/png;base64,' . base64_encode($image), get_string('qrcode', 'hybridteaching'));
-        echo '<br>' . ($qrcodeurl);
     }
 
     /**
@@ -69,10 +73,11 @@ class password {
     public static function hybridteaching_generate_passwords($session) {
         global $DB;
         $password = [];
-
+        $qrupdatetime = get_config('hybridteaching', 'qrupdatetime');
+        !$qrupdatetime ? $qrupdatetime = 15 : '';
         for ($i = 0; $i < 30; $i++) {
             array_push($password, ["attendanceid" => $session->id,
-                "password" => random_string(), "expirytime" => time() + (15 * $i), ]);
+                "password" => random_string(), "expirytime" => time() + ($qrupdatetime * $i), ]);
         }
 
         $DB->insert_records('hybridteaching_session_pwd', $password);
@@ -122,5 +127,17 @@ class password {
 
         $sql = 'SELECT * FROM {hybridteaching_session_pwd} WHERE attendanceid = ? AND expirytime > ? ORDER BY expirytime ASC';
         return json_encode($DB->get_records_sql($sql, ['attendanceid' => $session->id, time()], $strictness = IGNORE_MISSING));
+    }
+
+    /**
+     * Return QR code passwords.
+     *
+     * @param stdClass $session
+     */
+    public static function hybridteaching_set_password($session, $password) {
+        global $DB;
+
+        $session->studentpassword = $password;
+        $DB->update_record('hybridteaching', $session);
     }
 }

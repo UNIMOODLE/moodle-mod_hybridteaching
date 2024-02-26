@@ -24,7 +24,7 @@
 
 /**
  * Display information about all the mod_hybridteaching modules in the requested course. *
- * @package    mod_hybridteaching
+ * @package    hybridteachstore_pumukit
  * @copyright  2023 Proyecto UNIMOODLE
  * @author     UNIMOODLE Group (Coordinator) <direccion.area.estrategia.digital@uva.es>
  * @author     ISYC <soporte@isyc.com>
@@ -33,7 +33,16 @@
 
 namespace hybridteachstore_pumukit;
 
+/**
+ * Class sessions.
+ */
 class sessions {
+    /**
+     * Load a configuration from the database based on the given storage reference.
+     *
+     * @param int $storagereference Storage reference
+     * @return object|false
+     */
     public function load_config($storagereference) {
         global $DB;
 
@@ -42,7 +51,7 @@ class sessions {
             INNER JOIN {hybridteaching_configs} htc ON htc.subpluginconfigid=pu.id
                  WHERE htc.id=:storagereference";
 
-        $config = $DB->get_record_sql ($sql, ['storagereference' => $storagereference]);
+        $config = $DB->get_record_sql($sql, ['storagereference' => $storagereference]);
         return $config;
     }
 
@@ -59,6 +68,12 @@ class sessions {
         return $url;
     }
 
+    /**
+     * Deletes extended session for a specific config ID.
+     *
+     * @param int $htsession Session ID
+     * @param int $configid Config ID
+     */
     public function delete_session_extended($htsession, $configid) {
         global $DB;
         $DB->delete_records('hybridteachstore_pumukit', ['sessionid' => $htsession]);

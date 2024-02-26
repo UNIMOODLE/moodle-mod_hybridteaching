@@ -24,7 +24,7 @@
 
 /**
  * Display information about all the mod_hybridteaching modules in the requested course. *
- * @package    mod_hybridteaching
+ * @package    hybridteachstore_onedrive
  * @copyright  2023 Proyecto UNIMOODLE
  * @author     UNIMOODLE Group (Coordinator) <direccion.area.estrategia.digital@uva.es>
  * @author     ISYC <soporte@isyc.com>
@@ -35,12 +35,28 @@ namespace hybridteachstore_onedrive;
 
 use stdClass;
 
+/**
+ * Class configs.
+ */
 class configs extends \mod_hybridteaching\controller\configs_controller {
+    /**
+     * Load a configuration by its ID.
+     *
+     * @param int $configid The ID of the configuration to load
+     * @return object The loaded configuration data, or false if not found
+     */
     public static function load_config($configid) {
         global $DB;
         $data = $DB->get_record('hybridteachstore_onedrive_co', ['id' => $configid]);
         return $data;
     }
+
+    /**
+     * Create a config record in the database.
+     *
+     * @param object $data Data to store
+     * @return int
+     */
     public static function create_config($data) {
         global $DB, $USER;
         $records = new stdClass();
@@ -55,6 +71,12 @@ class configs extends \mod_hybridteaching\controller\configs_controller {
         return $id;
     }
 
+    /**
+     * Updates the config with the provided data.
+     *
+     * @param object $data The data to update the config with.
+     * @return int The ID of the updated record.
+     */
     public static function update_config($data) {
         global $DB, $USER;
         $records = new stdClass();
@@ -70,6 +92,11 @@ class configs extends \mod_hybridteaching\controller\configs_controller {
         return $records->id;
     }
 
+    /**
+     * Delete a configuration from the database by its ID.
+     *
+     * @param int $configid The ID of the configuration to be deleted
+     */
     public static function delete_config($configid) {
         global $DB;
         $configid = ['id' => $configid];

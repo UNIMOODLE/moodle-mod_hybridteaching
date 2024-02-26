@@ -36,10 +36,22 @@ namespace mod_hybridteaching\controller;
 
 use stdClass;
 
+/**
+ * Class configs_controller
+ */
 class configs_controller extends \mod_hybridteaching\controller\common_controller {
+    /** @var string The subplugin directory. */
     protected $splugindir;
+
+    /** @var string The subplugin type. */
     protected $splugintype;
 
+    /**
+     * Constructor for the class.
+     *
+     * @param stdClass|null $hybridobject Hybrid object
+     * @param string $splugintype Plugin type
+     */
     public function __construct(stdClass $hybridobject = null, $splugintype) {
         parent::__construct($hybridobject);
         $this->splugintype = $splugintype;
@@ -241,6 +253,7 @@ class configs_controller extends \mod_hybridteaching\controller\common_controlle
     /**
      * Returns an array of configs with their names and types in a format suitable for select lists.
      *
+     * @param string $coursecategory The course category to filter the configs by.
      * @return array the config select list
      */
     public function hybridteaching_get_configs_select($coursecategory) {
@@ -268,6 +281,8 @@ class configs_controller extends \mod_hybridteaching\controller\common_controlle
      * @param array $params An array of parameters for filtering categories.
      *                      Supported keys:
      *                      - category: The category to filter by.
+     * 
+     * @param bool $subenabled Boolean indicating if subplugins are enabled.
      * @return array Returns an array containing the conditions and inparams for filtering categories.
      *               The array has the following keys:
      *               - conditions: The SQL conditions for filtering categories.

@@ -29,7 +29,13 @@ defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->libdir.'/formslib.php');
 
+/**
+ * Class sessions_form
+ */
 class sessions_form extends \moodleform {
+    /**
+     * Create all the form elements
+     */
     public function definition() {
         global $CFG, $USER, $DB;
         $mform = &$this->_form;
@@ -104,8 +110,8 @@ class sessions_form extends \moodleform {
 
         $duration[] = &$mform->createElement('text', 'duration', get_string('duration', 'hybridteaching'));
         $options = [
-            '1' => get_string('minutes'),
-            '2' => get_string('hours'),
+            HYBRIDTEACHING_DURATION_TIMETYPE_MINUTES => get_string('minutes'),
+            HYBRIDTEACHING_DURATION_TIMETYPE_HOURS => get_string('hours'),
         ];
         $duration[] = &$mform->createElement('select', 'timetype', '', $options);
         $mform->addGroup($duration, 'durationgroup', get_string('duration', 'hybridteaching'));
@@ -179,6 +185,13 @@ class sessions_form extends \moodleform {
         $this->set_data($session);
     }
 
+    /**
+     * Form validation
+     *
+     * @param object $data Form data
+     * @param mixed $files 
+     * @return array Errors
+     */
     public function validation($data, $files) {
         // Programsessions duration errors check.
         $errors = [];

@@ -133,5 +133,29 @@ function xmldb_hybridteaching_upgrade($oldversion) {
         }
     }
 
+    if ($oldversion < '2023031700.44') {
+        $table = new xmldb_table('hybridteaching');
+        $field = new xmldb_field('maxgradeattendanceunit', XMLDB_TYPE_INTEGER, '1', null, null, null, '0', 'maxgradeattendance');
+
+        // Launch rename field maxgradeattendancemode.
+        $dbman->rename_field($table, $field, 'maxgradeattendancemode');
+
+        // Hybridteaching savepoint reached.
+        upgrade_mod_savepoint(true, '2023031700.44', 'hybridteaching');
+    }
+
+    if ($oldversion < '2023031700.45') {
+        $table = new xmldb_table('hybridteaching_session');
+        $field = new xmldb_field('visibleatt', XMLDB_TYPE_INTEGER, '1', null, null, null, '1', 'visiblechat');
+
+        // Conditionally launch add field visible.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Hybridteaching savepoint reached.
+        upgrade_mod_savepoint(true, '2023031700.45', 'hybridteaching');
+    }
+
     return true;
 }

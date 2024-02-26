@@ -36,6 +36,35 @@ use mod_hybridteaching\controller\sessions_controller;
 
 define('SESSION_LIST', 1);
 define('PROGRAM_SESSION_LIST', 2);
+define('HYBRIDTEACHING_GRADEMODE_NUMSESS', 1);
+define('HYBRIDTEACHING_GRADEMODE_PERCENTSESS', 2);
+define('HYBRIDTEACHING_GRADEMODE_PERCENTTIME', 3);
+define('HYBRIDTEACHING_DURATION_TIMETYPE_MINUTES', 1);
+define('HYBRIDTEACHING_DURATION_TIMETYPE_HOURS', 2);
+define('HYBRIDTEACHING_BULK_ADVANCE_STARTTIME', 3);
+define('HYBRIDTEACHING_BULK_DELAY_STARTTIME', 2);
+define('HYBRIDTEACHING_BULK_ACTIVE_ATTENDANCE', 1);
+define('HYBRIDTEACHING_BULK_INACTIVE_ATTENDANCE', 2);
+define('HYBRIDTEACHING_BULK_EXEMPT_ATTENDANCE', 3);
+define('HYBRIDTEACHING_BULK_NOT_EXEMPT_ATTENDANCE', 4);
+define('HYBRIDTEACHING_BULK_EXEMPT_SESSION_ATTENDANCE', 5);
+define('HYBRIDTEACHING_BULK_NOT_EXEMPT_SESSION_ATTENDANCE', 6);
+define('HYBRIDTEACHING_BULK_DURATION_SETON', 1);
+define('HYBRIDTEACHING_BULK_DURATION_EXTEND', 2);
+define('HYBRIDTEACHING_BULK_DURATION_REDUCE', 3);
+define('HYBRIDTEACHING_MODFORM_SECS', 2);
+define('HYBRIDTEACHING_MODFORM_MINUTES', 1);
+define('HYBRIDTEACHING_MODFORM_HOURS', 0);
+define('HYBRIDTEACHING_MODFORM_TOTAL_DURATION', 3);
+
+define('HYBRIDTEACHING_ATTSTATUS_NOTVALID', 0);
+define('HYBRIDTEACHING_ATTSTATUS_VALID', 1);
+define('HYBRIDTEACHING_ATTSTATUS_LATE', 2);
+define('HYBRIDTEACHING_ATTSTATUS_EXEMPT', 3);
+define('HYBRIDTEACHING_ATTSTATUS_EARLYLEAVE', 4);
+
+define('HYBRIDTEACHING_NOT_EXEMPT', 0);
+define('HYBRIDTEACHING_EXEMPT', 1);
 
 /**
  * Return if the plugin supports $feature.
@@ -96,13 +125,13 @@ function hybridteaching_add_instance($moduleinstance, $mform = null) {
         $moduleinstance->processedrecording = -1;
     }
 
-    if (empty($moduleinstance->duration) && !$moduleinstance->sessionscheduling) {
-        $moduleinstance->starttime = time();
-    }
-
     $moduleinstance->id = $DB->insert_record('hybridteaching', $moduleinstance);
     if (!$moduleinstance->sessionscheduling && !empty($moduleinstance->id)) {
         require_once($CFG->dirroot.'/mod/hybridteaching/classes/controller/sessions_controller.php');
+        // If there are not starttime assigned, save starttime in session.
+        if ($moduleinstance->starttime == 0) {
+            $moduleinstance->starttime = time();
+        }
         $sessioncontroller = new sessions_controller($moduleinstance);
         $moduleinstance->groupid = 0;
         $session = (object) $sessioncontroller->create_session($moduleinstance);
@@ -134,7 +163,7 @@ function hybridteaching_update_instance($moduleinstance, $mform = null) {
     }
 
     $moduleinstance->timemodified = time();
-    $moduleinstance->id = $moduleinstance->instance;
+    $moduleinstance->id = $moduleinstance->instance;  
 
     if ($moduleinstance->usevideoconference == 1) {
         $divide = isset($moduleinstance->typevc) ? explode('-', $moduleinstance->typevc, 2) : [];
@@ -145,12 +174,22 @@ function hybridteaching_update_instance($moduleinstance, $mform = null) {
         $moduleinstance->typevc = '';
     }
 
-    // If there is not sessionscheduling, change time in the unique session.
-    $hadsessionsscheduling = $DB->get_field('hybridteaching', 'sessionscheduling', ['id' => $moduleinstance->id]);
-    if ($moduleinstance->sessionscheduling == 0 && $hadsessionsscheduling == 1) {
+    // If there is not sessionscheduling, change info in the unique session.
+    if ($moduleinstance->sessionscheduling == 0) {  
         require_once($CFG->dirroot.'/mod/hybridteaching/classes/controller/sessions_controller.php');
-        $session = new sessions_controller($moduleinstance);
-        $session->update_session($moduleinstance);
+        // Populate moduleinstance in datainfo session to change session info.
+        $sessioninfo = $DB->get_record('hybridteaching_session', ['hybridteachingid' => $moduleinstance->id], '*', IGNORE_MULTIPLE);
+        if (!empty($sessioninfo)) {
+            $datainfo = clone $moduleinstance;
+            // Only change starttime in the session if is undatted and not finished.
+            if ($moduleinstance->starttime == 0 && !$sessioninfo->isfinished) {
+                $datainfo->starttime = time();
+            }
+            $session = new sessions_controller($datainfo);
+            $datainfo->hybridteachingid = $datainfo->id;
+            $datainfo->id = $sessioninfo->id;
+            $session->update_session($datainfo);
+        }
     }
 
     if (!$DB->update_record('hybridteaching', $moduleinstance)) {
@@ -180,16 +219,8 @@ function hybridteaching_delete_instance($id) {
     $sessions = new sessions_controller($existshybrid);
     $sessions->delete_all_sessions();
 
-    $attendance = $DB->get_records('hybridteaching_attendance', ['hybridteachingid' => $id]);
-    foreach ($attendance as $att) {
-        $DB->delete_records('hybridteaching_attend_log', ['attendanceid' => $att->id]);
-    }
-
-    $DB->delete_records('hybridteaching_attendance', ['hybridteachingid' => $id]);
     $DB->delete_records('hybridteaching', ['id' => $id]);
 
-    // TO-DO: repasar estas funciones para ver cómo incluirlas
-    // hybridteaching_calendar_item_delete($hybridteaching);.
     hybridteaching_grade_item_delete($existshybrid);
 
     return true;
@@ -394,6 +425,15 @@ function hybridteaching_scale_used_anywhere($scaleid) {
 }
 
 /**
+ * Not used but needed for moodle
+ *
+ * @param stdClass $hybridteaching
+ * @param int $userid
+ * @param bool $nullifnone
+ */
+function hybridteaching_update_grades($hybridteaching, $userid = 0, $nullifnone = true) {}
+
+/**
  * Create grade item for given hybridteaching.
  *
  * @param stdClass $hybridteaching record with extra cmidnumber
@@ -466,8 +506,7 @@ function hybridteaching_extend_settings_navigation(settings_navigation $settings
     }
 
     if (has_capability('mod/hybridteaching:programschedule', $context)) {
-        // Mostrar solo pestaña de "Programación de sesiones" solo si esta VC
-        // ...tiene marcada la opción de "usar programación de sesiones".
+        // Show only programschedule if have marked 'Use sessions scheduling' check.
         $hassessionsscheduling = $DB->get_field('hybridteaching', 'sessionscheduling', ['id' => $cm->instance]);
         if ($hassessionsscheduling) {
             $nodes[] = ['url' => new moodle_url('/mod/hybridteaching/sessions.php', ['id' => $cm->id, 'l' => PROGRAM_SESSION_LIST]),

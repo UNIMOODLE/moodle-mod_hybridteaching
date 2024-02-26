@@ -24,7 +24,7 @@
 
 /**
  * Display information about all the mod_hybridteaching modules in the requested course. *
- * @package    mod_hybridteaching
+ * @package    hybridteachvc_teams
  * @copyright  2023 Proyecto UNIMOODLE
  * @author     UNIMOODLE Group (Coordinator) <direccion.area.estrategia.digital@uva.es>
  * @author     ISYC <soporte@isyc.com>
@@ -36,6 +36,9 @@ namespace hybridteachvc_teams\task;
 use hybridteachvc_teams\sessions;
 use hybridteachvc_teams\teams_handler;
 
+/**
+ * Class downloadrecords.
+ */
 class downloadrecords extends \core\task\scheduled_task {
 
     /**
@@ -47,6 +50,12 @@ class downloadrecords extends \core\task\scheduled_task {
         return get_string('downloadrecordsteams', 'hybridteachvc_teams');
     }
 
+    /**
+     * This function executes the process of downloading recordings and chat meeting urls
+     * for hybrid teaching sessions with Teams integration. It iterates through each session,
+     * creating necessary folders, downloading recordings, getting chat meeting urls, and
+     * updating the database with the retrieved information.
+     */
     public function execute() {
 
         global $DB, $CFG;

@@ -30,7 +30,13 @@ defined('MOODLE_INTERNAL') || die();
 require_once($CFG->libdir . '/formslib.php');
 require_once($CFG->libdir . '/csvlib.class.php');
 
+/**
+ * Class sessions_import_form
+ */
 class sessions_import_form extends \moodleform {
+    /**
+     * Create all the form elements
+     */
     public function definition() {
         $mform =& $this->_form;
         $data  = $this->_customdata;

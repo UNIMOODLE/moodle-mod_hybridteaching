@@ -49,13 +49,13 @@ $capabilities = [
 
     'hybridteachvc/bbb:use' => [
         'captype' => 'write',
-        'contextlevel' => CONTEXT_COURSE,
+        'contextlevel' => CONTEXT_MODULE,
         'archetypes' => [
+            'student' => CAP_ALLOW,
             'teacher' => CAP_ALLOW,
             'editingteacher' => CAP_ALLOW,
             'manager' => CAP_ALLOW,
         ],
-        'clonepermissionsfrom' => 'mod/hybridteaching:sessionsactions',
     ],
 
     'hybridteachvc/bbb:record' => [

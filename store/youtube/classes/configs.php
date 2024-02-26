@@ -24,7 +24,7 @@
 
 /**
  * Display information about all the mod_hybridteaching modules in the requested course. *
- * @package    mod_hybridteaching
+ * @package    hybridteachstore_youtube
  * @copyright  2023 Proyecto UNIMOODLE
  * @author     UNIMOODLE Group (Coordinator) <direccion.area.estrategia.digital@uva.es>
  * @author     ISYC <soporte@isyc.com>
@@ -35,12 +35,28 @@ namespace hybridteachstore_youtube;
 
 use stdClass;
 
+/**
+ * Class configs.
+ */
 class configs extends \mod_hybridteaching\controller\configs_controller {
+    /**
+     * Loads a configuration by its ID.
+     *
+     * @param int $configid Configuration ID.
+     * @return object
+     */
     public static function load_config($configid) {
         global $DB;
         $data = $DB->get_record('hybridteachstore_youtube_con', ['id' => $configid]);
         return $data;
     }
+    
+    /**
+     * Create a new configuration record.
+     *
+     * @param object $data The data to create the configuration record
+     * @return int The ID of the newly created configuration record
+     */
     public static function create_config($data) {
         global $DB, $USER;
         $records = new stdClass();
@@ -53,6 +69,12 @@ class configs extends \mod_hybridteaching\controller\configs_controller {
         return $id;
     }
 
+    /**
+     * Update the configuration with the given data.
+     *
+     * @param object $data The data to create the configuration record
+     * @return int
+     */
     public static function update_config($data) {
         global $DB, $USER;
         $records = new stdClass();
@@ -66,6 +88,11 @@ class configs extends \mod_hybridteaching\controller\configs_controller {
         return $records->id;
     }
 
+    /**
+     * Deletes a configuration from the hybridteachstore_youtube_con table.
+     *
+     * @param int $configid The ID of the configuration to be deleted.
+     */
     public static function delete_config($configid) {
         global $DB;
         $configid = ['id' => $configid];

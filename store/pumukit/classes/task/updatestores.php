@@ -24,7 +24,7 @@
 
 /**
  * Display information about all the mod_hybridteaching modules in the requested course. *
- * @package    mod_hybridteaching
+ * @package    hybridteachstore_pumukit
  * @copyright  2023 Proyecto UNIMOODLE
  * @author     UNIMOODLE Group (Coordinator) <direccion.area.estrategia.digital@uva.es>
  * @author     ISYC <soporte@isyc.com>
@@ -33,8 +33,10 @@
 
 namespace hybridteachstore_pumukit\task;
 
+/**
+ * Class updatestores.
+ */
 class updatestores extends \core\task\scheduled_task {
-
     /**
      * Returns name of task.
      *
@@ -44,6 +46,10 @@ class updatestores extends \core\task\scheduled_task {
         return get_string('updatestores', 'hybridteachstore_pumukit');
     }
 
+    /**
+     * Executes the function, which includes retrieving session recordings, uploading them to Pumukit, 
+     * and updating the database accordingly.
+     */
     public function execute() {
         global $DB, $CFG;
         // require_once($CFG->dirroot . '/mod/hybridteaching/store/youtube/classes/youtube_handler.php');

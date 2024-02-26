@@ -62,26 +62,61 @@ class rotateQR {
     startRotating() {
         var parent = this;
 
+        // First iteration.
+        let initialpass = Object.values(parent.password).find(function(element) {
+            if (element.expirytime > Math.round(new Date().getTime() / 1000)) {
+                return element;
+            }
+        });
+        let password = initialpass.password;
+        let studentpassword = password.substr(Math.random(0,7), 6);
+        document.getElementsByClassName('student-password')[0].children[0].textContent = studentpassword;
+        fetch('password.php?instance='+parent.sessionId+'&changepassword=1&password='+studentpassword+'', {
+            headers: {
+                'Content-Type': 'application/json; charset=utf-8'
+            }
+        }).then((response) => response.json()) // Gets the data in json.
+        .then(function(data) {
+            console.log(data);
+        }).catch(err => {
+            console.log(err);
+            console.error("Error fetching QR passwords from API.");
+        });
+
+        // Loop function qr update on timer. 
         setInterval(function() {
             var found = Object.values(parent.password).find(function(element) {
-
                 if (element.expirytime > Math.round(new Date().getTime() / 1000)) {
+                    if (password != element.password) {
+                        password = element.password;
+                        let studentpassword = password.substr(Math.random(0,7), 6);
+                        document.getElementsByClassName('student-password')[0].children[0].textContent = studentpassword;
+                        fetch('password.php?instance='+parent.sessionId+'&changepassword=1&password='+studentpassword+'', {
+                            headers: {
+                                'Content-Type': 'application/json; charset=utf-8'
+                            }
+                        }).then((response) => response.json()) // Gets the data in json.
+                        .then(function(data) {
+                            console.log(data);
+                        }).catch(err => {
+                            console.log(err);
+                            console.error("Error fetching QR passwords from API.");
+                        });
+                    }
                     return element;
                 }
             });
-
             if (found == undefined) {
                 location.reload(true);
             } else {
                 parent.changeQRCode(found.password);
                 parent.updateTimer(found.expirytime - Math.round(new Date().getTime() / 1000));
             }
-
         }, 1000);
-
-    }
+    };
 
     fetchAndRotate() {
+        //usar fetch para query bd actualizacion contraseña estudiantes
         var parent = this;
         fetch('password.php?instance='+this.sessionId+'&returnpasswords=1', {
                 headers: {
@@ -94,6 +129,7 @@ class rotateQR {
                 parent.qrCodeSetUp();
                 parent.startRotating();
             }).catch(err => {
+                console.log(err);
                 console.error("Error fetching QR passwords from API.");
         });
     }

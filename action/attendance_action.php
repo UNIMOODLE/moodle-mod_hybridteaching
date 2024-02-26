@@ -77,11 +77,11 @@ $mform = null;
 switch ($action) {
     case 'disable':
         $attendancecontroller->enable_data($attid, false, 'hybridteaching_attendance');
-        $attendancecontroller->update_session_exempt($attid, 1);
+        attendance_controller::update_session_visibility($sessionid, 0);
         break;
     case 'enable':
         $attendancecontroller->enable_data($attid, true, 'hybridteaching_attendance');
-        $attendancecontroller->update_session_exempt($attid, 0);
+        attendance_controller::update_session_visibility($sessionid, 1);
         break;
     case 'view':
         if ($view == 'sessionattendance') {
@@ -261,9 +261,9 @@ if ($action == 'disable' || $action == 'enable') {
         $event = \mod_hybridteaching\event\attendance_updated::create([
             'objectid' => $hybridteachingid,
             'context' => \context_module::instance($cm->id),
+            'relateduserid' => $user->userid,
             'other' => [
                 'sessid' => $sessionid,
-                'userid' => $user->userid,
                 'attid' => $attid,
             ],
         ]);

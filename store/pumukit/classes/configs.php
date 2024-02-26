@@ -24,7 +24,7 @@
 
 /**
  * Display information about all the mod_hybridteaching modules in the requested course. *
- * @package    mod_hybridteaching
+ * @package    hybridteachstore_pumukit
  * @copyright  2023 Proyecto UNIMOODLE
  * @author     UNIMOODLE Group (Coordinator) <direccion.area.estrategia.digital@uva.es>
  * @author     ISYC <soporte@isyc.com>
@@ -35,12 +35,28 @@ namespace hybridteachstore_pumukit;
 
 use stdClass;
 
+/**
+ * Class configs.
+ */
 class configs extends \mod_hybridteaching\controller\configs_controller {
+    /**
+     * Loads a configuration by its ID.
+     *
+     * @param int $configid 
+     * @return object 
+     */
     public static function load_config($configid) {
         global $DB;
         $data = $DB->get_record('hybridteachstore_pumukit_con', ['id' => $configid]);
         return $data;
     }
+    
+    /**
+     * Create a config record in the database.
+     *
+     * @param object $data The data for creating the config record
+     * @return int The ID of the newly created config record
+     */
     public static function create_config($data) {
         global $DB, $USER;
         $records = new stdClass();
@@ -53,6 +69,12 @@ class configs extends \mod_hybridteaching\controller\configs_controller {
         return $id;
     }
 
+    /**
+     * Update the configuration data in the database.
+     *
+     * @param object $data The data to be updated
+     * @return int The ID of the updated record
+     */
     public static function update_config($data) {
         global $DB, $USER;
         $records = new stdClass();
@@ -66,6 +88,11 @@ class configs extends \mod_hybridteaching\controller\configs_controller {
         return $records->id;
     }
 
+    /**
+     * Delete a config by its ID.
+     *
+     * @param int $configid Configuration ID
+     */
     public static function delete_config($configid) {
         global $DB;
         $configid = ['id' => $configid];

@@ -24,7 +24,7 @@
 
 /**
  * Display information about all the mod_hybridteaching modules in the requested course. *
- * @package    mod_hybridteaching
+ * @package    hybridteachstore_onedrive
  * @copyright  2023 Proyecto UNIMOODLE
  * @author     UNIMOODLE Group (Coordinator) <direccion.area.estrategia.digital@uva.es>
  * @author     ISYC <soporte@isyc.com>
@@ -37,7 +37,6 @@
  * @param int $oldversion
  * @return bool
  */
-
 function xmldb_hybridteachstore_onedrive_upgrade($oldversion) {
 
     // For further information please read {@link https://docs.moodle.org/dev/Upgrade_API}.

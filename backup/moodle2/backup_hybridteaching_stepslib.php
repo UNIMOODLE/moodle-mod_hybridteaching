@@ -52,7 +52,7 @@ class backup_hybridteaching_activity_structure_step extends backup_activity_stru
             'course', 'name', 'intro', 'introformat', 'useattendance',
             'usevideoconference', 'userecordvc', 'typevc', 'config', 'sessionscheduling',
             'reusesession', 'starttime', 'duration', 'timezone', 'grade', 'maxgradeattendance',
-            'maxgradeattendanceunit', 'participants', 'waitmoderator', 'advanceentrycount',
+            'maxgradeattendancemode', 'participants', 'waitmoderator', 'advanceentrycount',
             'advanceentryunit', 'closedoorscount', 'closedoorsunit', 'userslimit',
             'graceperiod', 'graceperiodunit', 'disablecam', 'disablemic', 'disableprivatechat',
             'disablepublicchat', 'disablenote', 'hideuserslist', 'blockroomdesign',

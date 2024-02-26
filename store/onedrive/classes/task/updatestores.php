@@ -24,7 +24,7 @@
 
 /**
  * Display information about all the mod_hybridteaching modules in the requested course. *
- * @package    mod_hybridteaching
+ * @package    hybridteachstore_onedrive
  * @copyright  2023 Proyecto UNIMOODLE
  * @author     UNIMOODLE Group (Coordinator) <direccion.area.estrategia.digital@uva.es>
  * @author     ISYC <soporte@isyc.com>
@@ -33,7 +33,9 @@
 
 namespace hybridteachstore_onedrive\task;
 
-
+/**
+ * Class updatestores.
+ */
 class updatestores extends \core\task\scheduled_task {
 
     /**
@@ -45,6 +47,11 @@ class updatestores extends \core\task\scheduled_task {
         return get_string('updatestores', 'hybridteachstore_onedrive');
     }
 
+
+    /**
+     * Get onedrive recordings.
+     *
+     */
     public function execute() {
         global $DB, $CFG;
 

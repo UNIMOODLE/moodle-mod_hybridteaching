@@ -27,12 +27,18 @@ namespace mod_hybridteaching\form;
 defined('MOODLE_INTERNAL') || die();
 require_once($CFG->libdir.'/formslib.php');
 
+/**
+ * Class export_form
+ */
 class export_form extends \moodleform {
 
     /**
      * Called to define this moodle form
      *
      * @return void
+     */
+    /**
+     * Create all the form elements
      */
     public function definition() {
         global $USER, $DB, $PAGE, $CFG;

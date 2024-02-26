@@ -75,23 +75,33 @@ if ($sesionid) {
 switch ($action) {
     case 'disable':
         $sessioncontroller->enable_data($sesionid, false, 'hybridteaching_session');
+        trigger_session_updated_event($hybridteachingid, $context, $sesionid, $action);
         break;
     case 'enable':
         $sessioncontroller->enable_data($sesionid, true, 'hybridteaching_session');
+        trigger_session_updated_event($hybridteachingid, $context, $sesionid, $action);
+        break;
+    case 'hideatt':
+        mod_hybridteaching\controller\attendance_controller::update_session_visibility($sesionid, 0);
+        break;
+    case 'showatt':
+        mod_hybridteaching\controller\attendance_controller::update_session_visibility($sesionid, 1);
         break;
     case 'delete':
         if ($session->isfinished ||(time() < $session->starttime
               || time() > ($session->starttime + $session->duration))) {
-            $sessioncontroller->delete_session($sesionid, $hybridteachingid);
+            $sessioncontroller->delete_session($sesionid);
         } else {
             mod_hybridteaching\controller\notify_controller::notify_problem(get_string('error:deleteinprogress', 'hybridteaching'));
         }
         break;
     case 'visiblerecord':
         $sessioncontroller->set_record_visibility($sesionid);
+        trigger_session_updated_event($hybridteachingid, $context, $sesionid, $action);
         break;
     case 'visiblechat':
         $sessioncontroller->set_chat_visibility($sesionid);
+        trigger_session_updated_event($hybridteachingid, $context, $sesionid, $action);
         break;
     case 'bulkupdateduration':
     case 'bulkupdatestarttime':
@@ -132,7 +142,7 @@ switch ($action) {
         break;
     case 'bulkdelete':
         $confirm = optional_param('confirm', null, PARAM_INT);
-        $message = get_string('deletecheckfull', 'hybridteaching', get_string('sessions', 'hybridteaching'));
+        $message = get_string('deletecheckfull', 'hybridteaching');
 
         if (isset($confirm) && confirm_sesskey()) {
             $sessionsids = required_param('session', PARAM_ALPHANUMEXT);
@@ -176,6 +186,95 @@ switch ($action) {
         echo $OUTPUT->confirm($message, $url, $return);
         echo $OUTPUT->footer();
         break;
+    case 'bulkhide':
+    case 'bulkhidechats':
+    case 'bulkhiderecordings':
+        $confirm = optional_param('confirm', null, PARAM_INT);
+        $message = get_string('bulkhidetext', 'hybridteaching');
+
+        if (isset($confirm) && confirm_sesskey()) {
+            $sessionsids = required_param('session', PARAM_ALPHANUMEXT);
+            $sessionsids = explode('_', $sessionsids);
+            $stringreturn = get_string('bulkhidesuccess', 'hybridteaching');
+            foreach ($sessionsids as $sessid) {
+                if ($action === 'bulkhide') {
+                    $session = $DB->get_record('hybridteaching_session', ['id' => $sessid], '*', MUST_EXIST);
+                    if ($session->visible == 1) {
+                        $sessioncontroller->enable_data($sessid, false, 'hybridteaching_session');
+                    } else {
+                        $sessioncontroller->enable_data($sessid, true, 'hybridteaching_session');
+                    }
+                } else if ($action == 'bulkhidechats') {
+                    $sessioncontroller->set_chat_visibility($sessid);
+                    $stringreturn = get_string('bulkhidechatssuccess', 'hybridteaching');
+                } else if ($action == 'bulkhiderecordings') {
+                    $sessioncontroller->set_record_visibility($sessid);
+                    $stringreturn = get_string('bulkhiderecordingssuccess', 'hybridteaching');
+                }
+
+                trigger_session_updated_event($hybridteachingid, $context, $sesionid, $action);
+            }
+            redirect($return, $stringreturn);
+        }
+        $sessid = optional_param_array('session', '', PARAM_SEQUENCE);
+        if (empty($sessid)) {
+            throw new moodle_exception('nosessionsselected', 'mod_hybridteaching', $return);
+        }
+
+        list($extrasql, $params) = $DB->get_in_or_equal($sessid, SQL_PARAMS_NAMED, 'id');
+        $extrasql = 'id ' . $extrasql;
+        $sessionsinfo = $sessioncontroller->load_sessions(0, 0, $params, $extrasql);
+
+        $showhidestring = get_string('show');
+        $showhidestring .= get_string('hide');
+        $disabled = '';
+        $enabled = '';
+        $phide = strpos($showhidestring, get_string('hide'));
+        $paramtocheck = 'visible';
+
+        if ($action == 'bulkhidechats') {
+            $paramtocheck = 'visiblechat';
+        } else if ($action == 'bulkhiderecordings') {
+            $paramtocheck = 'visiblerecord';
+        }
+        
+        foreach ($sessionsinfo as $sessinfo) {
+            if ($sessinfo[$paramtocheck] == 0) {
+                $disabled .= html_writer::empty_tag('br');
+                $disabled .= userdate($sessinfo['starttime'], get_string('strftimedmyhm', 'hybridteaching'));
+                $disabled .= html_writer::empty_tag('br');
+                $disabled .= $sessinfo['name'];
+            }
+
+            if ($sessinfo[$paramtocheck] == 1) {
+                $enabled .= html_writer::empty_tag('br');
+                $enabled .= userdate($sessinfo['starttime'], get_string('strftimedmyhm', 'hybridteaching'));
+                $enabled .= html_writer::empty_tag('br');
+                $enabled .= $sessinfo['name'];
+            }
+        }
+
+        if (empty($disabled)) {
+            $showhidestring = html_writer::empty_tag('br') . substr($showhidestring, $phide) . $enabled;
+        } else if (empty($enabled)) {
+            $showhidestring = html_writer::empty_tag('br') . substr($showhidestring, 0, strlen(get_string('show'))) . $disabled;
+        } else {
+            $showhidestring = html_writer::empty_tag('br') . substr($showhidestring, 0, strlen(get_string('show'))) .
+                $disabled . html_writer::empty_tag('br') . html_writer::empty_tag('br') .
+                substr($showhidestring, $phide) . $enabled;
+        }
+
+        $message .= $showhidestring;
+        $sessionsids = implode('_', $sessid);
+        $params = ['action' => $action, 'session' => $sessionsids,
+                        'confirm' => 1, 'sesskey' => sesskey(), 'id' => $moduleid,
+                        'l' => $slist, 'h' => $hybridteachingid, ];
+
+        $url = new moodle_url('/mod/hybridteaching/action/session_action.php', $params);
+        echo $OUTPUT->header();
+        echo $OUTPUT->confirm($message, $url, $return);
+        echo $OUTPUT->footer();
+        break;
     default:
         redirect($return);
         break;
@@ -184,4 +283,17 @@ switch ($action) {
 
 if (empty($mform)) {
     redirect($return);
+}
+
+function trigger_session_updated_event($id, $context, $sessid, $action) {
+    $event = \mod_hybridteaching\event\session_updated::create([
+        'objectid' => $id,
+        'context' => $context,
+        'other' => [
+            'sessid' => $sessid,
+            'action' => $action,
+        ],
+    ]);
+
+    $event->trigger();
 }

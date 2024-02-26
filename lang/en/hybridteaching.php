@@ -111,6 +111,7 @@ $string['import'] = 'Import';
 $string['export'] = 'Export';
 
 $string['hybridteaching:addinstance'] = 'Add new hybrid teaching';
+$string['hybridteaching:manageactivity'] = 'Manage settings hybridteaching';
 $string['hybridteaching:view'] = 'View hybrid teaching';
 $string['hybridteaching:viewjoinurl'] = 'View join url';
 $string['hybridteaching:programschedule'] = 'View Program schedule';
@@ -118,13 +119,17 @@ $string['hybridteaching:sessions'] = 'View sessions';
 $string['hybridteaching:attendance'] = 'View attendance';
 $string['hybridteaching:import'] = 'Import';
 $string['hybridteaching:export'] = 'Export';
-$string['hybridteaching:downloadrecordings'] = 'Download recordings';
-$string['hybridteaching:manage_recordings'] = 'Manage recordings';
+$string['hybridteaching:bulksessions'] = 'See multiple session actions select';
+$string['hybridteaching:sessionsactions'] = 'See session list actions';
+$string['hybridteaching:sessionsfulltable'] = 'Display all fields of session list';
+$string['hybridteaching:attendancesactions'] = 'Access the attendance actions';
+$string['hybridteaching:attendanceregister'] = 'Register attendance in the session';
 $string['hybridteaching:record'] = 'Allow recordings';
-$string['hybridteaching:viewallsessions'] = 'Allow view all sessions without group filter';
-$string['hybridteaching:viewhiddenitems'] = 'View hidden items';
 $string['hybridteaching:viewrecordings'] = 'View recordings';
 $string['hybridteaching:viewchat'] = 'View chats';
+$string['hybridteaching:downloadrecordings'] = 'Download recordings';
+$string['hybridteaching:viewhiddenitems'] = 'View hidden items';
+$string['hybridteaching:viewallsessions'] = 'Allow view all sessions without group filter';
 
 $string['type'] = 'Type';
 $string['order'] = 'Order';
@@ -167,7 +172,6 @@ $string['sessiontypehelp'] = 'You can add sessions for all students or for a gro
 ';
 $string['nogroups'] = 'This activity has been set to use groups, but no groups exist in the course.';
 $string['addsession'] = 'Add session';
-$string['addsession'] = 'Add session';
 $string['presentationfile'] = 'Presentation file';
 $string['replicatedoc'] = 'Replicate file to all sessions';
 $string['caleneventpersession'] = 'Create one calendar event per session';
@@ -192,6 +196,7 @@ $string['nosessions'] = 'There are not sessions';
 $string['nogroup'] = 'Next session is not for your group';
 $string['nosubplugin'] = 'Incorrect type of videoconference. El tipo de videoconferencia es incorrecto. Contact your administrator';
 $string['noconfig'] = 'The selected videoconference configuration does not exist. Contact your administrator';
+$string['noconfig_viewer'] = 'There is no videoconference configuration. Contact your teacher.';
 
 $string['status_progress'] = 'The session is in progress';
 $string['status_finished'] = 'The session has finished';
@@ -235,7 +240,6 @@ $string['lessthan'] = 'Less than';
 $string['options'] = 'Options';
 $string['sesperpage'] = 'Sessions per page';
 
-$string['hybridteaching:bulksessions'] = 'See multiple session actions select';
 $string['updatesessions'] = 'Update sessions';
 $string['deletesessions'] = 'Delete sessions';
 $string['withselectedsessions'] = 'With selected sessions';
@@ -244,7 +248,7 @@ $string['options'] = 'Options';
 $string['sessionsuc'] = 'Sessions';
 $string['programscheduleuc'] = 'Program schedule';
 $string['nosessionsselected'] = 'No sessions selected';
-$string['deletecheckfull'] = 'Are you absolutely sure you want to completely delete the {$a}, including all user data?';
+$string['deletecheckfull'] = 'Are you absolutely sure you want to completely delete the following sessions, including all user data?';
 $string['sessiondeleted'] = 'Session successfully deleted';
 $string['strftimedmyhm'] = '%d %b %Y %I.%M%p';
 $string['extend'] = 'Extend';
@@ -256,14 +260,11 @@ $string['updateduration'] = 'Modify duration';
 $string['advance'] = 'Advance';
 $string['delayin'] = 'Delay in';
 $string['updatestarttime'] = 'Modify start time';
-$string['hybridteaching:sessionsactions'] = 'See session list actions';
-$string['hybridteaching:sessionsfulltable'] = 'Display all fields of session list';
 $string['editsession'] = 'Edit session';
 
 $string['headerconfigstore'] = 'Manage storage extensions';
 $string['storageplugins'] = 'Storage plugins';
 $string['importsessions'] = 'Import sessions';
-$string['export'] = 'Export';
 $string['invalidimportfile'] = 'File format is invalid.';
 $string['processingfile'] = 'Processing file...';
 $string['sessionsgenerated'] = '{$a} sessions were successfully generated';
@@ -332,7 +333,10 @@ $string['leavetime'] = 'Leave';
 $string['permanence'] = 'Permanence';
 
 $string['passwordgrp'] = 'Student password';
-$string['passwordgrp_help'] = 'If set students will be required to enter this password before they can set their own attendance status for the session. If empty, no password is required.';
+$string['passwordgrp_help'] = 'If set students will be required to enter this password so they can set their attendance in the session.
+
+  * If empty, no password is required.
+  * If use of rotating QR code, the password will also be rotating';
 
 $string['maxgradeattendance'] = 'Attendance for maximum score';
 $string['maxgradeattendance_help'] = 'Calculation mode
@@ -424,8 +428,6 @@ $string['norecording'] = 'No recording';
 
 $string['entersession'] = 'You can enter the session to register your attendance';
 $string['exitsession'] = 'Your attendance was registered sucesfully, remember to end your attendance when exiting the session';
-$string['hybridteaching:attendancesactions'] = 'Access the attendance actions';
-$string['hybridteaching:attendanceregister'] = 'Register attendance in the session';
 $string['novc'] = 'No use of vc in this session';
 $string['viewstudentinfo'] = 'Student attendance view';
 $string['viewsessioninfo'] = 'Session attendance view';
@@ -516,7 +518,39 @@ $string['updatecalen'] = 'Update calendar event';
 
 $string['sessiontobecreated'] = 'Session to be created';
 $string['recordingdisabled'] = 'Recordings are not activated. Download not allowed.';
-$string['hybridteaching:manageactivity'] = 'Manage settings hybridteaching';
 $string['cannotmanageactivity'] = 'You don\'t have permissions to update {$a}';
 
 $string['nouseconfig'] = 'This config does not apply for {$a} videoconferences.';
+$string['hybridteaching:createsessions'] = 'Allow create sessions';
+
+$string['bulkhide'] = 'Show/Hide sessions';
+$string['bulkhidechats'] = 'Show/Hide chats';
+$string['bulkhiderecordings'] = 'Show/Hide recordings';
+
+$string['bulkhidetext'] = 'Are you sure you want to show/hide the following sessions?';
+$string['bulkhidechatstext'] = 'Are you sure you want to show/hide the following chats?';
+$string['bulkhiderecordingstext'] = 'Are you sure you want to show/hide the following recordings?';
+
+$string['bulkhidesuccess'] = 'Sessions successfully hidden';
+$string['bulkhidechatssuccess'] = 'Chats successfully hidden';
+$string['bulkhiderecordingssuccess'] = 'Recordings successfully hidden';
+
+$string['hiddenuserattendance'] = '(Hidden session for the user)';
+$string['cantcreatevc'] ='You cannot join the videoconference: you do not have sufficient permissions or you must wait for the moderator.';
+$string['sessionperformed'] = '{$a} sessions already done (access in the Sessions tab).';
+
+$string['qrupdatetime'] = 'Qr/Password rotating period';
+$string['qrupdatetime_help'] = 'The period time in seconds, the qr will stay until a new one is generated, same as password if it applies';
+$string['rotateqr_help'] = 'Forces the QR and password to rotate according to the defined time
+
+  * Disables the password field if active';
+
+
+$string['bulkhideatt'] = 'Show/Hide session attendance';
+$string['bulkhideatttext'] = 'Are you sure you want to show/hide the following session attendance?';
+$string['bulkhideattsuccess'] = 'Session attendance successfully hidden';
+$string['hideatt'] = 'Hide session attendance';
+$string['visibleatt'] = 'Show session attendance';
+$string['updatefinished'] = 'Finish sessions that have finished by time';
+
+/** New strings. */

@@ -29,7 +29,13 @@ defined('MOODLE_INTERNAL') || die;
 
 require_once($CFG->libdir.'/formslib.php');
 
+/**
+ * Class bulk_set_attendance_form
+ */
 class bulk_set_attendance_form extends \moodleform {
+    /**
+     * Create all the form elements
+     */
     public function definition() {
         $mform =& $this->_form;
         $cm = $this->_customdata['cm'];
@@ -41,10 +47,10 @@ class bulk_set_attendance_form extends \moodleform {
 
         $mform->addElement('header', 'general', get_string('setattendance', 'hybridteaching'));
         $options = [
-            '1' => get_string('activeattendance', 'hybridteaching'),
-            '2' => get_string('inactiveattendance', 'hybridteaching'),
+            HYBRIDTEACHING_BULK_ACTIVE_ATTENDANCE => get_string('activeattendance', 'hybridteaching'),
+            HYBRIDTEACHING_BULK_INACTIVE_ATTENDANCE => get_string('inactiveattendance', 'hybridteaching'),
         ];
-        $mform->addElement('select', 'operation', get_string('updateduration', 'hybridteaching'), $options);
+        $mform->addElement('select', 'operation', get_string('setexempt', 'hybridteaching'), $options);
         $mform->setType('operation', PARAM_INT);
 
         $mform->addElement('hidden', 'action', 'bulksetattendance');
@@ -60,6 +66,16 @@ class bulk_set_attendance_form extends \moodleform {
 }
 
 
+/**
+ * Add hidden elements to the form.
+ *
+ * @param object $mform mform object
+ * @param array $ids Array of selected ids
+ * @param object $cm Course Module object
+ * @param object $hybridteaching Hybridteaching object
+ * @param int $sessionid Session id
+ * @param string $view The selected view
+ */
 function addhiddens($mform, $ids, $cm, $hybridteaching, $sessionid, $view) {
     $mform->addElement('hidden', 'ids', $ids);
     $mform->setType('ids', PARAM_ALPHANUMEXT);

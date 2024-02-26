@@ -38,6 +38,7 @@ require_once($CFG->dirroot . '/lib/grouplib.php');
 use mod_hybridteaching\helpers\roles;
 use mod_hybridteaching\controller\sessions_controller;
 use mod_hybridteaching\controller\notify_controller;
+use mod_hybridteaching\controller\attendance_controller;
 use mod_hybridteaching\helper;
 
 $id = optional_param('id', 0, PARAM_INT);
@@ -57,6 +58,8 @@ if (!isset($cm) || !$cm) {
 
 require_login($course, true, $cm);
 $modulecontext = context_module::instance($cm->id);
+$coursecontext = context_course::instance($course->id);
+
 require_capability('mod/hybridteaching:view', $modulecontext);
 
 global $USER;
@@ -76,12 +79,7 @@ $PAGE->set_activity_record($hybridteaching);
 $renderer = $PAGE->get_renderer('mod_hybridteaching');
 
 // Mark viewed and trigger the course_module_viewed event.
-hybridteaching_view(
-    $hybridteaching,
-    $course,
-    $cm,
-    $modulecontext
-);
+hybridteaching_view($hybridteaching, $course, $cm, $modulecontext);
 
 echo $OUTPUT->header();
 
@@ -149,6 +147,7 @@ if (!$activesession) {
 
         $viewupdate = false;
         switch (true) {
+            // Undatted session.
             case !$hybridteaching->sessionscheduling:
                 $isundatedsession = true;
                 $isfinished = $activesession->isfinished;
@@ -189,6 +188,7 @@ if (!$activesession) {
                 }
                 $isclosedoors ? $alert = 'alert-warning' : $alert = 'alert-info';
                 break;
+            // In progress.
             case $timeinit < time() && $timeend > time():
                 $isclosedoors ? $status = get_string('status_progress', 'hybridteaching') :
                     $status = get_string('status_ready', 'hybridteaching');
@@ -196,11 +196,13 @@ if (!$activesession) {
                 $alert = 'alert-warning';
                 $viewupdate = true;
                 break;
+            // No started yet.
             case $timeinit >= time():
                 $status = get_string('status_start', 'hybridteaching');
                 $isstart = true;
                 $alert = 'alert-info';
                 break;
+            // Finished.
             case $timeend < time():
                 $status = get_string('status_finished', 'hybridteaching');
                 $isfinished = true;
@@ -249,6 +251,7 @@ if (!$activesession) {
                 }
             }
         }
+
         $result['hasjoinurlcapability'] = has_capability('mod/hybridteaching:viewjoinurl', $modulecontext);
         if ($hybridteaching->waitmoderator) {
             $role = roles::is_moderator($modulecontext, json_decode($hybridteaching->participants, true), $USER->id);
@@ -258,27 +261,34 @@ if (!$activesession) {
                     // Wait moderator.
                     $result['waitmoderator'] = true;
                     $canentry = false;
+                    $status = get_string('waitmoderator_desc', 'hybridteaching');
                 }
             }
-        } else if ($canentry && !$session->session_started($activesession)) {
-            $role = roles::is_moderator($modulecontext, json_decode($hybridteaching->participants, true), $USER->id);
-            $issessionmoderator = ($role || has_capability('mod/hybridteaching:sessionsactions', $modulecontext));
-            $result['hasjoinurlcapability'] = $issessionmoderator;
         }
-        if (!has_capability('mod/hybridteaching:sessionsactions', $modulecontext) 
+
+        if (!has_capability('mod/hybridteaching:sessionsactions', $modulecontext)
               && !$session::get_sessionconfig_exists($activesession)
               && $isundatedsession && $hybridteaching->usevideoconference) {
             $viewupdate = false;
             $canentry = false;
             $status = get_string('status_undated_wait', 'hybridteaching');
         }
+
         $viewupdate && has_capability('mod/hybridteaching:attendanceregister', $modulecontext) && $hybridteaching->useattendance
             && $canentry ? $PAGE->requires->js_call_amd('mod_hybridteaching/view', 'init', [$activesession->id, $USER->id]) : '';
 
-        $result['isaccess'] = true;
         $result['id'] = $id;
         $result['s'] = !$isfinished ? $activesession->id : 0;
-        $result['hascreatecapability'] = has_capability('mod/hybridteaching:sessionsactions', $modulecontext);
+        $result['hassessionactionscapability'] = has_capability('mod/hybridteaching:sessionsactions', $modulecontext);
+
+        // In sessions undatted (no sessioncheduling and no starttime):.
+        // Only can create sessions users with permision sessionsactions (example: teachers).
+        if (!$hybridteaching->sessionscheduling) {
+            $result['hascreatecapability'] = has_capability('mod/hybridteaching:sessionsactions', $modulecontext);
+        } else {
+            $result['hascreatecapability'] = has_capability('mod/hybridteaching:createsessions', $modulecontext);
+        }
+
         $result['hasvc'] = $hasvc;
         $result['target'] = $hasvc ? "_blank" : "_self";
         $result['onsubmit'] = $result['target'] == "_blank" ? "setTimeout(function() { location.reload(); }, 4000)" : "";
@@ -316,13 +326,24 @@ if (!$activesession) {
         $result['usepassword'] = $hybridteaching->studentpassword != '';
         $result['rotateqr'] = $hybridteaching->rotateqr;
         $result['useattendance'] = $hybridteaching->useattendance;
+        if (!$result['hassessionactionscapability'] && is_object($activesession)) {
+            $result['userjoinsession'] = attendance_controller::can_user_join($activesession->id, $USER->id);
+        } else {
+            $result['userjoinsession'] = true;
+        }
     }
 }
+
+// Calculate number of sessions performed.
+$sessionperformed = sessions_controller::get_sessions_performed($hybridteaching->id);
+$result['sessperformed'] = $sessionperformed > 0 ? $sessionperformed : '';
+
 if ($err == 1) {
     // Code 1: error_unable_join: The meeting does not exist in the vc system, has been deleted, or has not been found.
     $result['message'] = get_string('error_unable_join', 'hybridteaching');
     $result['alert'] = 'alert-danger';
 }
+
 notify_controller::show();
 echo $renderer->zone_access($result);
 echo $OUTPUT->footer();

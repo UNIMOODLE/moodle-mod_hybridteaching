@@ -26,13 +26,8 @@ Se necesita una cuenta google
 
 Añadir las urls autorizadas (uris) siguientes:
 https://DOMINIO-MOODLE/mod/hybridteaching/store/youtube    
-    (comprobar si se puede no añadir como uri)
-
 https://DOMINIO-MOODLE/mod/hybridteaching/store/youtube/classes/youtube_handler.php
-    (comprobar si se puede no añadir como uri)
-
 https://DOMINIO-MOODLE/admin/tool/task/scheduledtasks.php
-
 https://DOMINIO-MOODLE/mod/hybridteaching/store/youtube/classes/youtubeaccess.php
 
 

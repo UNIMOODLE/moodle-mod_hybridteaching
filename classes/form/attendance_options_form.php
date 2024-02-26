@@ -29,7 +29,13 @@ defined('MOODLE_INTERNAL') || die;
 
 require_once($CFG->libdir.'/formslib.php');
 
+/**
+ * Class attendance_options_form
+ */
 class attendance_options_form extends \moodleform {
+    /**
+     * Create all the form elements
+     */
     public function definition() {
         global $USER;
         $mform = &$this->_form;

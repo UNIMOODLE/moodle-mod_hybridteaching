@@ -24,7 +24,7 @@
 
 /**
  * Display information about all the mod_hybridteaching modules in the requested course. *
- * @package    mod_hybridteaching
+ * @package    hybridteachvc_teams
  * @copyright  2023 Proyecto UNIMOODLE
  * @author     UNIMOODLE Group (Coordinator) <direccion.area.estrategia.digital@uva.es>
  * @author     ISYC <soporte@isyc.com>
@@ -35,13 +35,29 @@ namespace hybridteachvc_teams;
 
 use stdClass;
 
+/**
+ * Class configs.
+ */
 class configs extends \mod_hybridteaching\controller\configs_controller {
+    /**
+     * Load a specific configuration by ID.
+     *
+     * @param int $configid Configuration ID
+     * @return object
+     */
     public static function load_config($configid) {
         global $DB;
         $teamsdata = $DB->get_record('hybridteachvc_teams_config', ['id' => $configid]);
         return $teamsdata;
     }
 
+    /**
+     * Creates a new configuration record in the 'hybridteachvc_teams_config' table.
+     *
+     * @param object $data The data object containing the configuration details.
+     * @throws Exception If there is an error inserting the record.
+     * @return int The ID of the newly inserted record.
+     */
     public static function create_config($data) {
         global $DB, $USER;
         $records = new stdClass();
@@ -56,6 +72,11 @@ class configs extends \mod_hybridteaching\controller\configs_controller {
         return $id;
     }
 
+    /**
+     * Update the configuration in the database with the provided data.
+     *
+     * @param object $data description
+     */
     public static function update_config($data) {
         global $DB;
         $records = new stdClass();
@@ -68,6 +89,11 @@ class configs extends \mod_hybridteaching\controller\configs_controller {
         $DB->update_record('hybridteachvc_teams_config', $records);
     }
 
+    /**
+     * Delete a configuration by its ID.
+     *
+     * @param int $configid The ID of the configuration to be deleted
+     */
     public static function delete_config($configid) {
         global $DB;
         $configid = ['id' => $configid];

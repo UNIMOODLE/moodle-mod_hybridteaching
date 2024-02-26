@@ -24,7 +24,7 @@
 
 /**
  * Display information about all the mod_hybridteaching modules in the requested course. *
- * @package    mod_hybridteaching
+ * @package    hybridteachstore_youtube
  * @copyright  2023 Proyecto UNIMOODLE
  * @author     UNIMOODLE Group (Coordinator) <direccion.area.estrategia.digital@uva.es>
  * @author     ISYC <soporte@isyc.com>
@@ -35,6 +35,9 @@ namespace hybridteachstore_youtube\task;
 
 use hybridteachstore_youtube\youtube_handler;
 
+/**
+ * Class updatestores.
+ */
 class updatestores extends \core\task\scheduled_task {
 
     /**
@@ -46,6 +49,10 @@ class updatestores extends \core\task\scheduled_task {
         return get_string('updatestores', 'hybridteachstore_youtube');
     }
 
+    /**
+     * Execute the function to obtain sessions from which to download recordings with YouTube storage method,
+     * upload the recordings to YouTube, save the records as already uploaded, and delete the processed files.
+     */
     public function execute() {
         global $DB, $CFG;
         require_once($CFG->dirroot . '/mod/hybridteaching/store/youtube/classes/youtube_handler.php');

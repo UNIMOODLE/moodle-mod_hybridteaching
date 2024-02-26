@@ -64,7 +64,7 @@ class custom_completion extends activity_custom_completion {
         if (!$hybridteaching = $DB->get_record('hybridteaching', ['id' => $hybridteachingid])) {
             throw new \moodle_exception(get_string('nohid', 'hybridteaching') . $hybridteachingid);
         }
-        $status = 0;
+        $status = HYBRIDTEACHING_ATTSTATUS_NOTVALID;
         $attcountparams = ['userid' => $userid, 'hybridteachingid' => $hybridteachingid, 'status' => 1];
         if ($rule == 'completionattendance') {
             $status = $hybridteaching->completionattendance <= $DB->count_records('hybridteaching_attendance', $attcountparams);

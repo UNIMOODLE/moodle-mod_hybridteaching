@@ -35,6 +35,7 @@ use mod_hybridteaching\helpers\roles;
 use mod_hybridteaching\controller\attendance_controller;
 use mod_hybridteaching\controller\sessions_controller;
 use mod_hybridteaching\controller\notify_controller;
+use mod_hybridteaching\helper;
 
 require_once(dirname(dirname(dirname(__FILE__))).'/config.php');
 
@@ -44,88 +45,119 @@ $sid = optional_param('s', 0, PARAM_INT);
 $finishsession = optional_param('finishsession', 0, PARAM_INT);
 
 list($course, $cm) = get_course_and_cm_from_cmid($id, 'hybridteaching');
+
+require_login($course->id, true, $cm);
+
 $modulecontext = context_module::instance($cm->id);
 $hybridteaching = $DB->get_record('hybridteaching', ['id' => $cm->instance], '*', MUST_EXIST);
 $attendancecontroller = new attendance_controller($hybridteaching);
+
+$userismoderator = roles::is_moderator($modulecontext, json_decode($hybridteaching->participants, true), $USER->id);
+
+// If there is session created: sid.
 if (!empty($sid)) {
-    $activesession = $DB->get_record('hybridteaching_session', ['id' => $sid], '*', MUST_EXIST);
+    try {
+        $activesession = $DB->get_record('hybridteaching_session', ['id' => $sid], '*', MUST_EXIST);
+    } catch (\Exception $e) {
+        $url = new moodle_url('/mod/hybridteaching/view.php', ['id' => $id]);
+        redirect($url, get_string('error_unable_join', 'hybridteaching'), null, 'error');
+    }
+
+    // Check if the session is ending: if not push finish session button, then is join button.
     if (!$finishsession) {
+
+        // Update session values with hybridteaching activity.
+        $mustupdatesession = false;
         if ($activesession->typevc != $hybridteaching->typevc) {
             $activesession->typevc = $hybridteaching->typevc;
-            $DB->update_record('hybridteaching_session', $activesession);
+            $mustupdatesession = true;
         }
         if ($activesession->vcreference != $hybridteaching->config) {
             $activesession->vcreference = $hybridteaching->config;
-            $DB->update_record('hybridteaching_session', $activesession);
+            $mustupdatesession = true;
         }
         if ($activesession->starttime == 0) {
             $activesession->starttime = time();
+            $mustupdatesession = true;
+        }
+        if ($mustupdatesession) {
             $DB->update_record('hybridteaching_session', $activesession);
         }
 
-        if ($hybridteaching->config) {
-            sessions_controller::require_subplugin_session($hybridteaching->typevc);
-            $classname = sessions_controller::get_subpluginvc_class($hybridteaching->typevc);
-            $sessionvc = new $classname($activesession->id);
+        // Check if exists subplugin config.
+        if (!helper::subplugin_config_exists($activesession->vcreference, 'vc')) {
+            $url = new moodle_url('/mod/hybridteaching/view.php', ['id' => $id]);
+            redirect($url, get_string('vcconfigremoved', 'hybridteaching'), null, 'error');
+        }
 
-            if (!empty($sessionvc->get_session())) {
-                $resultsaccess = $sessionvc->get_zone_access();
+        // Check if this session is finished yet (by teacher usually).
+        if ($activesession->isfinished) {
+            $url = new moodle_url('/mod/hybridteaching/view.php', ['id' => $id]);
+            redirect($url, get_string('finished', 'hybridteaching') . date(' d M Y H:i:s',
+                $activesession->starttime + $activesession->duration), null, 'error');
+        }
+
+        // Imports and requires to create session vc object.
+        sessions_controller::require_subplugin_session($hybridteaching->typevc);
+        $classname = sessions_controller::get_subpluginvc_class($hybridteaching->typevc);
+        $sessionvc = new $classname($activesession->id);
+
+        // Check if there is meeting vc created.
+        // If yes, get the url meeting vc.
+        // If not, check if has to create, and create the meeting vc.
+        if (!empty($sessionvc->get_session())) {
+            $resultsaccess = $sessionvc->get_zone_access($userismoderator);
+            if ($resultsaccess == null ||
+                (isset($resultsaccess['returncode']) && $resultsaccess['returncode'] == 'FAILED') ) {
+                    $message = isset($resultsaccess['message']) ? $resultsaccess['message']
+                        : get_string('error_unable_join', 'hybridteaching');
+                    notify_controller::notify_problem($message);
+            } else {
+                $url = $resultsaccess['url'];
+                $ishost = $resultsaccess['ishost'];
+            }
+        } else {
+            $sessioncontroller = new sessions_controller($hybridteaching);
+            // User can create sessions if:.
+            // User has capability createsessions, and is moderator, or (not moderator and not waitmoderator).
+            $cancreatevc = false;
+            if (has_capability('mod/hybridteaching:createsessions', $modulecontext)) {
+                if ($userismoderator || (!$userismoderator && !$hybridteaching->waitmoderator)) {
+                    $cancreatevc = true;
+                }
+            }
+            if (!$cancreatevc) {
+                notify_controller::notify_problem(get_string('cantcreatevc', 'hybridteaching'));
+            } else {
+                // Create meeting vc.
+                try {
+                    $sessionvc->create_unique_session_extended($activesession, $hybridteaching);
+                } catch (\moodle_exception $e) {
+                    notify_controller::notify_problem($e->getMessage());
+                }
+                $resultsaccess = $sessionvc->get_zone_access($userismoderator);
                 if ($resultsaccess == null ||
                     (isset($resultsaccess['returncode']) && $resultsaccess['returncode'] == 'FAILED') ) {
-                        $message = isset($resultsaccess['message']) ? $resultsaccess['message'] : get_string('error_unable_join', 'hybridteaching');
+                        $message = isset($resultsaccess['message']) ? $resultsaccess['message']
+                            : get_string('error_unable_join', 'hybridteaching');
                         notify_controller::notify_problem($message);
                 } else {
                     $url = $resultsaccess['url'];
                     $ishost = $resultsaccess['ishost'];
                 }
-                if ($activesession->isfinished) {
-                    $regex = '/=[A-Za-z0-9]+/i';
-                    preg_match($regex, base64_decode($url), $match);
-                    $meetingid = substr($match[0], 1);
-                    if ($DB->get_record('hybridteachvc_' . $activesession->typevc,
-                          ['meetingid' => $meetingid], 'id', IGNORE_MISSING)) {
-                        $url = new moodle_url('/mod/hybridteaching/view.php', ['id' => $id]);
-                        redirect($url, get_string('finished', 'hybridteaching') . date(' d M Y H:i:s',
-                            $activesession->starttime + $activesession->duration), null, 'error');
-                    }
-                }
-            } else {
-                $sessioncontroller = new sessions_controller($hybridteaching);
-                $role = false;
-                if ($hybridteaching->waitmoderator || !empty($hybridteaching->participants)) {
-                    $role = roles::is_moderator($modulecontext, json_decode($hybridteaching->participants, true), $USER->id);
-                }
-                $issessionmoderator = ($role || has_capability('mod/hybridteaching:sessionsactions', $modulecontext));
-                if ($activesession && $issessionmoderator) {
-                    // If must save recordings, save the id of storage.
-                    if ($activesession->userecordvc) {
-                        $activesession->storagereference = sessions_controller::savestorage($activesession,
-                            $hybridteaching->course);
-                    }
-                    if (!$sessioncontroller->get_sessionconfig_exists($activesession)) {
-                        $url = new moodle_url('/mod/hybridteaching/view.php', ['id' => $id]);
-                        redirect($url, get_string('vcconfigremoved', 'hybridteaching'), null, 'error');
-                    }
-                    strlen($activesession->name) <= 1 ? $activesession->name .= '-' : '';                   
-                    try {
-                        $sessionvc->create_unique_session_extended($activesession, $hybridteaching);
-                    } catch (\moodle_exception $e) {
-                        notify_controller::notify_problem($e->getMessage());
-                    }
-                    $sessionvc->set_session($activesession->id);
-                    $resultsaccess = $sessionvc->get_zone_access();
-                    if ($resultsaccess == null ||
-                        (isset($resultsaccess['returncode']) && $resultsaccess['returncode'] == 'FAILED') ) {
-                            $message = isset($resultsaccess['message']) ? $resultsaccess['message'] : get_string('error_unable_join', 'hybridteaching');
-                            notify_controller::notify_problem($message);
-                    } else {
-                        $url = $resultsaccess['url'];
-                        $ishost = $resultsaccess['ishost'];
-                    }
+
+                // Why?.
+                strlen($activesession->name) <= 1 ? $activesession->name .= '-' : '';
+
+                // If must save recordings, save the id of storage.
+                if ($activesession->userecordvc) {
+                    $activesession->storagereference = sessions_controller::savestorage($activesession,
+                        $hybridteaching->course);
                 }
             }
         }
     } else {
+        // If is pushed "finish session" button.
         if (time() > $activesession->starttime) {
             $activesession->isfinished = 1;
             $activesession->duration = time() - $activesession->starttime;
@@ -133,7 +165,6 @@ if (!empty($sid)) {
             $url = new moodle_url('/mod/hybridteaching/view.php', ['id' => $id]);
             $url = base64_encode($url);
 
-            list($course, $cm) = get_course_and_cm_from_instance($hybridteaching->id, 'hybridteaching');
             $event = \mod_hybridteaching\event\session_finished::create([
                 'objectid' => $hybridteaching->id,
                 'context' => \context_module::instance($cm->id),
@@ -148,6 +179,8 @@ if (!empty($sid)) {
         }
     }
 } else {
+
+    // Sessions undatted.
     if (!$hybridteaching->sessionscheduling) {
         $sessioncontroller = new sessions_controller($hybridteaching);
         $session = new stdClass();
@@ -164,21 +197,21 @@ if (!empty($sid)) {
             $classname = sessions_controller::get_subpluginvc_class($hybridteaching->typevc);
             $sessionvc = new $classname($session->id);
             if (!empty($sessionvc->get_session())) {
-                if (!$sessioncontroller->get_sessionconfig_exists($session)) {
+                if (helper::subplugin_config_exists($session->vcreference, 'vc')) {
                     $url = new moodle_url('/mod/hybridteaching/view.php', ['id' => $id]);
-                    redirect($url, get_string('vcconfigremoved', 'hybridteaching'), null, 'error');
                 }
-                $resultsaccess = $sessionvc->get_zone_access();
+                $resultsaccess = $sessionvc->get_zone_access($userismoderator);
                 if ($resultsaccess == null ||
                     (isset($resultsaccess['returncode']) && $resultsaccess['returncode'] == 'FAILED') ) {
-                        $message = isset($resultsaccess['message']) ? $resultsaccess['message'] : get_string('error_unable_join', 'hybridteaching');
+                        $message = isset($resultsaccess['message']) ? $resultsaccess['message']
+                            : get_string('error_unable_join', 'hybridteaching');
                         notify_controller::notify_problem($message);
                 } else {
                     $url = $resultsaccess['url'];
                     $ishost = $resultsaccess['ishost'];
                 }
             } else {
-                if (has_capability('mod/hybridteaching:sessionsactions', $modulecontext) ||
+                if (has_capability('mod/hybridteaching:createsessions', $modulecontext) ||
                         roles::is_moderator($modulecontext, json_decode($hybridteaching->participants, true), $USER->id)) {
                     if ($activesession = $DB->get_record('hybridteaching_session', ['id' => $session->id], '*', MUST_EXIST)) {
                         // If must save recordings, save the id of storage.
@@ -192,15 +225,16 @@ if (!empty($sid)) {
                         redirect($url, get_string('vcconfigremoved', 'hybridteaching'), null, 'error');
                     }
                     try {
-                        $sessionvc->create_unique_session_extended($session, $hybridteaching);                    
+                        $sessionvc->create_unique_session_extended($session, $hybridteaching);
                     } catch (\Exception $e) {
                         notify_controller::notify_problem($e->getMessage());
                     }
                     $sessionvc->set_session($session->id);
-                    $resultsaccess = $sessionvc->get_zone_access();
+                    $resultsaccess = $sessionvc->get_zone_access($userismoderator);
                     if ($resultsaccess == null ||
                         (isset($resultsaccess['returncode']) && $resultsaccess['returncode'] == 'FAILED') ) {
-                            $message = isset($resultsaccess['message']) ? $resultsaccess['message'] : get_string('error_unable_join', 'hybridteaching');
+                            $message = isset($resultsaccess['message']) ? $resultsaccess['message']
+                                : get_string('error_unable_join', 'hybridteaching');
                             notify_controller::notify_problem($message);
                     } else {
                         $url = $resultsaccess['url'];
@@ -221,7 +255,6 @@ $event = \mod_hybridteaching\event\session_joined::create([
 
 $event->trigger();
 
-require_login($course->id, true);
 if (!$finishsession && !has_capability('mod/hybridteaching:sessionsfulltable', $PAGE->context)) {
     isset($activesession) ? $sessiontype = $activesession : $sessiontype = $session;
     $attaction = optional_param('attaction', 1, PARAM_INT);
@@ -232,7 +265,7 @@ if (!$finishsession && !has_capability('mod/hybridteaching:sessionsfulltable', $
         }
         $url = new moodle_url('/mod/hybridteaching/view.php', ['id' => $id]);
         $notify['ntype'] == 'error' ? redirect($url, get_string($notify['gstring'], 'hybridteaching'), null, $notify['ntype']) :
-        redirect($nexturl);
+            redirect($nexturl);
     }
 }
 redirect($nexturl);

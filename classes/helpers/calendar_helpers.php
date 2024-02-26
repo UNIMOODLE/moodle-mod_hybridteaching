@@ -39,14 +39,16 @@ defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->dirroot.'/calendar/lib.php');
 
+/**
+ * Class calendar_helpers.
+ */
 class calendar_helpers {
 
 
     /**
      * Creates a calendar event for a hybrid teaching session.
      *
-     * @param object &$session A reference to the hybrid teaching session object.
-     * @throws None
+     * @param object $session A reference to the hybrid teaching session object.
      * @return mixed Returns the ID of the newly created calendar event if successful,
      * false otherwise.
      */
@@ -148,7 +150,7 @@ class calendar_helpers {
     /**
      * Delete calendar events for sessions
      *
-     * @param array $sessionsids array of sessions ids
+     * @param int $sessionid Session id
      * @return bool result of updating
      */
     public static function hybridteaching_delete_calendar_events($sessionid) {

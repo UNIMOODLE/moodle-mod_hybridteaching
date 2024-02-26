@@ -14,19 +14,39 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
+// Project implemented by the "Recovery, Transformation and Resilience Plan.
+// Funded by the European Union - Next GenerationEU".
+//
+// Produced by the UNIMOODLE University Group: Universities of
+// Valladolid, Complutense de Madrid, UPV/EHU, León, Salamanca,
+// Illes Balears, Valencia, Rey Juan Carlos, La Laguna, Zaragoza, Málaga,
+// Córdoba, Extremadura, Vigo, Las Palmas de Gran Canaria y Burgos.
+
+/**
+ * Display information about all the mod_hybridteaching modules in the requested course. *
+ * @package    mod_hybridteaching
+ * @copyright  2023 Proyecto UNIMOODLE
+ * @author     UNIMOODLE Group (Coordinator) <direccion.area.estrategia.digital@uva.es>
+ * @author     ISYC <soporte@isyc.com>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
 namespace mod_hybridteaching\output;
 
 use plugin_renderer_base;
 
+/**
+ * Class renderer.
+ */
 class renderer extends plugin_renderer_base {
 
-    public function zone_errors($message) {
-        return $this->render_from_template('mod_hybridteaching/view_page_zone_errors', $message);
-    }
+    /**
+     * A function to handle zone access.
+     *
+     * @param string $resultaccess
+     * @return string Rendered HTML
+     */
     public function zone_access($resultaccess) {
         return $this->render_from_template('mod_hybridteaching/view_page_zone_access', $resultaccess);
-    }
-    public function zone_records() {
-        return $this->render_from_template('mod_hybridteaching/view_page_zone_records', null);
     }
 }

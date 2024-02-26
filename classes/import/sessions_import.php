@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - https://moodle.org/
+// This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -12,7 +12,24 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
+// Project implemented by the "Recovery, Transformation and Resilience Plan.
+// Funded by the European Union - Next GenerationEU".
+//
+// Produced by the UNIMOODLE University Group: Universities of
+// Valladolid, Complutense de Madrid, UPV/EHU, León, Salamanca,
+// Illes Balears, Valencia, Rey Juan Carlos, La Laguna, Zaragoza, Málaga,
+// Córdoba, Extremadura, Vigo, Las Palmas de Gran Canaria y Burgos.
+
+/**
+ * Display information about all the mod_hybridteaching modules in the requested course. *
+ * @package    mod_hybridteaching
+ * @copyright  2023 Proyecto UNIMOODLE
+ * @author     UNIMOODLE Group (Coordinator) <direccion.area.estrategia.digital@uva.es>
+ * @author     ISYC <soporte@isyc.com>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 
 namespace mod_hybridteaching\import;
 
@@ -27,6 +44,9 @@ defined('MOODLE_INTERNAL') || die();
 require_once($CFG->dirroot.'/mod/hybridteaching/classes/controller/sessions_controller.php');
 require_once($CFG->dirroot.'/mod/hybridteaching/classes/controller/notify_controller.php');
 
+/**
+ * Class sessions_import.
+ */
 class sessions_import {
 
     /** @var string $error The errors message from reading the xml */
@@ -53,7 +73,7 @@ class sessions_import {
     /** @var \core\progress\display_if_slow|null $progress The progress bar instance. */
     protected $progress = null;
 
-    /** @var bool $courseprovided If course has been provided we don't need to map the course field*/
+    /** @var object $courseprovided If course has been provided we don't need to map the course field*/
     protected $course = null;
 
     /**
@@ -151,13 +171,14 @@ class sessions_import {
     /**
      * Constructor - parses the raw text for sanity.
      *
-     * @param string $text The raw csv text.
-     * @param string $encoding The encoding of the csv file.
-     * @param string $delimiter The specified delimiter for the file.
+     * @param null|string $text The raw csv text.
+     * @param null|string $encoding The encoding of the csv file.
+     * @param null|string $delimiter The specified delimiter for the file.
      * @param string $importid The id of the csv import.
-     * @param array $mappingdata The mapping data from the import form.
-     * @param bool $useprogressbar Whether progress bar should be displayed, to avoid html output on CLI.
-     * @param bool $hybridteching object
+     * @param null|array $mappingdata The mapping data from the import form.
+     * @param null|bool $useprogressbar Whether progress bar should be displayed, to avoid html output on CLI.
+     * @param null|object $course The course object.
+     * @param null|object $hybridteaching Hybridteaching object.
      */
     public function __construct($text = null, $encoding = null, $delimiter = null, $importid = 0,
                                 $mappingdata = null, $useprogressbar = false, $course = null, $hybridteaching = null) {
@@ -256,10 +277,10 @@ class sessions_import {
             }
 
             $attexempt = $this->get_column_data($row, $mapping['attexempt']);
-            if (!empty($attexempt) && $attexempt == 1) {
+            if (!empty($attexempt) && $attexempt == HYBRIDTEACHING_EXEMPT) {
                 $session->attexempt = $attexempt;
             } else {
-                $session->attexempt = 0;
+                $session->attexempt = HYBRIDTEACHING_NOT_EXEMPT;
             }
 
             // Wrap the plain text description in html tags.
@@ -327,6 +348,7 @@ class sessions_import {
     /**
      * Create sessions using the CSV data.
      *
+     * @param object $hybridteaching Hybridteaching object
      * @return void
      */
     public function import($hybridteaching) {

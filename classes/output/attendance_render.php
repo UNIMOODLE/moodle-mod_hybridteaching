@@ -35,7 +35,6 @@ namespace mod_hybridteaching\output;
 
 defined('MOODLE_INTERNAL') || die();
 
-use core_table\dynamic as dynamic_table;
 use stdClass;
 use mod_hybridteaching\controller\attendance_controller;
 use mod_hybridteaching\controller\sessions_controller;
@@ -52,12 +51,27 @@ require_once($CFG->libdir . '/tablelib.php');
 require_once($CFG->dirroot . '/user/lib.php');
 require_once($CFG->libdir . '/gradelib.php');
 
-class attendance_render extends \table_sql implements dynamic_table {
+/**
+ * Class attendance_render.
+ */
+class attendance_render extends \flexible_table {
+    /** @var string Used when there is an empty column */
     const EMPTY = "-";
+
+    /** @var object Hybridteaching object */
     protected $hybridteaching;
+
+    /** @var object Course module */
     protected $cm;
+
+    /** @var object Module context */
     protected $context;
 
+    /**
+     * Constructor for the class.
+     *
+     * @param stdClass $hybridteaching 
+     */
     public function __construct(stdClass $hybridteaching) {
         $this->hybridteaching = $hybridteaching;
         if (!empty($this->hybridteaching)) {
@@ -69,7 +83,6 @@ class attendance_render extends \table_sql implements dynamic_table {
     /**
      * Builds the XHTML to display the control
      *
-     * @param string $query
      * @return string
      */
     public function print_attendance_table() {
@@ -125,7 +138,7 @@ class attendance_render extends \table_sql implements dynamic_table {
         list($extrasql, $params) = $sfiltering->get_sql_filter();
         $params['userid'] = $userid;
         $grades = new grades();
-        $viewsexclusion = ['studentattendance', 'attendlog', 'studentattsessions'];
+        $viewsexclusion = ['studentattendance', 'attendlog'];
         if (!has_capability('mod/hybridteaching:sessionsfulltable', $this->context, $user = $USER->id, $doanything = true)) {
             if (!in_array($view, $viewsexclusion)) {
                 $view = 'studentattendance';
@@ -172,7 +185,7 @@ class attendance_render extends \table_sql implements dynamic_table {
             }
         }
 
-        if ($view == 'studentattendance' || $view == 'studentattsessions') {
+        if ($view == 'studentattendance') {
             $selecteduser ? $params['userid'] = $selecteduser : $selecteduser = $userid;
             $params['userid'] = $selecteduser;
             $attresume = new attresume_options_form($CFG->wwwroot . '/mod/hybridteaching/attendance.php?view=' .
@@ -180,7 +193,7 @@ class attendance_render extends \table_sql implements dynamic_table {
                 '&dir=' . $dir, ['id' => $id, 'att' => $attid, 'selecteduser' => $selecteduser, 'hid' => $hybridteachingid]);
         }
 
-        if ($view == 'extendedstudentatt' || $view == 'extendedsessionatt') {
+        if ($view == 'extendedstudentatt') {
             $attusrfilter = new attuserfilter_options_form($CFG->wwwroot . '/mod/hybridteaching/attendance.php?',
                 ['id' => $id, 'att' => $attid, 'fname' => $fname, 'lname' => $lname, 'hid' => $hybridteachingid,
                     'view' => $view, 'sessid' => $selectedsession, 'sort' => $sort, 'dir' => $dir,
@@ -188,7 +201,7 @@ class attendance_render extends \table_sql implements dynamic_table {
         }
         $view == 'sessionattendance' ? $sortexclusions = ['stroptions', 'strclassroom', 'strvc'] : '';
         $view == 'extendedstudentatt' ? $sortexclusions = ['stroptions', 'strgrade'] : '';
-        $view == 'studentattsessions' ? $sortexclusions = ['strtype', 'strattendance', 'strgrade', 'stroptions'] : '';
+        $view == 'studentattendance' ? $sortexclusions = ['strtype', 'strattendance', 'strgrade', 'stroptions'] : '';
         !isset($sortexclusions) ? $sortexclusions = ['stroptions', 'strlogmark', 'strentrytime', 'strleavetime'] : '';
         foreach ($columns as $key => $column) {
             $columnnames = $this->get_column_name($key, $view);
@@ -300,7 +313,7 @@ class attendance_render extends \table_sql implements dynamic_table {
                 return $return;
             }
         }
-        if ($view == 'studentattsessions') {
+        if ($view == 'studentattendance') {
             $studentattsessparams = [
                 'hybridteachingid' => $hybridteachingid,
                 'id' => $id,
@@ -317,7 +330,8 @@ class attendance_render extends \table_sql implements dynamic_table {
                 'groupmode' => $groupmode,
                 'table' => $table,
                 'optionsformparams' => $optionsformparams,
-                'attresume' => $attresume, ];
+                'attresume' => $attresume,
+                'selecteduser' => $selecteduser ];
             $return = $this->print_student_sessions_table($studentattsessparams);
             return $return;
         }
@@ -344,7 +358,6 @@ class attendance_render extends \table_sql implements dynamic_table {
             'sort' => $sort, 'dir' => $dir, 'perpage' => $perpage, 'sessionid' => $sessionid, 'fname' => $fname,
             'lname' => $lname, 'attfilter' => $selectedfilter, ]);
             $return .= $OUTPUT->paging_bar($attendancecount, $page, $perpage, $baseurl);
-        $groupmode ? $usegroup = 1 : $usegroup = 0;
         if (!$groupmode) {
             $groupmode = $attendancecontroller->attendances_uses_groups($attendancelist);
             if (!$groupmode && ($view == 'studentattendance' || $view == 'sessionattendance')) {
@@ -428,7 +441,7 @@ class attendance_render extends \table_sql implements dynamic_table {
             $userurl = new \moodle_url('/user/view.php', ['id' => $USER->id]);
             $usertotalgrade = grade_get_grades($COURSE->id, 'mod', 'hybridteaching',
                 $this->hybridteaching->id, $attendance['userid']);
-            $attendgrade = $grades->calc_att_grade_for($this->hybridteaching, $session->id, $attendance['id']);
+            $attendgrade = $attendance['grade'];
             $attexempt = $sessionscontroller->get_session($attendance['sessionid'])->attexempt;
             $attendance['connectiontime'] == 0 ? $atttype = get_string('noatt', 'hybridteaching') : $atttype = '';
             if (empty($atttype)) {
@@ -460,7 +473,8 @@ class attendance_render extends \table_sql implements dynamic_table {
                     ' / ' . $this->hybridteaching->grade,
                 'vc' => isset($attassistance['vc']) ? $attassistance['vc'] : 0,
                 'classroom' => isset($attassistance['classroom']) ? $attassistance['classroom'] : 0,
-                'enabled' => !$attendance['visible'] || $attexempt ? 0 : 1,
+                'visible' => $attendance['visible'],
+                'enabled' => !$attendance['visible'] || $attexempt ? HYBRIDTEACHING_NOT_EXEMPT : HYBRIDTEACHING_EXEMPT,
                 'status' => $attendance['status'],
                 'checkbox' => new \core\output\checkbox_toggleall('attendance-table', false, [
                     'id' => 'attendance-' . $attendanceid,
@@ -529,6 +543,13 @@ class attendance_render extends \table_sql implements dynamic_table {
         return $return;
     }
 
+    /**
+     * Get the corresponding database column name for a given column and view.
+     *
+     * @param string $column The column name
+     * @param string $view The view name
+     * @return string The corresponding database column name
+     */
     public function get_column_name($column, $view) {
         switch ($column) {
             case 'strgroup':
@@ -599,6 +620,15 @@ class attendance_render extends \table_sql implements dynamic_table {
         }
     }
 
+    /**
+     * Get the table options based on the provided body, params, url, and urledit.
+     *
+     * @param array $body Array with all the body parameters
+     * @param array $params The params for build the options column
+     * @param \moodle_url $url The url parameter
+     * @param int $sessionid Session id
+     * @return array
+     */
     public function get_table_options($body, $params, $url, $sessionid) {
         $options = '';
         $arrayoptions = $this->build_options($body, $params, $url, $sessionid);
@@ -617,6 +647,14 @@ class attendance_render extends \table_sql implements dynamic_table {
         return ['options' => $options, 'class' => $arrayoptions['class']];
     }
 
+    /**
+     * Gets the table header based on the given columns, headers, and session ID.
+     *
+     * @param array $columns The columns for the table header.
+     * @param string $headers The type of headers to generate.
+     * @param int $sessionid The session ID.
+     * @return array The generated table header.
+     */
     public function get_table_header($columns, $headers, $sessionid) {
         global $OUTPUT;
         $header = [];
@@ -698,6 +736,15 @@ class attendance_render extends \table_sql implements dynamic_table {
         return $header;
     }
 
+    /**
+     * Builds options for the given parameters and returns an array of options.
+     *
+     * @param array $body Array with all the body parameters
+     * @param array $params The params for build the options column
+     * @param \moodle_url $url The url parameter
+     * @param int $sessionid Session id
+     * @return array The array of options
+     */
     public function build_options($body, $params, $url, $sessionid) {
         global $OUTPUT;
         $class = '';
@@ -717,16 +764,17 @@ class attendance_render extends \table_sql implements dynamic_table {
         }
 
         $view = html_writer::link(new \moodle_url($url, array_merge($params, ['action' => 'view',
-         'sessionid' => $sessionid, 'attid' => $attid, ])), $OUTPUT->pix_icon($icon, get_string($strview),
+          'sessionid' => $sessionid, 'attid' => $attid, ])), $OUTPUT->pix_icon($icon, get_string($strview),
           'moodle', ['class' => 'iconsmall']),
         );
         if ($params['view'] == 'sessionattendance') {
-            if (!$body['attexempt']) {
+            if ($body['visible']) {
                 $visible = html_writer::link(new \moodle_url($url, array_merge($params,
-                    ['action' => 'disable', 'attid' => $attid])),
+                    ['action' => 'disable', 'attid' => $attid, 'sessionid' => $sessionid])),
                     $OUTPUT->pix_icon('i/hide', get_string('disable'), 'moodle', ['class' => 'iconsmall', 'attid' => $attid]));
             } else {
-                $visible = html_writer::link(new \moodle_url($url, array_merge($params, ['action' => 'enable'])),
+                $visible = html_writer::link(new \moodle_url($url, array_merge($params,
+                    ['action' => 'enable', 'sessionid' => $sessionid])),
                     $OUTPUT->pix_icon('i/show', get_string('enable'), 'moodle', ['class' => 'iconsmall']));
                 $class = 'dimmed_text';
                 $view = '';
@@ -761,6 +809,15 @@ class attendance_render extends \table_sql implements dynamic_table {
         return $options;
     }
 
+    /**
+     * Get the attendance row for the given parameters and options.
+     *
+     * @param array $params The parameters for the attendance row
+     * @param array $options The options for the attendance row
+     * @param string $tableview The view of the table
+     * @param mixed|null $sessionid The session id, defaults to null
+     * @return \html_table_row The attendance row
+     */
     public function get_attendance_row($params, $options, $tableview, $sessionid = null) {
         global $OUTPUT;
         $type = $this->hybridteaching->typevc;
@@ -796,16 +853,6 @@ class attendance_render extends \table_sql implements dynamic_table {
                     $params['name'], $params['date'], $params['duration'], $params['type'], $params['attendance'],
                     $params['grade'], $options, ]);
                 break;
-            case 'studentattsessions':
-                if (!$params['group']) {
-                    $row = ([$params['name'], $params['date'], $params['duration'], $params['type'], $params['attendance'],
-                        $params['grade'], $options, ]);
-                    break;
-                }
-                $row = ([$params['group'],
-                    $params['name'], $params['date'], $params['duration'], $params['type'], $params['attendance'],
-                    $params['grade'], $options, ]);
-                break;
             case 'extendedsessionatt':
                 if (isset($sessionid) && $params['chosensession'] == 0 ) {
                     $session = $sessionscontroller->get_session($sessionid);
@@ -836,6 +883,12 @@ class attendance_render extends \table_sql implements dynamic_table {
         return $row;
     }
 
+    /**
+     * Get bulk options select based on the view.
+     *
+     * @param string $view The view of the table
+     * @return string
+     */
     public function get_bulk_options_select($view) {
         $selectactionparams = [
             'id' => 'attendanceid',
@@ -883,18 +936,32 @@ class attendance_render extends \table_sql implements dynamic_table {
         }
     }
 
+    /**
+     * Get the operator for the attendance controller.
+     *
+     * @return string $operator The operator for the attendance controller
+     */
     public function get_operator() {
         $operator = attendance_controller::OPERATOR_GREATER_THAN;
         return $operator;
     }
 
+    /**
+     * Check attendance filters and unset filtering if 'sort' parameter is not set.
+     */
     public function check_attendance_filters() {
         global $SESSION;
-        if (!isset($_GET['sort'])) {
+        $sort = optional_param('sort', '', PARAM_ALPHANUMEXT);
+        if (empty($sort)) {
             unset($SESSION->attendance_filtering);
         }
     }
 
+    /**
+     * Get the group filter for the current user in the context of the given course module.
+     *
+     * @return array An array containing the SQL condition and parameters for filtering by group.
+     */
     public function get_group_filter() {
         global $DB, $USER, $COURSE;
         $groups = groups_get_all_groups($COURSE->id, $USER->id, $this->cm->groupingid);
@@ -907,6 +974,13 @@ class attendance_render extends \table_sql implements dynamic_table {
         return [$extrasql, $params];
     }
 
+    /**
+     * Print the attendance bulk table.
+     *
+     * @param array $attendlist The list of attendance items
+     * @param string $view The view parameter (optional)
+     * @return string
+     */
     public function print_attendance_bulk_table($attendlist, $view = null) {
         global $OUTPUT, $DB, $PAGE;
 
@@ -999,6 +1073,13 @@ class attendance_render extends \table_sql implements dynamic_table {
         return $return;
     }
 
+    /**
+     * Print attendance log table.
+     *
+     * @param array $logparams Params to make the log attendance table
+     * @param string $view The view name
+     * @return string
+     */
     protected function print_attendance_log_table($logparams, $view = 'attendlog') {
         global $OUTPUT, $USER;
 
@@ -1073,6 +1154,13 @@ class attendance_render extends \table_sql implements dynamic_table {
 
     }
 
+    /**
+     * Print attendance extended student table.
+     *
+     * @param array $extendedstudentsparams The parameters for extended students table
+     * @param string $view The view type
+     * @return string
+     */
     protected function print_attendance_extendedstudent_table($extendedstudentsparams, $view = 'extendedstudentatt') {
         global $OUTPUT, $USER, $COURSE, $CFG;
 
@@ -1207,6 +1295,13 @@ class attendance_render extends \table_sql implements dynamic_table {
         return $return;
     }
 
+    /**
+     * Function for printing the attendance sessions table.
+     *
+     * @param array $attsessionsparams The parameters for the attendance sessions table
+     * @param string $view The view of the attendance table
+     * @return string
+     */
     protected function print_attendance_sessions_table($attsessionsparams, $view = 'sessionattendance') {
         global $OUTPUT, $CFG, $USER;
 
@@ -1270,6 +1365,7 @@ class attendance_render extends \table_sql implements dynamic_table {
                 'vc' => isset($attassistance['vc']) ? $attassistance['vc'] : 0,
                 'classroom' => isset($attassistance['classroom']) ? $attassistance['classroom'] : 0,
                 'attexempt' => $session->attexempt,
+                'visible' => $session->visibleatt,
                 'checkbox' => new \core\output\checkbox_toggleall('attendance-table', false, [
                     'id' => 'session-' . $session->id ,
                     'name' => 'session[]',
@@ -1324,7 +1420,14 @@ class attendance_render extends \table_sql implements dynamic_table {
         return $return;
     }
 
-    protected function print_student_sessions_table($studentattsessparams, $view = 'studentattsessions') {
+    /**
+     * Print student sessions table.
+     *
+     * @param array $studentattsessparams The parameters for the student sessions table
+     * @param string $view The view of the student sessions table
+     * @return string
+     */
+    protected function print_student_sessions_table($studentattsessparams, $view = 'studentattendance') {
         global $CFG, $OUTPUT, $USER, $COURSE;
 
         $hybridteachingid = $studentattsessparams['hybridteachingid'];
@@ -1343,15 +1446,15 @@ class attendance_render extends \table_sql implements dynamic_table {
         $table = $studentattsessparams['table'];
         $optionsformparams = $studentattsessparams['optionsformparams'];
         $attresume = $studentattsessparams['attresume'];
+        $selecteduser = $studentattsessparams['selecteduser'];
 
         $attendancecontroller = new attendance_controller($this->hybridteaching);
         $sessionscontroller = new sessions_controller($this->hybridteaching);
         $grades = new grades();
         $sort = optional_param('sort', 'starttime', PARAM_ALPHANUMEXT);
         $dir = optional_param('dir', 'DESC', PARAM_ALPHA);
-        $view = 'studentattsessions';
         $returnurl = new \moodle_url('/mod/hybridteaching/attendance.php?id=' . $this->cm->id . '&view='. $view .
-            '&page=' . $page . '&perpage=' . $perpage . '&sort=' . $sort . '&dir=' . $dir . '');
+            '&page=' . $page . '&perpage=' . $perpage . '&sort=' . $sort . '&dir=' . $dir . '&userid=' . $userid . '');
         $sessionslist = $attendancecontroller->load_attendance($page, $perpage, $params, $extrasql,
             $operator, $sort, $dir, $view, $sessionid);
         $sessionsuser = (object) $USER;
@@ -1366,11 +1469,10 @@ class attendance_render extends \table_sql implements dynamic_table {
                 'name'  => $session['name'],
                 'value' => get_string('active'),
                 'class' => 'attendance-validated', ];
-            $attendance = $attendancecontroller->get_session_attendance($session['id'], $userid);
-
-            $attributes['disabled'] = true;
+            $attendance = $attendancecontroller->get_session_attendance($session['id'], $selecteduser);
+            $params['editing'] ? true : $attributes['disabled'] = true;
             $submitb = html_writer::empty_tag('input', $attributes);
-            $usertotalgrade = grade_get_grades($COURSE->id, 'mod', 'hybridteaching', $this->hybridteaching->id, $userid);
+            $usertotalgrade = grade_get_grades($COURSE->id, 'mod', 'hybridteaching', $this->hybridteaching->id, $selecteduser);
             $attexempt = $session['attexempt'];
             $groupbody = '';
             if ($groupmode) {
@@ -1379,7 +1481,7 @@ class attendance_render extends \table_sql implements dynamic_table {
             }
             if ($attendance) {
                 $attendanceid = $attendance->id;
-                $attendance->status == 1 ? $attributes['checked'] = true : '';
+                $attendance->status == HYBRIDTEACHING_ATTSTATUS_VALID ? $attributes['checked'] = true : '';
                 $connectiontime = helper::get_hours_format($attendance->connectiontime);
                 empty($connectiontime) ? $connectiontime = self::EMPTY : false;
 
@@ -1401,12 +1503,13 @@ class attendance_render extends \table_sql implements dynamic_table {
                     'date' => $date,
                     'duration' => !empty($session['duration']) ? helper::get_hours_format($session['duration']) : self::EMPTY,
                     'firstlastname' => $sessionsuser->lastname . ' / ' . $sessionsuser->firstname,
-                    'attendance' => $attendance->exempt ? '<b>' . get_string('exempt', 'hybridteaching') . '<b>' : $submitb,
+                    'attendance' => $session['attexempt'] ? '<b>' . get_string('exempt', 'hybridteaching') . '<b>' : $submitb,
                     'type' => $atttype,
                     'grade' => round($attendgrade ?? 0, 2) . ' / ' .
                         round($usertotalgrade->items[0]->grades[$attendance->userid]->grade ?? 0, 2) .
                         ' / ' . $this->hybridteaching->grade,
-                    'enabled' => !$attendance->visible || $attexempt ? 0 : 1,
+                    'enabled' => !$attendance->visible || $attexempt ? HYBRIDTEACHING_NOT_EXEMPT : HYBRIDTEACHING_EXEMPT,
+                    'visible' => $session['visible'],
                     'status' => $attendance->status,
                     'checkbox' => new \core\output\checkbox_toggleall('attendance-table', false, [
                         'id' => 'attendance-' . $attendanceid,
@@ -1420,12 +1523,15 @@ class attendance_render extends \table_sql implements dynamic_table {
                     $body['class'] = 'dimmed_text';
                 }
                 $hybridteachingid = empty($hybridteachingid) ? $this->cm->instance : $hybridteachingid;
-                $params = ['h' => $hybridteachingid, 'id' => $id, 'sessionid' => $session['id'],
+                $tableparams = ['h' => $hybridteachingid, 'id' => $id, 'sessionid' => $session['id'],
                     'returnurl' => $returnurl, 'view' => $view, 'userid' => $userid, 'attid' => $attendance->id, ];
-                $options = $this->get_table_options($body, $params, $url, $session['id']);
+                $options = $this->get_table_options($body, $tableparams, $url, $session['id']);
                 $class = $options['class'];
                 if (!$body['enabled']) {
                     $class = 'dimmed_text';
+                }
+                if (!$body['visible']) {
+                    !$params['editing'] ? $class .= ' hidden' : $body['name'] .= ' ' . get_string('hiddenuserattendance', 'hybridteaching');
                 }
                 $options = $options['options'];
                 // Add a row to the table.
@@ -1450,9 +1556,10 @@ class attendance_render extends \table_sql implements dynamic_table {
                     'type' => isset($atttype) ? get_string('eventsessionfinished', 'hybridteaching') :
                         get_string('sessiontobecreated', 'hybridteaching'),
                     'grade' => round($attendgrade ?? 0, 2) . ' / ' .
-                        round($usertotalgrade->items[0]->grades[$userid]->grade ?? 0, 2) .
+                        round($usertotalgrade->items[0]->grades[$selecteduser]->grade ?? 0, 2) .
                         ' / ' . $this->hybridteaching->grade,
-                    'enabled' => $attexempt ? 0 : 1,
+                    'enabled' => !$session['visible'] || $attexempt ? HYBRIDTEACHING_NOT_EXEMPT : HYBRIDTEACHING_EXEMPT,
+                    'visible' => $session['visible'],
                     'checkbox' => new \core\output\checkbox_toggleall('attendance-table', false, [
                         'id' => 'session-' . $sessionid,
                         'name' => 'session[]',
@@ -1465,13 +1572,16 @@ class attendance_render extends \table_sql implements dynamic_table {
                     $body['class'] = 'dimmed_text';
                 }
                 $hybridteachingid = empty($hybridteachingid) ? $this->cm->instance : $hybridteachingid;
-                $params = ['h' => $hybridteachingid, 'id' => $id,
+                $tableparams = ['h' => $hybridteachingid, 'id' => $id,
                  'returnurl' => $returnurl, 'view' => $view, 'userid' => $userid, ];
 
-                $options = $this->get_table_options($body, $params, $url, $sessionid);
+                $options = $this->get_table_options($body, $tableparams, $url, $sessionid);
                 $class = $options['class'];
                 if (!$body['enabled']) {
                     $class = 'dimmed_text';
+                }
+                if (!$body['visible']) {
+                    !$params['editing'] ? $class .= ' hidden' : $body['name'] .= ' ' . get_string('hiddenuserattendance', 'hybridteaching');
                 }
                 $options = null;
                 // Add a row to the table.
@@ -1492,21 +1602,23 @@ class attendance_render extends \table_sql implements dynamic_table {
             $dir . '&groupid=' . $groupmode, $optionsformparams);
         $optionsform->display();
         if (!$groupmode) {
-            unset($table->head[0]);
-            $optionsformparams['groupexception'] = $groupmode;
+            $groupmode = $attendancecontroller->attendances_uses_groups($sessionslist);
+            if (!$groupmode) {
+                unset($table->head[1]);
+                $optionsformparams['groupexception'] = $groupmode;
+            }
         }
+        $params['editing'] ? $countparams = ['hybridteachingid' => $hybridteachingid] :
+            $countparams = ['hybridteachingid' => $hybridteachingid, 'visible' => 1];
+        $countsessions = $sessionscontroller->count_sessions($countparams);
         $attendancetable = html_writer::table($table);
         $attendancetable .= html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'h', 'value' => $hybridteachingid]);
         $attendancetable .= html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'id', 'value' => $id]);
-        $return .= "<a href='attendance.php?id=".$id."&view=studentattendance'  class='btn btn-info mr-3' role='button'>" .
-            get_string('studentsattendance', 'hybridteaching') . "</a>";
-        $return .= $OUTPUT->paging_bar($sessionscontroller->count_sessions(['hybridteachingid' => $hybridteachingid]),
-            $page, $perpage, $returnurl);
+        $return .= $OUTPUT->paging_bar($countsessions, $page, $perpage, $returnurl);
         $return .= html_writer::tag('form', $attendancetable, ['method' => 'post',
         'action' => $CFG->wwwroot . '/mod/hybridteaching/classes/action/attendance_action.php?view=' .
         $view . '&sessionid=' . $sessionid, ]);
-        $return .= $OUTPUT->paging_bar($sessionscontroller->count_sessions(['hybridteachingid' => $hybridteachingid]),
-            $page, $perpage, $returnurl);
+        $return .= $OUTPUT->paging_bar($countsessions,$page, $perpage, $returnurl);
         $return .= $OUTPUT->box_end();
         return $return;
     }

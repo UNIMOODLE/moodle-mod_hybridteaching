@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - https://moodle.org/
+// This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -12,10 +12,22 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
+/**
+ * The sessions form
+ * @package    mod_hybridteaching
+ * @copyright  2023 Proyecto UNIMOODLE
+ * @author     UNIMOODLE Group (Coordinator) <direccion.area.estrategia.digital@uva.es>
+ * @author     ISYC <soporte@isyc.com>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 
 namespace mod_hybridteaching\filters;
 
+/**
+ * Class session_filter_text
+ */
 class session_filter_text extends session_filter_type {
     /** @var string */
     public $_field;
@@ -33,9 +45,14 @@ class session_filter_text extends session_filter_type {
     }
 
     /**
-     * Old syntax of class constructor. Deprecated in PHP7.
+     * Initializes a new instance of the class.
      *
-     * @deprecated since Moodle 3.1
+     * @param string $name The name of the session filter.
+     * @param string $label The label of the session filter.
+     * @param bool $advanced Whether the session filter is advanced.
+     * @param string $field The field of the session filter.
+     * @throws Exception If there is an error initializing the session filter.
+     * @return void
      */
     public function session_filter_text($name, $label, $advanced, $field) {
         debugging('Use of class name as constructor is deprecated', DEBUG_DEVELOPER);

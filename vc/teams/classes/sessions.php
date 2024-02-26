@@ -24,7 +24,7 @@
 
 /**
  * Display information about all the mod_hybridteaching modules in the requested course. *
- * @package    mod_hybridteaching
+ * @package    hybridteachvc_teams
  * @copyright  2023 Proyecto UNIMOODLE
  * @author     UNIMOODLE Group (Coordinator) <direccion.area.estrategia.digital@uva.es>
  * @author     ISYC <soporte@isyc.com>
@@ -39,25 +39,50 @@ global $CFG;
 
 require_once($CFG->dirroot.'/mod/hybridteaching/classes/controller/sessions_controller.php');
 
+/**
+ * Class sessions.
+ */
 class sessions {
+    /** @var object $teamssession The teams session object. */
     protected $teamssession;
 
+    /**
+     * Constructor for the PHP class.
+     *
+     * @param int $htsessionid session ID
+     */
     public function __construct($htsessionid = null) {
         if (!empty($htsessionid)) {
             $this->teamssession = $this->load_session($htsessionid);
         }
     }
 
+    /**
+     * Load a session by session ID.
+     *
+     * @param int $htsessionid session ID
+     * @return object
+     */
     public function load_session($htsessionid) {
         global $DB;
         $this->teamssession = $DB->get_record('hybridteachvc_teams', ['htsession' => $htsessionid]);
         return $this->teamssession;
     }
 
+    /**
+     * Get the session value.
+     *
+     * @return object
+     */
     public function get_session() {
         return $this->teamssession;
     }
 
+    /**
+     * Set the session for the PHP function.
+     *
+     * @param int $htsessionid session ID
+     */
     public function set_session($htsessionid) {
         $this->teamssession = $this->load_session($htsessionid);
     }
@@ -67,14 +92,15 @@ class sessions {
      * and stores the data returned from it in the hybridteachvc_teams table if the response
      * is not false.
      *
-     * @param mixed $session the data to be passed to the create_meeting function
-     * @throws
+     * @param object $session the data to be passed to the create_meeting function
+     * @param object $ht the hybridteaching instance
      * @return mixed the response from the create_meeting function
      */
     public function create_unique_session_extended($session, $ht) {
         global $DB;
 
-        $context = \context_course::instance($ht->course);
+        $cm = get_coursemodule_from_instance('hybridteaching', $ht->id);
+        $context = \context_module::instance($cm->id);
         if (!has_capability('hybridteachvc/teams:use', $context)) {
             return;
         }
@@ -123,6 +149,8 @@ class sessions {
 
             if (!$teams->id = $DB->insert_record('hybridteachvc_teams', $teams)) {
                 return false;
+            } else {
+                $this->teamssession = $teams;
             }
         }
     }
@@ -131,11 +159,12 @@ class sessions {
 
     }
 
+
     /**
-     * Deletes a session and its corresponding meeting via the webservice (if exists).
+     * Deletes session from the database.
      *
-     * @param mixed $id The ID of the session to delete.
-     * @throws Exception
+     * @param object $htsession The session object.
+     * @param int $configid The ID of the config.
      */
     public function delete_session_extended($htsession, $configid) {
         global $DB;
@@ -191,7 +220,13 @@ class sessions {
         return $config;
     }
 
-    public function get_zone_access() {
+    /**
+     * Get zone access.
+     *
+     * @param bool $userismoderator  Whether or not user is moderator.
+     * @return array
+     */
+    public function get_zone_access($userismoderator = true) {
         if ($this->teamssession) {
             $teamsconfig = $this->load_teams_config_from_session();
             if (!$teamsconfig) {
@@ -206,8 +241,7 @@ class sessions {
             // the meeting still exists and is not deleted.
             $array = [
                 'id' => $this->teamssession->id,
-                'ishost' => true,
-                'isaccess' => true,
+                'ishost' => $userismoderator,
                 'url' => base64_encode($this->teamssession->joinurl),
             ];
             return $array;
@@ -219,6 +253,16 @@ class sessions {
         }
     }
 
+    /**
+     * Get the last teams in hybrid for a given session, group, typevc, vcreference, and starttime.
+     *
+     * @param int $htid The hybrid teaching ID
+     * @param int $groupid The group ID
+     * @param string $typevc The type of VC
+     * @param int $vcreference The VC reference
+     * @param string $starttime The start time
+     * @return object The configuration record
+     */
     public function get_last_teams_in_hybrid($htid, $groupid, $typevc, $vcreference, $starttime) {
         global $DB;
 
@@ -236,6 +280,12 @@ class sessions {
         return $config;
     }
 
+    /**
+     * Get the chat URL if the user has the capability, otherwise return an empty string.
+     *
+     * @param object $context The context object.
+     * @return string
+     */
     public function get_chat_url ($context) {
         if (!has_capability('hybridteachvc/teams:view', $context)) {
             return '';

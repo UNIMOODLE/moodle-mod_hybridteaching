@@ -29,7 +29,13 @@ defined('MOODLE_INTERNAL') || die;
 require_once($CFG->libdir.'/formslib.php');
 require_once($CFG->dirroot . '/mod/hybridteaching/classes/controller/attendance_controller.php');
 
+/**
+ * Class attuserfilter_options_form
+ */
 class attuserfilter_options_form extends \moodleform {
+    /**
+     * Create all the form elements
+     */
     public function definition() {
         global $OUTPUT, $CFG;
 

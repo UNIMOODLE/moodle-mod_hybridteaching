@@ -48,6 +48,7 @@ const ELEMENT_SELECTOR = {
     cmgroupmode: () => cmgroupmodeselector,
     pagecontext: () => get_page_context(document.getElementsByTagName('body')[0].getAttribute('class')),
     welcomemsg: () => document.getElementById('id_wellcomemessage'),
+    useqr: () => document.getElementById('id_useqr'),
 };
 var plistold = ELEMENT_SELECTOR.participantList().value;
 var welcomemsgold = ELEMENT_SELECTOR.welcomemsg().value;
@@ -77,8 +78,10 @@ export const init = () => {
     /**
      * Page load actions and events.
      */
+    get_vc_configs(ELEMENT_SELECTOR.useVC()).then();
     useVC();
     useAttendance();
+    useRotateQr(ELEMENT_SELECTOR.useqr());
     useGroupMode(ELEMENT_SELECTOR.sessionscheduling()).then();
     useSessionsScheduling();
     vcInitialStatus(ELEMENT_SELECTOR.typeVC());
@@ -91,6 +94,7 @@ export const init = () => {
     ELEMENT_SELECTOR.typeVC().addEventListener('change', (e) => vcInitialStatus(e.target));
     ELEMENT_SELECTOR.typeVC().addEventListener('change', () => useVCRecord());
     ELEMENT_SELECTOR.sessionscheduling().addEventListener('change', (e) => useGroupMode(e.target));
+    ELEMENT_SELECTOR.useqr().addEventListener('change', (e) => useRotateQr(e));
 };
 
 const useSessionsScheduling = (e = ELEMENT_SELECTOR.sessionscheduling()) => {
@@ -117,13 +121,7 @@ const useAttendance = (e = ELEMENT_SELECTOR.useAttendance()) => {
     let modStandardGrade = ELEMENT_SELECTOR.modStandardGrade();
     let gradeformselect = modStandardGrade.getElementsByTagName('SELECT')[0];
     if (is_checkbox_checked(e) && is_element_displayed(e)) {
-        formi.forEach(input => {
-            if (input.type !== 'hidden' && input.type !== 'text') {
-                input.value = 1;
-            }
-        });
         sectionAttendance.setAttribute('style', 'display:block');
-
         modStandardGrade.setAttribute('style', 'display:block');
     } else {
         formi.forEach(input => {
@@ -417,4 +415,31 @@ const get_vc_type = (vctype) => {
     }
     let regex = /-[A-Za-z]+/i;
     return vctype.match(regex)[0].substring(1);
+};
+
+const get_vc_configs = async(usevc) => {
+    //const noconfig = await getString('vcconfigremoved', 'mod_hybridteaching');
+    if (ELEMENT_SELECTOR.typeVC().options.length === 0) {
+        usevc.setAttribute('disabled', 'true');
+        usevc.checked = false;
+        //usevc.closest('.fitem').append(noconfig);
+    }
+    //console.log(ELEMENT_SELECTOR.typeVC(), ELEMENT_SELECTOR.typeVC().options.length === 0, 1);
+};
+
+const useRotateQr = (e) => {
+    let rotateqr = document.querySelector('#id_rotateqr');
+    // Check if its an event or the elemnt what we need to check.
+    if (e.target !== undefined) {
+        e = e.target;
+    }
+    let qrinuse = e.checked;
+    if (qrinuse) {
+        if (rotateqr.getAttribute('disabled')) {
+            rotateqr.removeAttribute('disabled');
+        }
+    } else {
+        rotateqr.checked = false;
+        rotateqr.setAttribute('disabled', true);
+    }
 };

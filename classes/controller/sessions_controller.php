@@ -39,15 +39,30 @@ use mod_hybridteaching\helper;
 use mod_hybridteaching\helpers\calendar_helpers;
 
 defined('MOODLE_INTERNAL') || die();
-global $CFG;
 
+/**
+ * Class sessions_controller
+ */
 class sessions_controller extends \mod_hybridteaching\controller\common_controller {
+    /** @var int The timetype to use when calculating the duration. Minutes */
     const MINUTE_TIMETYPE = 1;
+
+    /** @var int The timetype to use when calculating the duration. Hours */
     const HOUR_TIMETYPE = 2;
+
+    /** @var int The operation to use when updating the duration. Equal */
     const EQUAL = 1;
+
+    /** @var int The operation to use when updating the duration. Add */
     const ADD = 2;
+
+    /** @var int The operation to use when updating the duration. Reduce */
     const REDUCE = 3;
+
+    /** @var bool Whether the subplugin vc exists. */
     protected $existssubpluginvc = false;
+
+    /** @var bool Whether the subplugin store exists. */
     protected $existssubpluginstore = false;
 
     /**
@@ -154,7 +169,6 @@ class sessions_controller extends \mod_hybridteaching\controller\common_controll
      *
      * @param mixed $session The session data.
      * @param int $countsess The count of sessions.
-     * @throws Some_Exception_Class Description of exception.
      * @return mixed The created session.
      */
     public function create_unique_session($session, $countsess = 0) {
@@ -273,7 +287,7 @@ class sessions_controller extends \mod_hybridteaching\controller\common_controll
             $subpluginsession->update_session_extended($session, $this->hybridobject);
         }
 
-        list($course, $cm) = get_course_and_cm_from_instance($this->hybridobject->id, 'hybridteaching');
+        list($course, $cm) = get_course_and_cm_from_instance($session->hybridteachingid, 'hybridteaching');
         $event = \mod_hybridteaching\event\session_updated::create([
             'objectid' => $this->hybridobject->id,
             'context' => \context_module::instance($cm->id),
@@ -341,6 +355,17 @@ class sessions_controller extends \mod_hybridteaching\controller\common_controll
                 calendar_helpers::hybridteaching_update_calendar_event($session);
             }
 
+            list($course, $cm) = get_course_and_cm_from_instance($this->hybridobject->id, 'hybridteaching');
+            $event = \mod_hybridteaching\event\session_updated::create([
+                'objectid' => $this->hybridobject->id,
+                'context' => \context_module::instance($cm->id),
+                'other' => [
+                    'sessid' => !empty($session) ? $session->id : null,
+                ],
+            ]);
+    
+            $event->trigger();
+
             if (!empty($session->typevc)) {
                 $classname = $this->get_subpluginvc_class($session->typevc);
                 $subpluginsession = new $classname();
@@ -361,6 +386,8 @@ class sessions_controller extends \mod_hybridteaching\controller\common_controll
         global $DB;
         $errormsg = '';
         $sessiondata = $this->get_session($id);
+        list($course, $cm) = get_course_and_cm_from_instance($this->hybridobject->id, 'hybridteaching');
+        $context = \context_module::instance($cm->id);
         if (time() >= $sessiondata->starttime && time() < ($sessiondata->starttime + $sessiondata->duration)) {
             $errormsg = 'errordsinprogress';
         } else {
@@ -375,19 +402,23 @@ class sessions_controller extends \mod_hybridteaching\controller\common_controll
                 $subpluginsession->delete_session_extended($id, $this->hybridobject->config);
             }
 
-        // Check if exists storage subplugin.
-        $this->subpluginstore = helper::subplugin_config_exists($sessiondata->storagereference, 'store');
-        if (!empty($sessiondata->storagereference) && $this->subpluginstore) {
-                $classname = $this->get_subpluginstore_class($this->subpluginstore->type);
+            // Check if exists storage subplugin.
+            $this->existssubpluginstore = helper::subplugin_config_exists($sessiondata->storagereference, 'store');
+            if (!empty($sessiondata->storagereference) && $this->existssubpluginstore) {
+                $pluginstoreconfig = $DB->get_record('hybridteaching_configs', ['id' => $sessiondata->storagereference]);
+                $classname = $this->get_subpluginstore_class($pluginstoreconfig->type);
                 $subpluginsession = new $classname();
-                $subpluginsession->delete_session_extended($id, $this->subpluginstore);
+                $subpluginsession->delete_session_extended($id, $pluginstoreconfig);
             }
+
+            $fs = get_file_storage();
+            $fs->delete_area_files($context->id, 'mod_hybridteaching', 'session', $sessiondata->id);
+            $fs->delete_area_files($context->id, 'mod_hybridteaching', 'chats', $sessiondata->id);
         }
 
-        list($course, $cm) = get_course_and_cm_from_instance($this->hybridobject->id, 'hybridteaching');
         $event = \mod_hybridteaching\event\session_deleted::create([
             'objectid' => $this->hybridobject->id,
-            'context' => \context_module::instance($cm->id),
+            'context' => $context,
             'other' => [
                 'sessid' => $id,
             ],
@@ -402,39 +433,14 @@ class sessions_controller extends \mod_hybridteaching\controller\common_controll
     /**
      * Deletes all sessions associated with the hybrid teaching object.
      *
-     * @throws Some_Exception_Class description of exception
      */
     public function delete_all_sessions() {
         global $DB;
 
         $sessions = $DB->get_records('hybridteaching_session', ['hybridteachingid' => $this->hybridobject->id]);
         foreach ($sessions as $session) {
-            if (!empty($session->typevc)) {
-                $config = helper::subplugin_config_exists($session->vcreference, 'vc');
-                if ($config) {
-                    sessions_controller::require_subplugin_session($session->typevc);
-                    $classname = $this->get_subpluginvc_class($session->typevc);
-                    $subpluginsession = new $classname();
-                    $subpluginsession->delete_session_extended($session->id, $this->hybridobject->config);
-                }
-            }
-
-            if (!empty($session->storagereference)) {
-                $classstorage = sessions_controller::get_subpluginstorage_class($session->storagereference);
-                $config = helper::subplugin_config_exists($session->storagereference, 'store');
-                if ($config && $classstorage) {
-                    sessions_controller::require_subplugin_store($classstorage['type']);
-                    $classname = $classstorage['classname'];
-                    $subpluginsession = new $classname();
-                    $subpluginsession->delete_session_extended($session->id, $this->hybridobject->config);
-                }
-            }
-
-            calendar_helpers::hybridteaching_delete_calendar_events($session->id);
+            $this->delete_session($session->id);
         }
-
-        // Delete sessions.
-        $DB->delete_records('hybridteaching_session', ['hybridteachingid' => $this->hybridobject->id]);
 
         // Delete attendances, logs and session_pwd, if exists.
         $attendances = $DB->get_records('hybridteaching_attendance', ['hybridteachingid' => $this->hybridobject->id], 'id', 'id');
@@ -449,7 +455,6 @@ class sessions_controller extends \mod_hybridteaching\controller\common_controll
      * Retrieve the session data from the database using the given session ID.
      *
      * @param int $sessionid The ID of the session to retrieve.
-     * @throws Some_Exception_Class Description of the exception that can be thrown.
      * @return mixed The session data.
      */
     public function get_session($sessionid) {
@@ -616,10 +621,9 @@ class sessions_controller extends \mod_hybridteaching\controller\common_controll
 
 
     /**
-     * A description of the entire PHP function.
+     * A function that requires a subplugin session.
      *
-     * @param datatype $type description
-     * @throws Some_Exception_Class description of exception
+     * @param string $type The type of subplugin.
      * @return void
      */
     public static function require_subplugin_session($type) {
@@ -666,7 +670,6 @@ class sessions_controller extends \mod_hybridteaching\controller\common_controll
      *
      * @param mixed $session The session parameter.
      * @param mixed $courseid The course ID parameter.
-     * @throws Some_Exception_Class Description of exception.
      * @return void
      */
     public static function savestorage($session, $courseid) {
@@ -826,7 +829,11 @@ class sessions_controller extends \mod_hybridteaching\controller\common_controll
         }
     }
 
-
+    /**
+     * Set the chat visibility for a given session ID.
+     *
+     * @param int $sessid The session ID
+     */
     public static function set_chat_visibility($sessid) {
         global $DB;
 
@@ -928,5 +935,23 @@ class sessions_controller extends \mod_hybridteaching\controller\common_controll
                 $event->trigger();
             }
         }
+    }
+
+    /**
+     * Get the number of sessions performed for a given hybrid teaching ID.
+     *
+     * @param int $id the hybrid teaching ID
+     * @return int the number of sessions performed
+     */
+    public static function get_sessions_performed($id) {
+        global $DB;
+        $sql = "SELECT count(id) 
+                  FROM {hybridteaching_session} 
+                 WHERE hybridteachingid = :htid
+                   AND isfinished = 1 
+                   AND (starttime+duration) < :now";
+
+        $sessionperformed = $DB->count_records_sql($sql, ['htid' => $id, 'now' => time()]);
+        return $sessionperformed;
     }
 }

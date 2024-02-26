@@ -29,7 +29,13 @@ defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->libdir.'/formslib.php');
 
+/**
+ * Class bulk_update_starttime_form
+ */
 class bulk_update_starttime_form extends \moodleform {
+    /**
+     * Create all the form elements
+     */
     public function definition() {
         $mform =& $this->_form;
         $cm = $this->_customdata['cm'];
@@ -39,8 +45,8 @@ class bulk_update_starttime_form extends \moodleform {
 
         $mform->addElement('header', 'general', get_string('updatesesstarttime', 'hybridteaching'));
         $options = [
-            '3' => get_string('advance', 'hybridteaching'),
-            '2' => get_string('delayin', 'hybridteaching'),
+            HYBRIDTEACHING_BULK_ADVANCE_STARTTIME => get_string('advance', 'hybridteaching'),
+            HYBRIDTEACHING_BULK_DELAY_STARTTIME => get_string('delayin', 'hybridteaching'),
         ];
         $mform->addElement('select', 'operation', get_string('updatestarttime', 'hybridteaching'), $options);
         $mform->setType('operation', PARAM_INT);
@@ -48,8 +54,8 @@ class bulk_update_starttime_form extends \moodleform {
         $mform->setType('starttime', PARAM_INT);
 
         $options = [
-            '1' => get_string('minutes'),
-            '2' => get_string('hours'),
+            HYBRIDTEACHING_DURATION_TIMETYPE_MINUTES => get_string('minutes'),
+            HYBRIDTEACHING_DURATION_TIMETYPE_HOURS => get_string('hours'),
         ];
         $starttime[] = &$mform->createElement('select', 'timetype', '', $options);
         $mform->setType('timetype', PARAM_INT);
@@ -66,6 +72,15 @@ class bulk_update_starttime_form extends \moodleform {
     }
 }
 
+/**
+ * Add hidden elements to the form.
+ *
+ * @param object $mform mform object
+ * @param array $ids Array of selected ids
+ * @param object $cm Course Module object
+ * @param object $hybridteaching Hybridteaching object
+ * @param int $slist The selected view
+ */
 function addhiddens($mform, $ids, $cm, $hybridteaching, $slist) {
     $mform->addElement('hidden', 'ids', $ids);
     $mform->setType('ids', PARAM_ALPHANUMEXT);

@@ -24,7 +24,7 @@
 
 /**
  * Display information about all the mod_hybridteaching modules in the requested course. *
- * @package    mod_hybridteaching
+ * @package    hybridteachstore_youtube
  * @copyright  2023 Proyecto UNIMOODLE
  * @author     UNIMOODLE Group (Coordinator) <direccion.area.estrategia.digital@uva.es>
  * @author     ISYC <soporte@isyc.com>
@@ -41,6 +41,9 @@ function xmldb_hybridteachstore_youtube_uninstall() {
     return true;
 }
 
+/**
+ * Deletes YouTube configurations from the database.
+ */
 function delete_youtube_configs() {
     global $DB;
     $DB->delete_records('hybridteaching_configs', ['type' => get_string('youtube', 'hybridteachstore_youtube')]);

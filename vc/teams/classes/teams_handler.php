@@ -24,7 +24,7 @@
 
 /**
  * Display information about all the mod_hybridteaching modules in the requested course. *
- * @package    mod_hybridteaching
+ * @package    hybridteachvc_teams
  * @copyright  2023 Proyecto UNIMOODLE
  * @author     UNIMOODLE Group (Coordinator) <direccion.area.estrategia.digital@uva.es>
  * @author     ISYC <soporte@isyc.com>
@@ -41,8 +41,12 @@ require_once(__DIR__ . '/../vendor/autoload.php');
 use Microsoft\Graph\Graph;
 use Microsoft\Graph\Model;
 use mod_hybridteaching\helpers\roles;
-class teams_handler {
 
+/**
+ * Class teams_handler.
+ */
+class teams_handler {
+    /** @var stdClass $config A config from the teams object. */
     protected $config;
 
     /**
@@ -153,7 +157,8 @@ class teams_handler {
 
         $enabledrecording = get_config('hybridteachvc_teams', 'enabledrecording');
 
-        if ($ht->userecordvc && $ht->initialrecord && has_capability('hybridteachvc/teams:record', $context) && $enabledrecording) {
+        if ($ht->userecordvc && $ht->initialrecord && has_capability('hybridteachvc/teams:record', $context)
+            && has_capability('mod/hybridteaching:record', $context) && $enabledrecording) {
             $recordautomatically = true;
         } else {
             $recordautomatically = false;
@@ -323,7 +328,8 @@ class teams_handler {
         ];
 
         $allowrecording = false;
-        if (has_capability('hybridteachvc/teams:record', $context) && $enabledrecording) {
+        if (has_capability('hybridteachvc/teams:record', $context)
+            && has_capability('mod/hybridteaching:record', $context) && $enabledrecording) {
             $allowrecording = true;
         }
         $data['allowRecording'] = $allowrecording;
@@ -352,8 +358,8 @@ class teams_handler {
     /**
      * Get the first part of url to call api Teams
      *
-     * @param string $organizer.
-     * @return string The first part of url.
+     * @param string $organizer
+     * @return string The first part of url
      */
     public function geturlrequest($organizer) {
         // Accesstoken: app: 0, behalfuser: 1.
@@ -393,10 +399,12 @@ class teams_handler {
     /**
      * Get the meeting recordings.
      *
-     * @param string $folderfile Folder where to download the recording.
-     * @param int $meetingid The meeting id to download the recording.
-     * @param int $organizerid The id  of the organizer to download the recording from.
-     * @return string $recordingid The id of the recording downloaded.
+     * @param string $folderfile Folder where to download the recording
+     * @param int $meetingid The meeting id to download the recording
+     * @param int $organizerid The id  of the organizer to download the recording from
+     * @param int $course The ID of the course
+     * @param string $name The name of the meeting
+     * @return string $recordingid The id of the recording downloaded
      */
     public function get_meeting_recordings ($folderfile, $meetingid, $organizerid, $course, $name) {
         global $DB;
@@ -550,6 +558,15 @@ class teams_handler {
         return $result;
     }
 
+    /**
+     * Get meeting transcripts.
+     *
+     * @param string $folderfile Folder file path
+     * @param int $meetingid Meeting id
+     * @param int $organizerid Organizer id
+     * @throws \Exception
+     * @return mixed
+     */
     public function get_meeting_transcripts ($folderfile, $meetingid, $organizerid) {
         $token = $this->refreshtoken();
         $graph = new Graph();

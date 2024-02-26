@@ -24,7 +24,7 @@
 
 /**
  * Display information about all the mod_hybridteaching modules in the requested course. *
- * @package    mod_hybridteaching
+ * @package    hybridteachvc_teams
  * @copyright  2023 Proyecto UNIMOODLE
  * @author     UNIMOODLE Group (Coordinator) <direccion.area.estrategia.digital@uva.es>
  * @author     ISYC <soporte@isyc.com>
@@ -42,6 +42,9 @@ function xmldb_hybridteachvc_teams_uninstall() {
 }
 
 
+/**
+ * Deletes teams configurations from the database.
+ */
 function delete_teams_configs() {
     global $DB;
     $DB->delete_records('hybridteaching_configs', ['type' => get_string('teams', 'hybridteachvc_teams')]);

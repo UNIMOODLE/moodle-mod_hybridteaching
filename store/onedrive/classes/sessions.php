@@ -24,7 +24,7 @@
 
 /**
  * Display information about all the mod_hybridteaching modules in the requested course. *
- * @package    mod_hybridteaching
+ * @package    hybridteachstore_onedrive
  * @copyright  2023 Proyecto UNIMOODLE
  * @author     UNIMOODLE Group (Coordinator) <direccion.area.estrategia.digital@uva.es>
  * @author     ISYC <soporte@isyc.com>
@@ -37,9 +37,16 @@ defined('MOODLE_INTERNAL') || die();
 
 global $CFG;
 
-
+/**
+ * Class sessions.
+ */
 class sessions {
-
+    /**
+     * Load configuration based on the storage reference.
+     *
+     * @param int $storagereference Storage reference
+     * @return $config
+     */
     public function load_config($storagereference) {
         global $DB;
 
@@ -52,6 +59,15 @@ class sessions {
         return $config;
     }
 
+    /**
+     * Get the recording URL for a processed recording.
+     *
+     * @param int $processedrecording Processed recording check
+     * @param int $storagereference Storage reference
+     * @param int $htid Hybridteaching ID
+     * @param int $sid Session ID
+     * @return string
+     */
     public function get_recording($processedrecording, $storagereference,  $htid, $sid) {
         $config = $this->load_config($storagereference);
         if (!$config) {
@@ -62,6 +78,15 @@ class sessions {
         return $url;
     }
 
+    /**
+     * Download a recording from a storage reference.
+     *
+     * @param int $processedrecording Processed recording check
+     * @param int $storagereference Storage reference
+     * @param int $htid Hybridteaching ID
+     * @param int $sid Session ID
+     * @return string
+     */
     public function download_recording($processedrecording, $storagereference, $htid, $sid) {
         global $DB;
         $config = $this->load_config($storagereference);
@@ -74,9 +99,25 @@ class sessions {
         return $url;
     }
 
-    public function delete_session_extended($htsession, $configid) {
+    /**
+     * Delete a recording from a storage reference.
+     *
+     * @param int $htsession Session ID
+     * @param int $configid Hybridteaching config ID
+     * @return void
+     */
+    public function delete_session_extended($htsession, $config) {
         global $DB;
-        $DB->delete_records('hybridteachstore_onedrive', ['sessionid' => $htsession]);
 
+        // Read the store instance config.
+        $configod = $DB->get_record('hybridteachstore_onedrive_con', ['id' => $config->subpluginconfigid]);
+        $videoweburl = $DB->get_field('hybridteachstore_onedrive', 'weburl', ['sessionid' => $htsession]);
+        if (isset($videoweburl) && isset($configod)){
+            // Delete video in onedrive.
+            $onedriveclient = new onedrive_handler($configod);
+            $onedriveclient->deletefile($videoweburl);
+        }
+
+        $DB->delete_records('hybridteachstore_onedrive', ['sessionid' => $htsession]);
     }
 }

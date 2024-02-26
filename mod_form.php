@@ -115,8 +115,8 @@ class mod_hybridteaching_mod_form extends moodleform_mod {
         $mform->setType('duration', PARAM_INT);
 
         $options = [
-            '1' => get_string('minutes'),
-            '2' => get_string('hours'),
+            HYBRIDTEACHING_DURATION_TIMETYPE_MINUTES => get_string('minutes'),
+            HYBRIDTEACHING_DURATION_TIMETYPE_HOURS => get_string('hours'),
         ];
         $duration[] = &$mform->createElement('select', 'timetype', '', $options);
         $mform->setType('timetype', PARAM_INT);
@@ -143,9 +143,10 @@ class mod_hybridteaching_mod_form extends moodleform_mod {
         $mform->addElement('advcheckbox', 'waitmoderator', '', get_string('waitmoderator', 'hybridteaching'), null, [0, 1]);
         $mform->setDefault('waitmoderator', 0);
 
-        $units = [get_string('hours'),
-                get_string('minutes'),
-                get_string('seconds'),
+        $units = [
+            HYBRIDTEACHING_MODFORM_HOURS => get_string('hours'),
+            HYBRIDTEACHING_MODFORM_MINUTES => get_string('minutes'),
+            HYBRIDTEACHING_MODFORM_SECS => get_string('seconds'),
         ];
         $mform->addGroup([
                 $mform->createElement('text', 'advanceentrycount', '', ['size' => 5]),
@@ -153,7 +154,6 @@ class mod_hybridteaching_mod_form extends moodleform_mod {
                 ], 'advanceentry', get_string('advanceentry', 'hybridteaching'), ' ', false);
         $mform->addHelpButton('advanceentry', 'advanceentry', 'hybridteaching');
         $mform->setType('advanceentrycount', PARAM_INT);
-        $mform->disabledIf('advanceentry', 'sessionscheduling', 'notchecked');
         $mform->addGroup([
                 $mform->createElement('text', 'closedoorscount', '', ['size' => 5]),
                 $mform->createElement('select', 'closedoorsunit', '', $units),
@@ -223,10 +223,11 @@ class mod_hybridteaching_mod_form extends moodleform_mod {
 
         $mform->addElement('header', 'sectionattendance', get_string('sectionattendance', 'hybridteaching'));
 
-        $units = [get_string('hours'),
-            get_string('minutes'),
-            get_string('seconds'),
-            get_string('totalduration', 'hybridteaching'),
+        $units = [
+            HYBRIDTEACHING_MODFORM_HOURS => get_string('hours'),
+            HYBRIDTEACHING_MODFORM_MINUTES => get_string('minutes'),
+            HYBRIDTEACHING_MODFORM_SECS => get_string('seconds'),
+            HYBRIDTEACHING_MODFORM_TOTAL_DURATION =>get_string('totalduration', 'hybridteaching'),
         ];
         $mform->addGroup([
             $mform->createElement('text', 'validateattendance', '', ['size' => 5]),
@@ -237,17 +238,19 @@ class mod_hybridteaching_mod_form extends moodleform_mod {
 
         $mform->addElement('advcheckbox', 'useqr', '', get_string('useqr', 'hybridteaching'), null, [0, 1]);
         $mform->setDefault('useqr', 1);
-        $mform->disabledif('useqr', 'rotateqr', 'checked');
         $mform->addElement('advcheckbox', 'rotateqr', '', get_string('rotateqr', 'hybridteaching'), null, [0, 1]);
         $mform->setDefault('rotateqr', 0);
+        $mform->addHelpButton('rotateqr', 'rotateqr', 'hybridteaching');
         $mform->addElement('hidden', 'rotateqrsecret', '');
         $mform->setDefault('rotateqrsecret', random_string(8));
         $mform->setType('rotateqrsecret', PARAM_TEXT);
         $mform->disabledIf('rotateqrsecret', 'rotateqr', 'unchecked');
-        $mform->addElement('text', 'studentpassword', get_string('studentpassword', 'hybridteaching'));
+        $mform->addElement('passwordunmask', 'studentpassword', get_string('studentpassword', 'hybridteaching'),
+            ['size' => 40, 'class' => 'studentpassword']);
         $mform->setType('studentpassword', PARAM_TEXT);
-        $mform->disabledif('studentpassword', 'rotateqr', 'checked');
         $mform->addHelpButton('studentpassword', 'passwordgrp', 'hybridteaching');
+        $mform->hideIf('studentpassword', 'rotateqr', 'checked');
+        $mform->addRule('studentpassword', null, 'maxlength', 255, 'client');
 
         // Add standard grading elements.
         $this->standard_grading_coursemodule_elements();
@@ -256,17 +259,17 @@ class mod_hybridteaching_mod_form extends moodleform_mod {
         $mform->setType('maxgradeattendance', PARAM_INT);
 
         $options = [
-            '1' => get_string('numsess', 'hybridteaching'),
-            '2' => get_string('percennumatt', 'hybridteaching'),
-            '3' => get_string('percentotaltime', 'hybridteaching'),
+            HYBRIDTEACHING_GRADEMODE_NUMSESS => get_string('numsess', 'hybridteaching'),
+            HYBRIDTEACHING_GRADEMODE_PERCENTSESS => get_string('percennumatt', 'hybridteaching'),
+            HYBRIDTEACHING_GRADEMODE_PERCENTTIME => get_string('percentotaltime', 'hybridteaching'),
         ];
-        $maxgradeattendance[] = &$mform->createElement('select', 'maxgradeattendanceunit', '', $options);
-        $mform->setType('maxgradeattendanceunit', PARAM_INT);
+        $maxgradeattendance[] = &$mform->createElement('select', 'maxgradeattendancemode', '', $options);
+        $mform->setType('maxgradeattendancemode', PARAM_INT);
         $mform->addGroup($maxgradeattendance, 'maxgradeattendancegroup',
             get_string('maxgradeattendance', 'hybridteaching'), [' '], false);
         $mform->addHelpButton('maxgradeattendancegroup', 'maxgradeattendance', 'hybridteaching');
 
-        $mform->disabledIf('maxgradeattendancegroup', 'grade[modgrade_type]', 'eq', 'none');
+        $mform->hideIf('maxgradeattendancegroup', 'grade[modgrade_type]', 'eq', 'none');
         // $mform->setDefault('grade', false);
 
         // Add standard elements.

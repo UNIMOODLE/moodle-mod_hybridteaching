@@ -17,7 +17,6 @@ define([
     const update_view = (sessionid, userid, timer = 0) => {
         hybridteaching_student_view_update(sessionid, userid).done( r => {
             r = JSON.parse(r);
-            var useform = false;
             if (r.buttons === null || r.buttons == false ) {
                 clearInterval(timer);
             } else {
@@ -37,48 +36,6 @@ define([
                     });
                     clearInterval(timer);
                 }
-
-                var forms = (document.getElementsByTagName('form'));
-                forms.forEach(form => {
-                    let formid = (form.getAttribute('id'));
-                    if (formid !== undefined && formid !== null) {
-                        useform = true;
-                    }
-                    if (useform && (display == 'enter' || display == 'exit')) {
-                        switch (formid) {
-                            case 'joinvc':
-                                if (display == 'enter') {
-                                    form.setAttribute('style', 'display: block;');
-                                } else {
-                                    form.setAttribute('style', 'display: none;');
-                                }
-                                break;
-                            case 'showqr':
-                                if (display == 'enter') {
-                                    form.setAttribute('style', 'display: block;');
-                                } else {
-                                    form.setAttribute('style', 'display: none;');
-                                }
-                                break;
-                            case 'registeratt':
-                                if (display == 'enter') {
-                                    form.setAttribute('style', 'display: block;');
-                                } else {
-                                    form.setAttribute('style', 'display: none;');
-                                }
-                                break;
-                            case 'finishatt':
-                                if (display == 'enter') {
-                                    form.setAttribute('style', 'display: none;');
-                                } else {
-                                    form.setAttribute('style', 'display: block;');
-                                }
-                                break;
-                            default:
-                                break;
-                        }
-                    }
-                });
             }
         });
     };

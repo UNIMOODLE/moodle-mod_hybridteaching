@@ -24,7 +24,7 @@
 
 /**
  * Display information about all the mod_hybridteaching modules in the requested course. *
- * @package    mod_hybridteaching
+ * @package    hybridteachstore_onedrive
  * @copyright  2023 Proyecto UNIMOODLE
  * @author     UNIMOODLE Group (Coordinator) <direccion.area.estrategia.digital@uva.es>
  * @author     ISYC <soporte@isyc.com>
@@ -35,6 +35,9 @@
 
  require_once($CFG->libdir.'/formslib.php');
 
+ /**
+  * Class htonedrive_config_edit_form.
+  */
 class htonedrive_config_edit_form extends moodleform {
     /**
      * Called to define this moodle form

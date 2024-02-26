@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/
+// This file is part of Moodle - https://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -12,16 +12,25 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+// along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+
+// Project implemented by the "Recovery, Transformation and Resilience Plan.
+// Funded by the European Union - Next GenerationEU".
+//
+// Produced by the UNIMOODLE University Group: Universities of
+// Valladolid, Complutense de Madrid, UPV/EHU, León, Salamanca,
+// Illes Balears, Valencia, Rey Juan Carlos, La Laguna, Zaragoza, Málaga,
+// Córdoba, Extremadura, Vigo, Las Palmas de Gran Canaria y Burgos.
 
 /**
- * The export helper class
+ * Display information about all the mod_hybridteaching modules in the requested course. *
  * @package    mod_hybridteaching
  * @copyright  2023 Proyecto UNIMOODLE
  * @author     UNIMOODLE Group (Coordinator) <direccion.area.estrategia.digital@uva.es>
  * @author     ISYC <soporte@isyc.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+
 namespace mod_hybridteaching\helpers;
 
 use stdClass;
@@ -30,6 +39,9 @@ defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->dirroot.'/mod/hybridteaching/classes/controller/sessions_controller.php');
 
+/**
+ * Class export.
+ */
 class export {
     /** @var string $error The errors message from reading the xml */
     protected $error = '';
@@ -40,18 +52,22 @@ class export {
     /** @var stdClass|null  $table */
     protected $table = null;
 
+    /** @var object $course The course object */
     protected $course = null;
 
+    /** @var string $group The group name */
     protected $group = null;
 
+    /** @var object $context The context object */
     protected $context = null;
 
+    /** @var object $hybridteaching The hybridteaching object */
     protected $hybridteaching = null;
 
     /**
      * Constructs a new instance of the class.
      *
-     * @param mixed $data The data used to initialize the object.
+     * @param object $data The data used to initialize the object.
      */
     public function __construct($data) {
         global $DB;
@@ -82,8 +98,8 @@ class export {
     public function get_headers($data) {
         $headers = [];
 
-        $headers[] = get_string('lastname');
         $headers[] = get_string('firstname');
+        $headers[] = get_string('lastname');
         $headers[] = get_string('groups');
         $headers[] = get_string('email');
         $headers[] = get_string('takensessions', 'hybridteaching');
@@ -107,7 +123,6 @@ class export {
      * @param mixed $data The data used to retrieve the sessions.
      *                    If the 'includeallsessions' parameter is set, all sessions will be retrieved.
      *                    Otherwise, the sessions will be retrieved based on the start and end dates provided in the $data object.
-     * @throws Some_Exception_Class A description of the exception that may be thrown.
      * @return array An array of sessions containing the headers and dates.
      */
     public function get_headers_dates($data) {
@@ -129,7 +144,6 @@ class export {
      * @param array $params The parameters to filter the session dates.
      *                      - sessionstartdate (string): The start date of the session.
      *                      - sessionenddate (string): The end date of the session.
-     * @throws Some_Exception_Class A description of the exception thrown.
      * @return array The session dates.
      */
     public function get_sessions_dates($params = []) {
@@ -167,8 +181,7 @@ class export {
     /**
      * Retrieves the body of the function based on the provided parameters.
      *
-     * @param array $params The parameters used to filter the body.
-     * @throws Exception If an error occurs during the retrieval process.
+     * @param object $params The parameters used to filter the body.
      * @return array The body of the function.
      */
     public function get_body($params) {
@@ -248,8 +261,6 @@ class export {
      *
      * @param string $filename The name of the file to export to.
      * @param string $format The format of the exported file (text or excel/ods).
-     * @throws Some_Exception_Class If an error occurs during the export process.
-     * @return void
      */
     public function export($filename, $format) {
         if ($format === 'text') {
@@ -263,8 +274,6 @@ class export {
      * Export hybridteaching attendance as a text file.
      *
      * @param string $filename The name of the file to be downloaded.
-     * @throws Some_Exception_Class Description of exception
-     * @return void
      */
     public function export_text($filename) {
         header("Content-Type: application/download\n");
@@ -301,7 +310,7 @@ class export {
 
             $line = implode(";", get_object_vars($row));
             foreach ($this->sessions as $session) {
-                $status = 0;
+                $status = HYBRIDTEACHING_ATTSTATUS_NOTVALID;
                 foreach ($attbysess as $att) {
                     $attparts = explode(",", $att);
                     if ($attparts[0] == $session) {
@@ -322,8 +331,6 @@ class export {
      *
      * @param string $filename The name of the exported file.
      * @param string $format   The format of the exported file ('excel' or 'ods').
-     * @throws Some_Exception_Class Description of exception.
-     * @return void
      */
     public function export_excel_ods($filename, $format) {
         global $CFG;
@@ -385,7 +392,7 @@ class export {
             }
 
             foreach ($this->sessions as $session) {
-                $status = 0;
+                $status = HYBRIDTEACHING_ATTSTATUS_NOTVALID;
                 foreach ($attbysess as $att) {
                     $attparts = explode("-", $att);
                     if ($attparts[0] == $session) {

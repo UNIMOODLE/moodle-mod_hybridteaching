@@ -30,7 +30,13 @@ use mod_hybridteaching\controller\attendance_controller;
 defined('MOODLE_INTERNAL') || die;
 require_once($CFG->libdir.'/formslib.php');
 
+/**
+ * Class attresume_options_form
+ */
 class attresume_options_form extends \moodleform {
+    /**
+     * Create all the form elements
+     */
     public function definition() {
         global $USER;
 

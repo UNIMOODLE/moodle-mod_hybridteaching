@@ -45,20 +45,38 @@ use html_writer;
 
 defined('MOODLE_INTERNAL') || die();
 
-use core_table\dynamic as dynamic_table;
-
 require_once($CFG->libdir . '/tablelib.php');
 require_once($CFG->dirroot . '/user/lib.php');
 
-class sessions_render extends \table_sql implements dynamic_table {
+/**
+ * Class sessions_render.
+ */
+class sessions_render extends \flexible_table {
+    /** @var string Used when there is an empty column */
     const EMPTY = "-";
+
+    /** @var object Hybridteaching object */
     protected $hybridteaching;
+
+    /** @var int List type to display */
     protected $typelist;
+
+    /** @var object Course module */
     protected $cm;
+
+    /** @var object Module context */
     protected $context;
+
+    /** @var object Course context */
     protected $coursecontext;
 
-    public function __construct(stdClass $hybridteaching, int $typelist) {
+    /**
+     * Constructor for the class.
+     *
+     * @param object $hybridteaching Hybridteaching object
+     * @param int $typelist List type to display
+     */
+    public function __construct(object $hybridteaching, int $typelist) {
         $this->hybridteaching = $hybridteaching;
         $this->typelist = $typelist;
         if (!empty($this->hybridteaching)) {
@@ -71,7 +89,6 @@ class sessions_render extends \table_sql implements dynamic_table {
     /**
      * Builds the XHTML to display the control
      *
-     * @param string $query
      * @return string
      */
     public function print_sessions_table() {
@@ -225,6 +242,7 @@ class sessions_render extends \table_sql implements dynamic_table {
                 'enabled' => $session['visible'],
                 'visiblechat' => $session['visiblechat'],
                 'visiblerecord' => $session['visiblerecord'],
+                'visibleatt' => $session['visibleatt'],
                 'checkbox' => new \core\output\checkbox_toggleall('sessions-table', false, [
                     'id' => 'session-' . $sessionid,
                     'name' => 'session[]',
@@ -272,6 +290,12 @@ class sessions_render extends \table_sql implements dynamic_table {
         return $return;
     }
 
+    /**
+     * Get the table header based on the given columns.
+     *
+     * @param array $columns The columns for the table header.
+     * @return array The table header.
+     */
     public function get_table_header($columns) {
         global $OUTPUT;
         $header = [];
@@ -309,6 +333,11 @@ class sessions_render extends \table_sql implements dynamic_table {
         return $header;
     }
 
+    /**
+     * Get the operator based on the typelist.
+     *
+     * @return string
+     */
     public function get_operator() {
         $operator = sessions_controller::OPERATOR_GREATER_THAN;
         if ($this->typelist == SESSION_LIST) {
@@ -318,13 +347,23 @@ class sessions_render extends \table_sql implements dynamic_table {
         return $operator;
     }
 
+    /**
+     * Get the table options based on the provided body, params, url, and urledit.
+     *
+     * @param array $body Array with all the body parameters
+     * @param array $params The params for build the options column
+     * @param \moodle_url $url The url parameter
+     * @param string $urledit The urledit parameter
+     * @return array
+     */
     public function get_table_options($body, $params, $url, $urledit) {
         $options = '';
         $arrayoptions = $this->build_options($body, $params, $url, $urledit);
         if ($this->typelist == SESSION_LIST) {
             if (has_capability('mod/hybridteaching:sessionsactions', $this->context)) {
                 $options .= $arrayoptions['visible'] . $arrayoptions['delete']. $arrayoptions['info'] .
-                    $arrayoptions['record'] . $arrayoptions['chats'] . $arrayoptions['attendance'];
+                    $arrayoptions['record'] . $arrayoptions['chats'] .
+                    $arrayoptions['attcheck'];
             }
         } else if ($this->typelist == PROGRAM_SESSION_LIST) {
             $options .= $arrayoptions['edit'] . $arrayoptions['info']. $arrayoptions['delete'];
@@ -332,6 +371,15 @@ class sessions_render extends \table_sql implements dynamic_table {
         return ['options' => $options, 'class' => $arrayoptions['class']];
     }
 
+    /**
+     * Builds options for the given body, params, url, and urledit.
+     *
+     * @param array $body Array with all the body parameters
+     * @param array $params The params for build the options column
+     * @param \moodle_url $url The url parameter
+     * @param string $urledit The urledit parameter
+     * @return array
+     */
     public function build_options($body, $params, $url, $urledit) {
         global $OUTPUT;
 
@@ -382,8 +430,15 @@ class sessions_render extends \table_sql implements dynamic_table {
                     'moodle', ['class' => 'iconsmall fa-comment-slash']));
         }
 
-        $attendance = html_writer::link(new \moodle_url(''),
-            $OUTPUT->pix_icon('i/unchecked', get_string('actions', 'hybridteaching'), 'moodle', ['class' => 'iconsmall']));
+        if ($body['visibleatt']) {
+            $attcheck = html_writer::link(new \moodle_url($url, array_merge($params, ['action' => 'hideatt'])),
+                $OUTPUT->pix_icon('i/unchecked', get_string('hideatt', 'hybridteaching'),
+                    'moodle', ['class' => 'iconsmall']));
+        } else {
+            $attcheck = html_writer::link(new \moodle_url($url, array_merge($params, ['action' => 'showatt'])),
+                $OUTPUT->pix_icon('i/unchecked', get_string('visibleatt', 'hybridteaching'),
+                    'moodle', ['class' => 'iconsmall fa-comment-slash']));
+        }
 
         $options = [
             'visible' => $visible,
@@ -393,12 +448,19 @@ class sessions_render extends \table_sql implements dynamic_table {
             'info' => $info,
             'record' => $record,
             'chats' => $chats,
-            'attendance' => $attendance,
+            'attcheck' => $attcheck
         ];
 
         return $options;
     }
 
+    /**
+     * Get the session row based on the given parameters and options.
+     *
+     * @param array $params The data for the session row.
+     * @param array $options The options for the session row.
+     * @return object The session row HTML.
+     */
     public function get_session_row($params, $options) {
         global $OUTPUT;
         $type = $params['typevc'];
@@ -439,6 +501,12 @@ class sessions_render extends \table_sql implements dynamic_table {
         return $row;
     }
 
+    /**
+     * Get the corresponding column name for a given column label.
+     *
+     * @param string $column The column label to be converted
+     * @return string The corresponding column name
+     */
     public function get_column_name($column) {
         switch ($column) {
             case 'strgroup':
@@ -462,13 +530,23 @@ class sessions_render extends \table_sql implements dynamic_table {
         }
     }
 
+    /**
+     * Check session filters and unset session filtering if certain conditions are met.
+     */
     public function check_session_filters() {
         global $SESSION;
-        if (isset($_GET['l']) && !isset($_GET['sort'])) {
+        $sort = optional_param('sort', '', PARAM_ALPHANUMEXT);
+        $slist = optional_param('l', 1, PARAM_INT);
+        if (isset($slist) && empty($sort)) {
             unset($SESSION->session_filtering);
         }
     }
 
+    /**
+     * Get bulk options select.
+     *
+     * @return string HTML select with bulk options
+     */
     public function get_bulk_options_select() {
         $selectactionparams = [
             'id' => 'sessionid',
@@ -482,6 +560,9 @@ class sessions_render extends \table_sql implements dynamic_table {
         if ($this->typelist == SESSION_LIST) {
             $options = [
                 'bulkdelete' => get_string('deletesessions', 'hybridteaching'),
+                'bulkhide' => get_string('bulkhide', 'hybridteaching'),
+                'bulkhidechats' => get_string('bulkhidechats', 'hybridteaching'),
+                'bulkhiderecordings' => get_string('bulkhiderecordings', 'hybridteaching'),
             ];
         } else if ($this->typelist == PROGRAM_SESSION_LIST) {
             $options = [
@@ -505,6 +586,12 @@ class sessions_render extends \table_sql implements dynamic_table {
         return html_writer::tag('div', $label . $select . $submitb);
     }
 
+    /**
+     * Print a bulk table of sessions.
+     *
+     * @param array $slist list of session IDs
+     * @return string HTML output of the bulk table of sessions
+     */
     public function print_sessions_bulk_table($slist) {
         global $OUTPUT, $DB, $PAGE;
 
@@ -558,6 +645,11 @@ class sessions_render extends \table_sql implements dynamic_table {
         return $return;
     }
 
+    /**
+     * Retrieves the group filter for the current user and course.
+     *
+     * @return array The SQL fragment and parameters for filtering by group.
+     */
     public function get_group_filter() {
         global $DB, $USER, $COURSE;
         $groups = groups_get_all_groups($COURSE->id, $USER->id, $this->cm->groupingid);
@@ -571,6 +663,12 @@ class sessions_render extends \table_sql implements dynamic_table {
         return [$extrasql, $params];
     }
 
+    /**
+     * Get the URLs for session files and recordings.
+     *
+     * @param object $session Session object
+     * @return array
+     */
     public function get_files_url($session) {
         global $CFG, $OUTPUT;
 
@@ -672,6 +770,12 @@ class sessions_render extends \table_sql implements dynamic_table {
         return ['recordingbutton' => $recordingbutton, 'fileurls' => $fileurls];
     }
 
+    /**
+     * Get the chat URLs for the given session.
+     *
+     * @param object $session Session object
+     * @return string
+     */
     public function get_chats_url($session) {
         $fileurls = '';
         $fileurl = '';
@@ -703,10 +807,10 @@ class sessions_render extends \table_sql implements dynamic_table {
         }
 
         $config = helper::subplugin_config_exists($session['vcreference'], 'vc');
-        if (is_object($config) || ($config != 0 && $config != -1)) {
+        if ($config) {
             // Check if exists urlchat meeting to get the url.
-            sessions_controller::require_subplugin_session($session['typevc']);
-            $classname = sessions_controller::get_subpluginvc_class($session['typevc']);
+            sessions_controller::require_subplugin_session($config->type);
+            $classname = sessions_controller::get_subpluginvc_class($config->type);
             $sessionrecording = new $classname($session['id']);
             $urlchatmeeting = $sessionrecording->get_chat_url($this->context);
             if ($urlchatmeeting != '') {

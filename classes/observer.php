@@ -35,17 +35,39 @@ use mod_hybridteaching\controller\sessions_controller;
 use mod_hybridteaching\controller\attendance_controller;
 use mod_hybridteaching\helpers\grades;
 
+/**
+ * Class mod_hybridteaching_observer.
+ */
 class mod_hybridteaching_observer {
+    /**
+     * Observer for session_finished event
+     * Updates the users grade and sets the session state
+     *
+     * @param \mod_hybridteaching\event\session_finished $event The event to be processed
+     */
     public static function session_finished(\mod_hybridteaching\event\session_finished $event) {
         global $DB;
-        $userid = $DB->get_records('hybridteaching_attendance', ['sessionid' => $event->other['sessid']], '', 'userid');
-        self::update_users_grade($event->objectid, $event->other['sessid'], $userid);
+        $userids = $DB->get_records('hybridteaching_attendance', ['sessionid' => $event->other['sessid']], '', 'userid');
+        self::update_users_grade($event->objectid, $userids);
+        self::update_session_users_grade($event->objectid, $event->other['sessid'], $userids);
         self::set_session_state($event->other['sessid']);
+        grades::finish_connectime_logs($event->objectid, $event->other['sessid'], $userids);
     }
 
+    /**
+     * Observer for session_joined event.
+     *
+     * @param \mod_hybridteaching\event\session_joined $event The event to be processed.
+     */
     public static function session_joined(\mod_hybridteaching\event\session_joined $event) {
     }
 
+    /**
+     * Observer for session_added event
+     * Updates the users grade and create empty attendance
+     *
+     * @param \mod_hybridteaching\event\session_added $event The event to be processed
+     */
     public static function session_added(\mod_hybridteaching\event\session_added $event) {
         if (isset($event->other['multiplesess']) && empty($event->other['multiplesess'])) {
             self::create_empty_attendance($event->objectid, $event->other['sessid']);
@@ -53,35 +75,80 @@ class mod_hybridteaching_observer {
         self::update_users_grade($event->objectid);
     }
 
+    /**
+     * Observer for session_updated event
+     * Updates the users grade
+     *
+     * @param \mod_hybridteaching\event\session_updated $event The event to be processed
+     */
     public static function session_updated(\mod_hybridteaching\event\session_updated $event) {
-        isset($event->other['userid']) ? $userid  = $event->other['userid'] : $userid = null;
-        self::update_users_grade($event->objectid, $event->other['sessid'], $userid);
+        isset($event->other['userid']) ? $userids  = $event->other['userid'] : $userids = null;
+        self::update_users_grade($event->objectid, $userids);
+        self::update_session_users_grade($event->objectid, $event->other['sessid'], $userids);
     }
 
+    /**
+     * Observer for session_deleted event
+     * Updates the users grade
+     *
+     * @param \mod_hybridteaching\event\session_deleted $event The event to be processed
+     */
     public static function session_deleted(\mod_hybridteaching\event\session_deleted $event) {
         global $DB;
         $DB->delete_records('hybridteaching_attendance', ['sessionid' => $event->other['sessid']]);
         self::update_users_grade($event->objectid);
     }
 
+    /**
+     * Observer for attendance_updated event
+     * Updates the users grade
+     *
+     * @param \mod_hybridteaching\event\attendance_updated $event The event to be processed
+     */
     public static function attendance_updated(\mod_hybridteaching\event\attendance_updated $event) {
-        self::update_users_grade($event->objectid, null, [$event->other['userid']]);
+        self::update_users_grade($event->objectid, [$event->relateduserid]);
+        self::update_session_users_grade($event->objectid, $event->other['sessid'], [$event->relateduserid]);
     }
 
+    /**
+     * Observer for course_module_updated event
+     * Updates the users grade
+     *
+     * @param \core\event\course_module_updated $event The event to be processed
+     */
     public static function course_module_updated(\core\event\course_module_updated $event) {
         global $DB;
         $htid = $DB->get_field('course_modules', 'instance', ['id' => $event->contextinstanceid]);
         self::update_users_grade($htid);
     }
 
-    private static function update_users_grade($objectid, $sessid = null, $userid = null) {
-        $grades = new grades();
-        $grades->hybridteaching_update_users_grade($objectid, $userid);
-        if (!empty($sessid)) {
-            $grades->ht_update_users_att_grade($objectid, $sessid, $userid);
-        }
+    /**
+     * Update the grade of specified user(s) for a given object.
+     *
+     * @param int $objectid The hybridteaching ID for which the grade is being updated
+     * @param array|null $userids (Optional) The ID(s) of the user(s) for whom the grade is being updated
+     */
+    private static function update_users_grade($objectid, $userids = null) {
+        grades::hybridteaching_update_users_grade($objectid, $userids);
     }
 
+    /**
+     * Update the session grade of specified user(s) for a given object.
+     *
+     * @param int $objectid The hybridteaching ID for which the grade is being updated
+     * @param int $sessid The session ID
+     * @param array|null $userids (Optional) The ID(s) of the user(s) for whom the grade is being updated
+     */
+    private static function update_session_users_grade($objectid, $sessid, $userids = null) {
+        grades::ht_update_users_att_grade($objectid, $sessid, $userids);
+    }
+
+    /**
+     * Create empty attendance for a given object and session.
+     *
+     * @param int $objectid HybridTeaching ID
+     * @param int $sessid Session ID
+     */
     private static function create_empty_attendance($objectid, $sessid) {
         global $DB;
         $session = $DB->get_record('hybridteaching_session', ['id' => $sessid]);
@@ -93,6 +160,11 @@ class mod_hybridteaching_observer {
         }
     }
 
+    /**
+     * Set the session state for the given session ID.
+     *
+     * @param int $sessid Session ID
+     */
     private static function set_session_state($sessid) {
         sessions_controller::set_session_finished($sessid);
     }

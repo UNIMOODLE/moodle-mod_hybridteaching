@@ -24,7 +24,7 @@
 
 /**
  * Display information about all the mod_hybridteaching modules in the requested course. *
- * @package    mod_hybridteaching
+ * @package    hybridteachstore_youtube
  * @copyright  2023 Proyecto UNIMOODLE
  * @author     UNIMOODLE Group (Coordinator) <direccion.area.estrategia.digital@uva.es>
  * @author     ISYC <soporte@isyc.com>
@@ -33,10 +33,20 @@
 
 namespace hybridteachstore_youtube;
 
+/**
+ * Class youtube_handler.
+ */
 class youtube_handler {
-
+    /** @var \Google_Client Client. */
     protected $client;
 
+    /**
+     * Constructor for the class.
+     *
+     * @param object $configyt Youtube configuration.
+     * @throws \Google_Service_Exception
+     * @throws \Exception
+     */
     public function __construct($configyt) {
         global $CFG;
         require_once(__DIR__.'../../vendor/autoload.php');
@@ -68,12 +78,24 @@ class youtube_handler {
         }
     }
 
+    /**
+     * Set the redirect URI for the YouTube API configuration in the Google Cloud console.
+     *
+     * @param string $url The URI to be set for redirection
+     * @return $this->client The updated client object
+     */
     public function setredirecturi($url) {
         // This uri must be in youtube config api: console.cloud.google.com.
         $this->client->setRedirectUri($url);
         return $this->client;
     }
 
+    /**
+     * Create a new Google_Client for YouTube API with the given configuration.
+     *
+     * @param object $configyt description of the configuration parameter
+     * @return $this->client description of the returned value
+     */
     public function createclient($configyt) {
         global $CFG;
         require_once(__DIR__.'../../vendor/autoload.php');
@@ -89,6 +111,14 @@ class youtube_handler {
         return $this->client;
     }
 
+    /**
+     * Uploads a file to YouTube using the Google API.
+     *
+     * @param object $store Store object
+     * @param string $videopath Video path
+     * @throws \Google_Service_Exception
+     * @return mixed
+     */
     public function uploadfile($store, $videopath) {
         require_once(__DIR__.'../../vendor/autoload.php');
         try {
@@ -159,6 +189,11 @@ class youtube_handler {
         }
     }
 
+    /**
+     * Save token function.
+     *
+     * @param object $configyt Config object
+     */
     public function savetoken ($configyt) {
         global $DB;
 
@@ -166,6 +201,12 @@ class youtube_handler {
         $DB->update_record('hybridteachstore_youtube_con', $configyt);
     }
 
+    /**
+     * deletefile function deletes a video from YouTube using the provided video code.
+     *
+     * @param string $code The video code to be deleted
+     * @throws \Exception
+     */
     public function deletefile($code) {
         try {
             $youtube = new \Google_Service_YouTube($this->client);

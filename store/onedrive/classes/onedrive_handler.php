@@ -14,30 +14,54 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
+// Project implemented by the "Recovery, Transformation and Resilience Plan.
+// Funded by the European Union - Next GenerationEU".
+//
+// Produced by the UNIMOODLE University Group: Universities of
+// Valladolid, Complutense de Madrid, UPV/EHU, León, Salamanca,
+// Illes Balears, Valencia, Rey Juan Carlos, La Laguna, Zaragoza, Málaga,
+// Córdoba, Extremadura, Vigo, Las Palmas de Gran Canaria y Burgos.
+
+/**
+ * Display information about all the mod_hybridteaching modules in the requested course. *
+ * @package    hybridteachstore_onedrive
+ * @copyright  2023 Proyecto UNIMOODLE
+ * @author     UNIMOODLE Group (Coordinator) <direccion.area.estrategia.digital@uva.es>
+ * @author     ISYC <soporte@isyc.com>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
 namespace hybridteachstore_onedrive;
 
 // Include the Microsoft Graph classes.
 use Microsoft\Graph\Graph;
 use Microsoft\Graph\Model;
-class onedrive_handler {
 
+/**
+ * Class onedrive_handler.
+ */
+class onedrive_handler {
+    /** @var stdClass $config A config from the teams object. */
     protected $config;
 
+
     /**
-     * Constructor.
+     * Constructor for initializing the class with the provided configuration.
      *
-     * @return void
+     * @param object $config The configuration for the class
      */
     public function __construct($config) {
         $this->config = $config;  // Api with credentials, url...
     }
 
+    /**
+     * Checks the token to connect to Onedrive.
+     */
     public function refreshtoken() {
         require_once(__DIR__ . '/../vendor/autoload.php');
         global $DB;
 
         // Refresh authorization token.
-
         $guzzle = new \GuzzleHttp\Client();
 
         $url = 'https://login.microsoftonline.com/' . $this->config->tenantid . '/oauth2/v2.0/token';
@@ -57,6 +81,13 @@ class onedrive_handler {
         $DB->update_record('hybridteachstore_onedrive_co', $this->config);
     }
 
+    /**
+     * Uploads a file to Onedrive using the Graph API.
+     *
+     * @param object $store Store object
+     * @param string $videopath Video path
+     * @return mixed
+     */
     public function uploadfile($store, $videopath) {
         require_once(__DIR__ . '/../vendor/autoload.php');
         $this->refreshtoken();
@@ -198,10 +229,16 @@ class onedrive_handler {
         }
 
         return $response;
-
     }
 
 
+    /**
+     * A function to get the URL recording.
+     *
+     * @param int $processedrecording OneDrive instance
+     * @throws \Throwable
+     * @return string
+     */
     public function get_urlrecording($processedrecording) {
         global $DB;
         require_once(__DIR__ . '/../vendor/autoload.php');
@@ -247,6 +284,13 @@ class onedrive_handler {
         return $url;
     }
 
+    /**
+     * Download a recording from the OneDrive using the Microsoft Graph API.
+     *
+     * @param int $processedrecording The ID of the processed recording.
+     * @throws \Throwable
+     * @return array|string The download URL of the recording.
+     */
     public function downloadrecording($processedrecording) {
         global $DB;
         require_once(__DIR__ . '/../vendor/autoload.php');
@@ -276,6 +320,35 @@ class onedrive_handler {
             return '';
         }
         return '';
+    }
+
+    public function deletefile($processedrecording) {
+        global $DB;
+        require_once(__DIR__ . '/../vendor/autoload.php');
+        $this->refreshtoken();
+
+        $graph = new Graph();
+        $graph->setAccessToken($this->config->accesstoken);
+
+        $recording = $DB->get_record('hybridteachstore_onedrive', ['id' => $processedrecording]);
+        if (!isset($recording->weburl) || $recording->weburl == '') {
+            return;
+        }
+
+        try {
+            $path = "/me/drive/root:/".get_string('hybridteaching', 'hybridteachstore_onedrive')."/".$recording->weburl;
+            $graphresponse = $graph->createRequest("GET", $path)
+                ->setReturnType(Model\DriveItem::class)
+                ->execute();
+
+            $response = json_decode(json_encode($graphresponse), true);
+            if (isset($response['@microsoft.graph.downloadUrl'])) {
+                return $response['@microsoft.graph.downloadUrl'];
+            }
+
+        } catch (\Throwable $e) {
+            return '';
+        }
     }
 
 }

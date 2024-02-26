@@ -24,17 +24,20 @@
 
 /**
  * Display information about all the mod_hybridteaching modules in the requested course. *
- * @package    mod_hybridteaching
+ * @package    hybridteachstore_youtube
  * @copyright  2023 Proyecto UNIMOODLE
  * @author     UNIMOODLE Group (Coordinator) <direccion.area.estrategia.digital@uva.es>
  * @author     ISYC <soporte@isyc.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
- defined('MOODLE_INTERNAL') || die();
+defined('MOODLE_INTERNAL') || die();
 
- require_once($CFG->libdir.'/formslib.php');
+require_once($CFG->libdir.'/formslib.php');
 
+/**
+ * Class htyoutube_config_edit_form.
+ */
 class htyoutube_config_edit_form extends moodleform {
     /**
      * Called to define this moodle form

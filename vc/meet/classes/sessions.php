@@ -98,7 +98,8 @@ class sessions {
     public function create_unique_session_extended($session, $ht) {
         global $DB;
 
-        $context = \context_course::instance($ht->course);
+        $cm = get_coursemodule_from_instance('hybridteaching', $ht->id);
+        $context = \context_module::instance($cm->id);
         if (!has_capability('hybridteachvc/meet:use', $context)) {
             return;
         }
@@ -136,6 +137,7 @@ class sessions {
                 $meetsession->eventid = $event->id;
 
                 if (!$meetsession->id = $DB->insert_record('hybridteachvc_meet', $meetsession)) {
+                    $this->meetsession = $meetsession;
                     return false;
                 }
             }
@@ -161,11 +163,12 @@ class sessions {
         if (!empty($meetconfig)) {
             $meet = $DB->get_record('hybridteachvc_meet', ['htsession' => $htsession]);
             if (isset($meet->eventid)) {
+                // If exists meeting, delete it.
                 try {
                     $meethandler = new meet_handler($meetconfig);
                     $meethandler->deletemeeting($meet->eventid);
                 } catch (\Exception $e) {
-                    throw new \Exception($e->getMessage());
+                    // No action for delete.
                 }
             }
         }
@@ -211,9 +214,10 @@ class sessions {
     /**
      * Retrieves the zone access information.
      *
+     * @param bool $userismoderator  Whether or not user is moderator.
      * @return array The zone access information.
      */
-    public function get_zone_access() {
+    public function get_zone_access($userismoderator = false) {
         if ($this->meetsession) {
             $meetconfig = $this->load_meet_config_from_session();
             if (!$meetconfig) {
@@ -225,8 +229,7 @@ class sessions {
 
             $array = [
                 'id' => $this->meetsession->id,
-                'ishost' => true,
-                'isaccess' => true,
+                'ishost' => $userismoderator,
                 'url' => base64_encode($this->meetsession->joinurl),
             ];
             return $array;

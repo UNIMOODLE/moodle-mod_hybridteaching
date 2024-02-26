@@ -24,7 +24,7 @@
 
 /**
  * Display information about all the mod_hybridteaching modules in the requested course. *
- * @package    mod_hybridteaching
+ * @package    hybridteachstore_pumukit
  * @copyright  2023 Proyecto UNIMOODLE
  * @author     UNIMOODLE Group (Coordinator) <direccion.area.estrategia.digital@uva.es>
  * @author     ISYC <soporte@isyc.com>
@@ -41,6 +41,9 @@ function xmldb_hybridteachstore_pumukit_uninstall() {
     return true;
 }
 
+/**
+ * Deletes Pumukit configurations from the database.
+ */
 function delete_pumukit_configs() {
     global $DB;
     $DB->delete_records('hybridteaching_configs', ['type' => get_string('pumukit', 'hybridteachstore_pumukit')]);

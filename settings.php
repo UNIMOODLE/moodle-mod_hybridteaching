@@ -201,6 +201,12 @@ if ($hassiteconfig) {
         $studentpassword->set_locked_flag_options(admin_setting_flag::ENABLED, false);
         $generalsettings->add($studentpassword);
 
+        $qrupdatetime = (new admin_setting_configtext('hybridteaching/qrupdatetime',
+        new lang_string('qrupdatetime', 'hybridteaching'),
+        new lang_string('qrupdatetime_help', 'hybridteaching'), 15, PARAM_INT));
+        $qrupdatetime->set_locked_flag_options(admin_setting_flag::ENABLED, false);
+        $generalsettings->add($qrupdatetime);
+
         $vcsettings->add(new hybridteaching_admin_plugins_configs(
             'managevideoconferenceplugins',
             get_string('videoconferenceplugins', 'hybridteaching'),

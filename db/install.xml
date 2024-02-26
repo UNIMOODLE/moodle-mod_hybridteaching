@@ -22,8 +22,8 @@
         <FIELD NAME="duration" TYPE="int" LENGTH="6" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Duración."/>
         <FIELD NAME="timezone" TYPE="char" LENGTH="50" NOTNULL="false" SEQUENCE="false" COMMENT="Timezone to format start_time, like &quot;America/Los_Angeles&quot;. For scheduled meeting only."/>
         <FIELD NAME="grade" TYPE="int" LENGTH="11" NOTNULL="false" DEFAULT="0" SEQUENCE="false" COMMENT="Activity grade"/>
-        <FIELD NAME="maxgradeattendance" TYPE="float" LENGTH="11" NOTNULL="false" DEFAULT="0" SEQUENCE="false" COMMENT="Attendance to get max grade"/>
-        <FIELD NAME="maxgradeattendanceunit" TYPE="int" LENGTH="1" NOTNULL="false" DEFAULT="0" SEQUENCE="false" COMMENT="Unit to measure max attendance"/>
+        <FIELD NAME="maxgradeattendance" TYPE="number" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" DECIMALS="5" COMMENT="Attendance to get max grade"/>
+        <FIELD NAME="maxgradeattendancemode" TYPE="int" LENGTH="1" NOTNULL="false" DEFAULT="0" SEQUENCE="false" COMMENT="Mode to measure max attendance"/>
         <FIELD NAME="participants" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="json string of roles and users that can access, with their permissions"/>
         <FIELD NAME="waitmoderator" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Esperar al moderador."/>
         <FIELD NAME="advanceentrycount" TYPE="int" LENGTH="6" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Antelación de la entrada."/>
@@ -100,6 +100,7 @@
         <FIELD NAME="storagereference" TYPE="int" LENGTH="11" NOTNULL="false" SEQUENCE="false" COMMENT="Recording reference"/>
         <FIELD NAME="visiblerecord" TYPE="int" LENGTH="1" NOTNULL="false" DEFAULT="1" SEQUENCE="false"/>
         <FIELD NAME="visiblechat" TYPE="int" LENGTH="1" NOTNULL="false" DEFAULT="1" SEQUENCE="false"/>
+        <FIELD NAME="visibleatt" TYPE="int" LENGTH="1" NOTNULL="false" DEFAULT="1" SEQUENCE="false"/>
         <FIELD NAME="isfinished" TYPE="int" LENGTH="1" NOTNULL="false" DEFAULT="0" SEQUENCE="false" COMMENT="Session finished flag"/>
         <FIELD NAME="attexempt" TYPE="int" LENGTH="1" NOTNULL="false" DEFAULT="0" SEQUENCE="false" COMMENT="Is attendance exempt for this session"/>
         <FIELD NAME="caleventid" TYPE="int" LENGTH="11" NOTNULL="false" SEQUENCE="false" COMMENT="Calendar event id"/>

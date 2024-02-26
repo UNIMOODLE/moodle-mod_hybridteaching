@@ -31,7 +31,13 @@ use mod_hybridteaching\controller\sessions_controller;
 defined('MOODLE_INTERNAL') || die;
 require_once($CFG->libdir.'/formslib.php');
 
+/**
+ * Class attsessions_options_form
+ */
 class attsessions_options_form extends \moodleform {
+    /**
+     * Create all the form elements
+     */
     public function definition() {
         global $CFG, $USER, $DB;
         $mform = &$this->_form;

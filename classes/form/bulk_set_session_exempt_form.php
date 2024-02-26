@@ -29,7 +29,13 @@ defined('MOODLE_INTERNAL') || die;
 
 require_once($CFG->libdir.'/formslib.php');
 
+/**
+ * Class bulk_set_session_exempt_form
+ */
 class bulk_set_session_exempt_form extends \moodleform {
+    /**
+     * Create all the form elements
+     */
     public function definition() {
         $mform =& $this->_form;
         $cm = $this->_customdata['cm'];
@@ -40,10 +46,12 @@ class bulk_set_session_exempt_form extends \moodleform {
 
         $mform->addElement('header', 'general', get_string('setattendance', 'hybridteaching'));
         $options = [
-            '5' => get_string('exemptsessionattendance', 'hybridteaching'),
-            '6' => get_string('notexemptsessionattendance', 'hybridteaching'),
+            HYBRIDTEACHING_BULK_EXEMPT_SESSION_ATTENDANCE =>
+                get_string('exemptsessionattendance', 'hybridteaching'),
+            HYBRIDTEACHING_BULK_NOT_EXEMPT_SESSION_ATTENDANCE =>
+                get_string('notexemptsessionattendance', 'hybridteaching'),
         ];
-        $mform->addElement('select', 'operation', get_string('updateduration', 'hybridteaching'), $options);
+        $mform->addElement('select', 'operation', get_string('setexempt', 'hybridteaching'), $options);
         $mform->setType('operation', PARAM_INT);
 
         $mform->addElement('hidden', 'action', 'bulksetsessionexempt');
@@ -55,6 +63,16 @@ class bulk_set_session_exempt_form extends \moodleform {
     }
 }
 
+/**
+ * Add hidden elements to the form.
+ *
+ * @param object $mform mform object
+ * @param array $ids Array of selected ids
+ * @param object $cm Course Module object
+ * @param object $hybridteaching Hybridteaching object
+ * @param int $sessionid Session id
+ * @param string $view The selected view
+ */
 function addhiddens($mform, $ids, $cm, $hybridteaching, $sessionid, $view) {
     $mform->addElement('hidden', 'ids', $ids);
     $mform->setType('ids', PARAM_ALPHANUMEXT);

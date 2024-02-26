@@ -48,6 +48,13 @@ if (optional_param('returnpasswords', 0, PARAM_INT) == 1) {
     echo password::hybridteaching_return_passwords($session);
     exit;
 }
+if (optional_param('changepassword', 0, PARAM_INT) == 1) {
+    header('Content-Type: application/json');
+    $password = optional_param('password', '', PARAM_TEXT);
+    password::hybridteaching_set_password($session, $password);    
+    echo json_encode(['password' => $password]);
+    exit;
+}
 $showpassword = (isset($session->studentpassword) && strlen($session->studentpassword) > 0);
 $showqr = (isset($session->useqr) && $session->useqr == 1);
 $rotateqr = (isset($session->rotateqr) && $session->rotateqr == 1);
@@ -69,18 +76,20 @@ if ($rotateqr) {
 
 if ($showpassword) {
     if ($showqr) {
-        echo html_writer::div("<h2>".get_string('qrcodeandpasswordheader', 'hybridteaching'), 'qrcodeheader')."</h2>";
+        echo html_writer::div("<h2>". get_string('qrcodeandpasswordheader', 'hybridteaching'), 'qrcodeheader')."</h2>";
     } else {
-        echo html_writer::div("<h2>".get_string('passwordheader', 'hybridteaching'), 'qrcodeheader')."</h2>";
+        echo html_writer::div("<h2>". get_string('passwordheader', 'hybridteaching'), 'qrcodeheader')."</h2>";
     }
-    echo html_writer::div("<h4>".$session->studentpassword, 'student-password')."</h4>";
+    echo html_writer::div("<h4 class='alert alert-info alert-block fade in'>". $session->studentpassword, 'student-password')."</h4>";
     echo html_writer::div('&nbsp;');
 } else if ($showqr && !$rotateqr) {
-    echo html_writer::div("<h2>".get_string('qrcodeheader', 'hybridteaching'), 'qrcodeheader')."</h2>";
+    echo html_writer::div("<h2>". get_string('qrcodeheader', 'hybridteaching'), 'qrcodeheader')."</h2>";
 }
 if ($rotateqr) {
-    echo html_writer::div("<h2>".get_string('qrcodeheader', 'hybridteaching'), 'qrcodeheader')."</h2>";
+    //cambiar pass en secret hb cuando actu qr a la del qr (5head);
     password::hybridteaching_generate_passwords($session);
+    echo html_writer::div("<h2>". get_string('qrcodeandpasswordheader', 'hybridteaching'), 'qrcodeheader')."</h2>";
+    echo html_writer::div("<h4 class='alert alert-info alert-block fade in'>", 'student-password')."</h4>";
     password::hybridteaching_renderqrcoderotate($session);
 } else if ($showqr) {
     password::hybridteaching_renderqrcode($session);

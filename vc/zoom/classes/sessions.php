@@ -95,7 +95,8 @@ class sessions {
     public function create_unique_session_extended($session, $ht) {
         global $DB;
 
-        $context = \context_course::instance($ht->course);
+        $cm = get_coursemodule_from_instance('hybridteaching', $ht->id);
+        $context = \context_module::instance($cm->id);
         if (!has_capability('hybridteachvc/zoom:use', $context)) {
             return;
         }
@@ -106,6 +107,7 @@ class sessions {
         }
 
         $service = new \hybridteachvc_zoom\webservice($zoomconfig);
+
         if (!get_config('hybridteaching', 'reusesession') && $ht->reusesession == 0) {
             $response = $service->create_meeting($session, $ht);
         } else {
@@ -133,6 +135,7 @@ class sessions {
         if ($response != false) {
             $zoom = $this->populate_htzoom_from_response($session, $response);
             $zoom->id = $DB->insert_record('hybridteachvc_zoom', $zoom);
+            $this->zoomsession = $zoom;
             return true;
         } else {
             return false;
@@ -248,11 +251,12 @@ class sessions {
     /**
      * Retrieves the zone access for the current session's Zoom meeting.
      *
+     * @param bool $userismoderator  Whether or not user is moderator.
      * @return array Returns an array containing the session ID, host status, access status, and the URL to join the meeting.
      */
-    public function get_zone_access() {
+    public function get_zone_access($userismoderator = false) {
         if ($this->zoomsession) {
-            $zoomconfig = $this->load_zoom_config_from_session();
+            $zoomconfig = $this->load_zoom_config_from_session();           
             if (!$zoomconfig) {
                 // No exists config zoom or its hidden.
                 return [
@@ -263,12 +267,18 @@ class sessions {
             try {
                 $service = new \hybridteachvc_zoom\webservice($zoomconfig);
                 $meeting = $service->get_meeting_webinar_info($this->zoomsession->meetingid, 0);
+
                 if (isset($meeting->start_url)) {
+                    if ($userismoderator) {
+                        $zoomurl = $meeting->start_url;
+                    } else {
+                        $zoomurl = $meeting->join_url;
+                    }
+
                     $array = [
                         'id' => $this->zoomsession->id,
-                        'ishost' => true,
-                        'isaccess' => true,
-                        'url' => base64_encode($meeting->start_url),
+                        'ishost' => $userismoderator,
+                        'url' => base64_encode($zoomurl),
                     ];
                     return $array;
                 } else {

@@ -70,7 +70,6 @@ $string['userslimit_help'] = 'Solo aplicable a observadores, no moderadores';
 $string['wellcomemessage'] = 'Mensaje de bienvenida';
 $string['wellcomemessage_help'] = 'Mensaje de bienvenida a mostrar al entrar a la videoconferencia';
 
-
 $string['disablewebcam'] = 'Desactivar las cámaras web';
 $string['disablemicro'] = 'Desactivar los micrófonos';
 $string['disableprivatechat'] = 'Desactivar el chat privado';
@@ -92,7 +91,7 @@ $string['attendance_help'] = 'Cantidad de tiempo que debe pasar el estudiante en
 
 $string['completionattendance'] = 'El usuario debe asistir a sesiones';
 $string['completionattendancegroup'] = 'Requiere asistencia';
-$string['completiondetail:attendance'] = 'Sessions attendance: {$a}';
+$string['completiondetail:attendance'] = 'Asistencia a sesiones: {$a}';
 
 $string['subplugintype_hybridteachvc'] = 'Tipo de videoconferencia';
 $string['subplugintype_hybridteachvc_plural'] = 'Tipos de videoconferencia';
@@ -112,6 +111,7 @@ $string['import'] = 'Importar';
 $string['export'] = 'Exportar';
 
 $string['hybridteaching:addinstance'] = 'Añade una nueva Docencia híbrida';
+$string['hybridteaching:manageactivity'] = 'Gestionar configuración docencia híbrida';
 $string['hybridteaching:view'] = 'Ver docencia híbrida';
 $string['hybridteaching:viewjoinurl'] = 'Ver url de inicio';
 $string['hybridteaching:programschedule'] = 'Programación de docencia híbrida';
@@ -119,13 +119,17 @@ $string['hybridteaching:sessions'] = 'Ver sesiones';
 $string['hybridteaching:attendance'] = 'Ver asistencia';
 $string['hybridteaching:import'] = 'Importar';
 $string['hybridteaching:export'] = 'Exportar';
-$string['hybridteaching:downloadrecordings'] = 'Descargar grabaciones';
-$string['hybridteaching:manage_recordings'] = 'Administrar grabaciones';
+$string['hybridteaching:bulksessions'] = 'Mostrar el selector de acciones múltiples de sesiones';
+$string['hybridteaching:sessionsactions'] = 'Ver acciones en la lista de sesiones';
+$string['hybridteaching:sessionsfulltable'] = 'Mostrar todos los campos de las lista de sesiones';
+$string['hybridteaching:attendancesactions'] = 'Acceso a las acciones en la vista de asistencia';
+$string['hybridteaching:attendanceregister'] = 'Permiso para registrar asistencia en la sesión';
 $string['hybridteaching:record'] = 'Permitir grabaciones';
-$string['hybridteaching:viewallsessions'] = 'Permitir ver todas las sesiones sin filtro de grupo';
-$string['hybridteaching:viewhiddenitems'] = 'Ver elementos ocultos';
 $string['hybridteaching:viewrecordings'] = 'Ver grabaciones';
 $string['hybridteaching:viewchat'] = 'Ver chats';
+$string['hybridteaching:downloadrecordings'] = 'Descargar grabaciones';
+$string['hybridteaching:viewhiddenitems'] = 'Ver elementos ocultos';
+$string['hybridteaching:viewallsessions'] = 'Permitir ver todas las sesiones sin filtro de grupo';
 
 $string['type'] = 'Tipo';
 $string['order'] = 'Ordenar';
@@ -137,7 +141,7 @@ $string['configgeneralsettings'] = 'Configuración general de docencia híbrida'
 $string['configname'] = 'Nombre de configuración';
 $string['configselect'] = 'Seleccionar una configuración';
 $string['generalconfig'] = 'Configuración general';
-$string['configsconfig'] = 'Administrar configuracións';
+$string['configsconfig'] = 'Administrar configuraciones';
 $string['configsvcconfig'] = 'Administrar configuraciones de videoconferencia';
 $string['configsstoreconfig'] = 'Administrar configuraciones de almacenamiento';
 
@@ -168,7 +172,6 @@ La posibilidad de añadir diferentes tipos depende del modo de grupo de la activ
 ';
 $string['nogroups'] = 'Esta actividad ha sido configurada para usar grupos, pero no existen grupos en el curso.';
 $string['addsession'] = 'Añadir sesión';
-$string['addsession'] = 'Añadir sesión';
 $string['presentationfile'] = 'Archivo de presentación';
 $string['replicatedoc'] = 'Replicar archivo a todas las sesiones';
 $string['caleneventpersession'] = 'Crear un evento de calendario por sesión';
@@ -193,6 +196,7 @@ $string['nosessions'] = 'No hay sesiones disponibles';
 $string['nogroup'] = 'La próxima sesión no se realiza para su grupo';
 $string['nosubplugin'] = 'El tipo de videoconferencia es incorrecto. Contacte con su administrador';
 $string['noconfig'] = 'No existe la configuración de videoconferencia seleccionada. Contacte con su adminstrador';
+$string['noconfig_viewer'] = 'No existe la configuración de videoconferencia. Contacte con su profesor.';
 
 $string['status_progress'] = 'Sesión en progreso';
 $string['status_finished'] = 'Esta sesión ha finalizado';
@@ -236,7 +240,6 @@ $string['lessthan'] = 'Menor que';
 $string['options'] = 'Opciones';
 $string['sesperpage'] = 'Sesiones por página';
 
-$string['hybridteaching:bulksessions'] = 'Mostrar el selector de acciones múltiples de sesiones';
 $string['updatesessions'] = 'Actualizar sesiones';
 $string['deletesessions'] = 'Borrar sesiones';
 $string['withselectedsessions'] = 'Con las sesiones seleccionadas';
@@ -245,7 +248,7 @@ $string['options'] = 'Opciones';
 $string['sessionsuc'] = 'Sesiones';
 $string['programscheduleuc'] = 'Programación de sesiones';
 $string['nosessionsselected'] = 'Sin sesiones seleccionadas';
-$string['deletecheckfull'] = '¿Está completamente seguro de que desea eliminar por completo {$a}, incluidos todos los datos del usuario?';
+$string['deletecheckfull'] = '¿Está seguro de que desea eliminar por completo las siguientes sesiones, incluidos todos los datos del usuario?';
 $string['sessiondeleted'] = 'Sesión eliminada con éxito';
 $string['strftimedmyhm'] = '%d %b %Y %I.%M%p';
 $string['extend'] = 'Extender';
@@ -257,14 +260,11 @@ $string['updateduration'] = 'Modificar duración';
 $string['updatestarttime'] = 'Modificar inicio';
 $string['advance'] = 'Adelantar';
 $string['delayin'] = 'Retrasar en';
-$string['hybridteaching:sessionsactions'] = 'Ver acciones en la lista de sesiones';
-$string['hybridteaching:sessionsfulltable'] = 'Mostrar todos los campos de las lista de sesiones';
 $string['editsession'] = 'Editar la sesión';
 
 $string['headerconfigstore'] = 'Administrar extensiones de almacenamiento';
 $string['storageplugins'] = 'Extensiones de almacenamiento';
 $string['importsessions'] = 'Importar sesiones';
-$string['export'] = 'Exportar';
 $string['invalidimportfile'] = 'El formato del archivo no es correcto.';
 $string['processingfile'] = 'Procesando archivo...';
 $string['sessionsgenerated'] = '{$a} sesiones generadas con éxito';
@@ -303,7 +303,7 @@ $string['useqr'] = 'Incluir uso de QR';
 $string['rotateqr'] = 'Rotar codigo QR';
 $string['studentpassword'] = 'Contraseña de alumnos';
 $string['passwordheader'] = 'Introduzca la contraseña de abajo para registrar su asistencia';
-$string['qrcodeheader'] = 'Escanee el qr para registrar su asistencia';
+$string['qrcodeheader'] = 'Escanee el QR para registrar su asistencia';
 $string['qrcodeandpasswordheader'] = 'Escanee el QR o introduzca la contraseña de abajo para registrar su asistencia';
 $string['noqrpassworduse'] = 'El uso de QR o contraseña se encuentran deshabilitados';
 $string['labelshowqrpassword'] = 'Mostrar contraseña/QR para asistencia en aula';
@@ -322,7 +322,7 @@ $string['videoconference'] = 'Vconf';
 $string['classroom'] = 'Aula';
 
 $string['resultsperpage'] = 'Resultados por página';
-$string['sessresultsperpage_desc'] = 'Número de sesiones por página';
+$string['sessresultsperpage_desc'] = 'Cantidad de sesiones por página';
 $string['donotusepaging'] = 'No usar paginación';
 $string['reusesession'] = 'Reutilizar recursos externos de sesiones';
 $string['reusesession_desc'] = 'Si está marcado, se reutilizarán los recursos de sesiones recurrentes';
@@ -333,7 +333,10 @@ $string['leavetime'] = 'Salida';
 $string['permanence'] = 'Permanencia';
 
 $string['passwordgrp'] = 'Contraseña de estudiante';
-$string['passwordgrp_help'] = 'Si se establece, los estudiantes deberán ingresar esta contraseña antes de poder establecer su propio estado de asistencia para la sesión. Si está vacío, no se requiere contraseña.';
+$string['passwordgrp_help'] = 'Si se establece, los estudiantes deberán ingresar esta contraseña para establecer su asistencia en la sesión.
+
+  * Si está vacío, no se requiere contraseña.
+  * Si se marca la opción de rotar QR, la contraseña será variable y rotará junto al QR.';
 
 $string['maxgradeattendance'] = 'Asistencia para máxima puntuación';
 $string['maxgradeattendance_help'] = 'Modo de cálculo
@@ -411,7 +414,7 @@ $string['noatt'] = 'Sin asistencia registrada';
 $string['attendanceresume'] = 'Resumen de asistencia';
 $string['attendedsessions'] = 'Sesiones atendidas';
 $string['validatedattendance'] = 'Asistencias validas';
-$string['finalgrade'] = 'Nota final';
+$string['finalgrade'] = 'Calificación final';
 $string['late'] = 'Llegada tardía';
 $string['earlyleave'] = 'Abandono temprano';
 $string['withatt'] = 'Con asistencia';
@@ -425,8 +428,6 @@ $string['norecording'] = 'Sin grabación';
 
 $string['entersession'] = 'Puede entrar a la sesión para marcar su asistencia';
 $string['exitsession'] = 'Se ha registrado su asistencia recuerde terminar su asistencia al acabar la sesión';
-$string['hybridteaching:attendancesactions'] = 'Acceso a las acciones en la vista de asistencia';
-$string['hybridteaching:attendanceregister'] = 'Permiso para registrar asistencia en la sesión';
 $string['novc'] = 'Sesión sin uso de videoconferencia';
 $string['viewstudentinfo'] = 'Asistencia estudiante';
 $string['viewsessioninfo'] = 'Asistencia sesión';
@@ -445,7 +446,7 @@ $string['endofperiod'] = 'Fin del período';
 $string['includeall'] = 'Seleccionar todas las sesiones';
 $string['joinurl'] = 'Url de acceso: ';
 $string['passstring'] = 'Contraseña: ';
-$string['vcconfigremoved'] = 'La configuracion de videollamada de la actividad fue eliminada por un administrador';
+$string['vcconfigremoved'] = 'La configuracion de videoconferencia de la actividad fue eliminada por un administrador';
 $string['hiderecords'] = 'Ocultar grabaciones';
 $string['visiblerecords'] = 'Mostrar grabaciones';
 
@@ -471,7 +472,7 @@ $string['repeatsessionsamedate'] = 'La fecha de fin de repetir sesión no puede 
 $string['programsessionbeforenow'] = 'La fecha de fin de repetir sesión no puede ser antes de hoy';
 $string['daynotselected'] = 'Seleccione un día en el que repetir sesiones';
 
-$string['norecordingmoderation'] = 'No tiene acceso de moderación para permitir la grabación de este tipo de videollamada.';
+$string['norecordingmoderation'] = 'No tiene acceso de moderación para permitir la grabación de este tipo de videoconferencia.';
 $string['chats'] = 'Chats';
 
 $string['enabled'] = 'Activado';
@@ -484,7 +485,7 @@ $string['categoryselect'] = 'Selección personalizada';
 $string['defaultsettings'] = 'Ajustes de configuración de docencia híbrida generales';
 $string['defaultsettings_help'] = 'Estos ajustes definen las configuraciones generales de las actividades de docencia híbrida';
 $string['sessionscheduling_desc'] = 'Al estar activo, obliga a que las sesiones sean creadas usando programación de sesiones';
-$string['waitmoderator_desc'] = 'Los usuarios deben esperar a que se una un moderador para unirse a la videollamada';
+$string['waitmoderator_desc'] = 'Los usuarios deben esperar a que se una un moderador para unirse a la videoconferencia';
 $string['useattendance_help'] = 'Añade el uso de asistencia en las sesiones';
 $string['usevideoconference_help'] = 'Añade el uso de videollamadas en las sesiones';
 $string['userecord_help'] = 'Añade la posibilidad de realizar grabaciones en las sesiones';
@@ -517,7 +518,39 @@ $string['updatecalen'] = 'Actualizar evento del calendario';
 
 $string['sessiontobecreated'] = 'Sesión pendiente de ser creada';
 $string['recordingdisabled'] = 'Las grabaciones no están activadas. Descarga no permitida.';
-$string['hybridteaching:manageactivity'] = 'Gestionar configuración docencia híbrida';
 $string['cannotmanageactivity'] = 'No tiene permisos para actualizar {$a}';
 
 $string['nouseconfig'] = 'Esta configuración no aplica para las videoconferencias de {$a}.';
+$string['hybridteaching:createsessions'] = 'Permitir crear sesiones';
+
+$string['bulkhide'] = 'Mostrar/Ocultar sesiones';
+$string['bulkhidechats'] = 'Mostrar/Ocultar chats';
+$string['bulkhiderecordings'] = 'Mostrar/Ocultar grabaciones';
+
+$string['bulkhidetext'] = '¿Estás seguro de que quieres mostrar/ocultar las siguientes sesiones?';
+$string['bulkhidechatstext'] = '¿Estás seguro de que quieres mostrar/ocultar los siguientes chats?';
+$string['bulkhiderecordingstext'] = '¿Estás seguro de que quieres mostrar/ocultar las siguientes grabaciones?';
+
+$string['bulkhidesuccess'] = 'Sesiones ocultadas con éxito';
+$string['bulkhidechatssuccess'] = 'Chats ocultados con éxito';
+$string['bulkhiderecordingssuccess'] = 'Grabaciones ocultadas con éxito';
+
+$string['hiddenuserattendance'] = '(Sessión oculta para el usuario)';
+$string['cantcreatevc'] ='No puedes entrar a la videconferencia: no tienes permisos suficientes o debes esperar al moderador.';
+$string['sessionperformed'] = '{$a} sesiones ya realizadas (acceda en pestaña Sesiones)';
+
+$string['qrupdatetime'] = 'Periodo de rotación del QR/Contraseña';
+$string['qrupdatetime_help'] = 'El periodo de tiempo que el QR se mantendrá, hasta que cambie, también aplicable a la contraseña.';
+$string['rotateqr_help'] = 'Fuerza el uso de un codigo QR y una contraseña que iran rotando cada tiempo definido
+
+  * Deshabilita el campo de la contraseña si esta activo';
+
+$string['bulkhideatt'] = 'Mostrar/Ocultar asistencia a estas sesiones';
+$string['bulkhideatttext'] = '¿Estás seguro de que quieres mostrar/ocultar la asistencia a las siguientes sesiones?';
+$string['bulkhideattsuccess'] = 'Asistencias ocultadas con éxito';
+$string['hideatt'] = 'Ocultar asistencia a esta sesión';
+$string['visibleatt'] = 'Mostrar asistencia a esta sesión';
+$string['updatefinished'] = 'Finaliza sesiones que hayan finalizado por tiempo';
+
+
+/** New strings. */

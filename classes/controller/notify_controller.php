@@ -33,8 +33,10 @@
 
 namespace mod_hybridteaching\controller;
 
+/**
+ * Class notify_controller
+ */
 class notify_controller {
-
     /**
      * Show (print) the pending messages and clear them
      */

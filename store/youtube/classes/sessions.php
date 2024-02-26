@@ -24,7 +24,7 @@
 
 /**
  * Display information about all the mod_hybridteaching modules in the requested course. *
- * @package    mod_hybridteaching
+ * @package    hybridteachstore_youtube
  * @copyright  2023 Proyecto UNIMOODLE
  * @author     UNIMOODLE Group (Coordinator) <direccion.area.estrategia.digital@uva.es>
  * @author     ISYC <soporte@isyc.com>
@@ -33,8 +33,19 @@
 
 namespace hybridteachstore_youtube;
 
+/**
+ * Class sessions.
+ */
 class sessions {
-
+    /**
+     * Get the recording URL for a processed recording.
+     *
+     * @param int $processedrecording Processed recording check
+     * @param int $storagereference Storage reference
+     * @param int $htid Hybridteaching ID
+     * @param int $sid Session ID
+     * @return string
+     */
     public function get_recording($processedrecording, $storagereference, $htid, $sid) {
         global $DB;
         $object = $DB->get_record('hybridteachstore_youtube', ['id' => $processedrecording]);
@@ -45,6 +56,12 @@ class sessions {
         return $url;
     }
 
+    /**
+     * Delete a session extended.
+     *
+     * @param int $htsession Session ID
+     * @param object $config Config object
+     */
     public function delete_session_extended($htsession, $config) {
         global $DB;
 

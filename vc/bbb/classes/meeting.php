@@ -141,11 +141,12 @@ class meeting {
         $cm = get_coursemodule_from_instance ('hybridteaching', $ht->id);
         $context = \context_module::instance($cm->id);
 
-        $enabledrecording = get_config('enabledrecording', 'hybridteachvc_bbb');
+        $enabledrecording = get_config('hybridteachvc_bbb', 'enabledrecording');
         // Initially, recording is false. If has permissions, change to true.
         $data['record'] = false;
         $data['allowStartStopRecording'] = false;
-        if (has_capability('hybridteachvc/bbb:record', $context) && $enabledrecording) {
+        if (has_capability('hybridteachvc/bbb:record', $context) &&
+            has_capability('mod/hybridteaching:record', $context) && $enabledrecording) {
             $data['record'] = $ht->userecordvc ? 'true' : 'false';
             if ($data['record'] == 'true' ) {
                 if ($ht->initialrecord) {
