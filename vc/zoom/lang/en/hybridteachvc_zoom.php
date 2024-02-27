@@ -51,6 +51,14 @@ $string['downloadrecordszoom'] = 'Download Zoom records';
 $string['maxdownloadattempts'] = 'Max download attempts for recordings';
 $string['maxdownloadattempts_help'] = 'When downloading has been attempted this maximum number of times, attempts to download the recording will stop.';
 $string['chatnamefile'] = 'Chat meeting';
+$string['recordingnotdownload'] = 'Cannot download recording from courseid {$a->course}: \'{$a->name}\'';
+$string['recordingdownloaded'] = 'Recording downloaded correctly from courseid {$a->course} for session \'{$a->name}\'';
+$string['confignotfound'] = 'Configuration not found with Id {$a->config} for session \'{$a->name}\'';
+$string['meetingnotfound'] = 'Meeting not found in zoom from courseid \'{$a->course}\' for session \'{$a}\'';
+$string['errorgetmeeting'] = 'Webservice error when trying to obtain zoom meeting.';
+$string['recordingnotfound'] = 'Recording not found for session \'{$a}\' from courseid \'{$a->course}\'';
+$string['alreadydownloaded'] = 'Recording already downloaded from courseid \'{$a->course}\' for session \'{$a->name}\'. It will not download again';
+
 $string['zoom:view'] = 'Access Zoom';
 $string['zoom:use'] = 'Generate Zoom meetings';
 $string['zoom:record'] = 'Store Zoom recordings';

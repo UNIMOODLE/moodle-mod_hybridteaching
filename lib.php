@@ -125,6 +125,7 @@ function hybridteaching_add_instance($moduleinstance, $mform = null) {
         $moduleinstance->processedrecording = -1;
     }
 
+
     $moduleinstance->id = $DB->insert_record('hybridteaching', $moduleinstance);
     if (!$moduleinstance->sessionscheduling && !empty($moduleinstance->id)) {
         require_once($CFG->dirroot.'/mod/hybridteaching/classes/controller/sessions_controller.php');

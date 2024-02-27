@@ -554,3 +554,5 @@ $string['visibleatt'] = 'Show session attendance';
 $string['updatefinished'] = 'Finish sessions that have finished by time';
 
 /** New strings. */
+
+$string['error:importnosessionschedule'] = 'Session scheduling is disabled. Change it to import.';

@@ -207,18 +207,6 @@ if (!$activesession) {
                 $status = get_string('status_finished', 'hybridteaching');
                 $isfinished = true;
                 $alert = 'alert-danger';
-                if (!$session::session_finished_triggered($activesession->id)) {
-                    list($course, $cm) = get_course_and_cm_from_instance($hybridteaching->id, 'hybridteaching');
-                    $event = \mod_hybridteaching\event\session_finished::create([
-                        'objectid' => $hybridteaching->id,
-                        'context' => \context_module::instance($cm->id),
-                        'other' => [
-                            'sessid' => $activesession->id,
-                        ],
-                    ]);
-                    $event->trigger();
-                }
-
                 break;
         }
         !isset($status) ? $status = '' : '';

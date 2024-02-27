@@ -109,6 +109,8 @@ class downloadrecords extends \core\task\scheduled_task {
             // Connect to API to download recording.
             $zoomconfig = $sessionconfig->load_zoom_config($session->config);
             if ($zoomconfig == false) {
+                mtrace(get_string('confignotfound', 'hybridteachvc_zoom',
+                    ['config' => $session->config, 'name' => $session->name]));
                 continue;
             }
             $service = new webservice($zoomconfig);
@@ -117,13 +119,19 @@ class downloadrecords extends \core\task\scheduled_task {
                 $response = $service->get_past_meetings_uuid($session->meetingid);
             } catch (\Exception $e) {
                 $response = false;
+                mtrace(get_string('errorgetmeeting', 'hybridteachvc_zoom', $session->name));
             }
-            if ($response) {
+            if ($response->meetings) {
                 foreach ($response->meetings as $meet) {
                     if (!$DB->record_exists('hybridteachvc_zoom_records',
                         ['uuid' => $meet->uuid, 'meetingid' => $session->meetingid])) {
                         // Download recording from uuid.
-                        $responserecording = $service->get_meeting_recordings($meet->uuid);
+                        $responserecording = null;
+                        try {
+                            $responserecording = $service->get_meeting_recordings($meet->uuid);
+                        } catch (\Exception $e) {
+                            mtrace(get_string('errorgetmeeting', 'hybridteachvc_zoom', $session->name));
+                        }
                         $isdownloaded = self::downloadfiles ($responserecording, $folderfile, $service, $session);
                         if ($isdownloaded) {
                             $details = new \stdClass();
@@ -131,9 +139,17 @@ class downloadrecords extends \core\task\scheduled_task {
                             $details->meetingid = $session->meetingid;
                             $details->uuid = $meet->uuid;
                             $DB->insert_record('hybridteachvc_zoom_records', $details);
+                            mtrace(get_string('recordingdownloaded', 'hybridteachvc_zoom',
+                                ['course' => $session->course, 'name' => $session->name]));
                         }
+                    } else {
+                        mtrace(get_string('alreadydownloaded', 'hybridteachvc_zoom',
+                            ['course' => $session->course, 'name' => $session->name]));
                     }
                 }
+            } else {
+                mtrace(get_string('meetingnotfound', 'hybridteachvc_zoom',
+                    ['course' => $session->course, 'name' => $session->name]));
             }
         }
     }
@@ -151,29 +167,39 @@ class downloadrecords extends \core\task\scheduled_task {
         global $DB;
 
         $isdownloaded = false;
+        if (isset($response->recording_files) && count($response->recording_files) <= 0) {
+            mtrace(get_string('recordingnotfound', 'hybridteachvc_zoom', ['course' => $session->course, 'name' => $session->name]));
+            return $isdownloaded;
+        }
+
         foreach ($response->recording_files as $file) {
             if ((strtolower($file->file_type) == 'mp4')) {
                 $folderfilerecording = $folderfile.'-1.'.strtolower($file->file_type);
                 $filesize = @filesize($folderfile);
                 if ((!file_exists($folderfilerecording)) || (file_exists($folderfilerecording) &&
                     ($file->file_size != $filesize))) {
-                    $responsefile = $service->_make_call_download($file->download_url);
-                    if (!$responsefile) {
-                        mtrace(get_string('recordingnotdownload', 'hybridteachvc_zoom', ['course' => $session->course, 'name' => $session->name]));
-                    } else {
+                    try {
+                        $responsefile = $service->_make_call_download($file->download_url);
+                    } catch (\Exception $e) {
+                        mtrace($e->getMessage());
+                    }
+                    if ($responsefile) {
                         $filerecording = fopen($folderfilerecording, "w+");
                         fputs($filerecording, (string)$responsefile);
                         fclose($filerecording);
-                    }
 
-                    // Save processedrecording in hybridteaching_session=0: ready to upload to store.
-                    $sessionprocessed = $DB->get_record('hybridteaching_session', ['id' => $session->hsid]);
-                    $sessionprocessed->processedrecording = 0;
-                    $DB->update_record('hybridteaching_session', $sessionprocessed);
-                    $isdownloaded = true;
+                        // Save processedrecording in hybridteaching_session=0: ready to upload to store.
+                        $sessionprocessed = $DB->get_record('hybridteaching_session', ['id' => $session->hsid]);
+                        $sessionprocessed->processedrecording = 0;
+                        $DB->update_record('hybridteaching_session', $sessionprocessed);
+                        $isdownloaded = true;
+                    } else {
+                        mtrace(get_string('recordingnotdownload', 'hybridteachvc_zoom',
+                            ['course' => $session->course, 'name' => $session->name]));
+                    }
                 }
             }
-            if ($file->file_type == "CHAT") {
+            if (strtolower($file->file_type) == "chat") {
                 $responsechat = $service->_make_call_download($file->download_url);
                 $suffix = '-chat.txt';
                 $folderfilechat = $folderfile.$suffix;

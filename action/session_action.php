@@ -189,6 +189,7 @@ switch ($action) {
     case 'bulkhide':
     case 'bulkhidechats':
     case 'bulkhiderecordings':
+    case 'bulkhideatt':
         $confirm = optional_param('confirm', null, PARAM_INT);
         $message = get_string('bulkhidetext', 'hybridteaching');
 
@@ -198,8 +199,8 @@ switch ($action) {
             $stringreturn = get_string('bulkhidesuccess', 'hybridteaching');
             foreach ($sessionsids as $sessid) {
                 if ($action === 'bulkhide') {
-                    $session = $DB->get_record('hybridteaching_session', ['id' => $sessid], '*', MUST_EXIST);
-                    if ($session->visible == 1) {
+                    $visible = $DB->get_field('hybridteaching_session', 'visible', ['id' => $sessid], MUST_EXIST);
+                    if ($visible == 1) {
                         $sessioncontroller->enable_data($sessid, false, 'hybridteaching_session');
                     } else {
                         $sessioncontroller->enable_data($sessid, true, 'hybridteaching_session');
@@ -210,6 +211,13 @@ switch ($action) {
                 } else if ($action == 'bulkhiderecordings') {
                     $sessioncontroller->set_record_visibility($sessid);
                     $stringreturn = get_string('bulkhiderecordingssuccess', 'hybridteaching');
+                } else if ($action == 'bulkhideatt') {
+                    $visibleatt = $DB->get_field('hybridteaching_session', 'visibleatt', ['id' => $sessid], MUST_EXIST);
+                    if ($visibleatt == 1) {
+                        mod_hybridteaching\controller\attendance_controller::update_session_visibility($sessid, 0);
+                    } else {
+                        mod_hybridteaching\controller\attendance_controller::update_session_visibility($sessid, 1);
+                    }
                 }
 
                 trigger_session_updated_event($hybridteachingid, $context, $sesionid, $action);
@@ -236,6 +244,8 @@ switch ($action) {
             $paramtocheck = 'visiblechat';
         } else if ($action == 'bulkhiderecordings') {
             $paramtocheck = 'visiblerecord';
+        } else if ($action == 'bulkhideatt') {
+            $paramtocheck = 'visibleatt';
         }
         
         foreach ($sessionsinfo as $sessinfo) {

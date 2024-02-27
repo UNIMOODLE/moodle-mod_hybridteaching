@@ -563,6 +563,7 @@ class sessions_render extends \flexible_table {
                 'bulkhide' => get_string('bulkhide', 'hybridteaching'),
                 'bulkhidechats' => get_string('bulkhidechats', 'hybridteaching'),
                 'bulkhiderecordings' => get_string('bulkhiderecordings', 'hybridteaching'),
+                'bulkhideatt' => get_string('bulkhideatt', 'hybridteaching'),
             ];
         } else if ($this->typelist == PROGRAM_SESSION_LIST) {
             $options = [
@@ -807,6 +808,7 @@ class sessions_render extends \flexible_table {
         }
 
         $config = helper::subplugin_config_exists($session['vcreference'], 'vc');
+
         if ($config) {
             // Check if exists urlchat meeting to get the url.
             sessions_controller::require_subplugin_session($config->type);

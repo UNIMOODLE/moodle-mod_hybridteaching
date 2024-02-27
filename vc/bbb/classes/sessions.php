@@ -242,6 +242,7 @@ class sessions {
      * checks if the role is for starting a meeting or joining a meeting,
      * and returns the access URL (either starturl or joinurl) based on the role.
      *
+
      * @param bool $userismoderator  Whether or not user is moderator.
      * @return array|null Returns an array with the zone access information or null if there is no session available.
      */

@@ -886,26 +886,6 @@ class sessions_controller extends \mod_hybridteaching\controller\common_controll
     }
 
     /**
-     * Checks if a session has been finished.
-     *
-     * @param int $sessionid The ID of the session.
-     * @throws Exception
-     * @return bool Returns true if the session has been finished, false otherwise.
-     */
-    public static function session_finished_triggered($sessionid) : bool {
-        global $DB;
-
-        $event = '\mod_hybridteaching\event\session_finished';
-        $sql = 'SELECT id
-                  FROM {logstore_standard_log}
-                 WHERE eventname like \'%session_finished\'
-                   AND ' . $DB->sql_compare_text("other") . ' = ' . $DB->sql_compare_text(':othersessionid') . '';
-        $finished = $DB->get_records_sql($sql, ['othersessionid' => '{"sessid":"' . $sessionid . '"}'], IGNORE_MISSING);
-
-        return !empty($finished);
-    }
-
-    /**
      * Finish unfinished sessions for a given hybrid teaching ID.
      *
      * @param int $hid The hybrid teaching ID.
@@ -949,9 +929,10 @@ class sessions_controller extends \mod_hybridteaching\controller\common_controll
                   FROM {hybridteaching_session} 
                  WHERE hybridteachingid = :htid
                    AND isfinished = 1 
-                   AND (starttime+duration) < :now";
+                   AND (starttime  + duration) < :now";
 
         $sessionperformed = $DB->count_records_sql($sql, ['htid' => $id, 'now' => time()]);
         return $sessionperformed;
     }
 }
+

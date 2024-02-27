@@ -85,4 +85,14 @@ $functions = [
         'loginrequired' => true,
         'capabilities' => '', // Capabilities check in form.
     ],
+    'mod_hybridteaching_disable_attendance_inprogress' => [
+        'classname' => 'hybridteaching_external',
+        'methodname' => 'disable_attendance_inprogress',
+        'classpath' => '/mod/hybridteaching/externallib.php',
+        'description' => 'disable the checks if a session is in progress',
+        'type' => 'set',
+        'ajax' => true,
+        'loginrequired' => true,
+        'capabilities' => '', // Capabilities check in form.
+    ],
 ];

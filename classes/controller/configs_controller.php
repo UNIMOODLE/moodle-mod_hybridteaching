@@ -84,9 +84,9 @@ class configs_controller extends \mod_hybridteaching\controller\common_controlle
      * @return string a string containing an error message if there is an error, otherwise empty
      */
     public function hybridteaching_create_config($data) {
-        global $DB, $USER;
+        global $DB, $USER, $CFG;
         $plugin = new stdClass();
-        require_once('../../'.$this->splugindir.'/'.$this->hybridobject->type.'/version.php');
+        require($CFG->dirroot . '/mod/hybridteaching/'.$this->splugindir.'/'.$this->hybridobject->type.'/version.php');
         $errormsg = '';
         $config = new stdClass();
         $config->configname = $data->configname;

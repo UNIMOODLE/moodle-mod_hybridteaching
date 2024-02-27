@@ -251,12 +251,13 @@ class sessions {
     /**
      * Retrieves the zone access for the current session's Zoom meeting.
      *
+
      * @param bool $userismoderator  Whether or not user is moderator.
      * @return array Returns an array containing the session ID, host status, access status, and the URL to join the meeting.
      */
     public function get_zone_access($userismoderator = false) {
         if ($this->zoomsession) {
-            $zoomconfig = $this->load_zoom_config_from_session();           
+            $zoomconfig = $this->load_zoom_config_from_session();
             if (!$zoomconfig) {
                 // No exists config zoom or its hidden.
                 return [
@@ -267,6 +268,7 @@ class sessions {
             try {
                 $service = new \hybridteachvc_zoom\webservice($zoomconfig);
                 $meeting = $service->get_meeting_webinar_info($this->zoomsession->meetingid, 0);
+
 
                 if (isset($meeting->start_url)) {
                     if ($userismoderator) {

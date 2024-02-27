@@ -50,6 +50,7 @@ class bulk_set_attendance_form extends \moodleform {
             HYBRIDTEACHING_BULK_ACTIVE_ATTENDANCE => get_string('activeattendance', 'hybridteaching'),
             HYBRIDTEACHING_BULK_INACTIVE_ATTENDANCE => get_string('inactiveattendance', 'hybridteaching'),
         ];
+
         $mform->addElement('select', 'operation', get_string('setexempt', 'hybridteaching'), $options);
         $mform->setType('operation', PARAM_INT);
 

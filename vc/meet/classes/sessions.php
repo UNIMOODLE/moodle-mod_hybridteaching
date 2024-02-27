@@ -214,10 +214,12 @@ class sessions {
     /**
      * Retrieves the zone access information.
      *
+
      * @param bool $userismoderator  Whether or not user is moderator.
      * @return array The zone access information.
      */
     public function get_zone_access($userismoderator = false) {
+
         if ($this->meetsession) {
             $meetconfig = $this->load_meet_config_from_session();
             if (!$meetconfig) {

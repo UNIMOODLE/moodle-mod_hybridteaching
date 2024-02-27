@@ -382,8 +382,8 @@ class webservice {
             If the account has it activated, it is activated
             If the account has it deactivated, it remains deactivated.
         */
-        $enabledrecording = get_config('enabledrecording','hybridteachvc_zoom');
-        if ($ht->userecordvc && has_capability('hybridteachvc/zoom:record', $context) 
+        $enabledrecording = get_config('enabledrecording', 'hybridteachvc_zoom');
+        if ($ht->userecordvc && has_capability('hybridteachvc/zoom:record', $context)
             && has_capability('mod/hybridteaching:record', $context) && $enabledrecording) {
             if (isset($ht->initialrecord) && $ht->initialrecord == 1) {
                 $data['auto_recording'] = HTZOOM_RECORDING_CLOUD;

@@ -52,6 +52,12 @@ $string['maxdownloadattempts'] = 'Num. máximo de intentos de descarga de grabac
 $string['maxdownloadattempts_help'] = 'Cuando se haya intentado descargar esta cantidad máxima de intentos se detendrán los intentos de desacarga';
 $string['chatnamefile'] = 'Chat de la reunión';
 $string['recordingnotdownload'] = 'Cannot download recording from courseid {$a->course}: \'{$a->name}\'';
+$string['recordingdownloaded'] = 'Grabación descargada correctamente del id de curso {$a->course} para la sesión \'{$a->name}\'';
+$string['confignotfound'] = 'Configuración no encontrada con Id {$a->config} para la sesión \'{$a->name}\'';
+$string['meetingnotfound'] = 'Meeting no encontrado en zoom del id de curso \'{$a->course}\' para la sesión \'{$a->name}\'';
+$string['errorgetmeeting'] = 'Error webservice al intentar obtener meeting de zoom.';
+$string['recordingnotfound'] = 'No se encontraron grabaciones para la sesión \'{$a->name}\' del id de curso \'{$a->course}\'';
+$string['alreadydownloaded'] = 'Grabación ya descargada previamente del id de curso \'{$a->course}\' para la sesión \'{$a->name}\'. No se descargará de nuevo.';
 
 $string['zoom:view'] = 'Ver Zoom';
 $string['zoom:use'] = 'Generar videconferencias Zoom';

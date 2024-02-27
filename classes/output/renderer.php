@@ -40,6 +40,7 @@ use plugin_renderer_base;
  */
 class renderer extends plugin_renderer_base {
 
+
     /**
      * A function to handle zone access.
      *
@@ -49,4 +50,5 @@ class renderer extends plugin_renderer_base {
     public function zone_access($resultaccess) {
         return $this->render_from_template('mod_hybridteaching/view_page_zone_access', $resultaccess);
     }
+
 }

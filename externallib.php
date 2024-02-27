@@ -39,7 +39,9 @@ global $CFG;
 require_once("$CFG->libdir/externallib.php");
 
 use mod_hybridteaching\controller\sessions_controller;
+
 use mod_hybridteaching\helper;
+
 
 /**
  * hybridteaching external functions
@@ -345,4 +347,62 @@ class hybridteaching_external extends external_api {
     public static function get_user_has_recording_capability_returns() {
         // TODO.
     }
+
+
+    /**
+     * Get the parameters for the `disable_attendance_inprogress` function.
+     *
+     * @return external_function_parameters The parameters for the function.
+     */
+    public static function disable_attendance_inprogress_parameters() {
+        return new external_function_parameters(
+            ["hybridteachingid" => new external_value(PARAM_INT, "hybridteachingid"),
+                "sessionid" => new external_value(PARAM_INT, "sessionid")]
+        );
+    }
+
+    /**
+     * Info about the returned object
+     */
+    public static function disable_attendance_inprogress_returns() {
+        // TODO.
+    }
+
+    /**
+     * Get sessions in progress by cmid.
+     *
+     * @param int $cmid coursemodule id
+     * @param int $cmid coursemodule id
+     * @return string json-encoded information of session attendance in progress
+     */
+    public static function disable_attendance_inprogress($hybridteachingid, $sessionid = -1) {
+        global $DB, $USER;
+
+        $params = self::validate_parameters(
+            self::disable_attendance_inprogress_parameters(), ["hybridteachingid" => $hybridteachingid
+            , "sessionid" => $sessionid]
+        );
+        $sqlattsession = 'SELECT hts.id 
+                            FROM {hybridteaching_session} hts
+                            JOIN {course_modules} cm
+                              ON cm.instance = hts.hybridteachingid
+                           WHERE hts.starttime < UNIX_TIMESTAMP() 
+                             AND hts.starttime + hts.duration>UNIX_TIMESTAMP()';
+        $attstudentsrecords = "";
+        if ($sessionid != -1) {
+            $sqlattstudents = 'SELECT hta.id 
+                                 FROM {hybridteaching_attendance} hta
+                                 JOIN {hybridteaching_session} hts 
+                                   ON hts.id = hta.sessionid
+                                  AND hts.starttime < UNIX_TIMESTAMP() 
+                                  AND hts.starttime + hts.duration > UNIX_TIMESTAMP()';
+            $attstudentsparam = ['hts.id' => $sessionid];
+            $attstudentsrecords = $DB->get_records_sql($sqlattstudents, $attstudentsparam);
+        }
+        $attsessionparam = ['cm.id' => $hybridteachingid];
+        $attsessionrecords = $DB->get_records_sql($sqlattsession, $attsessionparam);
+        $datarecords = [$attsessionrecords, $attstudentsrecords];
+        return json_encode($datarecords);
+    }
+
 }

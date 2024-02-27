@@ -72,9 +72,11 @@ if ($importform->is_cancelled()) {
     redirect($url);
 }
 
-
 echo $OUTPUT->header();
 echo $OUTPUT->heading(get_string('importsessions', 'hybridteaching'));
+if ($hybridteaching->sessionscheduling != 1) { 
+    notify_controller::notify_problem(get_string('error:importnosessionschedule', 'hybridteaching'));
+}
 notify_controller::show();
 $importform->display();
 echo $OUTPUT->footer();

@@ -217,6 +217,7 @@ $capabilities = [
     'mod/hybridteaching:viewallsessions' => [
         'captype' => 'read',
         'contextlevel' => CONTEXT_MODULE,
+
         'archetypes' => [
             'teacher' => CAP_ALLOW,
             'editingteacher' => CAP_ALLOW,

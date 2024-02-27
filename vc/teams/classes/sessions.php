@@ -149,8 +149,7 @@ class sessions {
 
             if (!$teams->id = $DB->insert_record('hybridteachvc_teams', $teams)) {
                 return false;
-            } else {
-                $this->teamssession = $teams;
+
             }
         }
     }
@@ -223,6 +222,7 @@ class sessions {
     /**
      * Get zone access.
      *
+
      * @param bool $userismoderator  Whether or not user is moderator.
      * @return array
      */

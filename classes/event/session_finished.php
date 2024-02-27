@@ -47,7 +47,7 @@ class session_finished extends \core\event\base {
      */
     public function get_description() {
         return 'User with id ' . $this->userid . ' finished session with id ' .
-            $this->objectid;
+            $this->other['sessid'];
     }
 
     /**

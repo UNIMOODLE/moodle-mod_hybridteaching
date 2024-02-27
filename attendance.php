@@ -34,10 +34,10 @@
 
 require(__DIR__.'/../../config.php');
 use mod_hybridteaching\output\attendance_render;
+use mod_hybridteaching\controller\notify_controller;
 global $USER;
 // Course module id.
 $id = required_param('id', PARAM_INT);
-
 list ($course, $cm) = get_course_and_cm_from_cmid($id, 'hybridteaching');
 require_login($course, true, $cm);
 
@@ -63,11 +63,22 @@ echo $OUTPUT->header();
 echo $OUTPUT->heading(get_string('attendance', 'hybridteaching'));
 
 if (has_capability('mod/hybridteaching:sessionsfulltable', $context, $user, $doanything = true)) {
-    echo "<a href='attendance.php?id=".$id."&view=extendedstudentatt'  class='btn btn-info mr-3' role='button'>" .
-        get_string('studentsattendance', 'hybridteaching') . "</a>";
-    echo "<a href='attendance.php?id=".$id."&view=sessionattendance'  class='btn btn-info' role='button'>" .
+    if ($_GET['view'] == 'extendedstudentatt') {
+        echo "<a href='attendance.php?id=".$id."&view=sessionattendance' class='btn btn-info' role='button'>" .
         get_string('sessionsattendance', 'hybridteaching') . "</a>";
+    }
+    else if ($_GET['view'] == 'sessionattendance') {
+        echo "<a href='attendance.php?id=".$id."&view=extendedstudentatt' id='extendedstudentattbtn' class='btn btn-info mr-3' role='button'>" .
+        get_string('studentsattendance', 'hybridteaching') . "</a>";
+    }
+    else {
+        echo "<a href='attendance.php?id=".$id."&view=extendedstudentatt' id='extendedstudentattbtn' class='btn btn-info mr-3' role='button'>" .
+        get_string('studentsattendance', 'hybridteaching') . "</a>";
+        echo "<a href='attendance.php?id=".$id."&view=sessionattendance' class='btn btn-info' role='button'>" .
+        get_string('sessionsattendance', 'hybridteaching') . "</a>";
+    }
 }
+//notify_controller::notify_message(get_string('info:sessioninprogress', 'hybridteaching'));
+//notify_controller::show();
 echo $attendancerender->print_attendance_table();
-
 echo $OUTPUT->footer();

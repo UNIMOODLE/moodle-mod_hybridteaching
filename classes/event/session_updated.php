@@ -45,6 +45,7 @@ class session_updated extends \core\event\base {
      *
      */
     public function get_description() {
+
         $description = 'User with id ' . $this->userid . ' has updated the session with id ' .
             $this->other['sessid'] . ' for hybridteaching instance with id ' . $this->objectid;
 

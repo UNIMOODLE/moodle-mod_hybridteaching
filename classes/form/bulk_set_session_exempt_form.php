@@ -51,6 +51,7 @@ class bulk_set_session_exempt_form extends \moodleform {
             HYBRIDTEACHING_BULK_NOT_EXEMPT_SESSION_ATTENDANCE =>
                 get_string('notexemptsessionattendance', 'hybridteaching'),
         ];
+
         $mform->addElement('select', 'operation', get_string('setexempt', 'hybridteaching'), $options);
         $mform->setType('operation', PARAM_INT);
 

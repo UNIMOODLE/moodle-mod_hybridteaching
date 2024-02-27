@@ -102,4 +102,19 @@ class common_controller {
         $object->sortorder = $sortorder;
         $DB->update_record($table, $object);
     }
+
+    /**
+     * Checks if a hybrid teaching record with the given ID exists.
+     *
+     * @param int $id The ID of the hybrid teaching record to check.
+     * @return bool
+     */
+    public static function hybridteaching_exist($id) {
+        global $DB;
+        $hybridteaching = $DB->get_record('hybridteaching', ['id' => $id]);
+        if ($hybridteaching) {
+            return true;
+        }
+        return false;
+    }
 }

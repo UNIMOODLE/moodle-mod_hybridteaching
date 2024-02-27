@@ -40,12 +40,11 @@ $cid = required_param('cid', PARAM_INT);
 $sid = required_param('sid', PARAM_INT);
 $id = required_param('id', PARAM_INT);
 $download = optional_param('download', 0, PARAM_BOOL);
-
+require_login($cid);
 
 $session = $DB->get_record('hybridteaching_session', ['id' => $sid], '*', MUST_EXIST );
 
 $cm = get_coursemodule_from_instance ('hybridteaching', $session->hybridteachingid);
-require_login($cid, true, $cm);
 $context = context_module::instance($cm->id);
 
 $urlrecording = '';
@@ -128,9 +127,5 @@ if ($urlrecording != '') {
 } else {
     redirect (new moodle_url('/mod/hybridteaching/sessions.php', ['id' => $id, 'l' => 1]));
 }
-
-
-
-
 
 

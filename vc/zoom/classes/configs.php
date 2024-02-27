@@ -50,11 +50,11 @@ class configs extends \mod_hybridteaching\controller\configs_controller {
         $zoomdata = $DB->get_record('hybridteachvc_zoom_config', ['id' => $configid]);
         return $zoomdata;
     }
-    
+
     /**
      * Create a new configuration record in the database.
      *
-     * @param object $data 
+     * @param object $data
      * @return int
      */
     public static function create_config($data) {
