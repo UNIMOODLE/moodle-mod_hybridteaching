@@ -214,15 +214,19 @@ class hybridteaching_external extends external_api {
             self::get_display_actions_parameters(), ["sessionid" => $sessionid, 'userid' => $userid]
         );
         $actions = [];
+        is_siteadmin($USER) ? $actions['admin'] = true : $actions['admin'] = false;
+
         $att = $DB->get_record('hybridteaching_attendance', ['sessionid' => $sessionid, 'userid' => $userid], '*', IGNORE_MISSING);
-        $att ? $log = $DB->get_records('hybridteaching_attend_log', ['attendanceid' => $att->id],
-            'timecreated DESC', 'action', 0, 1, IGNORE_MISSING) : $log = false;
-        if ($att && $log && !empty($log[1])) {
-            $actions['buttons'] = 'exit';
+        if (!$att) {
             return json_encode($actions);
         }
-        $actions['buttons'] = 'enter';
-        is_siteadmin($USER) ? $actions['admin'] = true : $actions['admin'] = false;
+        $activesession = $DB->get_record('hybridteaching_session', ['id' => $sessionid], '*', IGNORE_MISSING);
+        if ($activesession) {
+            $sessioncontroller = new sessions_controller();
+            if ($sessioncontroller->session_started($activesession)) {
+                $actions['buttons'] = 'enter';
+            }
+        }
         return json_encode($actions);
     }
 
@@ -372,22 +376,16 @@ class hybridteaching_external extends external_api {
      * Get sessions in progress by cmid.
      *
      * @param int $cmid coursemodule id
-     * @param int $cmid coursemodule id
+     * @param int $sessionid session id
      * @return string json-encoded information of session attendance in progress
      */
-    public static function disable_attendance_inprogress($hybridteachingid, $sessionid = -1) {
+    public static function disable_attendance_inprogress($id, $sessionid = -1) {
         global $DB, $USER;
-
+        list ($course, $cm) = get_course_and_cm_from_cmid($id, 'hybridteaching');
         $params = self::validate_parameters(
-            self::disable_attendance_inprogress_parameters(), ["hybridteachingid" => $hybridteachingid
+            self::disable_attendance_inprogress_parameters(), ["hybridteachingid" => $cm->instance
             , "sessionid" => $sessionid]
         );
-        $sqlattsession = 'SELECT hts.id 
-                            FROM {hybridteaching_session} hts
-                            JOIN {course_modules} cm
-                              ON cm.instance = hts.hybridteachingid
-                           WHERE hts.starttime < UNIX_TIMESTAMP() 
-                             AND hts.starttime + hts.duration>UNIX_TIMESTAMP()';
         $attstudentsrecords = "";
         if ($sessionid != -1) {
             $sqlattstudents = 'SELECT hta.id 
@@ -399,8 +397,7 @@ class hybridteaching_external extends external_api {
             $attstudentsparam = ['hts.id' => $sessionid];
             $attstudentsrecords = $DB->get_records_sql($sqlattstudents, $attstudentsparam);
         }
-        $attsessionparam = ['cm.id' => $hybridteachingid];
-        $attsessionrecords = $DB->get_records_sql($sqlattsession, $attsessionparam);
+        $attsessionrecords = sessions_controller::get_sessions_in_progress($cm->instance);
         $datarecords = [$attsessionrecords, $attstudentsrecords];
         return json_encode($datarecords);
     }

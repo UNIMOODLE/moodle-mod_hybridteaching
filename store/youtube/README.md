@@ -16,7 +16,7 @@ Se necesita una cuenta google
 4.Añadir api de "Youtube data api v3"
 5.Crear credenciales, con claves de api
 6.Ir en el menú a Pantalla de Consentimiento de OAuth. (Después enlace "Editar app" si ya está creada, y continuar abajo):
-7. Botón Agretar o quitar permisos.
+7.Botón Agretar o quitar permisos.
 8.Asignar los permisos siguienTes:
 			- .../auth/youtube.readonly     Ve tu cuenta de YouTube
 			- .../auth/youtube				Administrar tu cuenta de YouTube
@@ -38,3 +38,4 @@ API: https://developers.google.com/youtube/v3
 API DOC: https://developers.google.com/youtube/v3/docs/videos
 https://developers.google.com/youtube/terms/api-services-terms-of-service
 
+-  Crear canal de YouTube.

@@ -281,7 +281,7 @@ class configs_controller extends \mod_hybridteaching\controller\common_controlle
      * @param array $params An array of parameters for filtering categories.
      *                      Supported keys:
      *                      - category: The category to filter by.
-     * 
+     *
      * @param bool $subenabled Boolean indicating if subplugins are enabled.
      * @return array Returns an array containing the conditions and inparams for filtering categories.
      *               The array has the following keys:

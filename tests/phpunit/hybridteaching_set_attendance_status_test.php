@@ -90,7 +90,6 @@ class hybridteaching_set_attendance_status_test extends \advanced_testcase {
      * @param int $timeunit
      * @param int $grademodule
      * @param int $grade
-     * @covers \hybridteaching_set_attendance_status::set_attendance_status
      * @dataProvider dataprovider
      * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
      */
@@ -108,7 +107,8 @@ class hybridteaching_set_attendance_status_test extends \advanced_testcase {
             'config' => self::$config,
             'userecordvc' => self::$userecordvc,
             'usevideoconference' => self::$usevideoconference,
-            'grade' => $grademodule
+            'grade' => $grademodule,
+            'completionattendance' => 1
             ]);
         $cm = get_coursemodule_from_instance('hybridteaching', $hybridobject->id, self::$course->id);
         $hybridobject->usevideoconference = self::$usevideoconference;
@@ -140,6 +140,21 @@ class hybridteaching_set_attendance_status_test extends \advanced_testcase {
         $attendancejson = $external->set_attendance_status($attendanceid, $status, $hybridobject->id);
         $external->set_attendance_status_returns();
         $this->assertNotNull($attendancejson);
+
+        // Exception for calc_att_grade_for.
+        \mod_hybridteaching\helpers\grades::calc_att_grade_for($hybridobject, 999, $attendanceid);
+        $event = \core\event\course_module_updated::create([
+            'objectid' => $hybridobject->id,
+            'context' => \context_module::instance($cm->id),
+            'courseid' => self::$course->id,
+            'userid' => self::$user->id,
+            'other' => [
+                'modulename' => "1",
+                'instanceid' => 1,
+                'name' => 'eventupdate'
+            ],
+        ]);
+        \mod_hybridteaching_observer::course_module_updated($event);
 
     }
     public static function dataprovider(): array {

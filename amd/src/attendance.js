@@ -42,9 +42,6 @@ define([
         
         let queryString = window.location.search;
         let urlParams = new URLSearchParams(queryString);
-        //urlParams.get('view') == "sessionattendance" ? document.getElementById("sessionattendancebtn").style.display = "none" : "";
-        //urlParams.get('view') == "extendedstudentatt" ? document.getElementById("extendedstudentattbtn").style.display = "none" : "";
-            
         var hybridteachingid = urlParams.get('id');
         var sessionid = urlParams.get('sessionid');
         ajax.call([{
@@ -58,37 +55,33 @@ define([
             var table = document.getElementById('hybridteachingattendance');
             
             if (urlParams.get('view') == "sessionattendance" || urlParams.get('view') == null) {
-                if (Object.keys(response[0]).length > 0) {
-                    let allchecks = document.getElementById("select-all-attendance");
-                    allchecks.disabled = "true";
-                    
-                }
+                let allchecks = document.getElementById("select-all-attendance");
                 for (var i in response[0]) {
                     let check = document.getElementById('session-'+response[0][i].id);
-                    check.disabled = "true";
+                    if(check!=null){
+                        allchecks.disabled = "true";
+                        check.disabled = "true";
+                    }
+
                 }
             }
             if (urlParams.get('view')=="extendedsessionatt") {
-                if (Object.keys(response[1]).length > 0) {
-                    let allchecks = document.getElementById("select-all-attendance");
-                    allchecks.disabled = "true";
-                    console.log(response[1]);
-                }
+                let allchecks = document.getElementById("select-all-attendance");
                 for (var i in response[1]) {
                     let check = document.getElementById('attendance-'+response[1][i].id);
-                    console.log("fila:"+check.rowIndex)
-                    console.log("columna:"+check.cellIndex)
-                    console.log("------------");
-                    check.disabled = "true";
-                    for (var i = 1; i < table.rows.length; i++) {
-                        var rowatt = table.rows[i];
-                        var cellat = rowatt.cells[0];
-                        if (cellat.firstChild.id === check.id) {
-                            let cellatt = rowatt.cells[8].firstChild;
-                            cellatt.disabled = "true";
-                            console.log(cellatt);
+                    if(check != null){
+                        check.disabled = "true";
+                        for (var i = 1; i < table.rows.length; i++) {
+                            var rowatt = table.rows[i];
+                            var cellat = rowatt.cells[0];
+                            if (cellat.firstChild.id === check.id) {
+                                allchecks.disabled = "true";
+                                let cellatt = rowatt.cells[8].firstChild;
+                                cellatt.disabled = "true";
+                                console.log(cellatt);
+                            }
                         }
-                      }
+                    }
                 }
             }
         }).fail(err => {

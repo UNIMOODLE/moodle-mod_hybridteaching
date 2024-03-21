@@ -34,6 +34,7 @@
 
 namespace mod_hybridteaching;
 use mod_hybridteaching\controller\common_controller;
+use stdClass;
 
 defined('MOODLE_INTERNAL') || die();
 global $CFG;
@@ -56,6 +57,7 @@ class hybridteaching_print_session_info_test extends \advanced_testcase {
     private static $config;
     private static $userecordvc;
     private static $action;
+    private static $group;
     private static $usevideoconference;
     public const COURSE_START = 1704099600;
     public const COURSE_END = 1706605200;
@@ -67,8 +69,9 @@ class hybridteaching_print_session_info_test extends \advanced_testcase {
         $this->resetAfterTest(true);
         self::setAdminUser();
         self::$course = self::getDataGenerator()->create_course(
-            ['startdate' => self::COURSE_START, 'enddate' => self::COURSE_END]
+            ['name' => 'course1', 'startdate' => self::COURSE_START, 'enddate' => self::COURSE_END]
         );
+        self::$group = self::getDataGenerator()->create_group(['courseid' => self::$course->id, 'name' => 'group1']);
         self::$coursecontext = \context_course::instance(self::$course->id);
         self::$user = $USER;
         self::$userecordvc = 0;
@@ -87,11 +90,10 @@ class hybridteaching_print_session_info_test extends \advanced_testcase {
      * @param string $param
      * @param int $action
      * @param int $gradesattsession
-     * @covers \hybridteaching_print_session_info::print_session_info
      * @dataProvider dataprovider
      * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
      */
-    public function test_print_session_info($param, $action, $gradesattsession, $grade) {
+    public function test_print_session_info($param, $action, $gradesattsession, $grade = 0, $groupid = 0) {
         // Reset after execute the test.
         global $DB, $USER;
         // Module instance.
@@ -103,10 +105,12 @@ class hybridteaching_print_session_info_test extends \advanced_testcase {
             'name' => 'hybt',
             'timetype' => null,
             'config' => self::$config,
+            'groupid' => self::$group->id,
             'userecordvc' => self::$userecordvc,
             'grade' => $grade,
             'maxgradeattendanceunit' => $gradesattsession
             ]);
+        
         $cm = get_coursemodule_from_instance('hybridteaching', $hybridobject->id, self::$course->id);
       
         $sessioncontroller = new sessions_controller($hybridobject);
@@ -117,6 +121,7 @@ class hybridteaching_print_session_info_test extends \advanced_testcase {
         $data->name = $datadecoded->name;
         $data->context = $datadecoded->context;
         $data->starttime = time();
+        $data->groupid = self::$group->id;
         $data->durationgroup['duration'] = $datadecoded->durationgroup->duration;
         $data->durationgroup['timetype'] = $sessioncontroller::MINUTE_TIMETYPE;
         $data->duration = $sessioncontroller::calculate_duration($data->durationgroup['duration'],
@@ -129,12 +134,27 @@ class hybridteaching_print_session_info_test extends \advanced_testcase {
         $this->assertNotNull($sessionexpected);
         $attendancecontroller = new attendance_controller();
         //Get session info string.
+        $this->assertNotNull($attendancecontroller->hybridteaching_print_session_info(''));
         $this->assertNotNull($attendancecontroller->hybridteaching_print_session_info($sessionexpected));
         $sessioninfo = $attendancecontroller->hybridteaching_print_session_info($sessionexpected);
         $this->assertGreaterThan(0, strlen($sessioninfo));
         // Cambiar a attendance
         $allhyboj = $DB->get_record('hybridteaching', ['id' => $hybridobject->id]);
         $this->assertNotNull($attendancecontroller->hybridteaching_print_attendance_for_user($hybridobject->id, self::$user));
+        // No string noattendance in lang/en.
+        //$this->assertNotNull($attendancecontroller->hybridteaching_print_attendance_for_user('', self::$user));
+        //$this->assertNotNull($attendancecontroller->hybridteaching_print_attendance_for_user(0, self::$user));
+
+        $dataexport = new stdClass();
+        $dataexport->context = self::$coursecontext;
+        $dataexport->hybridteaching = $hybridobject;
+        // or other.
+        $dataexport->includeallsessions = 1;
+        // or other.
+        $dataexport->group = 0;
+        $dataexport->coursename = 'coursename';
+        $exporter = new \mod_hybridteaching\helpers\export($dataexport);
+
 
     }
     public static function dataprovider(): array {
@@ -142,11 +162,11 @@ class hybridteaching_print_session_info_test extends \advanced_testcase {
         return [
             ['{"hybridteachingid":1,"name":"Test de prueba", "description": "description of session","context":50,
              "starttime":1642736531,"durationgroup":{"duration":45000,"timetype":1}}'
-             , 1, '1', null],
+             , 1, '1', null, null],
 
             ['{"hybridteachingid":1,"name":"Test de prueba", "description": "description of session","context":50,
             "starttime":1642736531,"durationgroup":{"duration":45000,"timetype":2}}'
-             , 1, '2', 100],
+             , 1, '2', 100, self::$group->id],
 
             ['{"hybridteachingid":1,"name":"Test de prueba", "description": "description of session","context":50,
              "starttime":1642736531,"durationgroup":{"duration":45031,"timetype":1}}'
@@ -157,8 +177,8 @@ class hybridteaching_print_session_info_test extends \advanced_testcase {
              , 0, '1', null],
             
              ['{"hybridteachingid":2,"name":"Test de prueba","context":50,"starttime":1642736531,
-                "durationgroup":{"duration":0,"timetype":null}}'
-                , 0, '1', 100],
+                "durationgroup":{"duration":0,"timetype":1}}'
+                , 0, '1', 100, self::$group->id],
         ];
     }
 

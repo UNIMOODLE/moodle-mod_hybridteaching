@@ -4,7 +4,7 @@
 
 Obtener: idcliente, idtenant (inquilino), secretclient.
 
-1. Añadir URI de redirección:
+1. Añadir URI de redirección desde Azure, opción de menú Autenticación, añadiendo una plataforma Web:
 https://NOMBRE DEL DOMINIO/mod/hybridteaching/vc/teams/classes/teamsaccess.php
 https://NOMBRE DEL DOMINIO/mod/hybridteaching/vc/teams/classes/teamsaccessapp.php
 
@@ -42,7 +42,7 @@ Directivas a poder utilizar:
 1. Install-Module -Name PowerShellGet -Force -AllowClobber
 2. Install-Module -Name MicrosoftTeams -Force -AllowClobber
 3. Connect-MicrosoftTeams
-4. New-CsApplicationAccessPolicy -Identity hybridteaching -AppIds "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxx528de"
-5. Grant-CsApplicationAccessPolicy -PolicyName hybridteaching -Identity "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxx3ef3"
+4. New-CsApplicationAccessPolicy -Identity hybridteaching -AppIds "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxx528de"     (reemmplazar por ID de cliente)
+5. Grant-CsApplicationAccessPolicy -PolicyName hybridteaching -Identity "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxx3ef3"  (reemplazar por ID de user ppal)
 6. Grant-CsApplicationAccessPolicy -PolicyName hybridteaching -Global
 7. Se puede también configurar la poítica de vida útil del token de acceso (no puede exceder de 24 h, por defecto es de 3599 segs)

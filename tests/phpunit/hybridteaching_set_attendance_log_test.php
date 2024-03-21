@@ -58,6 +58,7 @@ class hybridteaching_set_attendance_log_test extends \advanced_testcase {
     private static $action;
     private static $usevideoconference;
 
+    private static $group;
     private static $validateattendance;
     public const COURSE_START = 1704099600;
     public const COURSE_END = 1706605200;
@@ -65,12 +66,25 @@ class hybridteaching_set_attendance_log_test extends \advanced_testcase {
 
     public function setUp(): void {
         global $USER;
+        $user1 = self::getDataGenerator()->create_user();
+        $user2 = self::getDataGenerator()->create_user();
+        $user3 = self::getDataGenerator()->create_user();
+        $user4 = self::getDataGenerator()->create_user();
+        $user5 = self::getDataGenerator()->create_user();
+        
         parent::setUp();
         $this->resetAfterTest(true);
         self::setAdminUser();
         self::$course = self::getDataGenerator()->create_course(
             ['startdate' => self::COURSE_START, 'enddate' => self::COURSE_END]
         );
+        self::getDataGenerator()->enrol_user($user1->id, self::$course->id);
+        self::getDataGenerator()->enrol_user($user2->id, self::$course->id);
+        self::getDataGenerator()->enrol_user($user3->id, self::$course->id);
+        self::getDataGenerator()->enrol_user($user4->id, self::$course->id);
+        self::getDataGenerator()->enrol_user($user5->id, self::$course->id);
+        self::$group = self::getDataGenerator()->create_group(['courseid' => self::$course->id]);
+        $this->getDataGenerator()->create_group_member(['userid' => $USER->id, 'groupid' => self::$group->id]);
         self::$coursecontext = \context_course::instance(self::$course->id);
         self::$user = $USER;
         self::$userecordvc = 0;
@@ -89,11 +103,10 @@ class hybridteaching_set_attendance_log_test extends \advanced_testcase {
      * @copyright  2023 Proyecto UNIMOODLE
      * @param string $param
      * @param int $action
-     * @covers \hybridteaching_set_attendance_log::set_attendance_log
      * @dataProvider dataprovider
      * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
      */
-    public function test_set_attendance_log($param, $action) {
+    public function test_set_attendance_log($param, $action, $attendanceunit) {
         // Reset after execute the test.
         global $DB, $USER;
         // Module instance.
@@ -108,6 +121,8 @@ class hybridteaching_set_attendance_log_test extends \advanced_testcase {
             'userecordvc' => self::$userecordvc,
             'usevideoconference' => self::$usevideoconference,
             'validateattendance' => self::$validateattendance,
+            'attendanceunit' => $attendanceunit,
+            'usercreator' => self::$user->id
             ]);
         $cm = get_coursemodule_from_instance('hybridteaching', $hybridobject->id, self::$course->id);
 
@@ -124,6 +139,8 @@ class hybridteaching_set_attendance_log_test extends \advanced_testcase {
         $data->duration = $sessioncontroller::calculate_duration($data->durationgroup['duration'],
                 $data->durationgroup['timetype']);
 
+        // Get user creator id.
+        $this->assertIsNumeric(\mod_hybridteaching\hybridteaching_proxy::get_instance_ownerid($hybridobject));
         // Create session.
         $session = $sessioncontroller->create_session($data);
         $sessionexpected = $sessioncontroller->get_session($session->id);
@@ -131,6 +148,8 @@ class hybridteaching_set_attendance_log_test extends \advanced_testcase {
         $attendancecontroller = new attendance_controller($hybridobject);
         
         $log = $attendancecontroller->hybridteaching_set_attendance_log($hybridobject, $sessionexpected, $action, self::$user->id);
+        // Another log.
+        $attendancecontroller->hybridteaching_set_attendance_log($hybridobject, $sessionexpected, $action, self::$user->id);
         $this->assertNotNull($log);
 
         // Set attendance.
@@ -138,7 +157,6 @@ class hybridteaching_set_attendance_log_test extends \advanced_testcase {
         $attendancesrecords = $DB->get_records('hybridteaching_attendance', ['hybridteachingid' => $session->id]);
         // Get time spent in attendance.
         $this->assertNotNull($attendancecontroller->get_user_timespent($attendanceid));
-        //hybridteaching_set_attendance_log($hybridteaching, $session, $action, $userid = 0, $event = false)
         $this->assertNotNull($attendancesrecords);
 
         $this->assertArrayHasKey('gstring', $log);
@@ -148,6 +166,9 @@ class hybridteaching_set_attendance_log_test extends \advanced_testcase {
         $external->get_display_actions($sessionexpected->id, self::$user->id);
         $external->get_display_actions_returns();
 
+        $hybridobject->coursecontext = self::$coursecontext;
+        $sessatt = \mod_hybridteaching\helpers\attendance::calculate_session_att($hybridobject, $sessionexpected->id, self::$group->id);
+        $this->assertNotNull($sessatt);
         
     }
     public static function dataprovider(): array {
@@ -155,16 +176,16 @@ class hybridteaching_set_attendance_log_test extends \advanced_testcase {
         return [
             ['{"hybridteachingid":1,"name":"Test de prueba", "description": "description of session","context":50,
              "starttime":1642736531,"durationgroup":{"duration":45000,"timetype":0}}'
-             , 1, ],
+             , 1, 1],
             ['{"hybridteachingid":2,"name":"Test de prueba","context":50,"starttime":1642736531,
              "durationgroup":{"duration":45000,"timetype":1}}'
-             , 0, ],
+             , 0, 2],
             ['{"hybridteachingid":1,"name":"Test de prueba", "description": "description of session","context":50,
              "starttime":1642736531,"durationgroup":{"duration":45000,"timetype":2}}'
-             , 1, ],
+             , 1, 3],
             ['{"hybridteachingid":2,"name":"Test de prueba","context":50,"starttime":1642736531,
              "durationgroup":{"duration":45000,"timetype":3}}'
-             , 0, ],
+             , 0, 0],
         ];
     }
 

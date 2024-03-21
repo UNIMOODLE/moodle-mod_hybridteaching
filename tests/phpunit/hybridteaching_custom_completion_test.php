@@ -79,7 +79,6 @@ class hybridteaching_custom_completion_test extends \advanced_testcase {
      * @package    mod_hybridteaching
      * @copyright  2023 Proyecto UNIMOODLE
      * @param string $param
-     * @covers \hybridteaching_custom_completion::custom_completion
      * @dataProvider dataprovider
      * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
      */
@@ -130,6 +129,7 @@ class hybridteaching_custom_completion_test extends \advanced_testcase {
         $this->assertNotNull($customsortorder);
         $this->assertGreaterThan(0, count($customsortorder));
 
+        // Update grades.
         hybridteaching_update_grades($hybridobject);
 
     }

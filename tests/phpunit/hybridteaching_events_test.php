@@ -87,7 +87,6 @@ class hybridteaching_events_test extends \advanced_testcase {
      * @copyright  2023 Proyecto UNIMOODLE
      * @param string $param
      * @param string $typevc
-     * @covers \hybridteaching_events::events
      * @dataProvider dataprovider
      * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
      */
@@ -193,7 +192,6 @@ class hybridteaching_events_test extends \advanced_testcase {
      */
     public function manage_events($hybridobject, $cm, $classname, $sessid) {
         $eventClassName = "\\mod_hybridteaching\\event\\" . $classname;
-
         $event = $eventClassName::create([
             'objectid' => $hybridobject->id,
             'context' => \context_module::instance($cm->id),
@@ -202,14 +200,81 @@ class hybridteaching_events_test extends \advanced_testcase {
                 'userid' => self::$user->id,
                 'sessid' => $sessid,
                 'attid' => 1,
+                'action' => 1
             ],
         ]);
         $this->assertNotNull($event->get_description());
         $this->assertNotNull($event->get_name());
         $this->assertNotNull($event->get_objectid_mapping());
-        if ($classname == 'course_module_viewed') {
-            $this->assertNotNull($event->get_url());
+        switch ($classname) {
+            case "session_added":
+                $event = $eventClassName::create([
+                    'objectid' => $hybridobject->id,
+                    'context' => \context_module::instance($cm->id),
+                    'other' => [
+                        'multiplesess' => "",
+                        'userid' => self::$user->id,
+                        'sessid' => $sessid,
+                        'attid' => 1,
+                        'action' => 1
+                    ],
+                ]);
+                $this->assertNotNull($event->get_description());
+                $reflectionMethod = new \ReflectionMethod(\mod_hybridteaching\event\session_added::class, 'get_legacy_logdata');
+                break;
+            case "course_module_viewed":
+                $this->assertNotNull($event->get_url());
+                $reflectionMethod = new \ReflectionMethod(\mod_hybridteaching\event\course_module_viewed::class, 'get_legacy_logdata');
+                break;
+            case "session_viewed":
+                $reflectionMethod = new \ReflectionMethod(\mod_hybridteaching\event\session_viewed::class, 'get_legacy_logdata');
+                break;
+            case "session_joined":
+                $reflectionMethod = new \ReflectionMethod(\mod_hybridteaching\event\session_joined::class, 'get_legacy_logdata');
+                $observer = new \mod_hybridteaching_observer();
+                $observer->session_joined($event);
+                break;
+            case "session_manage_viewed":
+                $reflectionMethod = new \ReflectionMethod(\mod_hybridteaching\event\session_manage_viewed::class, 'get_legacy_logdata');
+                break;
+            case "attendance_manage_viewed":
+                $reflectionMethod = new \ReflectionMethod(\mod_hybridteaching\event\attendance_manage_viewed::class, 'get_legacy_logdata');
+                break;
+            case "attendance_viewed":
+                $reflectionMethod = new \ReflectionMethod(\mod_hybridteaching\event\attendance_viewed::class, 'get_legacy_logdata');
+                break;
+            case "session_record_downloaded":
+                $reflectionMethod = new \ReflectionMethod(\mod_hybridteaching\event\session_record_downloaded::class, 'get_legacy_logdata');
+                break;
+            case "session_record_viewed":
+                $reflectionMethod = new \ReflectionMethod(\mod_hybridteaching\event\session_record_viewed::class, 'get_legacy_logdata');
+                break;
+            case 'attendance_updated':
+                $reflectionMethod = new \ReflectionMethod(\mod_hybridteaching\event\attendance_updated::class, 'get_legacy_logdata');
+                break;
+            case 'session_added':
+                $reflectionMethod = new \ReflectionMethod(\mod_hybridteaching\event\session_added::class, 'get_legacy_logdata');      
+                break;
+            case 'session_deleted':
+                $reflectionMethod = new \ReflectionMethod(\mod_hybridteaching\event\session_deleted::class, 'get_legacy_logdata');             
+                break;
+            case 'session_finished':
+                $reflectionMethod = new \ReflectionMethod(\mod_hybridteaching\event\session_finished::class, 'get_legacy_logdata');                
+                break;
+            case 'session_info_viewed':
+                $reflectionMethod = new \ReflectionMethod(\mod_hybridteaching\event\session_info_viewed::class, 'get_legacy_logdata');                
+                break;
+            case 'session_updated':
+                $reflectionMethod = new \ReflectionMethod(\mod_hybridteaching\event\session_updated::class, 'get_legacy_logdata');
+                break;
+            default:
+                break;
         }
+        $reflectionMethod->setAccessible(true);
+        $getlegacylogdata = $reflectionMethod->invoke($event);
+
+
+        
 
     }
     

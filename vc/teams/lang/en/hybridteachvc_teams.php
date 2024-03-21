@@ -51,3 +51,5 @@ $string['recordingnotfound'] = 'Recording not found in courseid {$a->course}: \'
 $string['recordingnotdownload'] = 'Cannot download recording from courseid {$a->course}: \'{$a->name}\'  with meetingid: {$a->meetingid}';
 $string['recordingnoexists'] = 'Recording not exists in courseid {$a->course} : \'{$a->name}\' with meetingid {$a->meetingid}';
 $string['emailorganizatornotfound'] = 'The organizers email was not found in the selected Teams organization.';
+$string['incorrectconfig'] = 'Incorrect configuration or access to Teams for session \'{$a->name}\' from course {$a->course}. Contact your administrator for Teams settings.';
+$string['correctdownload'] = 'Successful download of the course recording {$a->course}: \'{$a->name}\' with meetingid {$a->meetingid}';

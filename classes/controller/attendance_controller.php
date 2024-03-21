@@ -191,7 +191,7 @@ class attendance_controller extends \mod_hybridteaching\controller\common_contro
             $where .= " AND $extraselect ";
         }
         if (!empty($params['userid'])) {
-            if ($params['view'] == 'studentattendance') {
+            if ($params['view'] == 'studentattendance' || $params['view'] == 'extendedstudentatt') {
                 $userid = $params['userid'];
                 $where .= 'AND userid = ' . $userid . ' ';
             }
@@ -365,7 +365,11 @@ class attendance_controller extends \mod_hybridteaching\controller\common_contro
      */
     public function count_sess_attendance($params = []) {
         global $DB;
-        return count($DB->get_records('hybridteaching_attendance', $params, '', 'id'));
+        $sql = 'SELECT *
+                  FROM {hybridteaching_attendance}
+                 WHERE sessionid = :sessionid
+                   AND status != :status';
+        return count($DB->get_records_sql($sql, $params));
     }
 
     /**
@@ -445,7 +449,7 @@ class attendance_controller extends \mod_hybridteaching\controller\common_contro
             }
         }
     }
-    
+
     /**
      * Get attendance logs for a specific attendance ID.
      *
@@ -684,19 +688,6 @@ class attendance_controller extends \mod_hybridteaching\controller\common_contro
         list($course, $cm) = get_course_and_cm_from_instance($hid, 'hybridteaching');
         return get_enrolled_users(\context_module::instance($cm->id), 'mod/hybridteaching:attendanceregister',
             0,  $userfields = 'u.*',  $orderby = '', 0, 0);
-        $sql = "SELECT DISTINCT u.id, u.firstname, u.lastname
-                  FROM {hybridteaching_attendance} att
-                  JOIN {user} u
-                    ON (u.id = att.userid)
-                 WHERE att.hybridteachingid = :hid
-                   AND att.connectiontime != 0
-              ORDER BY u.lastname ASC";
-        $params = ['hid' => $hid];
-        try {
-            return $DB->get_records_sql($sql, $params);
-        } catch (\Throwable $dbexception) {
-            throw $dbexception;
-        }
     }
 
 
@@ -718,11 +709,38 @@ class attendance_controller extends \mod_hybridteaching\controller\common_contro
         if (!$hid) {
             return false;
         }
+        $params = [];
         $sortd = [0 => 'total', 1 => 'vc' , 2 => 'classroom', 3 => 'lastname'];
         !in_array($sort, $sortd) ? $prefix = 'u.' : $prefix = '';
-        !empty($fname) ? $fname = " AND u.firstname like '" . $fname . "%' " : '';
-        !empty($lname) ? $lname = " AND u.lastname like '" . $lname . "%' " : '';
-        $sql = "SELECT userid, u.lastname,
+        !empty($fname) ? $fname = " AND UPPER(u.firstname) like '" . $fname . "%' " : '';
+        !empty($lname) ? $lname = " AND UPPER(u.lastname) like '" . $lname . "%' " : '';
+        $users = self::hybridteaching_get_instance_users($hid);
+        [$insql, $inparams] = $DB->get_in_or_equal($users, SQL_PARAMS_NAMED, 'id');
+        foreach ($inparams as $key => $values) {
+            $params[$key] = $values->id;
+        }
+        $sql = "SELECT userid, u.lastname
+                  FROM {user} u
+             LEFT JOIN {hybridteaching_attendance} ha ON  u.id = ha.userid
+                  JOIN {hybridteaching_session} s ON (ha.sessionid = s.id)
+                 WHERE u.id " . $insql . " " . $fname . $lname . "
+              GROUP BY ha.userid, u.lastname, u.id
+              ORDER BY " . $prefix . $sort . " " . $dir;
+              $params['hid'] = $hid;
+        try {
+            return $DB->get_records_sql($sql, $params);
+        } catch (\Throwable $dbexception) {
+            throw $dbexception;
+        }
+    }
+
+    public static function get_student_participation($hid = '', $userid = 0) {
+        global $DB;
+
+        if (!$hid || !$userid) {
+            return false;
+        }
+        $sql = "SELECT ha.userid,
                          COUNT(type) AS total,
                       SUM(CASE
                          WHEN type <> 0 THEN 0
@@ -733,19 +751,17 @@ class attendance_controller extends \mod_hybridteaching\controller\common_contro
                          ELSE 0
                       END) AS vc
                   FROM
-                       {hybridteaching_attendance} at
+                       {hybridteaching_attendance} ha
                   JOIN
-                       {hybridteaching_session} s ON (at.sessionid = s.id)
-                  JOIN {user} u ON (u.id = at.userid)
-                 WHERE at.hybridteachingid = :hid
-                   AND (at.connectiontime != 0 OR at.status = 1)
-                   AND at.visible = 1" .
-                    $fname . $lname . "
-              GROUP BY at.userid, u.lastname, u.id
-              ORDER BY " . $prefix . $sort . " " . $dir;
-        $param = ['hid' => $hid];
+                       {hybridteaching_session} s ON (ha.sessionid = s.id)
+                 WHERE ha.hybridteachingid = :hid
+                   AND (ha.connectiontime != 0 OR ha.status = 1)
+                   AND ha.visible = 1
+                   AND ha.userid = :userid
+              GROUP BY ha.userid";
+
         try {
-            return $DB->get_records_sql($sql, $param);
+            return $DB->get_record_sql($sql, ['hid' => $hid, 'userid' => $userid]);
         } catch (\Throwable $dbexception) {
             throw $dbexception;
         }
@@ -1143,7 +1159,7 @@ class attendance_controller extends \mod_hybridteaching\controller\common_contro
         global $DB;
 
         $shouldjoin = false;
-        $attid = $DB->get_field('hybridteaching_attendance', 'id', ['sessionid' => $sessionid,'userid' => $userid]);
+        $attid = $DB->get_field('hybridteaching_attendance', 'id', ['sessionid' => $sessionid, 'userid' => $userid]);
         if ($attid) {
             $logaction = self::hybridteaching_get_last_attend($attid, $userid);
             if (is_object($logaction) && $logaction->action == 0) {

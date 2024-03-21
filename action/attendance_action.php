@@ -74,6 +74,9 @@ $hybridteaching = $DB->get_record('hybridteaching', ['id' => $hybridteachingid],
 $attendancecontroller = new attendance_controller($hybridteaching, 'hybridteaching_attendance');
 $mform = null;
 
+$urlview = new moodle_url($CFG->wwwroot . '/mod/hybridteaching/attendance.php',
+    ['id' => $moduleid]);
+
 switch ($action) {
     case 'disable':
         $attendancecontroller->enable_data($attid, false, 'hybridteaching_attendance');
@@ -84,35 +87,23 @@ switch ($action) {
         attendance_controller::update_session_visibility($sessionid, 1);
         break;
     case 'view':
-        if ($view == 'sessionattendance') {
-            redirect($return = new moodle_url($CFG->wwwroot . '/mod/hybridteaching/attendance.php',
-                ['id' => $moduleid, 'sessionid' => $sessionid, 'view' => 'extendedsessionatt']));
-        }
-
-        if ($view == 'extendedsessionatt') {
-            redirect($return = new moodle_url($CFG->wwwroot . '/mod/hybridteaching/attendance.php',
-                ['id' => $moduleid, 'sessionid' => $sessionid, 'view' => 'attendlog', 'attid' => $attid, 'userid' => $userid]));
-        }
-
+        $view == 'sessionattendance' ? $urlview->params(['view' => 'extendedsessionatt', 'sessionid' => $sessionid]) : '';
+        $view == 'extendedsessionatt' ? $urlview->params(['view' =>'attendlog', 'userid' => $userid, 'sessionid' => $sessionid, 'attid' => $attid]) : '';
         if ($view == 'studentattendance') {
             $log ? $rview = 'attendlog' : $rview = 'extendedsessionatt';
-            redirect($return = new moodle_url($CFG->wwwroot . '/mod/hybridteaching/attendance.php',
-                ['id' => $moduleid, 'sessionid' => $sessionid, 'view' => $rview, 'attid' => $attid, 'userid' => $userid]));
+            $urlview->params(['view' => $rview, 'userid' => $userid, 'attid' => $attid, 'sessionid' => $sessionid]);
         }
+        $view == 'extendedstudentatt' ? $urlview->params(['sessionid' => 0, 'view' =>'studentattendance', 'userid' => $userid, 'attid' => $attid]) : '';
+        $view == 'studentattsessions' ? $urlview->params(['view' =>'attendlog', 'userid' => $userid, 'attid' => $attid, 'sessionid' => $sessionid]) : '';
 
-        if ($view == 'extendedstudentatt') {
-            redirect($return = new moodle_url($CFG->wwwroot . '/mod/hybridteaching/attendance.php',
-                ['id' => $moduleid, 'sessionid' => 0, 'view' => 'studentattendance', 'attid' => $attid, 'userid' => $userid]));
-        }
-        if ($view == 'studentattsessions') {
-            redirect($return = new moodle_url($CFG->wwwroot . '/mod/hybridteaching/attendance.php',
-                ['id' => $moduleid, 'sessionid' => $sessionid, 'view' => 'attendlog', 'userid' => $userid, 'attid' => $attid]));
-        }
+        redirect($urlview);
+       
         break;
     case 'userinf':
-        redirect($return = new moodle_url($CFG->wwwroot . '/mod/hybridteaching/attendance.php',
-            ['id' => $moduleid, 'sessionid' => 0, 'view' => 'studentattendance', 'attid' => $attid,
-            'userid' => $attendancecontroller::hybridteaching_get_attendance_from_id($attid)->userid, ]));
+
+        $urlview->params(['sessionid' => 0, 'view' => 'studentattendance', 'attid' => $attid
+        , 'userid' => $attendancecontroller::hybridteaching_get_attendance_from_id($attid)->userid,]);
+        redirect($urlview);
         break;
 
         // Bulk options.
@@ -122,19 +113,15 @@ switch ($action) {
             $useratt = array_key_first($attendsid);
             $userid = $attendancecontroller->hybridteaching_get_attendance_from_id($attendsid[$useratt])->userid;
             $view == 'studentattendance' ?
-            $return = new moodle_url($CFG->wwwroot . '/mod/hybridteaching/attendance.php',
-                ['id' => $moduleid, 'userid' => $userid, 'view' => $view])
+            $urlview->params(['view' => $view, 'userid' => $userid])
             :
-            $return = new moodle_url($CFG->wwwroot . '/mod/hybridteaching/attendance.php',
-                ['id' => $moduleid, 'sessionid' => $sessionid, 'view' => $view]);
+            $urlview->params(['view' => $view, 'sessionid' => $sessionid]);
 
         } else {
             $view == 'studentattendance' ?
-            $return = new moodle_url($CFG->wwwroot . '/mod/hybridteaching/attendance.php',
-                ['id' => $moduleid, 'userid' => $userid, 'view' => $view])
+            $urlview->params(['view' => $view, 'userid' => $userid])
             :
-            $return = new moodle_url($CFG->wwwroot . '/mod/hybridteaching/attendance.php',
-                ['id' => $moduleid, 'sessionid' => $sessionid, 'view' => $view]);
+            $urlview->params(['view' => $view, 'sessionid' => $sessionid]);
         }
 
         $ids = optional_param('ids', '', PARAM_ALPHANUMEXT);
@@ -152,17 +139,13 @@ switch ($action) {
         $mform = ($action === 'bulksetattendance') ? new bulk_set_attendance_form($url, $formparams)
             : false;
         if ($mform->is_cancelled()) {
-            redirect($return);
+            redirect($urlview);
         }
         if ($formdata = $mform->get_data()) {
             $attendancecontroller->update_multiple_attendance(explode('_', $formdata->ids), $formdata);
-            redirect($return);
+            redirect($urlview);
         }
-
-        echo $OUTPUT->header();
-        echo $attendancerenderer->print_attendance_bulk_table($attendsid);
-        echo $mform->display();
-        echo $OUTPUT->footer();
+        print_attendance_action($mform, $attendancerenderer, 'bulksetattendance', $attendsid, null);
         break;
     case 'bulksetexempt':
         $attendsid = optional_param_array('attendance', '', PARAM_SEQUENCE);
@@ -170,19 +153,16 @@ switch ($action) {
             $useratt = array_key_first($attendsid);
             $userid = $attendancecontroller->hybridteaching_get_attendance_from_id($attendsid[$useratt])->userid;
             $view == 'studentattendance' ?
-            $return = new moodle_url($CFG->wwwroot . '/mod/hybridteaching/attendance.php',
-                ['id' => $moduleid, 'userid' => $userid, 'view' => $view])
+            $urlview->params(['userid' => $userid, 'view' => $view])
             :
-            $return = new moodle_url($CFG->wwwroot . '/mod/hybridteaching/attendance.php',
-                ['id' => $moduleid, 'sessionid' => $sessionid, 'view' => $view]);
+            $$urlview->params(['sessionid' => $sessionid, 'view' => $view]);
 
         } else {
             $view == 'studentattendance' ?
-            $return = new moodle_url($CFG->wwwroot . '/mod/hybridteaching/attendance.php',
-                ['id' => $moduleid, 'userid' => $userid, 'view' => $view])
+            $urlview->params(['view' => $view, 'userid' => $userid])
             :
-            $return = new moodle_url($CFG->wwwroot . '/mod/hybridteaching/attendance.php',
-                ['id' => $moduleid, 'sessionid' => $sessionid, 'view' => $view]);
+            $urlview->params(['view' => $view, 'sessionid' => $sessionid]);
+
         }
         $ids = optional_param('ids', '', PARAM_ALPHANUMEXT);
         $PAGE->set_title(format_string($hybridteaching->name));
@@ -198,21 +178,17 @@ switch ($action) {
         $mform = ($action === 'bulksetexempt') ? new bulk_set_exempt_form($url, $formparams)
             : false;
         if ($mform->is_cancelled()) {
-            redirect($return);
+            redirect($urlview);
         }
         if ($formdata = $mform->get_data()) {
             $attendancecontroller->update_multiple_attendance(explode('_', $formdata->ids), $formdata);
-            redirect($return);
+            redirect($urlview);
         }
-
-        echo $OUTPUT->header();
-        echo $attendancerenderer->print_attendance_bulk_table($attendsid, 'bulksetexempt');
-        echo $mform->display();
-        echo $OUTPUT->footer();
+        print_attendance_action($mform, $attendancerenderer, 'bulksetexempt', $attendsid, null);
         break;
     case 'bulksetsessionexempt':
-        $return = new moodle_url($CFG->wwwroot . '/mod/hybridteaching/attendance.php',
-                ['id' => $moduleid, 'view' => $view]);
+        $urlview->params(['view' => $view]);
+        
         $attendsid = optional_param_array('session', '', PARAM_SEQUENCE);
         $ids = optional_param('ids', '', PARAM_ALPHANUMEXT);
 
@@ -237,17 +213,13 @@ switch ($action) {
         $mform = ($action === 'bulksetsessionexempt') ? new bulk_set_session_exempt_form($url, $formparams)
             : false;
         if ($mform->is_cancelled()) {
-            redirect($return);
+            redirect($urlview);
         }
         if ($formdata = $mform->get_data()) {
             $attendancecontroller->update_multiple_sessions_exempt(explode('_', $formdata->ids), $formdata);
-            redirect($return);
+            redirect($urlview);
         }
-
-        echo $OUTPUT->header();
-        echo $attendancerenderer->print_attendance_bulk_table($sessionsids, 'sessionbulk');
-        echo $mform->display();
-        echo $OUTPUT->footer();
+        print_attendance_action($mform, $attendancerenderer, 'bulksetsessionexempt', null, $sessionsids);
         break;
     default:
         redirect($return);
@@ -275,4 +247,32 @@ if ($action == 'disable' || $action == 'enable') {
 
 if (empty($mform)) {
     redirect($return);
+}
+
+/**
+ * Display the print attendance action.
+ *
+ * @param object $mform mform object
+ * @param mod_hybridteaching\output\attendance_render $attendancerenderer renderer
+ * @param string $action bulksetattendance || bulksetexempt || bulksetsessionexempt
+ * @param array $attendsid attends ids
+ * @param array $sessionsids sessions ids
+ */
+function print_attendance_action($mform, $attendancerenderer, $action, $attendsid = null, $sessionsids = null) {
+    global $OUTPUT;
+    echo $OUTPUT->header();
+    switch ($action) {
+        case "bulksetattendance":
+            $attendancerenderer->print_attendance_bulk_table($attendsid);
+            break;
+        case "bulksetexempt":
+            $attendancerenderer->print_attendance_bulk_table($attendsid, 'bulksetexempt');
+            break;
+        case "bulksetsessionexempt":
+            $attendancerenderer->print_attendance_bulk_table($sessionsids, 'sessionbulk');
+            break;
+    }
+    $mform != null && ($action == "bulksetattendance" || $action == "bulksetexempt" || $action == "bulksetsessionexempt") 
+    ? $mform->display() : '';
+    echo $OUTPUT->footer();
 }

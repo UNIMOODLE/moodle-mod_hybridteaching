@@ -448,7 +448,7 @@ class sessions_render extends \flexible_table {
             'info' => $info,
             'record' => $record,
             'chats' => $chats,
-            'attcheck' => $attcheck
+            'attcheck' => $attcheck,
         ];
 
         return $options;
@@ -679,8 +679,8 @@ class sessions_render extends \flexible_table {
             if (!has_capability('mod/hybridteaching:sessionsactions', $this->context) && $session['visiblerecord'] == 0) {
                 $recordingbutton = get_string('norecording', 'hybridteaching');
             } else {
-                if ($session['userecordvc'] == 1 && $session['processedrecording'] >= 0) {
-                    if ($session['storagereference'] > 0) {
+                if ($session['storagereference'] > 0) {
+                    if ($session['userecordvc'] == 1 && $session['processedrecording'] > 0) {
                         $classstorage = sessions_controller::get_subpluginstorage_class($session['storagereference']);
                         $config = helper::subplugin_config_exists($session['storagereference'], 'store');
 
@@ -716,26 +716,28 @@ class sessions_render extends \flexible_table {
                             }
                         }
                     }
+                } else {
+                    if ($session['userecordvc'] == 1 && $session['processedrecording'] >= 0) {
+                        $config = helper::subplugin_config_exists($session['vcreference'], 'vc');
+                        if ($config) {
+                            // Check if exists recording meeting to get the url.
+                            sessions_controller::require_subplugin_session($session['typevc']);
+                            $classname = sessions_controller::get_subpluginvc_class($session['typevc']);
+                            $sessionrecording = new $classname($session['id']);
 
-                    $config = helper::subplugin_config_exists($session['vcreference'], 'vc');
-                    if ($config) {
-                        // Check if exists recording meeting to get the url.
-                        sessions_controller::require_subplugin_session($session['typevc']);
-                        $classname = sessions_controller::get_subpluginvc_class($session['typevc']);
-                        $sessionrecording = new $classname($session['id']);
-
-                        // Get recording if there are subplugin without api to download recordings (ex. BBB).
-                        // Then, get the recording from url from vc subplugin or similar.
-                        if ($session['storagereference'] == -1) {
-                            if (method_exists($sessionrecording, 'get_recording')) {
-                                $urlrecording = $sessionrecording->get_recording($this->context);
-                                if (isset($urlrecording['recording']) && $urlrecording['recording'] != '') {
-                                    $recordingbutton = html_writer::link($urlrecording['recording'], get_string('watchrecording',
-                                        'mod_hybridteaching'), ['target' => '_blank', 'class' => 'btn btn-secondary']);
-                                }
-                                if (isset($urlrecording['materials']) && $urlrecording['materials'] != '') {
-                                    $fileurls .= html_writer::tag('a', get_string('notesurlmeeting', 'hybridteaching'),
-                                    ['href' => $urlrecording['materials'], 'target' => '_blank']);
+                            // Get recording if there are subplugin without api to download recordings (ex. BBB).
+                            // Then, get the recording from url from vc subplugin or similar.
+                            if ($session['storagereference'] == -1) {
+                                if (method_exists($sessionrecording, 'get_recording')) {
+                                    $urlrecording = $sessionrecording->get_recording($this->context);
+                                    if (isset($urlrecording['recording']) && $urlrecording['recording'] != '') {
+                                        $recordingbutton = html_writer::link($urlrecording['recording'], get_string('watchrecording',
+                                            'mod_hybridteaching'), ['target' => '_blank', 'class' => 'btn btn-secondary']);
+                                    }
+                                    if (isset($urlrecording['materials']) && $urlrecording['materials'] != '') {
+                                        $fileurls .= html_writer::tag('a', get_string('notesurlmeeting', 'hybridteaching'),
+                                        ['href' => $urlrecording['materials'], 'target' => '_blank']);
+                                    }
                                 }
                             }
                         }

@@ -40,10 +40,10 @@ $string['alias'] = 'BBB';
 
 $string['bbberr_field_missing'] = '{$a} no encontrado';
 $string['errorwebservice'] = 'Error de webservice de BBB: {$a}.';
-$string['bbberr_no_access_token'] = 'No access token returned';
+$string['bbberr_no_access_token'] = 'No se encontró token de acceso';
 
-$string['view_error_unable_join_student'] = 'Unable to connect to the BigBlueButton server.';
-$string['view_error_unable_join_teacher'] = 'Unable to connect to the BigBlueButton server. Please contact an administrator.';
+$string['view_error_unable_join_student'] = 'No se pudo conectar al servidor BigBlueButton.';
+$string['view_error_unable_join_teacher'] = 'No se pudo conectar al servidor BigBlueBotton. Póngase en contacto con el administrador.';
 $string['view_error_unable_join'] = 'Incapaz de unirse a la sesión. Por favor compruebe el servidor añadido en la configuración de BigBlueButton y compruebe que el servidor de BigBlueButton está en funcionamiento.';
 
 $string['downloadrecordsbbb'] = 'Descargar grabaciones BigBlueButton';
@@ -53,3 +53,6 @@ $string['bbb:use'] = 'Generar videconferencias BigBlueButton';
 $string['bbb:record'] = 'Almacenar grabaciones BigBlueButton';
 
 $string['recordingnotfound'] = 'No se encontró la grabación en el curso {$a->course}: \'{$a->name}\'';
+$string['meetingrunning'] = 'La reunión con meetingID {$a} está en ejecución. Aún no está disponible la grabación.';
+$string['unknownerror'] = 'Se produjo un problema con la grabación del meetingID {$a}.';
+$string['correctgetrecording'] = 'Grabación obtenida correctamente para la sesión \'{$a->name}\' del curso id {$a->course}';

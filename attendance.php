@@ -63,22 +63,30 @@ echo $OUTPUT->header();
 echo $OUTPUT->heading(get_string('attendance', 'hybridteaching'));
 
 if (has_capability('mod/hybridteaching:sessionsfulltable', $context, $user, $doanything = true)) {
-    if ($_GET['view'] == 'extendedstudentatt') {
-        echo "<a href='attendance.php?id=".$id."&view=sessionattendance' class='btn btn-info' role='button'>" .
-        get_string('sessionsattendance', 'hybridteaching') . "</a>";
-    }
-    else if ($_GET['view'] == 'sessionattendance') {
+    if (!empty(optional_param('view', '', PARAM_TEXT))) {
+        if ($_GET['view'] == 'extendedstudentatt') {
+            echo "<a href='attendance.php?id=".$id."&view=sessionattendance' class='btn btn-info' role='button'>" .
+            get_string('sessionsattendance', 'hybridteaching') . "</a>";
+        } else if ($_GET['view'] == 'sessionattendance') {
+            echo "<a href='attendance.php?id=".$id."&view=extendedstudentatt'
+                id='extendedstudentattbtn' class='btn btn-info mr-3' role='button'>" .
+            get_string('studentsattendance', 'hybridteaching') . "</a>";
+        } else {
+            echo "<a href='attendance.php?id=".$id."&view=extendedstudentatt'
+                id='extendedstudentattbtn' class='btn btn-info mr-3' role='button'>" .
+            get_string('studentsattendance', 'hybridteaching') . "</a>";
+            echo "<a href='attendance.php?id=".$id."&view=sessionattendance' class='btn btn-info' role='button'>" .
+            get_string('sessionsattendance', 'hybridteaching') . "</a>";
+        }
+    } else {
         echo "<a href='attendance.php?id=".$id."&view=extendedstudentatt' id='extendedstudentattbtn' class='btn btn-info mr-3' role='button'>" .
         get_string('studentsattendance', 'hybridteaching') . "</a>";
-    }
-    else {
-        echo "<a href='attendance.php?id=".$id."&view=extendedstudentatt' id='extendedstudentattbtn' class='btn btn-info mr-3' role='button'>" .
-        get_string('studentsattendance', 'hybridteaching') . "</a>";
-        echo "<a href='attendance.php?id=".$id."&view=sessionattendance' class='btn btn-info' role='button'>" .
-        get_string('sessionsattendance', 'hybridteaching') . "</a>";
     }
 }
-//notify_controller::notify_message(get_string('info:sessioninprogress', 'hybridteaching'));
-//notify_controller::show();
+$attsessionrecords = \mod_hybridteaching\controller\sessions_controller::get_sessions_in_progress($cm->instance);
+if (count($attsessionrecords) > 0) {
+    notify_controller::notify_message(get_string('info:sessioninprogress', 'hybridteaching'));
+    notify_controller::show();
+}
 echo $attendancerender->print_attendance_table();
 echo $OUTPUT->footer();

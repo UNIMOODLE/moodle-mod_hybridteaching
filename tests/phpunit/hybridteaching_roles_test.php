@@ -68,6 +68,7 @@ class hybridteaching_roles_test extends \advanced_testcase {
         );
         self::$coursecontext = \context_course::instance(self::$course->id);
         self::$user = $USER;
+        self::getDataGenerator()->enrol_user(self::$user->id, self::$course->id);
         self::$userecordvc = 0;
         self::$config = 0;
     }
@@ -82,7 +83,6 @@ class hybridteaching_roles_test extends \advanced_testcase {
      * @param string $context
      * @param string $role
      * @param array $participantList
-     * @covers \hybridteaching_roles::roles
      * @dataProvider dataprovider
      * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
      */

@@ -172,8 +172,8 @@ class mod_hybridteaching_mod_form extends moodleform_mod {
         $mform->addHelpButton('graceperiod', 'graceperiod', 'hybridteaching');
         $mform->setType('graceperiod', PARAM_INT);
 
-        $mform->addElement('text', 'wellcomemessage', get_string('wellcomemessage','hybridteaching'), ['size' => 80]);
-        $mform->addHelpButton('wellcomemessage','wellcomemessage','hybridteaching');
+        $mform->addElement('text', 'wellcomemessage', get_string('wellcomemessage','hybridteaching'), ['size' => 80,]);
+        $mform->addHelpButton('wellcomemessage', 'wellcomemessage', 'hybridteaching');
         $mform->setType('wellcomemessage', PARAM_TEXT);
 
         // Sección Opciones de bloqueo iniciales de la videoconferencia.
@@ -227,7 +227,7 @@ class mod_hybridteaching_mod_form extends moodleform_mod {
             HYBRIDTEACHING_MODFORM_HOURS => get_string('hours'),
             HYBRIDTEACHING_MODFORM_MINUTES => get_string('minutes'),
             HYBRIDTEACHING_MODFORM_SECS => get_string('seconds'),
-            HYBRIDTEACHING_MODFORM_TOTAL_DURATION =>get_string('totalduration', 'hybridteaching'),
+            HYBRIDTEACHING_MODFORM_TOTAL_DURATION => get_string('totalduration', 'hybridteaching'),
         ];
         $mform->addGroup([
             $mform->createElement('text', 'validateattendance', '', ['size' => 5]),

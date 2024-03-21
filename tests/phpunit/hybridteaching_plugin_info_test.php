@@ -39,6 +39,7 @@ defined('MOODLE_INTERNAL') || die();
 global $CFG;
 require_once($CFG->dirroot . '/mod/hybridteaching/classes/controller/sessions_controller.php');
 require_once($CFG->dirroot . '/mod/hybridteaching/classes/helpers/calendar_helpers.php');
+require_once($CFG->dirroot . '/mod/hybridteaching/lib.php');
 require_once($CFG->dirroot . '/config.php');
 
 use mod_hybridteaching\plugininfo\hybridteachstore;
@@ -89,7 +90,6 @@ class hybridteaching_plugin_info_test extends \advanced_testcase {
      * @param string $newname
      * @param string $newdescription
      * @param string $typevc
-     * @covers \hybridteaching_plugin_info::plugin_info
      * @dataProvider dataprovider
      * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
      */
@@ -106,25 +106,6 @@ class hybridteaching_plugin_info_test extends \advanced_testcase {
             ]);
         $cm = get_coursemodule_from_instance('hybridteaching', $hybridobject->id, self::$course->id);
 
-        $sessioncontroller = new sessions_controller($hybridobject);
-        // Simulate data form.
-        $datadecoded = json_decode($baseparam);
-        $data = new \StdClass();
-        $data->hybridteachingid = $hybridobject->id;
-        $data->name = $datadecoded->name;
-        $data->typevc = $typevc;
-        $data->updatecalen = self::$updatecalen;
-        $data->context = $datadecoded->context;
-        $data->starttime = time();
-        $data->durationgroup['duration'] = $datadecoded->durationgroup->duration;
-        $data->durationgroup['timetype'] = $sessioncontroller::MINUTE_TIMETYPE;
-        $data->duration = $sessioncontroller::calculate_duration($data->durationgroup['duration'],
-                $data->durationgroup['timetype']);
-
-        // Create session.
-        $session = $sessioncontroller->create_session($data);
-        
-        $sessionexpected = $sessioncontroller->get_session($session->id);
         $hybridteachvc = new hybridteachvc();
         $hybridteachstore = new hybridteachstore();
         $this->assertTrue($hybridteachvc->is_uninstall_allowed());
@@ -135,21 +116,25 @@ class hybridteaching_plugin_info_test extends \advanced_testcase {
 
         $this->assertIsBool($hybridteachvc->is_enabled());
         $this->assertIsBool($hybridteachstore->is_enabled());
+        // Return if the plugin supports it.
+        $supp = hybridteaching_supports(FEATURE_MOD_PURPOSE);
+        $this->assertNotNull($supp);
+
     }
 
     public static function dataprovider(): array {
 
         return [
-            ['{"hybridteachingid":1,"name":"Session 1", "description":"description 1","context":50,"starttime":1642736531,
+            ['{"hybridteachingid":1,"name":"Session 1","context":50,"starttime":1642736531,
              "durationgroup":{"duration":45000,"timetype":null}}',
              "Session testing edited", "Description of session edited", "bbb" ],
-             ['{"hybridteachingid":1,"name":"Session 1", "description":"description 1","context":50,"starttime":1642736531,
+             ['{"hybridteachingid":1,"name":"Session 1","context":50,"starttime":1642736531,
              "durationgroup":{"duration":45000,"timetype":null}}',
              "Session testing edited", "Description of session edited", "bbb", 1 ],
-            ['{"hybridteachingid":1,"name":"Session 2", "description":"description 2","context":50,"starttime":1642736531,
+            ['{"hybridteachingid":1,"name":"Session 2","context":50,"starttime":1642736531,
              "durationgroup":{"duration":45000,"timetype":null}}',
              "Session testing edited 2", "Description of session 2 edited", "meet"],
-            ['{"hybridteachingid":1,"name":"Session 2", "description":"description 2","context":50,"starttime":1642736531,
+            ['{"hybridteachingid":1,"name":"Session 2","context":50,"starttime":1642736531,
              "durationgroup":{"duration":45000,"timetype":null}}',
              "Session testing edited 2", "Description of session 2 edited", "meet" ],
         ];

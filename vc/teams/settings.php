@@ -31,6 +31,8 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+defined('MOODLE_INTERNAL') || die();
+
 $item = new admin_setting_configcheckbox('hybridteachvc_teams/enabled',
     new lang_string('enabled', 'hybridteaching'),
     new lang_string('enabled_help', 'hybridteaching'), 1);

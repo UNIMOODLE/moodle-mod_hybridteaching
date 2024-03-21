@@ -98,7 +98,6 @@ class hybridteaching_session_filter_test extends \advanced_testcase {
      * @param int $operator
      * @param string $value
      * @param int $unittime
-     * @covers \hybridteaching_session_filter::session_filter
      * @dataProvider dataprovider
      * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
      */
@@ -156,9 +155,11 @@ class hybridteaching_session_filter_test extends \advanced_testcase {
         // Session filter text.
         $sessionfiltertext = new session_filter_text($name, $label, $advanced, $field);
         $sessionfiltertext->session_filter_text($name, $label, $advanced, $field);
-
-        $sessionfilterduration->get_label(['operator' => $operator,'value'=> $value, 'unittime' => $unittime]);
-        //$sessionfiltertype->get_label($dataduration);
+        $this->assertNotNull($sessionfiltertext->get_operators());
+        $sessionfiltertext->get_sql_filter(['operator' => $operator, 'value' => $value]);
+        $laberfiterduration = $sessionfilterduration->get_label(['operator' => $operator,'value'=> $value, 'unittime' => $unittime]);
+        
+        
         
         $this->assertTrue(true);
     }
@@ -169,7 +170,9 @@ class hybridteaching_session_filter_test extends \advanced_testcase {
             [ 'name', 'b', 'c', 'd', ['value' => 'value'], 1, 50, 2],
             [ 'name', 'c', 'd', 'b', ['value' => 'value'], 2, 50, 2],
             [ 'name', 'b', 'c', 'd', ['value' => 'value'], 2, 60, 1],
-            [ 'name', 'b', 'c', 'd', ['value' => 'value'], 1, 60, 2],
+            [ 'name', 'b', 'c', 'd', ['value' => 'value'], 2, 60, 1],
+            [ 'name', 'b', 'c', 'd', ['value' => 'value'], 1, 60, 1],
+            [ 'name', 'b', 'c', 'd', ['value' => 'value'], 0, 60, 1],
 
         ];
     }

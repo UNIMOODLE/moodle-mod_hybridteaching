@@ -61,6 +61,7 @@ class updatestores extends \core\task\scheduled_task {
                   FROM {hybridteaching_session} hs
             INNER JOIN {hybridteaching} ht ON ht.id=hs.hybridteachingid
             INNER JOIN {hybridteaching_configs} hc ON hs.storagereference=hc.id
+                        AND hc.visible = 1
             INNER JOIN {course} c ON c.id=ht.course
                  WHERE hs.userecordvc=1 AND hc.type='onedrive' AND hs.processedrecording=0";
 
@@ -103,7 +104,6 @@ class updatestores extends \core\task\scheduled_task {
                     $onedrive = new  \stdClass();
                     $onedrive->sessionid = $store->hsid;
                     $onedrive->weburl = $store->shortname.'/'.$store->name.'.mp4';
-                    $onedrive->downloadurl = $response['downloadurl'];
                     $onedrive->visible = true;
                     $onedrive->timecreated = time();
 
@@ -115,8 +115,15 @@ class updatestores extends \core\task\scheduled_task {
 
                     // Delete video from origin download vc moodledata.
                     unlink ($videopath);
+
+                    mtrace(get_string('correctupload', 'hybridteachstore_onedrive', ['name' => $onedrive->weburl]));
                 } else {
-                    mtrace(get_string('notuploading', 'hybridteachstore_onedrive').' '.$store->course.": '".$store->name."': ");
+                    mtrace(get_string('notuploading', 'hybridteachstore_onedrive',
+                        [
+                            'course' => $store->course,
+                            'name' => $store->name,
+                        ]
+                    ));
                 }
             }
         }

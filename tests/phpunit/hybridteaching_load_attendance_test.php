@@ -85,7 +85,6 @@ class hybridteaching_load_attendance_test extends \advanced_testcase {
      * @copyright  2023 Proyecto UNIMOODLE
      * @param string $param
      * @param string $view
-     * @covers \hybridteaching_load_attendance::load_attendance
      * @dataProvider dataprovider
      * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
      */
@@ -134,6 +133,11 @@ class hybridteaching_load_attendance_test extends \advanced_testcase {
         // Check that attendance was loaded successfuly.
         $this->assertNotNull($attendancecontroller->load_attendance_assistance(['starttime' => 1642736531
         , 'userid' => self::$user->id, 'view' => 'studentattendance'],'starttime > 0 '));
+        $this->assertNotNull($attendancecontroller->load_attendance(0, 0, ['starttime' => 1642736531, 'view' => $view,
+        'groupid' => 1]));
+        $attendancecontroller->hybridteaching_get_attendance_users_in_session($sessionexpected->id, $hybridobject->id);
+        // Catch exception.
+        $attendancecontroller->hybridteaching_get_attendance_users_in_session($sessionexpected->id, $hybridobject->name);
         $this->assertIsNumeric($attendancecontroller->count_attendance(self::$user->firstname, self::$user->lastname, 1));
         $attendanceobject = $attendancecontroller->hybridteaching_get_attendance_from_id($attendanceid);
         $listarray = ['userid' => $attendanceobject->userid];
@@ -143,11 +147,11 @@ class hybridteaching_load_attendance_test extends \advanced_testcase {
         $attendancecontroller->load_sessions_attendant($attendanceobject);
         $attendancecontroller->load_sessions_attendant($listnumeric);
         // Count attendance of session by parameters.
-        $this->assertIsNumeric($attendancecontroller->count_sess_attendance(['id' => $attendanceid]));
+        $this->assertIsNumeric($attendancecontroller->count_sess_attendance(['sessionid' => $attendanceid, 'status' => 1]));
         // Count user attendance.
         //$attendancecontroller->count_attendance($USER->firstname, $USER->lastname, '');
-        // Delete all atendances.
-        $sessioncontroller->delete_all_sessions();
+        $attendancescount = $DB->get_records('hybridteaching_attendance', ['hybridteachingid' => $hybridobject->id], 'id', 'id');
+        
 
     }
     public static function dataprovider(): array {
@@ -158,7 +162,7 @@ class hybridteaching_load_attendance_test extends \advanced_testcase {
              , 'extendedstudentatt', ],
             ['{"hybridteachingid":2,"name":"Test 2","context":50,"starttime":1642736531,
              "durationgroup":{"duration":45000,"timetype":null}}'
-             , 'extendedstudentatt', ],
+             , 'extendedsessionatt', ],
         ];
     }
 

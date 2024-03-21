@@ -52,7 +52,7 @@ class session_updated extends \core\event\base {
         if (isset($this->other['action'])) {
             $description .= ' action: ' . $this->other['action'];
         }
-        
+
         return $description;
     }
 

@@ -63,18 +63,21 @@ class onedrive_handler {
 
         // Refresh authorization token.
         $guzzle = new \GuzzleHttp\Client();
-
         $url = 'https://login.microsoftonline.com/' . $this->config->tenantid . '/oauth2/v2.0/token';
+        $tokenderefresco = null;
 
-        $tokenderefresco = json_decode($guzzle->post($url, [
-            'form_params' => [
-                'client_id' => $this->config->clientid,
-                'client_secret' => $this->config->clientsecret,
-                'grant_type' => 'refresh_token',
-                'refresh_token' => $this->config->refreshtoken,
-            ],
-        ])->getBody()->getContents());
-
+        try {
+            $tokenderefresco = json_decode($guzzle->post($url, [
+                'form_params' => [
+                    'client_id' => $this->config->clientid,
+                    'client_secret' => $this->config->clientsecret,
+                    'grant_type' => 'refresh_token',
+                    'refresh_token' => $this->config->refreshtoken,
+                ],
+            ])->getBody()->getContents());
+        } catch (\Exception $e) {
+            throw $e;
+        }
         // Save token:.
         $this->config->accesstoken = $tokenderefresco->access_token;
         $this->config->refreshtoken = $tokenderefresco->refresh_token;
@@ -90,7 +93,16 @@ class onedrive_handler {
      */
     public function uploadfile($store, $videopath) {
         require_once(__DIR__ . '/../vendor/autoload.php');
-        $this->refreshtoken();
+        try {
+            $this->refreshtoken();
+        } catch (\Exception $e) {
+            mtrace(get_string('incorrectconfig', 'hybridteachstore_onedrive',
+                [
+                    'course' => $store->course,
+                    'name' => $store->name,
+                ]));
+            return;
+        }
 
         $graph = new Graph();
         $graph->setAccessToken($this->config->accesstoken);
@@ -224,9 +236,6 @@ class onedrive_handler {
         if (isset($element['webUrl'])) {
             $response['weburl'] = $element['webUrl'];
         }
-        if (isset($element['@microsoft.graph.downloadUrl'])) {
-            $response['downloadurl'] = $element['@microsoft.graph.downloadUrl'];
-        }
 
         return $response;
     }
@@ -322,30 +331,18 @@ class onedrive_handler {
         return '';
     }
 
-    public function deletefile($processedrecording) {
-        global $DB;
+    public function deletefile($videoweburl) {
         require_once(__DIR__ . '/../vendor/autoload.php');
         $this->refreshtoken();
 
         $graph = new Graph();
         $graph->setAccessToken($this->config->accesstoken);
 
-        $recording = $DB->get_record('hybridteachstore_onedrive', ['id' => $processedrecording]);
-        if (!isset($recording->weburl) || $recording->weburl == '') {
-            return;
-        }
-
         try {
-            $path = "/me/drive/root:/".get_string('hybridteaching', 'hybridteachstore_onedrive')."/".$recording->weburl;
-            $graphresponse = $graph->createRequest("GET", $path)
+            $path = "/me/drive/root:/".get_string('hybridteaching', 'hybridteachstore_onedrive')."/ee".$videoweburl;
+            $graphresponse = $graph->createRequest("DELETE", $path)
                 ->setReturnType(Model\DriveItem::class)
                 ->execute();
-
-            $response = json_decode(json_encode($graphresponse), true);
-            if (isset($response['@microsoft.graph.downloadUrl'])) {
-                return $response['@microsoft.graph.downloadUrl'];
-            }
-
         } catch (\Throwable $e) {
             return '';
         }

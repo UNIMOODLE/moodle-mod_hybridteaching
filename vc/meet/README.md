@@ -8,7 +8,7 @@ Requiere instalación de composer para meet, bajo la carpeta principal de meet c
 2. Crear credenciales a través de la consola de google: console.cloud.google.com 
 3. Crear un nuevo proyecto en Google Developers Console y obtener las credenciales de autorización para realizar solicitudes api.
 4. Habilitar apis y servicios.
-5. Añadir api de "Google calendar"
+5. Añadir api de "Google calendar" y "Google Drive".
 6. Crear credenciales, con claves de api
 7. Asignar los permisos siguientes:
 	- .../auth/calendar.events     Ver y editar eventos en tus calendarios

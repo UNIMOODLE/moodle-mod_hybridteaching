@@ -88,7 +88,6 @@ class hybridteaching_set_attendance_test extends \advanced_testcase {
      * @param string $param
      * @param string $typevc
      * @param int $attexempt
-     * @covers \hybridteaching_set_attendance::set_attendance
      * @dataProvider dataprovider
      * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
      */
@@ -108,7 +107,6 @@ class hybridteaching_set_attendance_test extends \advanced_testcase {
             'usevideoconference' => self::$usevideoconference
             ]);
         $cm = get_coursemodule_from_instance('hybridteaching', $hybridobject->id, self::$course->id);
-        $hybridobject->usevideoconference = self::$usevideoconference;
 
         $sessioncontroller = new sessions_controller($hybridobject);
         // Simulate data form.
@@ -124,8 +122,6 @@ class hybridteaching_set_attendance_test extends \advanced_testcase {
         $data->durationgroup['timetype'] = $sessioncontroller::MINUTE_TIMETYPE;
         $data->duration = $sessioncontroller::calculate_duration($data->durationgroup['duration'],
                 $data->durationgroup['timetype']);
-
-
                 
         // Create session.
         $session = $sessioncontroller->create_session($data);
@@ -147,9 +143,9 @@ class hybridteaching_set_attendance_test extends \advanced_testcase {
         $modaltext = $external->get_modal_text($sessionexpected->id);
         $external->get_modal_text_parameters();
         $external->get_modal_text_returns();
-        // Disable attendance in progress
-        $external->disable_attendance_inprogress($hybridobject->id);
-        $this->assertNotNull($external->disable_attendance_inprogress($hybridobject->id, $sessionexpected->id));
+        // Disable attendance in progress.
+        $external->disable_attendance_inprogress($cm->id);
+        $this->assertNotNull($external->disable_attendance_inprogress($cm->id, $sessionexpected->id));
         $external->disable_attendance_inprogress_returns();
 
         $this->assertNotNull($external->get_display_actions($sessionexpected->id, self::$user->id));
@@ -162,6 +158,11 @@ class hybridteaching_set_attendance_test extends \advanced_testcase {
         $grades->count_user_att($hybridobject, self::$user->id);
         // Update session/attendance visivility.
         $attendancecontroller->update_session_visibility($sessionexpected->id, 1);
+
+        $attendancecontroller->user_attendance_early_leave($sessionexpected, $attendancecontroller->hybridteaching_get_attendance($attendanceid));
+        $attendancecontroller->user_attendance_early_leave($sessionexpected, $attendanceid);
+        $this->assertFalse($attendancecontroller->user_attendance_early_leave($sessionexpected, ''));
+
     }
     public static function dataprovider(): array {
 
@@ -174,10 +175,10 @@ class hybridteaching_set_attendance_test extends \advanced_testcase {
              , 'meet', 1, ],
             ['{"hybridteachingid":1,"name":"Test de prueba", "description": "description of session","context":50,
              "starttime":1642736531,"durationgroup":{"duration":45000,"timetype":null}}'
-             , 'random', 0, ],
+             , 'bbb', 0, ],
             ['{"hybridteachingid":2,"name":"Test de prueba","context":50,"starttime":1642736531,
              "durationgroup":{"duration":45000,"timetype":null}}'
-             , 1, 1, ],
+             , 'meet', 1, ],
         ];
     }
 

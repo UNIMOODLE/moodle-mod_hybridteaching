@@ -17,7 +17,8 @@ Feature: Add a hybridteaching session
     And the following config values are set as admin:
       | enablemoodlenet | 0 | tool_moodlenet |
     And I log in as "teacher1"
-    And I am on "Moodle Testing Hybrid Teaching" course homepage with editing mode on
+    And I am on "testhybridteaching" course homepage
+    And I turn editing mode on
 
   Scenario: The teacher create a hybridteaching activity and add a session
     Given I click on "Add an activity or resource" "button" in the "Topic 1" "section"

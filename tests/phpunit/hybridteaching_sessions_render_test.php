@@ -39,6 +39,7 @@ global $CFG;
 require_once($CFG->dirroot . '/mod/hybridteaching/classes/controller/sessions_controller.php');
 require_once($CFG->dirroot . '/mod/hybridteaching/classes/helpers/calendar_helpers.php');
 require_once($CFG->dirroot . '/config.php');
+require_once($CFG->dirroot . '/mod/hybridteaching/lib.php');
 
 use mod_hybridteaching\output\attendance_render;
 use mod_hybridteaching\controller\sessions_controller;
@@ -56,7 +57,8 @@ class hybridteaching_sessions_render_test extends \advanced_testcase {
     private static $user;
     private static $config;
     private static $userecordvc;
-
+    private static $category;
+    private static $subcategory;
     private static $page;
     public const COURSE_START = 1704099600;
     public const COURSE_END = 1706605200;
@@ -67,9 +69,12 @@ class hybridteaching_sessions_render_test extends \advanced_testcase {
         parent::setUp();
         $this->resetAfterTest(true);
         self::setAdminUser();
+        self::$category = self::getDataGenerator()->create_category(['name'=>'Category1']);
+        self::$subcategory = self::getDataGenerator()->create_category(['name'=>'Subcategory1', 'parent'=>self::$category->id]);
         self::$course = self::getDataGenerator()->create_course(
             ['startdate' => self::COURSE_START, 'enddate' => self::COURSE_END]
         );
+        
         self::$coursecontext = \context_course::instance(self::$course->id);
         self::$user = $USER;
         self::$userecordvc = 0;
@@ -87,13 +92,12 @@ class hybridteaching_sessions_render_test extends \advanced_testcase {
      * @param string $param
      * @param int $typelist
      * @param string $column
-     * @covers \hybridteaching_sessions_render::sessions_render
      * @dataProvider dataprovider
      * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
      */
     public function test_sessions_render($param, $typelist, $column) {
         // Reset after execute the test.
-        global $DB;
+        global $DB, $COURSE, $USER;
         // Module instance.
         $moduleinstance = new \stdClass();
         $moduleinstance->course = self::$course->id;
@@ -127,9 +131,21 @@ class hybridteaching_sessions_render_test extends \advanced_testcase {
         $sessionsrender = new output\sessions_render($hybridobject, $typelist);
 
         $sessionsrender->get_bulk_options_select();
+        $this->assertNotNull($sessionsrender->get_operator());
         $sessionsrender->get_column_name($column);
 
+        $renderer = self::$page->get_renderer('mod_hybridteaching');
+        $renderer->zone_access('');
         
+        $COURSE = self::$course;
+        $USER = self::$user;
+        $sessionsrender = new \mod_hybridteaching\output\sessions_render($hybridobject, 1);
+        $sessionsrender->check_session_filters();
+        $categories = ['cat1' => self::$category];
+        // Build output categories.
+        hybrid_build_output_categories([['id' => self::$category->id, 'name' => self::$category->name, 'categories' => [['id' => self::$category->id, 'name' => self::$category->name]]]], 1);    
+        hybrid_get_categories_for_modal();  
+        hybrid_build_category_array(self::$category);   
     }
     public static function dataprovider(): array {
 

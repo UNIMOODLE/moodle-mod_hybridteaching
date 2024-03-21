@@ -19,7 +19,8 @@ Feature: A student register his attendance in a session
     And the following config values are set as admin:
       | enablemoodlenet | 0 | tool_moodlenet |
     And I log in as "teacher1"
-    And I am on "Moodle Testing Hybrid Teaching" course homepage with editing mode on
+    And I am on "testhybridteaching" course homepage
+    And I turn editing mode on
     And I click on "Add an activity or resource" "button" in the "General" "section"
     And I click on "Add a new Hybrid teaching" "link" in the "Add an activity or resource" "dialogue"
     And I should see "Adding a new Hybrid teaching"

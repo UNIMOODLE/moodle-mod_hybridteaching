@@ -35,7 +35,6 @@ $string['pluginconfig'] = 'Hybrid BBB config';
 $string['pluginnewconfig'] = 'New hybrid BBB config';
 $string['serverurl'] = 'Url del servidor BigBlueButton';
 $string['sharedsecret'] = 'Clave secreta de BigBlueButton';
-
 $string['bbb'] = 'bbb';
 $string['alias'] = 'BBB';
 
@@ -54,3 +53,6 @@ $string['bbb:use'] = 'Generate BigBlueButton meetings';
 $string['bbb:record'] = 'Store BigBlueButton recordings';
 
 $string['recordingnotfound'] = 'Recording not found in courseid {$a->course}: \'{$a->name}\'';
+$string['meetingrunning'] = 'The meeting with meetingID {$a} is still running. The recording is not yet available.';
+$string['unknownerror'] = 'There was an error with the recording for the meetingID {$a}.';
+$string['correctgetrecording'] = 'Recording successfully obtained for session \'{$a->name}\' from course id {$a->course}';

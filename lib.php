@@ -84,8 +84,8 @@ function hybridteaching_supports($feature) {
         case FEATURE_GROUPINGS:
         case FEATURE_BACKUP_MOODLE2:
             return true;
-        case FEATURE_MOD_PURPOSE: 
-            return MOD_PURPOSE_COMMUNICATION;            
+        case FEATURE_MOD_PURPOSE:
+            return MOD_PURPOSE_COMMUNICATION;
         default:
             return null;
     }
@@ -125,7 +125,6 @@ function hybridteaching_add_instance($moduleinstance, $mform = null) {
         $moduleinstance->processedrecording = -1;
     }
 
-
     $moduleinstance->id = $DB->insert_record('hybridteaching', $moduleinstance);
     if (!$moduleinstance->sessionscheduling && !empty($moduleinstance->id)) {
         require_once($CFG->dirroot.'/mod/hybridteaching/classes/controller/sessions_controller.php');
@@ -164,7 +163,7 @@ function hybridteaching_update_instance($moduleinstance, $mform = null) {
     }
 
     $moduleinstance->timemodified = time();
-    $moduleinstance->id = $moduleinstance->instance;  
+    $moduleinstance->id = $moduleinstance->instance;
 
     if ($moduleinstance->usevideoconference == 1) {
         $divide = isset($moduleinstance->typevc) ? explode('-', $moduleinstance->typevc, 2) : [];
@@ -176,7 +175,7 @@ function hybridteaching_update_instance($moduleinstance, $mform = null) {
     }
 
     // If there is not sessionscheduling, change info in the unique session.
-    if ($moduleinstance->sessionscheduling == 0) {  
+    if ($moduleinstance->sessionscheduling == 0) {
         require_once($CFG->dirroot.'/mod/hybridteaching/classes/controller/sessions_controller.php');
         // Populate moduleinstance in datainfo session to change session info.
         $sessioninfo = $DB->get_record('hybridteaching_session', ['hybridteachingid' => $moduleinstance->id], '*', IGNORE_MULTIPLE);
@@ -323,10 +322,10 @@ function hybridteaching_view($hybridteaching, $course, $cm, $context) {
 
     // Trigger course_module_viewed event.
 
-    $params = array(
+    $params = [
         'context' => $context,
-        'objectid' => $hybridteaching->id
-    );
+        'objectid' => $hybridteaching->id,
+    ];
 
     $event = \mod_hybridteaching\event\course_module_viewed::create($params);
     $event->add_record_snapshot('course_modules', $cm);
@@ -337,7 +336,7 @@ function hybridteaching_view($hybridteaching, $course, $cm, $context) {
     // Completion.
     $completion = new completion_info($course);
     $completion->set_module_viewed($cm);
-    
+
     if ($completion->is_enabled($cm) && $hybridteaching->completionattendance) {
         $completion->update_state($cm, COMPLETION_UNKNOWN);
     }
@@ -432,7 +431,9 @@ function hybridteaching_scale_used_anywhere($scaleid) {
  * @param int $userid
  * @param bool $nullifnone
  */
-function hybridteaching_update_grades($hybridteaching, $userid = 0, $nullifnone = true) {}
+function hybridteaching_update_grades($hybridteaching, $userid = 0, $nullifnone = true) {
+    // Not used.
+}
 
 /**
  * Create grade item for given hybridteaching.
@@ -637,7 +638,7 @@ function hybrid_get_categories_for_modal() {
             "input", "", ["id" => "course-category-select-all", "type" => "checkbox", "class" => "custom-control-input"]
         );
         $outputcategories .= html_writer::tag("label", "", ["class" => "custom-control-label",
-            "for" => "course-category-select-all"]);
+            "for" => "course-category-select-all",]);
         $outputcategories .= html_writer::end_div(); // ... .custom-checkbox
         $outputcategories .= html_writer::start_div("", ["class" => "col px-0 d-flex"]);
         $outputcategories .= html_writer::start_div("", ["class" => "header-categoryname"]);

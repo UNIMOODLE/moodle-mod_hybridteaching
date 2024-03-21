@@ -30,4 +30,6 @@ $string['licenses'] = 'Licencias';
 $string['updatestores'] = 'Subir vídeos Onedrive';
 $string['subdomain'] = 'Subdominio de Onedrive';
 $string['hybridteaching'] = 'hybridteaching';
-$string['notuploading'] = 'No se pudo subir la grabación en el cursoid';
+$string['notuploading'] = 'No se pudo subir la grabación de la sesión \'{$a->name}\' en el cursoid {$a->course}. ';
+$string['incorrectconfig'] = 'Configuración o acceso erróneos a Onedrive para la sesión  del curso {$a->course}. Contacte con el administrador para la configuración Onedrive.';
+$string['correctupload'] = 'Vídeo subido correctamente: {$a->name}';

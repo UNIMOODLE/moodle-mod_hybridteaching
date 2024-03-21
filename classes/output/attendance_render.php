@@ -70,7 +70,7 @@ class attendance_render extends \flexible_table {
     /**
      * Constructor for the class.
      *
-     * @param stdClass $hybridteaching 
+     * @param stdClass $hybridteaching
      */
     public function __construct(stdClass $hybridteaching) {
         $this->hybridteaching = $hybridteaching;
@@ -193,14 +193,14 @@ class attendance_render extends \flexible_table {
                 '&dir=' . $dir, ['id' => $id, 'att' => $attid, 'selecteduser' => $selecteduser, 'hid' => $hybridteachingid]);
         }
 
-        if ($view == 'extendedstudentatt') {
+        if ($view == 'extendedsessionatt') {
             $attusrfilter = new attuserfilter_options_form($CFG->wwwroot . '/mod/hybridteaching/attendance.php?',
                 ['id' => $id, 'att' => $attid, 'fname' => $fname, 'lname' => $lname, 'hid' => $hybridteachingid,
                     'view' => $view, 'sessid' => $selectedsession, 'sort' => $sort, 'dir' => $dir,
                     'perpage' => $perpage, 'attfilter' => $selectedfilter, 'groupid' => $group, ]);
         }
         $view == 'sessionattendance' ? $sortexclusions = ['stroptions', 'strclassroom', 'strvc'] : '';
-        $view == 'extendedstudentatt' ? $sortexclusions = ['stroptions', 'strgrade'] : '';
+        $view == 'extendedstudentatt' ? $sortexclusions = ['stroptions', 'strgrade', 'strvc', 'strclassroom', 'strcombinedatt', 'strpfp'] : '';
         $view == 'studentattendance' ? $sortexclusions = ['strtype', 'strattendance', 'strgrade', 'stroptions'] : '';
         !isset($sortexclusions) ? $sortexclusions = ['stroptions', 'strlogmark', 'strentrytime', 'strleavetime'] : '';
         foreach ($columns as $key => $column) {
@@ -307,7 +307,9 @@ class attendance_render extends \flexible_table {
                 'attid' => $attid,
                 'url' => $url,
                 'table' => $table,
-                'returnurl' => $returnurl, ];
+                'returnurl' => $returnurl,
+                'selectedfilter' => $selectedfilter,
+                'group' => $group, ];
             $return = $this->print_attendance_extendedstudent_table($extendedstudentsparams);
             if ($return) {
                 return $return;
@@ -331,7 +333,8 @@ class attendance_render extends \flexible_table {
                 'table' => $table,
                 'optionsformparams' => $optionsformparams,
                 'attresume' => $attresume,
-                'selecteduser' => $selecteduser ];
+                'selecteduser' => $selecteduser,
+            ];
             $return = $this->print_student_sessions_table($studentattsessparams);
             return $return;
         }
@@ -383,7 +386,7 @@ class attendance_render extends \flexible_table {
                 'editing' => $editing,
                 'groupmode' => $groupmode,
                 'id' => $id,
-                'returnurl' =>$returnurl,
+                'returnurl' => $returnurl,
                 'baseurl' => $baseurl,
                 'url' => $url,
                 'userid' => $userid,
@@ -1181,6 +1184,8 @@ class attendance_render extends \flexible_table {
         $url = $extendedstudentsparams['url'];
         $table = $extendedstudentsparams['table'];
         $returnurl = $extendedstudentsparams['returnurl'];
+        $selectedfilter = $extendedstudentsparams['selectedfilter'];
+        $group = $extendedstudentsparams['group'];
 
         $attendancecontroller = new attendance_controller($this->hybridteaching);
         $sessionscontroller = new sessions_controller($this->hybridteaching);
@@ -1192,10 +1197,12 @@ class attendance_render extends \flexible_table {
         $return .= $OUTPUT->paging_bar($attendancecount, $page, $perpage, $baseurl);
         $attuser = $attendancecontroller->load_sessions_attendant($userid);
         $userpicture = $OUTPUT->user_picture($attuser);
-        $params['userid'] = $attuser->id;
         $params['view'] = $view;
-        $attendanceassist = $attendancecontroller->load_attendance_assistance($params, $extrasql, $operator);
         foreach ($participationrecords as $participation) {
+            $params['userid'] = $participation->userid;
+            $attendanceassist = $attendancecontroller->get_student_participation($hybridteachingid, $params['userid']);
+            $attendanceassist ? $participation->vc = $attendanceassist->vc : $participation->vc = 0;
+            $attendanceassist ? $participation->classroom = $attendanceassist->classroom : $participation->classroom = 0;
             $usertotalgrade = grade_get_grades($COURSE->id, 'mod', 'hybridteaching',
                 $this->hybridteaching->id, $participation->userid);
             $attuser = $attendancecontroller->load_sessions_attendant($participation);
@@ -1224,7 +1231,7 @@ class attendance_render extends \flexible_table {
             ];
             $hybridteachingid = empty($hybridteachingid) ? $this->cm->instance : $hybridteachingid;
             $params = ['attid' => $attid, 'h' => $hybridteachingid, 'id' => $id,
-                'returnurl' => $returnurl, 'view' => $view, 'userid' => $attuser->id, ];
+                'view' => $view, 'userid' => $attuser->id, ];
             $options = $this->get_table_options($body, $params, $url, 0);
             $class = $options['class'];
             $options = $options['options'];
@@ -1263,7 +1270,7 @@ class attendance_render extends \flexible_table {
                 }
                 $hybridteachingid = empty($hybridteachingid) ? $this->cm->instance : $hybridteachingid;
                 $params = ['attid' => $attid, 'h' => $hybridteachingid, 'id' => $id,
-                    'returnurl' => $returnurl, 'view' => $view, 'userid' => $attuser->id, ];
+                    'view' => $view, 'userid' => $attuser->id, ];
 
                 $options = $this->get_table_options($body, $params, $url, $att->sessionid);
                 $class = $options['class'];
@@ -1280,6 +1287,10 @@ class attendance_render extends \flexible_table {
         if (has_capability('mod/hybridteaching:bulksessions', $this->context)) {
             $attendancetable .= $this->get_bulk_options_select($view);
         }
+        $attusrfilter = new attuserfilter_options_form($CFG->wwwroot . '/mod/hybridteaching/attendance.php?',
+        ['id' => $id, 'att' => $attid, 'fname' => $fname, 'lname' => $lname, 'hid' => $hybridteachingid,
+            'view' => $view, 'sessid' => $sessionid, 'sort' => $sort, 'dir' => $dir,
+            'perpage' => $perpage, 'attfilter' => $selectedfilter, 'groupid' => $group, ]);
         if (isset($attusrfilter)) {
             $attusrfilter->display();
         }
@@ -1378,7 +1389,7 @@ class attendance_render extends \flexible_table {
                 $body['class'] = 'dimmed_text';
             }
             $params = ['attid' => $session->id, 'h' => $hybridteachingid, 'id' => $id,
-            'returnurl' => $returnurl, 'view' => $view, 'userid' => $userid, ];
+                'view' => $view, 'userid' => $userid, ];
 
             $options = $this->get_table_options($body, $params, $url, $session->id);
             $class = $options['class'];
@@ -1401,9 +1412,6 @@ class attendance_render extends \flexible_table {
         $optionsform->display();
         if (isset($sessionoptions) && $editing) {
             $sessionoptions->display();
-        }
-        if (isset($attusrfilter)) {
-            $attusrfilter->display();
         }
         $attendancetable = html_writer::table($table);
         if (has_capability('mod/hybridteaching:bulksessions', $this->context)) {
@@ -1471,7 +1479,6 @@ class attendance_render extends \flexible_table {
                 'class' => 'attendance-validated', ];
             $attendance = $attendancecontroller->get_session_attendance($session['id'], $selecteduser);
             $params['editing'] ? true : $attributes['disabled'] = true;
-            $submitb = html_writer::empty_tag('input', $attributes);
             $usertotalgrade = grade_get_grades($COURSE->id, 'mod', 'hybridteaching', $this->hybridteaching->id, $selecteduser);
             $attexempt = $session['attexempt'];
             $groupbody = '';
@@ -1484,7 +1491,7 @@ class attendance_render extends \flexible_table {
                 $attendance->status == HYBRIDTEACHING_ATTSTATUS_VALID ? $attributes['checked'] = true : '';
                 $connectiontime = helper::get_hours_format($attendance->connectiontime);
                 empty($connectiontime) ? $connectiontime = self::EMPTY : false;
-
+                $submitb = html_writer::empty_tag('input', $attributes);
                 $submitb .= '<br>' . $connectiontime;
                 $attendance->status == 2 ? $submitb .= '<br>' . get_string('late', 'hybridteaching') : '';
                 $attendance->status == 4 ? $submitb .= '<br>' . get_string('earlyleave', 'hybridteaching') : '';
@@ -1524,14 +1531,15 @@ class attendance_render extends \flexible_table {
                 }
                 $hybridteachingid = empty($hybridteachingid) ? $this->cm->instance : $hybridteachingid;
                 $tableparams = ['h' => $hybridteachingid, 'id' => $id, 'sessionid' => $session['id'],
-                    'returnurl' => $returnurl, 'view' => $view, 'userid' => $userid, 'attid' => $attendance->id, ];
+                    'view' => $view, 'userid' => $userid, 'attid' => $attendance->id, ];
                 $options = $this->get_table_options($body, $tableparams, $url, $session['id']);
                 $class = $options['class'];
                 if (!$body['enabled']) {
                     $class = 'dimmed_text';
                 }
                 if (!$body['visible']) {
-                    !$params['editing'] ? $class .= ' hidden' : $body['name'] .= ' ' . get_string('hiddenuserattendance', 'hybridteaching');
+                    !$params['editing'] ? $class .= ' hidden' : $body['name'] .= ' '
+                        . get_string('hiddenuserattendance', 'hybridteaching');
                 }
                 $options = $options['options'];
                 // Add a row to the table.
@@ -1573,7 +1581,7 @@ class attendance_render extends \flexible_table {
                 }
                 $hybridteachingid = empty($hybridteachingid) ? $this->cm->instance : $hybridteachingid;
                 $tableparams = ['h' => $hybridteachingid, 'id' => $id,
-                 'returnurl' => $returnurl, 'view' => $view, 'userid' => $userid, ];
+                    'view' => $view, 'userid' => $userid, ];
 
                 $options = $this->get_table_options($body, $tableparams, $url, $sessionid);
                 $class = $options['class'];
@@ -1581,7 +1589,8 @@ class attendance_render extends \flexible_table {
                     $class = 'dimmed_text';
                 }
                 if (!$body['visible']) {
-                    !$params['editing'] ? $class .= ' hidden' : $body['name'] .= ' ' . get_string('hiddenuserattendance', 'hybridteaching');
+                    !$params['editing'] ? $class .= ' hidden' : $body['name'] .= ' '
+                        . get_string('hiddenuserattendance', 'hybridteaching');
                 }
                 $options = null;
                 // Add a row to the table.
@@ -1618,7 +1627,7 @@ class attendance_render extends \flexible_table {
         $return .= html_writer::tag('form', $attendancetable, ['method' => 'post',
         'action' => $CFG->wwwroot . '/mod/hybridteaching/classes/action/attendance_action.php?view=' .
         $view . '&sessionid=' . $sessionid, ]);
-        $return .= $OUTPUT->paging_bar($countsessions,$page, $perpage, $returnurl);
+        $return .= $OUTPUT->paging_bar($countsessions, $page, $perpage, $returnurl);
         $return .= $OUTPUT->box_end();
         return $return;
     }

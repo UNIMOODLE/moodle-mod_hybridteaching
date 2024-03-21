@@ -145,7 +145,6 @@ if (!$activesession) {
         $isfinished = false;
         $alert = 0;
 
-        $viewupdate = false;
         switch (true) {
             // Undatted session.
             case !$hybridteaching->sessionscheduling:
@@ -161,7 +160,6 @@ if (!$activesession) {
                     $status = get_string('status_start', 'hybridteaching');
                     if (($activesession->starttime < time() && $activesession->isfinished == 0)) {
                         $isprogress = true;
-                        $viewupdate = true;
                         $isclosedoors ? $status = get_string('status_progress', 'hybridteaching') :
                             $status = get_string('status_ready', 'hybridteaching');
                     } else if ($activesession->starttime > time()) {
@@ -169,7 +167,6 @@ if (!$activesession) {
                         $activesession = $session->get_last_undated_session();
                         if (!empty($activesession)) {
                             $isprogress = true;
-                            $viewupdate = true;
                             $timeinit = $activesession->starttime;
                             $isclosedoors ? $status = get_string('status_progress', 'hybridteaching') :
                                 $status = get_string('status_ready', 'hybridteaching');
@@ -180,7 +177,6 @@ if (!$activesession) {
                         }
                     } else {
                         $isprogress = true;
-                            $viewupdate = true;
                             $timeinit = $activesession->starttime;
                             $isclosedoors ? $status = get_string('status_progress', 'hybridteaching') :
                                 $status = get_string('status_ready', 'hybridteaching');
@@ -194,7 +190,6 @@ if (!$activesession) {
                     $status = get_string('status_ready', 'hybridteaching');
                 $isprogress = true;
                 $alert = 'alert-warning';
-                $viewupdate = true;
                 break;
             // No started yet.
             case $timeinit >= time():
@@ -226,7 +221,7 @@ if (!$activesession) {
         }
 
         $canentry = false;
-        if (($timeinit - $advanceentrytime) < time()) {
+        if (($timeinit - $advanceentrytime) <= time()) {
             if ($isclosedoors) {
                 if (($timeinit + $closedoorstime) > time()) {
                     $canentry = true;
@@ -250,6 +245,7 @@ if (!$activesession) {
                     $result['waitmoderator'] = true;
                     $canentry = false;
                     $status = get_string('waitmoderator_desc', 'hybridteaching');
+                    $PAGE->requires->js_call_amd('mod_hybridteaching/view', 'init', [$activesession->id, $USER->id]);
                 }
             }
         }
@@ -257,13 +253,9 @@ if (!$activesession) {
         if (!has_capability('mod/hybridteaching:sessionsactions', $modulecontext)
               && !$session::get_sessionconfig_exists($activesession)
               && $isundatedsession && $hybridteaching->usevideoconference) {
-            $viewupdate = false;
             $canentry = false;
             $status = get_string('status_undated_wait', 'hybridteaching');
         }
-
-        $viewupdate && has_capability('mod/hybridteaching:attendanceregister', $modulecontext) && $hybridteaching->useattendance
-            && $canentry ? $PAGE->requires->js_call_amd('mod_hybridteaching/view', 'init', [$activesession->id, $USER->id]) : '';
 
         $result['id'] = $id;
         $result['s'] = !$isfinished ? $activesession->id : 0;

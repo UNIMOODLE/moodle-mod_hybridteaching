@@ -65,11 +65,17 @@ class teams_handler {
      * @return string The token to connect Teams.
      */
     public function refreshtoken() {
-        if ($this->config->accessmethod == 0) {
-            return $this->accesstokenapp();
-        } else {
-            return $this->getrefreshtoken();
+        $token = '';
+        try {
+            if ($this->config->accessmethod == 0) {
+                $token = $this->accesstokenapp();
+            } else {
+                $token = $this->getrefreshtoken();
+            }
+        } catch (\Exception $e) {
+            throw $e;
         }
+        return $token;
     }
 
     /**
@@ -84,15 +90,19 @@ class teams_handler {
         $guzzle = new \GuzzleHttp\Client();
 
         $url = 'https://login.microsoftonline.com/' . $this->config->tenantid . '/oauth2/v2.0/token';
-
-        $tokenderefresco = json_decode($guzzle->post($url, [
-            'form_params' => [
-                'client_id' => $this->config->clientid,
-                'grant_type' => 'refresh_token',
-                'client_secret' => $this->config->clientsecret,
-                'refresh_token' => $this->config->refreshtoken,
-            ],
-        ])->getBody()->getContents());
+        $tokenderefresco = null;
+        try {
+            $tokenderefresco = json_decode($guzzle->post($url, [
+                'form_params' => [
+                    'client_id' => $this->config->clientid,
+                    'grant_type' => 'refresh_token',
+                    'client_secret' => $this->config->clientsecret,
+                    'refresh_token' => $this->config->refreshtoken,
+                ],
+            ])->getBody()->getContents());
+        } catch (\Exception $e) {
+            throw $e;
+        }
 
         // Save token.
         $this->config->accesstoken = $tokenderefresco->access_token;
@@ -114,16 +124,21 @@ class teams_handler {
 
         // Get access token if accessmethod is app.
         $url = 'https://login.microsoftonline.com/' . $this->config->tenantid . '/oauth2/v2.0/token';
-        $graphresponse = json_decode($guzzle->post($url, [
-            'form_params' => [
-                'tenant' => $this->config->tenantid,
-                'client_id' => $this->config->clientid,
-                'scope' => 'https://graph.microsoft.com/.default',
-                'client_secret' => $this->config->clientsecret,
-                'grant_type' => 'client_credentials',
-                'redirect_uri' => $CFG->wwwroot.'/mod/hybridteaching/vc/teams/classes/teamsacessapp.php',
-            ],
-        ])->getBody()->getContents());
+        $graphresponse = null;
+        try {
+            $graphresponse = json_decode($guzzle->post($url, [
+                'form_params' => [
+                    'tenant' => $this->config->tenantid,
+                    'client_id' => $this->config->clientid,
+                    'scope' => 'https://graph.microsoft.com/.default',
+                    'client_secret' => $this->config->clientsecret,
+                    'grant_type' => 'client_credentials',
+                    'redirect_uri' => $CFG->wwwroot.'/mod/hybridteaching/vc/teams/classes/teamsacessapp.php',
+                ],
+            ])->getBody()->getContents());
+        } catch (\Exception $e) {
+            throw $e;
+        }
 
         $result = json_decode(json_encode($graphresponse), true);
 
@@ -285,7 +300,7 @@ class teams_handler {
         if (isset($organizatorteams['id'])) {
             $organiz = $organizatorteams['id'];
         } else {
-            throw new \moodle_exception (get_string('emailorganizatornotfound','hybridteachvc_teams'), 'Teams');
+            throw new \moodle_exception (get_string('emailorganizatornotfound', 'hybridteachvc_teams'), 'Teams');
         }
         $urlrequest = $this->geturlrequest($organiz);
 
@@ -408,7 +423,17 @@ class teams_handler {
      */
     public function get_meeting_recordings ($folderfile, $meetingid, $organizerid, $course, $name) {
         global $DB;
-        $token = $this->refreshtoken();
+        $token = '';
+        try {         
+            $token = $this->refreshtoken();         
+        } catch (\Exception $e) {
+            mtrace(get_string('incorrectconfig', 'hybridteachvc_teams',
+                [
+                    'course' => $course,
+                    'name' => $name,
+                ]));
+            return;
+        }
         $graph = new Graph();
         $graph->setAccessToken($token);
         $urlrequest = $this->geturlrequest ($organizerid);
@@ -465,13 +490,18 @@ class teams_handler {
                             ->download($pathfile);
                     } catch (\Exception $e) {
                         mtrace(get_string('recordingnotdownload', 'hybridteachvc_teams',
-                            [
+                            [ 
                                 'course' => $course,
                                 'name' => $name,
                                 'meetingid' => $meetingid,
                             ]));
                     }
-
+                    mtrace(get_string('correctdownload', 'hybridteachvc_teams',
+                    [ 
+                        'course' => $course,
+                        'name' => $name,
+                        'meetingid' => $meetingid,
+                    ]));
                     $result = json_decode(json_encode($graphresponse), true);
                     break;
                 }
@@ -488,8 +518,18 @@ class teams_handler {
      * @param int $organizerid The id  of the organizer to get the chat url meeting.
      * @return string $urlchat The url of the chat meetingo.
      */
-    public function getchatmeetingurl ($meetingid, $organizerid) {
-        $token = $this->refreshtoken();
+    public function getchatmeetingurl ($meetingid, $organizerid, $course, $name) {
+        $token = '';
+        try {
+            $token = $this->refreshtoken();
+        } catch (\Exception $e) {
+            mtrace(get_string('incorrectconfig', 'hybridteachvc_teams',
+                [
+                    'course' => $course,
+                    'name' => $name,
+                ]));
+            return;
+        }
         $graph = new Graph();
         $graph->setAccessToken($token);
         $urlrequest = $this->geturlrequest ($organizerid);

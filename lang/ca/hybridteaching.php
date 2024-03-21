@@ -203,7 +203,7 @@ $string['status_finished'] = 'Aquesta sessió ha finalitzat';
 $string['status_start'] = 'La sessió començarà properament';
 $string['status_ready'] = 'La sessió està llesta. Podeu entrar ara.';
 $string['status_undated'] = 'Podeu crear una sessió recurrent';
-$string['status_undated_wait'] = 'Ha d\'esperar fins que la nova sessió comenci';
+$string['status_undated_wait'] = 'Heu d\'esperar a que comenci una nova sessió';
 
 $string['closedoors_hours'] = ' {$a} hores després de l\'inici';
 $string['closedoors_minutes'] = ' {$a} minuts després de l\'inici';
@@ -536,7 +536,7 @@ $string['bulkhidechatssuccess'] = 'Xats ocultats amb èxit';
 $string['bulkhiderecordingssuccess'] = 'Enregistraments ocultats amb èxit';
 
 $string['hiddenuserattendance'] = '(Sessió oculta per a l\'usuari)';
-$string['cantcreatevc'] ='No pots entrar a la videoconferència: no tens prou permisos o has d\'esperar el moderador.';
+$string['cantcreatevc'] = 'No pots entrar a la videoconferència: no tens prou permisos o has d\'esperar el moderador.';
 $string['sessionperformed'] = '{$a} sessions ja realitzades (accediu en pestanya Sessions)';
 
 $string['qrupdatetime'] = 'Període de rotació del QR/Contrasenya';

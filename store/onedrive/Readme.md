@@ -7,7 +7,8 @@ Obtener: idcliente, idtenant (inquilino), secretclient.
 
 En la configuración de AZURE:
 
-1. Añadir URI de redirección:
+1. Añadir URI de redirección desde Azure, opción de menú Autenticación,
+añadiendo una plataforma web (si no lo ha hecho ya):
 https://NOMBRE DEL DOMINIO/mod/hybridteaching/store/onedrive/classes/onedriveaccess.php
 
 2. Asignar permisos de aplicación:
@@ -30,5 +31,4 @@ DOCUMENTACIÓN PARA CONFIGURACIÓN PLUGIN:
 
 guardar:
 - clientid, tenantid, secretclient
-- subdominio de sharepoint. 
-Ejemplo: si el dominio sharepoint es https://nhb7.sharepoint.com, almacenar el valor "nhb7" en el campo subdominio de sharepoint de la configuración.
+- Subdominio/dominio no se utilizan actualmente, son aclaratorios para conocer a qué tenant/subdominio pertenecen los ids y secrets.

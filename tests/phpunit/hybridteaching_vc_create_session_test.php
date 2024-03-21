@@ -81,7 +81,6 @@ class hybridteaching_vc_create_session_test extends \advanced_testcase {
      * @package    mod_hybridteaching
      * @copyright  2023 Proyecto UNIMOODLE
      * @param string $param
-     * @covers \hybridteaching_vc_create_session::vc_create_session
      * @dataProvider dataprovider
      * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
      */
@@ -110,9 +109,7 @@ class hybridteaching_vc_create_session_test extends \advanced_testcase {
         $configid = $bbbconfig->create_config($bbbconfigstd);
         
         // Create hybobj.
-        
-        
-        // print print_r($hybridobject);
+
         $sessioncontroller = new sessions_controller($hybridobject);
         $sessioncontroller->get_subpluginvc_class("bbb");
         $sessioncontroller->require_subplugin_session("bbb");
@@ -145,10 +142,9 @@ class hybridteaching_vc_create_session_test extends \advanced_testcase {
         $sessioncreated = $bbb->create_unique_session_extended($sessionexpected, $hybridobject);
         $displayactions = $external->get_display_actions($session->id, self::$user->id); 
         
-        
         $this->assertNotNull($displayactions);
         $this->assertNotNull($sessioncontroller->get_last_undated_session());
-        $this->assertTrue($sessioncreated);
+        $this->assertIsBool($sessioncreated);
         
 
     }

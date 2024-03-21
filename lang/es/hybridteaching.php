@@ -536,7 +536,7 @@ $string['bulkhidechatssuccess'] = 'Chats ocultados con éxito';
 $string['bulkhiderecordingssuccess'] = 'Grabaciones ocultadas con éxito';
 
 $string['hiddenuserattendance'] = '(Sessión oculta para el usuario)';
-$string['cantcreatevc'] ='No puedes entrar a la videconferencia: no tienes permisos suficientes o debes esperar al moderador.';
+$string['cantcreatevc'] = 'No puedes entrar a la videconferencia: no tienes permisos suficientes o debes esperar al moderador.';
 $string['sessionperformed'] = '{$a} sesiones ya realizadas (acceda en pestaña Sesiones)';
 
 $string['qrupdatetime'] = 'Periodo de rotación del QR/Contraseña';
@@ -551,6 +551,3 @@ $string['bulkhideattsuccess'] = 'Asistencias ocultadas con éxito';
 $string['hideatt'] = 'Ocultar asistencia a esta sesión';
 $string['visibleatt'] = 'Mostrar asistencia a esta sesión';
 $string['updatefinished'] = 'Finaliza sesiones que hayan finalizado por tiempo';
-
-
-/** New strings. */

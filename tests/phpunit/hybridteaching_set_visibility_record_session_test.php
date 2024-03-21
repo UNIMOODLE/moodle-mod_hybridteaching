@@ -82,7 +82,6 @@ class hybridteaching_set_visibility_record_session_test extends \advanced_testca
      * @param string $param
      * @param boolean $visibility
      * @param boolean $visibilitychat
-     * @covers \hybridteaching_set_visibility_record_session::set_visibility_record_session
      * @dataProvider dataprovider
      * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
      */
@@ -109,6 +108,7 @@ class hybridteaching_set_visibility_record_session_test extends \advanced_testca
         $data->hybridteachingid = $datadecoded->hybridteachingid;
         $data->name = $datadecoded->name;
         $data->context = $datadecoded->context;
+        $data->typevc = '';
         $data->starttime = time();
         $data->durationgroup['duration'] = $datadecoded->durationgroup->duration;
         $data->durationgroup['timetype'] = $sessioncontroller::MINUTE_TIMETYPE;
@@ -140,6 +140,8 @@ class hybridteaching_set_visibility_record_session_test extends \advanced_testca
         $sessionbeforevisibleset->visiblerecord == 1 ? self::$isvisible = 1 : self::$isvisible = 0;
         // Check that session records are invisible now.
         $this->assertEquals(0, $sessionbeforevisibleset->visiblerecord);
+        // Checks if the session has started.
+        $this->assertTrue($sessioncontroller->session_started($sessionexpected));
         
 
     }
@@ -156,7 +158,7 @@ class hybridteaching_set_visibility_record_session_test extends \advanced_testca
     }
 
     /**
-     * @covers \hybridteaching_set_visibility_record_session::isvisible
+     * Check is visible.
      */
     public function test_isvisible() {
         $this->assertEquals(1, self::$isvisible);

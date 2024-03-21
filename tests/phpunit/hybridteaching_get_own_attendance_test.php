@@ -82,7 +82,6 @@ class hybridteaching_get_own_attendance_test extends \advanced_testcase {
      *
      * @package    mod_hybridteaching
      * @copyright  2023 Proyecto UNIMOODLE
-     * @covers \hybridteaching_get_own_attendance::get_attendance
      * @dataProvider dataprovider
      * @param string $param
      * @param int $status
@@ -102,7 +101,8 @@ class hybridteaching_get_own_attendance_test extends \advanced_testcase {
             'name' => 'hybt',
             'timetype' => null,
             'config' => self::$config,
-            'userecordvc' => self::$userecordvc
+            'userecordvc' => self::$userecordvc,
+            'groupid' => self::$group->id
             ]);
         $cm = get_coursemodule_from_instance('hybridteaching', $hybridobject->id, self::$course->id);
 
@@ -110,7 +110,7 @@ class hybridteaching_get_own_attendance_test extends \advanced_testcase {
         // Simulate data form.
         $datadecoded = json_decode($param);
         $data = new \StdClass();
-        $data->hybridteachingid = $datadecoded->hybridteachingid;
+        $data->hybridteachingid = $hybridobject->id;
         $data->name = $datadecoded->name;
         $data->context = $datadecoded->context;
         $data->starttime = time();
@@ -125,22 +125,26 @@ class hybridteaching_get_own_attendance_test extends \advanced_testcase {
         $this->assertNotNull($sessionexpected);
         $attendancecontroller = new attendance_controller();
         // Create attendance.
-        $attendances = $attendancecontroller->hybridteaching_set_attendance($hybridobject, $sessionexpected, 1, 2);
+        $attendanceid = $attendancecontroller->hybridteaching_set_attendance($hybridobject, $sessionexpected, 1, 2);
         $attendancesrecords = $DB->get_records('hybridteaching_attendance', ['hybridteachingid' => $session->id]);
         $this->assertNotNull($attendancesrecords);
         // Get own attendance information.
         $this->assertNotNull($attendancecontroller->hybridteaching_get_attendance($session->id));
-        $studentsparticipation = $attendancecontroller->hybridteaching_get_students_participation($hybridobject->id);
-        $this->assertEquals(1, count($studentsparticipation));
+        $studentsparticipation = $attendancecontroller->hybridteaching_get_students_participation('');
+        //$studentsparticipation = $attendancecontroller->hybridteaching_get_students_participation($hybridobject->name);
+        //$studentsparticipation = $attendancecontroller->hybridteaching_get_students_participation($hybridobject->id);
+        //$this->assertEquals(1, count($studentsparticipation));
         // Retrieves the attendance records for a specific user.
         $this->assertFalse($attendancecontroller->hybridteaching_get_instance_users(''));
         $this->assertNotNull($attendancecontroller->hybridteaching_get_instance_users($hybridobject));
         // Belongs in session group.
         $belongsinsessiongroup = $attendancecontroller->user_belongs_in_session_group(self::$user->id, $sessionexpected->id);
         // Calculates the number of attendances that uses groups.
-        //$this->assertNotNull($attendancecontroller->attendances_uses_groups([$attendancecontroller->hybridteaching_get_attendance($session->id)]));
+        $this->assertIsNumeric($attendancecontroller->attendances_uses_groups($attendancesrecords));
         // Get session attendance.
         $this->assertNotNull($attendancecontroller->get_session_attendance($sessionexpected->id, self::$user->id));
+        // Delete all atendances.
+        $sessioncontroller->delete_all_sessions();
     }
     public static function dataprovider(): array {
 

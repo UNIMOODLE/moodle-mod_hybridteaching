@@ -78,7 +78,6 @@ class hybridteaching_finish_unfinished_sessions_test extends \advanced_testcase 
      * @package    mod_hybridteaching
      * @copyright  2023 Proyecto
      * @param string $param
-     * @covers \hybridteaching_finish_unfinished_sessions::finishs_unfinished_sessions
      * @dataProvider dataprovider
      * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
      */

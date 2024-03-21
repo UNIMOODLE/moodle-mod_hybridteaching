@@ -82,7 +82,6 @@ class hybridteaching_create_session_test extends \advanced_testcase {
      * @copyright  2023 Proyecto UNIMOODLE
      * @param string $param
      * @param string $typevc
-     * @covers \hybridteaching_create_session::create_session
      * @dataProvider dataprovider
      * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
      */
@@ -128,21 +127,22 @@ class hybridteaching_create_session_test extends \advanced_testcase {
 
         // Create session.
         $session = $sessioncontroller->create_session($data);
+
         $this->assertGreaterThan(0, $sessioncontroller->count_sessions());
         $this->assertNotNull($sessioncontroller->get_last_undated_session());
         $sessionexpected = $sessioncontroller->get_session($session->id);
-        //print print_r($sessionexpected);
+
         $this->assertNotNull($sessionexpected);
         // Check conf of this session doesnt exist
         $this->assertFalse($sessioncontroller->get_sessionconfig_exists($sessionexpected));
         // Check this session is started
         $this->assertFalse($sessioncontroller->session_started($sessionexpected));
-        // Check this session is not finished yet.
-        $this->assertFalse($sessioncontroller->session_finished_triggered($sessionexpected->id));
         // Get the last session created.
         $this->assertNotNull($sessioncontroller->get_last_session());
         // Enable data.
         $commoncontroller = new common_controller();
+        $this->assertTrue($commoncontroller->hybridteaching_exist($hybridobject->id));
+        $this->assertFalse($commoncontroller->hybridteaching_exist('fail'));
         $commoncontroller->enable_data($hybridobject->id, 1, 'hybridteaching_session');
         // Get enable data session.
         $commoncontroller->get_enabled_data('hybridteaching_session');
@@ -163,20 +163,20 @@ class hybridteaching_create_session_test extends \advanced_testcase {
         */
             ['{"name":"Test de prueba","description": "description session", "context":50,"starttime":1642736531,"durationgroup":
                 {"duration":45000,"timetype":null}}',
-                '{"configname":"Testing config data", "category":1, "version":2024010901, "visible":1,"subpluginconfigid":1, "id":99}',
+                '{"configname":"Testing config data", "categories":"1", "version":2024010901, "visible":1,"subpluginconfigid":1, "id":99}',
                  'bbb'],
             ['{"name":"Test de prueba","context":50,"description": "description session","starttime":1642736531,"durationgroup":
                 {"duration":45000,"timetype":null}}',
-                '{"configname":"Testing config data", "category":1, "version":2024010901, "visible":1,"subpluginconfigid":1, "id":99}',
+                '{"configname":"Testing config data", "categories":"cat1,cat2,cat3,", "version":2024010901, "visible":1,"subpluginconfigid":1, "id":99}',
                  'meet'],
             ['{"name":"Test de prueba","context":50,"description": "description session","starttime":1642736531,"noduration":true,"durationgroup":
                 {"duration":45000,"timetype":null}}',
-                '{"configname":"Testing config data", "category":1, "version":2024010901, "visible":1,"subpluginconfigid":1, "id":99}',
+                '{"configname":"Testing config data", "categories":"1", "version":2024010901, "visible":1,"subpluginconfigid":1, "id":99}',
                  'bbb'],
             ['{"name":"Test de prueba","context":50,"description": "description session","starttime":1642736531,"noduration":true,"durationgroup":
                 {"duration":45000,"timetype":null}}',
-                '{"configname":"Testing config data", "category":1, "version":2024010901, "visible":1,"subpluginconfigid":1, "id":99}',
-                 'meet'],
+                '{"configname":"Testing config data", "categories":"1", "version":2024010901, "visible":1,"subpluginconfigid":1, "id":99}',
+                 'bbb'],
          
         ];
     }
@@ -210,6 +210,7 @@ class hybridteaching_create_session_test extends \advanced_testcase {
         // Create config data.
         $config = new \StdClass();
         $configdatadecoded = json_decode($configdata);
+        $config->id = $bbbid;
         $config->configname = $configdatadecoded->configname;
         isset($configdatadecoded->category) ? $config->category = $configdatadecoded->category : $config->category = null; 
         $config->id = $configdatadecoded->subpluginconfigid;

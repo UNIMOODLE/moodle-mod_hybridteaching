@@ -63,18 +63,22 @@ $importform = new sessions_import_form(null, ['id' => $id]);
 if ($importform->is_cancelled()) {
     redirect($returnurl);
 } else if ($data = $importform->get_data()) {
-    require_sesskey();
-    $text = $importform->get_file_content('sessionsfile');
-    $encoding = $data->encoding;
-    $delimiter = $data->delimiter_name;
-    $importer = new sessions_import($text, $encoding, $delimiter, 0, null, false, $course, $hybridteaching);
-    $importer->import($hybridteaching);
-    redirect($url);
+    if ($importform->get_data()->validimport == 1) {
+        require_sesskey();
+        $text = $importform->get_file_content('sessionsfile');
+        $encoding = $data->encoding;
+        $delimiter = $data->delimiter_name;
+        $importer = new sessions_import($text, $encoding, $delimiter, 0, null, false, $course, $hybridteaching);
+        $importer->import($hybridteaching);
+        redirect($url);
+    } else {
+        redirect($url);
+    }
 }
 
 echo $OUTPUT->header();
 echo $OUTPUT->heading(get_string('importsessions', 'hybridteaching'));
-if ($hybridteaching->sessionscheduling != 1) { 
+if ($hybridteaching->sessionscheduling != 1) {
     notify_controller::notify_problem(get_string('error:importnosessionschedule', 'hybridteaching'));
 }
 notify_controller::show();

@@ -52,7 +52,6 @@ class bbbproxy extends proxy_base {
     /** @var object $bbbinstance Api with credentials, url... */
     protected $bbbinstance;
 
-    
     /**
      * Constructor for the class.
      *
@@ -227,11 +226,18 @@ class bbbproxy extends proxy_base {
      *
      * @param meetingid $meetingid
      */
-    public function get_meeting_recording($meetingid) {
+    public function get_meeting_recording ($meetingid) {
         $data = [
             'meetingID' => $meetingid,
             'state' => 'published, unpublished, processed, processing, deleted',
         ];
+
+        if ($this->is_meeting_running ($meetingid)) {
+            return [
+                'returncode' => 'meetingrunning',
+            ];
+        }
+
         $recordingurl = $this->action_url_config('getRecordings', $data);
         $recordingid = '';
         $curl = new curl();

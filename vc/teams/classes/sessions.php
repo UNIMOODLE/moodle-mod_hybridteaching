@@ -146,11 +146,13 @@ class sessions {
             $teams->meetingcode = $response['meetingCode'];
             $teams->organizer = $response['participants']['organizer']['identity']['user']['id'];
             $teams->joinurl = $response['joinUrl'];
-
             if (!$teams->id = $DB->insert_record('hybridteachvc_teams', $teams)) {
                 return false;
-
             }
+
+            // Load the new session.
+            $this->teamssession = $teams;
+
         }
     }
 

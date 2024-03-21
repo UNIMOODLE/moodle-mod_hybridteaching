@@ -172,6 +172,10 @@ class downloadrecords extends \core\task\scheduled_task {
             return $isdownloaded;
         }
 
+        if (!isset($response->recording_files)) {
+            return $isdownloaded;
+        }
+
         foreach ($response->recording_files as $file) {
             if ((strtolower($file->file_type) == 'mp4')) {
                 $folderfilerecording = $folderfile.'-1.'.strtolower($file->file_type);

@@ -42,15 +42,15 @@ class configs extends \mod_hybridteaching\controller\configs_controller {
     /**
      * Loads a configuration by its ID.
      *
-     * @param int $configid 
-     * @return object 
+     * @param int $configid
+     * @return object
      */
     public static function load_config($configid) {
         global $DB;
         $data = $DB->get_record('hybridteachstore_pumukit_con', ['id' => $configid]);
         return $data;
     }
-    
+
     /**
      * Create a config record in the database.
      *

@@ -81,7 +81,6 @@ class hybridteaching_notifys_test extends \advanced_testcase {
      * @param string $problem
      * @param string $message
      * @param string $success
-     * @covers \hybridteaching_notifys::notifys
      * @dataProvider dataprovider
      * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
      */

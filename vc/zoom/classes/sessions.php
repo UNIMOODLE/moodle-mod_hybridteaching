@@ -269,7 +269,6 @@ class sessions {
                 $service = new \hybridteachvc_zoom\webservice($zoomconfig);
                 $meeting = $service->get_meeting_webinar_info($this->zoomsession->meetingid, 0);
 
-
                 if (isset($meeting->start_url)) {
                     if ($userismoderator) {
                         $zoomurl = $meeting->start_url;
@@ -296,6 +295,11 @@ class sessions {
                     'message' => get_string('error_unable_join', 'hybridteaching'),
                 ];
             }
+        } else {
+            return [
+                'returncode' => 'FAILED',
+                'message' => get_string('error_unable_join', 'hybridteaching'),
+            ];
         }
     }
 

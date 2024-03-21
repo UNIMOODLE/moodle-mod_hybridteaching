@@ -37,7 +37,6 @@ namespace mod_hybridteaching;
 defined('MOODLE_INTERNAL') || die();
 global $CFG;
 require_once($CFG->dirroot . '/mod/hybridteaching/classes/controller/sessions_controller.php');
-//require_once($CFG->dirroot . '/mod/hybridteaching/classes/controller/configs_controller.php');
 require_once($CFG->dirroot . '/mod/hybridteaching/classes/helpers/calendar_helpers.php');
 require_once($CFG->dirroot . '/mod/hybridteaching/lib.php');
 require_once($CFG->dirroot . '/config.php');
@@ -85,7 +84,6 @@ class hybridteaching_create_config_test extends \advanced_testcase {
      * @copyright  2023 Proyecto UNIMOODLE
      * @param string $configdata
      * @param string $param
-     * @covers \hybridteaching_create_session::create_session
      * @dataProvider dataprovider
      * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
      */
@@ -112,6 +110,7 @@ class hybridteaching_create_config_test extends \advanced_testcase {
         $databbbid = $this->subplugininfo();
         $hybridconfig = new \stdClass();
         $hybridconfig->type = 'bbb';
+        $hybridconfig->subplugintype = 'vc';
         $configscontroller = new configs_controller($hybridconfig, 'hybridteachvc');
         // Create config.
         $this->createconfig($configscontroller, $hybridobject, $configdata, $databbbid);
@@ -119,9 +118,15 @@ class hybridteaching_create_config_test extends \advanced_testcase {
         $this->assertNotNull($configscontroller->hybridteaching_load_config(1));
         $this->assertNotNull($configscontroller->hybridteaching_get_configs_select(0));
         $this->assertNotNull($configscontroller->get_categories_conditions(['category' => 0]));
+        // Update config.
+        $configinitial = $DB->get_records('hybridteaching_configs');
+        //print print_r(array_keys($configinitial)[0]);
+        $config = $configscontroller->hybridteaching_load_config(array_keys($configinitial)[0]);
+        $config->configname = 'random';
+        $configscontroller->hybridteaching_update_config($config);
         // Delete config.
-        $configscontroller->hybridteaching_delete_config(1);
-        $configscontroller->hybridteaching_delete_config('fail');
+        $configscontroller->hybridteaching_delete_config($config->id);
+        $configscontroller->hybridteaching_delete_config(999);
 
     }
     public static function dataprovider(): array {

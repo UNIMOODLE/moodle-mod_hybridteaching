@@ -82,7 +82,6 @@ class hybridteaching_delete_session_test extends \advanced_testcase {
      * @copyright  2023 Proyecto UNIMOODLE
      * @param string $param
      * @param string $typevc
-     * @covers \hybridteaching_delete_session::delete_session
      * @dataProvider dataprovider
      * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
      */
@@ -125,10 +124,8 @@ class hybridteaching_delete_session_test extends \advanced_testcase {
         $sessioncontroller->delete_session($session->id);
         hybridteaching_grade_item_delete($hybridobject);
         
-
         $this->assertFalse(hybridteaching_delete_instance(1));
         $this->assertTrue(hybridteaching_delete_instance($hybridobject->id));
-
 
     }
     public static function dataprovider(): array {

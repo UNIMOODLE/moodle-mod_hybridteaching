@@ -35,13 +35,10 @@ namespace mod_hybridteaching\task;
 
 use mod_hybridteaching\controller\sessions_controller;
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * Class update_finished.
  */
 class update_finished_session extends \core\task\scheduled_task {
-    
     /**
      * Returns localised general event name.
      *

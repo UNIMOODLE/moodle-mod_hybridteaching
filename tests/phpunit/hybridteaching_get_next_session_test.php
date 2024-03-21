@@ -79,7 +79,6 @@ class hybridteaching_get_next_session_test extends \advanced_testcase {
      * @package    mod_hybridteaching
      * @copyright  2023 Proyecto UNIMOODLE
      * @param string $param
-     * @covers \hybridteaching_get_next_session::get_next_session
      * @dataProvider dataprovider
      * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
      */

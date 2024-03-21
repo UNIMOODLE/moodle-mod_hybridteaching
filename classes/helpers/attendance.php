@@ -55,7 +55,7 @@ class attendance {
      */
     public static function calculate_session_att($ht, $sessid, $groupid) {
         $attendancecontroller = new attendance_controller($ht);
-        $attendance = $attendancecontroller->count_sess_attendance(['sessionid' => $sessid, 'status' => 1]);
+        $attendance = $attendancecontroller->count_sess_attendance(['sessionid' => $sessid, 'status' => 0]);
         $totalusers = roles::count_role_users(5, $ht->coursecontext, false, $groupid);
 
         if ($totalusers == 0) {

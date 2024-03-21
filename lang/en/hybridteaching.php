@@ -536,7 +536,7 @@ $string['bulkhidechatssuccess'] = 'Chats successfully hidden';
 $string['bulkhiderecordingssuccess'] = 'Recordings successfully hidden';
 
 $string['hiddenuserattendance'] = '(Hidden session for the user)';
-$string['cantcreatevc'] ='You cannot join the videoconference: you do not have sufficient permissions or you must wait for the moderator.';
+$string['cantcreatevc'] = 'You cannot join the videoconference: you do not have sufficient permissions or you must wait for the moderator.';
 $string['sessionperformed'] = '{$a} sessions already done (access in the Sessions tab).';
 
 $string['qrupdatetime'] = 'Qr/Password rotating period';
@@ -553,6 +553,7 @@ $string['hideatt'] = 'Hide session attendance';
 $string['visibleatt'] = 'Show session attendance';
 $string['updatefinished'] = 'Finish sessions that have finished by time';
 
-/** New strings. */
+// New strings.
 
 $string['error:importnosessionschedule'] = 'Session scheduling is disabled. Change it to import.';
+$string['info:sessioninprogress'] = 'Some sessions are currently in progress. Any actions are limited.';

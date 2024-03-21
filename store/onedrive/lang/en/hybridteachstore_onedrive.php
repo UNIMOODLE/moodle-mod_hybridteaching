@@ -31,3 +31,6 @@ $string['updatestores'] = 'Upload Onedrive videos';
 $string['subdomain'] = 'Onedrive subdomain';
 $string['hybridteaching'] = 'hybridteaching';
 $string['notuploading'] = 'Cannot uploading recording in courseid';
+$string['notuploading'] = 'Cannot uploading recording for session \'{$a->name}\' from courseid {$a->course}. ';
+$string['incorrectconfig'] = 'Incorrect configuration or access to OneDrive for session \'{$a->name}\' from course {$a->course}. Contact your administrator for OneDrive settings.';
+$string['correctupload'] = 'Video uploaded successfully: {$a->name}';

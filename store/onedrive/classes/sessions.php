@@ -110,9 +110,9 @@ class sessions {
         global $DB;
 
         // Read the store instance config.
-        $configod = $DB->get_record('hybridteachstore_onedrive_con', ['id' => $config->subpluginconfigid]);
+        $configod = $DB->get_record('hybridteachstore_onedrive_co', ['id' => $config->subpluginconfigid]);
         $videoweburl = $DB->get_field('hybridteachstore_onedrive', 'weburl', ['sessionid' => $htsession]);
-        if (isset($videoweburl) && isset($configod)){
+        if (isset($videoweburl) && $videoweburl != '' && isset($configod)) {
             // Delete video in onedrive.
             $onedriveclient = new onedrive_handler($configod);
             $onedriveclient->deletefile($videoweburl);

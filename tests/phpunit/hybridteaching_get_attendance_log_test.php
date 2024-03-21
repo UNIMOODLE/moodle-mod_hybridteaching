@@ -85,7 +85,6 @@ class hybridteaching_get_attendance_log_test extends \advanced_testcase {
      * @copyright  2023 Proyecto UNIMOODLE
      * @param string $param
      * @param int $action
-     * @covers \hybridteaching_get_attendance_log::get_attendance_log
      * @dataProvider dataprovider
      * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
      */
@@ -125,20 +124,21 @@ class hybridteaching_get_attendance_log_test extends \advanced_testcase {
         // Set attendance.
         $attendanceid = $attendancecontroller->hybridteaching_set_attendance($hybridobject, $sessionexpected->id);
         $attendancesrecords = $DB->get_records('hybridteaching_attendance', ['hybridteachingid' => $session->id]);
-        //hybridteaching_set_attendance_log($hybridteaching, $session, $action, $userid = 0, $event = false)
         $this->assertNotNull($attendancesrecords);
         // Set attendance log.
         $log = $attendancecontroller->hybridteaching_set_attendance_log($hybridobject, $sessionexpected, $action, self::$user->id);
         $this->assertNotNull($log);
-        //$this->assertArrayHasKey('gstring', $log);
-        //$this->assertArrayHasKey('ntype', $log);
-        
         // Get attendance log.
         $logsdb = $attendancecontroller->hybridteaching_get_attendance_logs($attendanceid);
+
         $this->assertFalse($attendancecontroller->hybridteaching_get_attendance_logs(null));
         $this->assertNotNull($logsdb);
+        // Catch exception.
+        $attendancecontroller->hybridteaching_get_attendance_logs('');
         // Don't insert in DB when $action == 0
         $this->assertEquals(1, count($logsdb));
+        // Exception get last attendance.
+        $attendancecontroller->hybridteaching_get_last_attend('', self::$user->id);
     }
     public static function dataprovider(): array {
 

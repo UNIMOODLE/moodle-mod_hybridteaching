@@ -189,7 +189,7 @@ class sessions_form extends \moodleform {
      * Form validation
      *
      * @param object $data Form data
-     * @param mixed $files 
+     * @param mixed $files
      * @return array Errors
      */
     public function validation($data, $files) {

@@ -23,19 +23,10 @@ define([
                 var display = r.buttons;
                 if (!r.admin) {
                     if (display == 'enter') {
-                        toast.add(str.get_string('entersession', 'hybridteaching'));
-                    } else {
-                        toast.add(str.get_string('exitsession', 'hybridteaching'));
+                        clearInterval(timer);
+                        location.reload();
                     }
-                    var exitstr = str.get_string('exitsession', 'hybridteaching');
-                    exitstr.done(function(exitstring) {
-                        if (display == 'exit') {
-                            document.querySelector('#zonemessage').querySelector('.alert-info').textContent =
-                            exitstring;
-                        }
-                    });
-                    clearInterval(timer);
-                }
+                };
             }
         });
     };
@@ -43,6 +34,7 @@ define([
         init: (sessionid, userid) => {
             update_view(sessionid, userid);
             hybridteaching_student_view_update(sessionid, userid);
+            toast.add(str.get_string('cantcreatevc', 'hybridteaching'));
             var timer = setInterval(() => {
                 update_view(sessionid, userid, timer);}, 15000);
         }

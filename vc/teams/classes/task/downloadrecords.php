@@ -60,7 +60,7 @@ class downloadrecords extends \core\task\scheduled_task {
 
         global $DB, $CFG;
 
-        $enabledrecording = get_config('hybridteachvc_teams','enabledrecording');
+        $enabledrecording = get_config('hybridteachvc_teams', 'enabledrecording');
         if (!$enabledrecording) {
             mtrace(get_string('recordingdisabled', 'hybridteaching'));
             return;
@@ -91,12 +91,17 @@ class downloadrecords extends \core\task\scheduled_task {
 
             $teamshandler = new teams_handler($teamsconfig);
 
-            // Call to download recordings.
-            $responserecording = $teamshandler->get_meeting_recordings ($folderfile, $session->meetingid, $session->organizer,
-                $session->course, $session->name);
+            try {
+                // Call to download recordings.
+                $responserecording = $teamshandler->get_meeting_recordings ($folderfile, $session->meetingid, $session->organizer,
+                    $session->course, $session->name);
 
-            // Call to get meeting chatinfo urls.
-            $responsechat = $teamshandler->getchatmeetingurl($session->meetingid, $session->organizer);
+                // Call to get meeting chatinfo urls.
+                $responsechat = $teamshandler->getchatmeetingurl($session->meetingid, $session->organizer,
+                    $session->course, $session->name);
+            } catch (\Exception $e) {
+                continue;
+            }
 
             // Save recordingid and prepare to upload.
             $sess = $DB->get_record('hybridteaching_session', ['id' => $session->hsid]);

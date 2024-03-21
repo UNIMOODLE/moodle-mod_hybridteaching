@@ -89,7 +89,6 @@ class hybridteaching_session_import_test extends \advanced_testcase {
      * @param string $msg
      * @param array $mappingdata
      * @param int $row
-     * @covers \hybridteaching_session_import::session_import
      * @dataProvider dataprovider
      * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
      */
@@ -124,8 +123,6 @@ class hybridteaching_session_import_test extends \advanced_testcase {
         $data->duration = $sessioncontroller::calculate_duration($data->durationgroup['duration'],
                 $data->durationgroup['timetype']);
 
-
-                
         // Create session.
         $session = $sessioncontroller->create_session($data);
         $sessionexpected = $sessioncontroller->get_session($session->id);
@@ -141,8 +138,6 @@ class hybridteaching_session_import_test extends \advanced_testcase {
         $this->assertEquals($sessionsimport->get_error(), $msg);
         // Get import id.
         $this->assertIsNumeric($sessionsimport->get_importid());
-        // Get required headers.
-        //$this->assertIsArray($sessionsimport->list_required_headers());
         // Found headers.
         $foundheaders = $sessionsimport->list_found_headers();
         // Read mapping data.
@@ -152,6 +147,7 @@ class hybridteaching_session_import_test extends \advanced_testcase {
         $readmap = $reflectionMethod->invoke($sesimport, $mappingdata);
         $this->assertIsArray($readmap);
 
+        $this->assertNotNull($sesimport->list_required_headers());
 
         $reflectionMethod = new \ReflectionMethod(sessions_import::class, 'get_column_data');
         $reflectionMethod->setAccessible(true);

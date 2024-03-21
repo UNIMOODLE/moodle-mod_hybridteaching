@@ -47,7 +47,7 @@ class updatestores extends \core\task\scheduled_task {
     }
 
     /**
-     * Executes the function, which includes retrieving session recordings, uploading them to Pumukit, 
+     * Executes the function, which includes retrieving session recordings, uploading them to Pumukit,
      * and updating the database accordingly.
      */
     public function execute() {

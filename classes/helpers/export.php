@@ -192,7 +192,7 @@ class export {
         $inparams = [];
         $insql = '';
         if (!empty($this->sessions)) {
-            [$insql, $inparams] = $DB->get_in_or_equal($this->sessions, SQL_PARAMS_NAMED, 'sessions'); 
+            [$insql, $inparams] = $DB->get_in_or_equal($this->sessions, SQL_PARAMS_NAMED, 'sessions');
             $allparams = $allparams + $inparams;
         }
 
@@ -208,7 +208,7 @@ class export {
             $selectgroups = "CASE WHEN g.id IS NOT NULL THEN g.name ELSE '-' END AS groupname,";
             $allparams = $allparams + ['courseid' => $this->hybridteaching->course];
         }
-      
+
         $allparams = $allparams + ['htid' => $this->hybridteaching->id];
 
         $sql = "SELECT
@@ -221,7 +221,6 @@ class export {
                         CONCAT(hs.id, ' - ', ha.status) AS attbysess
                   FROM {hybridteaching_attendance} ha
             INNER JOIN {hybridteaching_session} hs ON hs.id = ha.sessionid
-            
             INNER JOIN {user} u ON u.id = ha.userid
                         $groups
                  WHERE hs.hybridteachingid = :htid AND hs.id $insql $wheregroups";

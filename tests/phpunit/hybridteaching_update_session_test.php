@@ -87,7 +87,6 @@ class hybridteaching_update_session_test extends \advanced_testcase {
      * @param string $newname
      * @param string $newdescription
      * @param string $typevc
-     * @covers \hybridteaching_update_session::update_session
      * @dataProvider dataprovider
      * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
      */
@@ -147,7 +146,9 @@ class hybridteaching_update_session_test extends \advanced_testcase {
         $sessioncontroller->load_sessions(0, 0, ['starttime' => $data->starttime - 1000], 'hybridteachingid != 0');
 
         $this->assertGreaterThan(0, $sessioncontroller->get_session($sessionedited->id)->timemodified);
-        $this->assertFalse($sessioncontroller->session_started($sessionexpected));
+        // Try insert subplugin extension.
+        $DB->insert_record('hybridteachvc_bbb', ['htsession' => $sessionexpected->id, 'meetingid' => 1, 'recordingid' => 1, 'createtime' => 1]);
+        $this->assertIsBool($sessioncontroller->session_started($sessionexpected));
     }
 
     public static function dataprovider(): array {
@@ -155,10 +156,10 @@ class hybridteaching_update_session_test extends \advanced_testcase {
         return [
             ['{"hybridteachingid":1,"name":"Session 1", "description":"description 1","context":50,"starttime":1642736531,
              "durationgroup":{"duration":45000,"timetype":null}}',
-             "Session testing edited", "Description of session edited", "bbb" ],
+             "Session testing edited", "Description of session edited", 'bbb' ],
              ['{"hybridteachingid":1,"name":"Session 1", "description":"description 1","context":50,"starttime":1642736531,
              "durationgroup":{"duration":45000,"timetype":null}}',
-             "Session testing edited", "Description of session edited", "bbb" ],
+             "Session testing edited", "Description of session edited", 'bbb' ],
             ['{"hybridteachingid":1,"name":"Session 2", "description":"description 2","context":50,"starttime":1642736531,
              "durationgroup":{"duration":45000,"timetype":null}}',
              "Session testing edited 2", "Description of session 2 edited", 'meet'],

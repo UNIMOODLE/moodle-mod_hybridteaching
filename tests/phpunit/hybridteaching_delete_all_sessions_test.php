@@ -84,7 +84,6 @@ class hybridteaching_delete_all_sessions_test extends \advanced_testcase {
      * @copyright  2023 Proyecto UNIMOODLE
      * @param string $param
      * @param string $typevc
-     * @covers \hybridteaching_delete_session::delete_all_sessions
      * @dataProvider dataprovider
      * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
      */

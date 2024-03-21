@@ -42,6 +42,7 @@ require_once($CFG->dirroot . '/config.php');
 
 use mod_hybridteaching\helpers\password;
 use mod_hybridteaching\controller\sessions_controller;
+use mod_hybridteaching\task\update_finished_session;
 
 class hybridteaching_finish_session_test extends \advanced_testcase {
 
@@ -79,7 +80,6 @@ class hybridteaching_finish_session_test extends \advanced_testcase {
      * @package    mod_hybridteaching
      * @copyright  2023 Proyecto UNIMOODLE
      * @param string $param
-     * @covers \hybridteaching_finish_session::finish_session
      * @dataProvider dataprovider
      * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
      */
@@ -118,6 +118,12 @@ class hybridteaching_finish_session_test extends \advanced_testcase {
         $sessioncontroller->set_session_finished($sessionexpected->id);
         $this->assertEquals(1, $sessioncontroller->get_session($sessionexpected->id)->isfinished);
 
+        $updatefinishedsession = new update_finished_session();
+        $this->assertNotNull($updatefinishedsession->get_name());
+        $updatefinishedsession->execute();
+        
+        $this->assertNotNull($sessioncontroller->get_sessions_performed($hybridobject->id));
+
     }
 
     public static function dataprovider(): array {
@@ -125,8 +131,8 @@ class hybridteaching_finish_session_test extends \advanced_testcase {
         return [
             ['{"hybridteachingid":1,"name":"Test de prueba","context":50,"starttime":1642736531,"durationgroup":{"duration":45000,
                 "timetype":null}}', ],
-            ['{"hybridteachingid":2,"name":"Test de prueba 2","context":50,"starttime":1642736531,"durationgroup":{"duration":45000,
-                "timetype":null}}', ],
+            ['{"hybridteachingid":2,"name":"Test de prueba 2","context":50,"starttime":1642736531,"durationgroup":{"duration":1,
+                "timetype":2}}', ],
         ];
     }
 

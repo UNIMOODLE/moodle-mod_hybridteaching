@@ -67,15 +67,19 @@ class sessions_import_form extends \moodleform {
         $mform->addElement('select', 'encoding', get_string('encoding', 'group'), $choices);
         $mform->setDefault('encoding', 'UTF-8');
         $hybridteaching = $DB->get_record_sql('SELECT ht.* FROM {hybridteaching} ht
-                                                 JOIN {course_modules} cm 
-                                                   ON cm.instance=ht.id'
-                                                   , ['cm.id' => $data['id']]);
-        
-        if($hybridteaching->sessionscheduling != '1') {
+                                                 JOIN {course_modules} cm
+                                                   ON cm.instance=ht.id
+                                                WHERE cm.id = ?'
+                                                    , [$data['id']]);
+
+        if ($hybridteaching->sessionscheduling != '1') {
             $mform->disabledIf('submitbutton', 'id', 'eq', $data['id']);
+        } else {
+            $mform->addElement('hidden', 'validimport', 1);
+            $mform->setType('validimport', PARAM_INT);
         }
         $this->add_action_buttons(true, get_string('importsessions', 'hybridteaching'));
-        
+
         $this->set_data($data);
     }
 }

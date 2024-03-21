@@ -50,7 +50,7 @@ class configs extends \mod_hybridteaching\controller\configs_controller {
         $bbbdata = $DB->get_record('hybridteachvc_bbb_config', ['id' => $configid]);
         return $bbbdata;
     }
-    
+
     /**
      * Creates a configuration record in the database based on the provided data.
      *

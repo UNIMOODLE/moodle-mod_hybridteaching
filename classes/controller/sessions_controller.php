@@ -38,8 +38,6 @@ use stdClass;
 use mod_hybridteaching\helper;
 use mod_hybridteaching\helpers\calendar_helpers;
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * Class sessions_controller
  */
@@ -363,7 +361,7 @@ class sessions_controller extends \mod_hybridteaching\controller\common_controll
                     'sessid' => !empty($session) ? $session->id : null,
                 ],
             ]);
-    
+
             $event->trigger();
 
             if (!empty($session->typevc)) {
@@ -925,14 +923,35 @@ class sessions_controller extends \mod_hybridteaching\controller\common_controll
      */
     public static function get_sessions_performed($id) {
         global $DB;
-        $sql = "SELECT count(id) 
+        $sql = "SELECT count(id)
                   FROM {hybridteaching_session} 
                  WHERE hybridteachingid = :htid
-                   AND isfinished = 1 
+                   AND isfinished = 1
                    AND (starttime  + duration) < :now";
 
         $sessionperformed = $DB->count_records_sql($sql, ['htid' => $id, 'now' => time()]);
         return $sessionperformed;
+    }
+
+
+    /**
+     * Get the sessions currently in progress for a given hybrid teaching ID.
+     *
+     * @param int $id the hybrid teaching id
+     * @return array the number of sessions in progress
+     */
+    public static function get_sessions_in_progress($id) {
+        global $DB;
+        $sql = 'SELECT hts.id 
+                  FROM {hybridteaching_session} hts
+                  JOIN {course_modules} cm
+                    ON cm.instance = hts.hybridteachingid
+                 WHERE hts.hybridteachingid = ?
+                   AND hts.starttime < ?
+                   AND hts.starttime + hts.duration > ?';
+        $sessionprogressparam = [$id, time(), time()];
+        $sessionsinprogress = $DB->get_records_sql($sql, $sessionprogressparam);
+        return $sessionsinprogress;
     }
 }
 

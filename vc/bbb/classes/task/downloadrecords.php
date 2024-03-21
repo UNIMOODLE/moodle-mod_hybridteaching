@@ -82,27 +82,39 @@ class downloadrecords extends \core\task\scheduled_task {
             $meeting = new meeting($bbbconfig);
             $response = $meeting->get_meeting_recordings($session->meetingid);
 
-            if (isset($response['returncode']) && $response['returncode'] == 'SUCCESS') {
-                $sessionresult = $DB->get_record('hybridteaching_session', ['id' => $session->hsid]);
-                if ($response['recordingid'] != '') {
-                    $bbb = $DB->get_record('hybridteachvc_bbb',
-                        ['meetingid' => $session->meetingid, 'htsession' => $session->hsid]);
-                    $bbb->recordingid = $response['recordingid'];
-                    $DB->update_record('hybridteachvc_bbb', $bbb);
-                    // Save processedrecording in hybridteaching_session=0: ready to upload to store.
-                    $sessionresult->processedrecording = 0;
-                    $sessionresult->storagereference = -1;
-                    $DB->update_record('hybridteaching_session', $sessionresult);
+            if (isset($response['returncode'])) {
+
+                if ($response['returncode'] == 'meetingrunning') {
+                    // If is meeting running, still cannot get recordingid.
+                    mtrace(get_string('meetingrunning', 'hybridteachvc_bbb', $session->meetingid));
+
+                } else if ($response['returncode'] == 'SUCCESS') {
+                    $sessionresult = $DB->get_record('hybridteaching_session', ['id' => $session->hsid]);
+                    if ($response['recordingid'] != '') {
+                        $bbb = $DB->get_record('hybridteachvc_bbb',
+                            ['meetingid' => $session->meetingid, 'htsession' => $session->hsid]);
+                        $bbb->recordingid = $response['recordingid'];
+                        $DB->update_record('hybridteachvc_bbb', $bbb);
+                        // Save processedrecording in hybridteaching_session=0: ready to upload to store.
+                        $sessionresult->processedrecording = 0;
+                        $sessionresult->storagereference = -1;
+                        $DB->update_record('hybridteaching_session', $sessionresult);
+                        mtrace(get_string('correctgetrecording', 'hybridteachvc_bbb',
+                            ['name' => $session->name, 'course' => $session->course]));
+                    } else {
+                        // If there are not recordingid, then the recording is not found or there are no recording.
+                        $sessionresult->processedrecording = -2;
+                        $sessionresult->storagereference = -1;
+                        $DB->update_record('hybridteaching_session', $sessionresult);
+                        mtrace(get_string('recordingnotfound', 'hybridteachvc_bbb',
+                            ['course' => $session->course, 'name' => $session->name]));
+                    }
                 } else {
-                    $sessionresult->processedrecording = -2;
-                    $sessionresult->storagereference = -1;
-                    $DB->update_record('hybridteaching_session', $sessionresult);
                     mtrace(get_string('recordingnotfound', 'hybridteachvc_bbb',
                         ['course' => $session->course, 'name' => $session->name]));
                 }
             } else {
-                mtrace(get_string('recordingnotfound','hybridteachvc_bbb',
-                    ['course' => $session->course, 'name' => $session->name]));
+                mtrace(get_string('unknownerror', 'hybridteachvc_bbb', $session->meetingid));
             }
         }
     }

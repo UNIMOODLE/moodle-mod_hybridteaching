@@ -7,7 +7,7 @@
 // (at your option) any later version.
 //
 // Moodle is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY;without even the implied warranty of
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
@@ -35,7 +35,7 @@ defined('MOODLE_INTERNAL') || die();
 
 
 $string['pluginname'] = 'Irakaskuntza hibridoa';
-$string['modulename'] ='Irakaskuntza hibridoa';
+$string['modulename'] = 'Irakaskuntza hibridoa';
 $string['modulenameu'] = 'Irakaskuntza_hibridoa';
 $string['modulenameplural'] = 'Irakaskuntza hibridoa';
 $string['hybridteachingname'] = 'Izena';
@@ -327,8 +327,8 @@ $string['passwordgrp_help'] = 'Ezartzen bada, ikasleek pasahitz hau sartu behark
   * Biratu QR aukera markatuta badago, pasahitza aldakorra izango da eta QRren ondoan biratuko da.';
 $string['maxgradeattendance'] = 'Gehieneko kalifikazioaren asistentzia';
 $string['maxgradeattendance_help'] = 'Kalkulatzeko modua
-  * Parte hartutzat jotzen den saio kopurua 
-  * Asistentzia kopurua % saio eskuragarrien guztizkoetatik 
+  * Parte hartutzat jotzen den saio kopurua
+  * Asistentzia kopurua % saio eskuragarrien guztizkoetatik
   * % parte hartu den denbora saio eskuragarrien kopuru nominalaren guztizkotik
 ';
 $string['numsess'] = 'Saio kopurua';
@@ -505,7 +505,7 @@ $string['bulkhidesuccess '] = 'Arrakastaz ezkutatu diren saioak';
 $string['bulkhididechatssuccess'] = 'Txaketak ongi ezkutatu dira';
 $string['bulkhiderecordingssuccess'] = 'Grabaketak ongi ezkutatu dira';
 $string['hiddenuserattendance'] = '(Saioa erabiltzaileari ezkutatuta)';
-$string['cantcreatevc'] ='Ezin zara bideo-konferentzian sartu: ez duzu baimen nahikorik edo moderatzailearen zain egon behar duzu.';
+$string['cantcreatevc'] = 'Ezin zara bideo-konferentzian sartu: ez duzu baimen nahikorik edo moderatzailearen zain egon behar duzu.';
 $string['sessionperformed'] = '{$a} saio egin dira jada (sarbidea Saioak fitxan)';
 $string['qrupdatetime'] = 'QR/Pasahitza txandakatzeko epea';
 $string['qrupdatetime_help'] = 'QR mantenduko den denbora-tartea, aldatu arte, pasahitzari ere aplikagarria.';

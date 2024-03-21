@@ -172,7 +172,7 @@ class grades {
         $usergrade = 0;
         $maxgradeper = $ht->maxgradeattendance / 100;
         $attendancetomaxgrade = round($DB->count_records('hybridteaching_session',
-            array('hybridteachingid' => $ht->id, 'attexempt' => HYBRIDTEACHING_NOT_EXEMPT)) * $maxgradeper);
+            ['hybridteachingid' => $ht->id, 'attexempt' => HYBRIDTEACHING_NOT_EXEMPT,]) * $maxgradeper);
         $userattendance = self::count_user_att($ht, $userid);
 
         if ($userattendance->totalattended >= $attendancetomaxgrade) {
@@ -359,6 +359,14 @@ class grades {
         return $DB->record_exists('hybridteaching_session', ['id' => $sessid, 'attexempt' => HYBRIDTEACHING_EXEMPT]);
     }
 
+    /**
+     * Finish connectime logs for a specific hybrid teaching session.
+     *
+     * @param int $htid The ID of the hybrid teaching session.
+     * @param int $sessid The ID of the session.
+     * @param array $userids An array of user IDs.
+     * @return bool Returns false if the hybrid teaching session does not have a grade.
+     */
     public static function finish_connectime_logs($htid, $sessid, $userids = []) {
         global $DB;
 

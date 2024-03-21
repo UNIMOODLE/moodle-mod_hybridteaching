@@ -58,7 +58,7 @@ class htonedrive_config_edit_form extends moodleform {
         $mform->addElement('hidden', 'categories', '', "id='categories'");
         $mform->addElement('text', 'configname', get_string('configname', 'hybridteaching'));
 
-        $mform->addElement('html', '<button type="button" class="btn btn-outline-primary ml-3" data-toggle="modal" 
+        $mform->addElement('html', '<button type="button" class="btn btn-outline-primary ml-3" data-toggle="modal"
             data-target="#categoriesmodal">'.get_string('categories').'</button>');
 
         $mform->setType('id', PARAM_INT);
@@ -75,7 +75,8 @@ class htonedrive_config_edit_form extends moodleform {
         $mform->addElement('header', 'subplugin', get_string('pluginname', 'hybridteachstore_onedrive'));
         $mform->addElement('text', 'tenantid', get_string('tenantid', 'hybridteachstore_onedrive'), ['size' => 40]);
         $mform->addElement('text', 'clientid', get_string('clientid', 'hybridteachstore_onedrive'), ['size' => 40]);
-        $mform->addElement('passwordunmask', 'clientsecret', get_string('clientsecret', 'hybridteachstore_onedrive'), ['size' => 40]);
+        $mform->addElement('passwordunmask', 'clientsecret',
+            get_string('clientsecret', 'hybridteachstore_onedrive'), ['size' => 40]);
         $mform->addElement('text', 'subdomain', get_string('subdomain', 'hybridteachstore_onedrive'), ['size' => 30]);
         $mform->addElement('text', 'useremail', get_string('useremail', 'hybridteachstore_onedrive'), ['size' => 40]);
 

@@ -88,7 +88,7 @@ class restore_hybridteaching_activity_task extends restore_activity_task {
 
     /**
      * Defines and returns an array of restore log rules.
-     * 
+     *
      * @return array the array of restore log rules
      */
     public static function define_restore_log_rules() {

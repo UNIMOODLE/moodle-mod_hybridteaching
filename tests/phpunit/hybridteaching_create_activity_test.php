@@ -75,7 +75,6 @@ class hybridteaching_create_activity_test extends \advanced_testcase {
      *
      * @package    mod_hybridteaching
      * @copyright  2023 Proyecto UNIMOODLE
-     * @covers \hybridteaching_create_activity::create_activity
      * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
      */
     public function test_create_activity() {

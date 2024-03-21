@@ -247,7 +247,7 @@ switch ($action) {
         } else if ($action == 'bulkhideatt') {
             $paramtocheck = 'visibleatt';
         }
-        
+
         foreach ($sessionsinfo as $sessinfo) {
             if ($sessinfo[$paramtocheck] == 0) {
                 $disabled .= html_writer::empty_tag('br');
