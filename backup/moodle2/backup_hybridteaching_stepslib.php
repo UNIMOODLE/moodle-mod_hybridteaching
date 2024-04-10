@@ -97,6 +97,10 @@ class backup_hybridteaching_activity_structure_step extends backup_activity_stru
         $log->set_source_table('hybridteaching_attend_log', ['attendanceid' => backup::VAR_PARENTID], 'id ASC');
         // This source definition only happen if we are including user info witch in our case we dont.
 
+        // Support 2 types of subplugins.
+        $this->add_subplugin_structure('hybridteachvc', $session, true);
+        $this->add_subplugin_structure('hybridteachstore', $session, true);
+
         // Skip group overrides if not including groups.
         $groupinfo = $this->get_setting_value('groups');
         if (!$groupinfo) {

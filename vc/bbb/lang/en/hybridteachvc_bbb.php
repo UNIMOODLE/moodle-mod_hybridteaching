@@ -55,4 +55,4 @@ $string['bbb:record'] = 'Store BigBlueButton recordings';
 $string['recordingnotfound'] = 'Recording not found in courseid {$a->course}: \'{$a->name}\'';
 $string['meetingrunning'] = 'The meeting with meetingID {$a} is still running. The recording is not yet available.';
 $string['unknownerror'] = 'There was an error with the recording for the meetingID {$a}.';
-$string['correctgetrecording'] = 'Recording successfully obtained for session \'{$a->name}\' from course id {$a->course}';
+$string['correctgetrecording'] = 'Recording successfully obtained for session \'{$a->name}\' with sessionid {$a->sessionid} from course id {$a->course}';

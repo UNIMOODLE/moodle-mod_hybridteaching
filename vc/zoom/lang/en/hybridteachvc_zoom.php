@@ -34,9 +34,6 @@
 $string['pluginname'] = 'Hybrid Zoom';
 $string['pluginconfig'] = 'Hybrid zoom config';
 $string['pluginnewconfig'] = 'New hybrid zoom config';
-$string['accountid'] = 'Accountid';
-$string['clientid'] = 'Client ID';
-$string['clientsecret'] = 'Client secret';
 $string['zoom'] = 'zoom';
 $string['alias'] = 'Zoom';
 $string['accountid'] = 'Zoom account ID';

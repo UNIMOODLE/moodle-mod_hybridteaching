@@ -88,7 +88,7 @@ class attsessions_options_form extends \moodleform {
         foreach ($sessions as $sess) {
             if ($att = $attcontroller->hybridteaching_get_attendance($sess)) {
                 $att->visible && !$sess['attexempt'] ? $visible = '' : $visible = get_string('attnotforgrade', 'hybridteaching');
-                $selectedsessions[$sess['id']] = $sess['name'] . ' | ' . date('l, j \d\e F \d\e Y H:i', $sess['starttime']) .
+                $selectedsessions[$sess['id']] = $sess['name'] . ' | ' . date('l, j F Y H:i', $sess['starttime']) .
                     ' ' . $visible;
             }
         }

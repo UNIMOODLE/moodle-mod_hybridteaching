@@ -41,13 +41,13 @@ require_once($CFG->dirroot . '/mod/hybridteaching/classes/helpers/calendar_helpe
 require_once($CFG->dirroot . '/config.php');
 require_once($CFG->dirroot . '/mod/hybridteaching/lib.php');
 
-use mod_hybridteaching\output\attendance_render;
+use mod_hybridteaching\local\attendance_table;
 use mod_hybridteaching\controller\sessions_controller;
-use mod_hybridteaching\output\sessions_renderer;
+use mod_hybridteaching\local\sessions_table;
 
 use mod_hybridteaching\output\renderer;
 
-class hybridteaching_sessions_render_test extends \advanced_testcase {
+class hybridteaching_sessions_table_test extends \advanced_testcase {
 
     // Write the tests here as public funcions.
     // Please refer to {@link https://docs.moodle.org/dev/PHPUnit} for more details on PHPUnit tests in Moodle.
@@ -95,7 +95,7 @@ class hybridteaching_sessions_render_test extends \advanced_testcase {
      * @dataProvider dataprovider
      * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
      */
-    public function test_sessions_render($param, $typelist, $column) {
+    public function test_sessions_table($param, $typelist, $column) {
         // Reset after execute the test.
         global $DB, $COURSE, $USER;
         // Module instance.
@@ -128,7 +128,7 @@ class hybridteaching_sessions_render_test extends \advanced_testcase {
         // Create session.
         $session = $sessioncontroller->create_session($data);
 
-        $sessionsrender = new output\sessions_render($hybridobject, $typelist);
+        $sessionsrender = new sessions_table($hybridobject, $typelist);
 
         $sessionsrender->get_bulk_options_select();
         $this->assertNotNull($sessionsrender->get_operator());
@@ -139,7 +139,7 @@ class hybridteaching_sessions_render_test extends \advanced_testcase {
         
         $COURSE = self::$course;
         $USER = self::$user;
-        $sessionsrender = new \mod_hybridteaching\output\sessions_render($hybridobject, 1);
+        $sessionsrender = new sessions_table($hybridobject, 1);
         $sessionsrender->check_session_filters();
         $categories = ['cat1' => self::$category];
         // Build output categories.

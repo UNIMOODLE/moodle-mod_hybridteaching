@@ -33,7 +33,7 @@
 
 define('NO_OUTPUT_BUFFERING', true);
 
-use mod_hybridteaching\output\sessions_render;
+use mod_hybridteaching\local\sessions_table;
 use mod_hybridteaching\form\bulk_update_duration_form;
 use mod_hybridteaching\form\bulk_update_starttime_form;
 
@@ -118,7 +118,7 @@ switch ($action) {
         ];
 
         $formparams = compact('sesslist', 'cm', 'hybridteaching', 'slist');
-        $sessionrender = new sessions_render($hybridteaching, $slist);
+        $sessiontable = new sessions_table($hybridteaching, $slist);
         $mform = ($action === 'bulkupdateduration') ? new bulk_update_duration_form($url, $formparams)
             : new bulk_update_starttime_form($url, $formparams);
 
@@ -136,7 +136,7 @@ switch ($action) {
         }
 
         echo $OUTPUT->header();
-        echo $sessionrender->print_sessions_bulk_table($sessid);
+        echo $sessiontable->print_sessions_bulk_table($sessid);
         echo $mform->display();
         echo $OUTPUT->footer();
         break;

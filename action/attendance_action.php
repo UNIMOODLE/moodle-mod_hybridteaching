@@ -34,7 +34,7 @@
 define('NO_OUTPUT_BUFFERING', true);
 
 use mod_hybridteaching\controller\attendance_controller;
-use mod_hybridteaching\output\attendance_render;
+use mod_hybridteaching\local\attendance_table;
 use mod_hybridteaching\form\bulk_set_attendance_form;
 use mod_hybridteaching\form\bulk_set_exempt_form;
 use mod_hybridteaching\form\bulk_set_session_exempt_form;
@@ -135,7 +135,7 @@ switch ($action) {
             'action' => $action,
         ];
         $formparams = compact('attendslist', 'cm', 'hybridteaching', 'sessionid', 'view', 'userid');
-        $attendancerenderer = new attendance_render($hybridteaching, $attendslist);
+        $attendancetable = new attendance_table($hybridteaching, $attendslist);
         $mform = ($action === 'bulksetattendance') ? new bulk_set_attendance_form($url, $formparams)
             : false;
         if ($mform->is_cancelled()) {
@@ -145,7 +145,7 @@ switch ($action) {
             $attendancecontroller->update_multiple_attendance(explode('_', $formdata->ids), $formdata);
             redirect($urlview);
         }
-        print_attendance_action($mform, $attendancerenderer, 'bulksetattendance', $attendsid, null);
+        print_attendance_action($mform, $attendancetable, 'bulksetattendance', $attendsid, null);
         break;
     case 'bulksetexempt':
         $attendsid = optional_param_array('attendance', '', PARAM_SEQUENCE);
@@ -155,7 +155,7 @@ switch ($action) {
             $view == 'studentattendance' ?
             $urlview->params(['userid' => $userid, 'view' => $view])
             :
-            $$urlview->params(['sessionid' => $sessionid, 'view' => $view]);
+            $urlview->params(['sessionid' => $sessionid, 'view' => $view]);
 
         } else {
             $view == 'studentattendance' ?
@@ -174,7 +174,7 @@ switch ($action) {
             'action' => $action,
         ];
         $formparams = compact('attendslist', 'cm', 'hybridteaching', 'sessionid', 'view', 'userid');
-        $attendancerenderer = new attendance_render($hybridteaching, $attendslist);
+        $attendancetable = new attendance_table($hybridteaching, $attendslist);
         $mform = ($action === 'bulksetexempt') ? new bulk_set_exempt_form($url, $formparams)
             : false;
         if ($mform->is_cancelled()) {
@@ -184,7 +184,7 @@ switch ($action) {
             $attendancecontroller->update_multiple_attendance(explode('_', $formdata->ids), $formdata);
             redirect($urlview);
         }
-        print_attendance_action($mform, $attendancerenderer, 'bulksetexempt', $attendsid, null);
+        print_attendance_action($mform, $attendancetable, 'bulksetexempt', $attendsid, null);
         break;
     case 'bulksetsessionexempt':
         $urlview->params(['view' => $view]);
@@ -209,7 +209,7 @@ switch ($action) {
         ];
 
         $formparams = compact('sessionslist', 'cm', 'hybridteaching', 'sessionid', 'view');
-        $attendancerenderer = new attendance_render($hybridteaching, $sessionslist);
+        $attendancetable = new attendance_table($hybridteaching, $sessionslist);
         $mform = ($action === 'bulksetsessionexempt') ? new bulk_set_session_exempt_form($url, $formparams)
             : false;
         if ($mform->is_cancelled()) {
@@ -219,7 +219,7 @@ switch ($action) {
             $attendancecontroller->update_multiple_sessions_exempt(explode('_', $formdata->ids), $formdata);
             redirect($urlview);
         }
-        print_attendance_action($mform, $attendancerenderer, 'bulksetsessionexempt', null, $sessionsids);
+        print_attendance_action($mform, $attendancetable, 'bulksetsessionexempt', null, $sessionsids);
         break;
     default:
         redirect($return);
@@ -253,23 +253,23 @@ if (empty($mform)) {
  * Display the print attendance action.
  *
  * @param object $mform mform object
- * @param mod_hybridteaching\output\attendance_render $attendancerenderer renderer
+ * @param mod_hybridteaching\local\attendance_table $attendancetable renderer
  * @param string $action bulksetattendance || bulksetexempt || bulksetsessionexempt
  * @param array $attendsid attends ids
  * @param array $sessionsids sessions ids
  */
-function print_attendance_action($mform, $attendancerenderer, $action, $attendsid = null, $sessionsids = null) {
+function print_attendance_action($mform, $attendancetable, $action, $attendsid = null, $sessionsids = null) {
     global $OUTPUT;
     echo $OUTPUT->header();
     switch ($action) {
         case "bulksetattendance":
-            $attendancerenderer->print_attendance_bulk_table($attendsid);
+            $attendancetable->print_attendance_bulk_table($attendsid);
             break;
         case "bulksetexempt":
-            $attendancerenderer->print_attendance_bulk_table($attendsid, 'bulksetexempt');
+            $attendancetable->print_attendance_bulk_table($attendsid, 'bulksetexempt');
             break;
         case "bulksetsessionexempt":
-            $attendancerenderer->print_attendance_bulk_table($sessionsids, 'sessionbulk');
+            $attendancetable->print_attendance_bulk_table($sessionsids, 'sessionbulk');
             break;
     }
     $mform != null && ($action == "bulksetattendance" || $action == "bulksetexempt" || $action == "bulksetsessionexempt") 

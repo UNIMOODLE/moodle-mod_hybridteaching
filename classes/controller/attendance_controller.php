@@ -547,7 +547,7 @@ class attendance_controller extends \mod_hybridteaching\controller\common_contro
         }
         $s = '<br>';
         $s .= get_string('name') . ': ' . $session->name;
-        $s .= '<br>' . get_string('date') . ': ' . date('l, j \d\e F \d\e Y H:i', $session->starttime).'<br>';
+        $s .= '<br>' . get_string('date') . ': ' . date('l, j F Y H:i', $session->starttime).'<br>';
         $s .= get_string('group') . ': ';
         $session->groupid == 0 ? $s .= get_string('commonattendance', 'hybridteaching') :
             $s .= groups_get_group($session->groupid)->name;
@@ -805,9 +805,11 @@ class attendance_controller extends \mod_hybridteaching\controller\common_contro
                     $att->exempt == HYBRIDTEACHING_NOT_EXEMPT ?
                         $updateatt = false : $att->exempt = HYBRIDTEACHING_NOT_EXEMPT;
                     if ($DB->update_record('hybridteaching_attendance', $att)) {
-                        $timeneeded = $session->duration;
+                        $hybridteaching = $DB->get_record('hybridteaching', ['id' => $att->hybridteachingid]);
+                        $timeneeded = self::hybridteaching_get_needed_time($hybridteaching->validateattendance,
+                            $hybridteaching->attendanceunit, $session->duration);
                         $timespent = self::get_user_timespent($attid);
-                        $att->status = self::verify_user_attendance(0, 0, $attid, $timeneeded, $timespent);
+                        $att->status = self::verify_user_attendance($hybridteaching->id, $session, $attid, $timeneeded, $timespent);
                         $updateatt = true;
                     }
                     break;

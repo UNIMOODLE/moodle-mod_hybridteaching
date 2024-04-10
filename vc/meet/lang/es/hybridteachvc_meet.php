@@ -32,25 +32,23 @@
  */
 
 $string['pluginname'] = 'Meet híbrido';
-$string['pluginconfig'] = 'Configuración de meet híbrido';
-$string['pluginnewconfig'] = 'Nueva Configuración de meet híbrido';
-$string['accountid'] = 'Accountid';
-$string['clientid'] = 'Client ID';
-$string['clientsecret'] = 'Client secret';
+$string['pluginconfig'] = 'Configuración de Meet híbrido';
+$string['pluginnewconfig'] = 'Nueva configuración de Meet híbrido';
+$string['accountid'] = 'ID da conta';
 $string['meet'] = 'meet';
 $string['emailaccount'] = 'Email de la cuenta de Google Meet';
-$string['clientid'] = 'ID cliente meet';
-$string['clientsecret'] = 'Clave secreta cliente meet';
+$string['clientid'] = 'ID cliente Meet';
+$string['clientsecret'] = 'Clave secreta cliente Meet';
 $string['meeterr_field_missing'] = '{$a} no encontrado';
-$string['errorwebservice'] = 'Error de webservice de meet: {$a}.';
-$string['meeterr_no_access_token'] = 'No access token returned';
+$string['errorwebservice'] = 'Error de webservice de Meet: {$a}.';
+$string['meeterr_no_access_token'] = 'No se ha obtenido token de acceso.';
 $string['alias'] = 'Meet';
 $string['licenses'] = 'Licencias';
 $string['downloadrecordsmeet'] = 'Descargar grabaciones Meet';
 $string['alreadyloggedmeet'] = 'Ya has iniciado sesión para esta configuración de meet';
 $string['loggingerrormeet'] = 'Error de inicio de sesión en su cuenta de Google';
 $string['downloadrecordsmeet'] = 'Descargar grabaciones Meet';
-$string['chatnamefile'] = 'Chat de meet';
+$string['chatnamefile'] = 'Chat de Meet';
 
 $string['meet:view'] = 'Ver Meet';
 $string['meet:use'] = 'Generar videconferencias Meet';

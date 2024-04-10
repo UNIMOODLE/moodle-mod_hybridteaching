@@ -48,15 +48,21 @@ class restore_hybridteaching_activity_structure_step extends restore_activity_st
         $userinfo = $this->get_setting_value('userinfo');
 
         $paths[] = new restore_path_element('hybridteaching', '/activity/hybridteaching');
-        $paths[] = new restore_path_element('hybridteaching_session', '/activity/hybridteaching/sessions/session');
+        $session = new restore_path_element('hybridteaching_session', '/activity/hybridteaching/sessions/session');
+        $paths[] = $session;
         $paths[] = new restore_path_element('hybridteaching_attendance',
             '/activity/hybridteaching/sessions/session/attendances/attendance');
         $paths[] = new restore_path_element('hybridteaching_attend_log',
             '/activity/hybridteaching/sessions/session/attendances/attendance/logs/log');
 
+        // Support 2 types of subplugins.
+        $this->add_subplugin_structure('hybridteachvc', $session);
+        //$this->add_subplugin_structure('hybridteachstore', $session);
+        
         // Return the paths wrapped into standard activity structure.
         return $this->prepare_activity_structure($paths);
     }
+
 
     /**
      * Process the hybridteaching data and insert a new record.
@@ -133,6 +139,25 @@ class restore_hybridteaching_activity_structure_step extends restore_activity_st
         // No need to save this mapping as far as nothing depend on it
         // (child paths, file areas nor links decoder).
         $this->set_mapping('hybridteaching_attend_log', $oldid, $newitemid, true);
+    }
+
+    /**
+     * Process the hybridteachvc.
+     *
+     * @param mixed $data
+     */
+    protected function process_hybridteaching_hybridteachvc($data) {
+        /*global $DB;
+
+        $data = (object)$data;
+        $oldid = $data->id;
+        $data->attendanceid = $this->get_new_parentid('hybridteaching_attendance');
+
+        $newitemid = $DB->insert_record('hybridteaching_attend_log', $data);
+        // No need to save this mapping as far as nothing depend on it
+        // (child paths, file areas nor links decoder).
+        $this->set_mapping('hybridteaching_attend_log', $oldid, $newitemid, true);
+        */
     }
 
     /**

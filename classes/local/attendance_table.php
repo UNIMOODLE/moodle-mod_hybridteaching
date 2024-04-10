@@ -31,7 +31,7 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace mod_hybridteaching\output;
+namespace mod_hybridteaching\local;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -52,9 +52,9 @@ require_once($CFG->dirroot . '/user/lib.php');
 require_once($CFG->libdir . '/gradelib.php');
 
 /**
- * Class attendance_render.
+ * Class attendance_table.
  */
-class attendance_render extends \flexible_table {
+class attendance_table {
     /** @var string Used when there is an empty column */
     const EMPTY = "-";
 
@@ -363,7 +363,7 @@ class attendance_render extends \flexible_table {
             $return .= $OUTPUT->paging_bar($attendancecount, $page, $perpage, $baseurl);
         if (!$groupmode) {
             $groupmode = $attendancecontroller->attendances_uses_groups($attendancelist);
-            if (!$groupmode && ($view == 'studentattendance' || $view == 'sessionattendance')) {
+            if (!$groupmode && ($view == 'sessionattendance')) {
                 unset($table->head[1]);
                 $optionsformparams['groupexception'] = $groupmode;
             }
@@ -409,7 +409,7 @@ class attendance_render extends \flexible_table {
             $date = $session->starttime;
             $hour = date('H:i', $date);
             $attendanceid = $attendance['id'];
-            $date = date('l, j \d\e F \d\e Y H:i', $date);
+            $date = date('l, j F Y H:i', $date);
             $attassistance = [];
             foreach ($attendanceassist as $attassist) {
                 if ($attassist['sessionid'] == $attendance['sessionid']) {
@@ -444,7 +444,7 @@ class attendance_render extends \flexible_table {
             $userurl = new \moodle_url('/user/view.php', ['id' => $USER->id]);
             $usertotalgrade = grade_get_grades($COURSE->id, 'mod', 'hybridteaching',
                 $this->hybridteaching->id, $attendance['userid']);
-            $attendgrade = $attendance['grade'];
+            $attendgrade = $grades->calc_att_grade_for($this->hybridteaching, $session->id, $attendance['id']);
             $attexempt = $sessionscontroller->get_session($attendance['sessionid'])->attexempt;
             $attendance['connectiontime'] == 0 ? $atttype = get_string('noatt', 'hybridteaching') : $atttype = '';
             if (empty($atttype)) {
@@ -675,8 +675,6 @@ class attendance_render extends \flexible_table {
             ];
         } else if ($headers == 'studentattendance') {
             $header = [
-                has_capability('mod/hybridteaching:sessionsfulltable', $this->context) ?
-                    $OUTPUT->render($columns['mastercheckbox']) : '',
                 $columns['strgroup'],
                 $columns['strname'],
                 $columns['strdate'],
@@ -721,7 +719,6 @@ class attendance_render extends \flexible_table {
             ];
         } else {
             $header = [
-                $OUTPUT->render($columns['mastercheckbox']),
                 $columns['strpfp'],
                 $columns['strlastfirstname'],
                 $columns['strcombinedatt'],
@@ -845,15 +842,11 @@ class attendance_render extends \flexible_table {
                 break;
             case 'studentattendance':
                 if (!$params['group']) {
-                    $row = ([has_capability('mod/hybridteaching:sessionsfulltable', $this->context) ?
-                    $OUTPUT->render($params['checkbox']) : '',
-                        $params['name'], $params['date'], $params['duration'], $params['type'], $params['attendance'],
+                        $row = ([$params['name'], $params['date'], $params['duration'], $params['type'], $params['attendance'],
                         $params['grade'], $options, ]);
                     break;
                 }
-                $row = ([has_capability('mod/hybridteaching:sessionsfulltable', $this->context) ?
-                        $OUTPUT->render($params['checkbox']) : '', $params['group'],
-                    $params['name'], $params['date'], $params['duration'], $params['type'], $params['attendance'],
+                $row = ([$params['name'], $params['date'], $params['duration'], $params['type'], $params['attendance'],
                     $params['grade'], $options, ]);
                 break;
             case 'extendedsessionatt':
@@ -870,7 +863,7 @@ class attendance_render extends \flexible_table {
                 $row = ([$params['hour'], $params['logaction'], $params['mark']]);
                 break;
             case 'extendedstudentatt':
-                $row = ([$OUTPUT->render($params['checkbox']), $params['pfp'], $params['firstlastname'],
+                $row = ([$params['pfp'], $params['firstlastname'],
                      $params['combinedatt'], $params['classroom'], $params['vc'], $params['grade'], $options, ]);
                 break;
             default:
@@ -1022,7 +1015,7 @@ class attendance_render extends \flexible_table {
                 $session = $sessionscontroller->get_session($sessionid);
                 $date = $session->starttime;
                 $hour = date('H:i', $date);
-                $date = date('l, j \d\e F \d\e Y, H:i', $date);
+                $date = date('l, j F Y, H:i', $date);
 
                 $body = [
                     'name' => $session->name,
@@ -1045,7 +1038,7 @@ class attendance_render extends \flexible_table {
             $attuser = $attcontroller->load_sessions_attendant($att);
             $date = $att['starttime'];
             $hour = date('H:i', $date);
-            $date = date('l, j \d\e F \d\e Y, H:i', $date);
+            $date = date('l, j F Y, H:i', $date);
 
             $attributes = [
                 'type'  => 'checkbox',
@@ -1341,7 +1334,7 @@ class attendance_render extends \flexible_table {
             $session = $sessionscontroller->get_session($sessionlist['id']);
             $date = $session->starttime;
             $hour = date('H:i', $date);
-            $date = date('l, j \d\e F \d\e Y H:i', $date);
+            $date = date('l, j F Y H:i', $date);
             $attassistance = [];
             foreach ($attendanceassist as $attassist) {
                 if ($attassist['sessionid'] == $session->id) {
@@ -1471,7 +1464,7 @@ class attendance_render extends \flexible_table {
         foreach ($sessionslist as $session) {
             $date = $session['starttime'];
             $hour = date('H:i', $date);
-            $date = date('l, j \d\e F \d\e Y H:i', $date);
+            $date = date('l, j F Y H:i', $date);
             $attributes = [
                 'type'  => 'checkbox',
                 'name'  => $session['name'],
@@ -1494,6 +1487,7 @@ class attendance_render extends \flexible_table {
                 $submitb = html_writer::empty_tag('input', $attributes);
                 $submitb .= '<br>' . $connectiontime;
                 $attendance->status == 2 ? $submitb .= '<br>' . get_string('late', 'hybridteaching') : '';
+                $attendance->status == 3 ? $submitb = get_string('exempt', 'hybridteaching') : '';
                 $attendance->status == 4 ? $submitb .= '<br>' . get_string('earlyleave', 'hybridteaching') : '';
                 $attendgrade = $grades->calc_att_grade_for($this->hybridteaching, $session['id'], $attendance->id);
                 $attendance->connectiontime == 0 ? $atttype = get_string('noatt', 'hybridteaching') : $atttype = '';
@@ -1516,7 +1510,7 @@ class attendance_render extends \flexible_table {
                         round($usertotalgrade->items[0]->grades[$attendance->userid]->grade ?? 0, 2) .
                         ' / ' . $this->hybridteaching->grade,
                     'enabled' => !$attendance->visible || $attexempt ? HYBRIDTEACHING_NOT_EXEMPT : HYBRIDTEACHING_EXEMPT,
-                    'visible' => $session['visible'],
+                    'visible' => $attendance->visible,
                     'status' => $attendance->status,
                     'checkbox' => new \core\output\checkbox_toggleall('attendance-table', false, [
                         'id' => 'attendance-' . $attendanceid,
@@ -1613,7 +1607,7 @@ class attendance_render extends \flexible_table {
         if (!$groupmode) {
             $groupmode = $attendancecontroller->attendances_uses_groups($sessionslist);
             if (!$groupmode) {
-                unset($table->head[1]);
+                unset($table->head[0]);
                 $optionsformparams['groupexception'] = $groupmode;
             }
         }

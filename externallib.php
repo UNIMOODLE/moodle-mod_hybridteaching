@@ -392,9 +392,9 @@ class hybridteaching_external extends external_api {
                                  FROM {hybridteaching_attendance} hta
                                  JOIN {hybridteaching_session} hts 
                                    ON hts.id = hta.sessionid
-                                  AND hts.starttime < UNIX_TIMESTAMP() 
-                                  AND hts.starttime + hts.duration > UNIX_TIMESTAMP()';
-            $attstudentsparam = ['hts.id' => $sessionid];
+                                  AND hts.starttime < :timenow 
+                                  AND hts.starttime + hts.duration > :timenow2';
+            $attstudentsparam = ['timenow' => time(), 'timenow2' => time()];
             $attstudentsrecords = $DB->get_records_sql($sqlattstudents, $attstudentsparam);
         }
         $attsessionrecords = sessions_controller::get_sessions_in_progress($cm->instance);

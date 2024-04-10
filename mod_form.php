@@ -33,7 +33,7 @@
 
 use mod_hybridteaching\helpers\roles;
 use mod_hybridteaching\controller\configs_controller;
-
+use mod_hybridteaching\helper;
 defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->dirroot.'/course/moodleform_mod.php');
@@ -346,7 +346,8 @@ class mod_hybridteaching_mod_form extends moodleform_mod {
      */
     public function data_preprocessing(&$defaultvalues) {
         global $DB;
-
+        $timeunitsession = $this->select_timeunit_session($defaultvalues['id']);
+        substr($timeunitsession, -1) == 'h' ? $defaultvalues['timetype'] = 2 : '';
         // Set up the completion checkboxes which aren't part of standard data.
         // We also make the default value (if you turn on the checkbox) for those
         // numbers to be 1, this will not apply unless checkbox is ticked.
@@ -433,5 +434,19 @@ class mod_hybridteaching_mod_form extends moodleform_mod {
             }
         }
 
+    }
+
+    /**
+     * Function to check if is necesary use hours or minutes.
+     *
+     * @param int $htid
+     * @return string time with timeunit of session
+     */
+    private function select_timeunit_session($htid) : string {
+        global $DB;
+        $hybridteaching = $DB->get_records('hybridteaching_session', ['hybridteachingid' => $htid]);
+        ($hybridteaching != null && count($hybridteaching) > 0) ? $timeunit = trim(helper::get_hours_format(reset($hybridteaching)->duration))
+        : $timeunit = '';
+        return $timeunit;
     }
 }

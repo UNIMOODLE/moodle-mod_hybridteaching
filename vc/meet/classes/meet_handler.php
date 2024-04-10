@@ -250,23 +250,38 @@ class meet_handler {
      * @throws \Exception If an error occurs during the search.
      * @return array An array of files that match the join code.
      */
-    public function search_recordings($joincode) {
+    public function search_recordings($session) {
         require_once(__DIR__.'/../vendor/autoload.php');
         try {
             $driveservice = new \Google_Service_Drive($this->client);
             $recordings = [];
             $pagetoken = null;
-            do {
-                $response = $driveservice->files->listFiles([
-                    'q' => "mimeType='video/mp4' and name contains '" . $joincode . "'",
-                    'spaces' => 'drive',
-                    'pageToken' => $pagetoken,
-                    'fields' => 'nextPageToken, files(id, name)',
-                ]);
-                array_push($recordings, $response->files);
+            if (!empty($session)) {
+                do {
+                    $response = $driveservice->files->listFiles([
+                        'q' => "mimeType='video/mp4' and name contains '" . basename($session->joinurl) . "'",
+                        'spaces' => 'drive',
+                        'pageToken' => $pagetoken,
+                        'fields' => 'nextPageToken, files(id, name)',
+                    ]);
 
-                $pagetoken = $response->pageToken;
-            } while ($pagetoken != null);
+                    if (!empty($response->files)) {
+                        array_push($recordings, $response->files);
+                    }
+
+                    if (empty($recordings)) {
+                        $response = $driveservice->files->listFiles([
+                            'q' => "mimeType='video/mp4' and name contains '" . $session->name . "'",
+                            'spaces' => 'drive',
+                            'pageToken' => $pagetoken,
+                            'fields' => 'nextPageToken, files(id, name)',
+                        ]);
+                        array_push($recordings, $response->files);
+                    }
+
+                    $pagetoken = $response->pageToken;
+                } while ($pagetoken != null);
+            }
             return $recordings;
         } catch(\Exception $e) {
             echo "Error Message: ".$e;
@@ -280,23 +295,39 @@ class meet_handler {
      * @throws \Exception If an error occurs during the search.
      * @return array An array of chats that match the join code.
      */
-    public function search_chats($joincode) {
+    public function search_chats($session) {
         require_once(__DIR__.'/../vendor/autoload.php');
         try {
             $driveservice = new \Google_Service_Drive($this->client);
             $chats = [];
             $pagetoken = null;
-            do {
-                $response = $driveservice->files->listFiles([
-                    'q' => "mimeType='text/plain' and name contains '" . $joincode . "'",
-                    'spaces' => 'drive',
-                    'pageToken' => $pagetoken,
-                    'fields' => 'nextPageToken, files(id, name)',
-                ]);
-                array_push($chats, $response->files);
+            if (!empty($session)) {
+                do {
+                    $response = $driveservice->files->listFiles([
+                        'q' => "mimeType='text/plain' and name contains '" . basename($session->joinurl) . "'",
+                        'spaces' => 'drive',
+                        'pageToken' => $pagetoken,
+                        'fields' => 'nextPageToken, files(id, name)',
+                    ]);
 
-                $pagetoken = $response->pageToken;
-            } while ($pagetoken != null);
+                    if (!empty($response->files)) {
+                        array_push($chats, $response->files);
+                    }
+
+                    if (empty($chats)) {
+                        $response = $driveservice->files->listFiles([
+                            'q' => "mimeType='text/plain' and name contains '" . $session->name . "'",
+                            'spaces' => 'drive',
+                            'pageToken' => $pagetoken,
+                            'fields' => 'nextPageToken, files(id, name)',
+                        ]);
+                        array_push($chats, $response->files);
+                    }
+
+                    $pagetoken = $response->pageToken;
+                } while ($pagetoken != null);
+            }
+
             return $chats;
         } catch(\Exception $e) {
             echo "Error Message: ".$e;
@@ -350,5 +381,15 @@ class meet_handler {
         $calendarservice->events->patch($calendarid, $eventid, $changes, [
           'supportsAttachments' => true,
         ]);
+    }
+
+    public function delete_file($fileid) {
+        require_once(__DIR__.'/../vendor/autoload.php');
+        try {
+            $driveservice = new \Google_Service_Drive($this->client);
+            $driveservice->files->delete($fileid);
+        } catch(\Exception $e) {
+            echo "Error Message: ".$e;
+        }
     }
 }

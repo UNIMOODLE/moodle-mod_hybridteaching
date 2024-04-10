@@ -112,7 +112,8 @@ class meeting {
 
         $meetingid = self::get_unique_meetingid_seed();
 
-        $url = new \moodle_url('/course/view.php', ['id' => $ht->course]);
+        $cm = get_coursemodule_from_instance ('hybridteaching', $ht->id);
+        $url = new \moodle_url('/mod/hybridteaching/view.php', ['id' => $cm->id ]);
 
         $data = ['meetingID' => $meetingid,
                 'name' => \mod_bigbluebuttonbn\plugin::html2text($session->name, 64),

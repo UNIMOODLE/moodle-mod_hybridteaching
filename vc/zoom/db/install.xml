@@ -12,7 +12,6 @@
         <FIELD NAME="hostemail" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false"/>
         <FIELD NAME="starturl" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
         <FIELD NAME="joinurl" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
-        <FIELD NAME="password" TYPE="char" LENGTH="11" NOTNULL="false" SEQUENCE="false" COMMENT="Meeting password. Password may only contain the following characters: [a-zA-Z0-9@-_*]. Max of 10 characters"/>
         <FIELD NAME="hostid" TYPE="char" LENGTH="30" NOTNULL="true" SEQUENCE="false" COMMENT="Meeting host user ID. Can be any user under this account. Cannot be updated after creation."/>
         <FIELD NAME="optionhostvideo" TYPE="int" LENGTH="1" NOTNULL="false" DEFAULT="1" SEQUENCE="false" COMMENT="Start video when host joins meeting."/>
         <FIELD NAME="optionparticipantsvideo" TYPE="int" LENGTH="1" NOTNULL="false" DEFAULT="1" SEQUENCE="false" COMMENT="Start video when participants join meeting."/>

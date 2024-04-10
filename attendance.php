@@ -33,7 +33,7 @@
 
 
 require(__DIR__.'/../../config.php');
-use mod_hybridteaching\output\attendance_render;
+use mod_hybridteaching\local\attendance_table;
 use mod_hybridteaching\controller\notify_controller;
 global $USER;
 // Course module id.
@@ -48,7 +48,7 @@ require_capability('mod/hybridteaching:attendance', $context);
 $hybridteaching = $DB->get_record('hybridteaching', ['id' => $cm->instance], '*', MUST_EXIST);
 $hybridteaching->context = $context;
 $url = new moodle_url('/mod/hybridteaching/attendance.php', ['id' => $id, 'editing' => 1]);
-$attendancerender = new attendance_render($hybridteaching);
+$attendancetable = new attendance_table($hybridteaching);
 
 $PAGE->navbar->add(get_string('attendance', 'hybridteaching'));
 $PAGE->set_url($url);
@@ -64,10 +64,11 @@ echo $OUTPUT->heading(get_string('attendance', 'hybridteaching'));
 
 if (has_capability('mod/hybridteaching:sessionsfulltable', $context, $user, $doanything = true)) {
     if (!empty(optional_param('view', '', PARAM_TEXT))) {
-        if ($_GET['view'] == 'extendedstudentatt') {
+        $view = optional_param('view', '', PARAM_TEXT);
+        if ($view == 'extendedstudentatt') {
             echo "<a href='attendance.php?id=".$id."&view=sessionattendance' class='btn btn-info' role='button'>" .
             get_string('sessionsattendance', 'hybridteaching') . "</a>";
-        } else if ($_GET['view'] == 'sessionattendance') {
+        } else if ($view == 'sessionattendance') {
             echo "<a href='attendance.php?id=".$id."&view=extendedstudentatt'
                 id='extendedstudentattbtn' class='btn btn-info mr-3' role='button'>" .
             get_string('studentsattendance', 'hybridteaching') . "</a>";
@@ -84,9 +85,9 @@ if (has_capability('mod/hybridteaching:sessionsfulltable', $context, $user, $doa
     }
 }
 $attsessionrecords = \mod_hybridteaching\controller\sessions_controller::get_sessions_in_progress($cm->instance);
-if (count($attsessionrecords) > 0) {
+if (count($attsessionrecords) > 0 && ($view == null || $view == 'sessionattendance' || $view == 'extendedsessionatt')) {
     notify_controller::notify_message(get_string('info:sessioninprogress', 'hybridteaching'));
     notify_controller::show();
 }
-echo $attendancerender->print_attendance_table();
+echo $attendancetable->print_attendance_table();
 echo $OUTPUT->footer();

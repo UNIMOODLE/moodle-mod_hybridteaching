@@ -31,18 +31,18 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-$string['pluginname'] = 'Youtube híbrido';
-$string['pluginconfig'] = 'Configuración de Youtube Store';
-$string['pluginnewconfig'] = 'Nueva configuración de Youtube Store';
+$string['pluginname'] = 'YouTube híbrido';
+$string['pluginconfig'] = 'Configuración de YouTube Store';
+$string['pluginnewconfig'] = 'Nueva configuración de YouTube Store';
 $string['youtube'] = 'youtube';
-$string['alias'] = 'Youtube';
-$string['accountid'] = 'ID cuenta youtube';
-$string['clientid'] = 'ID cliente youtube';
-$string['clientsecret'] = 'Clave secreta cliente youtube';
-$string['emaillicense'] = 'Email de la licencia youtube';
+$string['alias'] = 'YouTube';
+$string['accountid'] = 'ID cuenta YouTube';
+$string['clientid'] = 'ID cliente YouTube';
+$string['clientsecret'] = 'Clave secreta cliente YouTube';
+$string['emaillicense'] = 'Email de la licencia YouTube';
 $string['merr_field_missing'] = '{$a} no encontrado';
-$string['errorwebservice'] = 'Error de webservice de Youtube: {$a}.';
-$string['err_no_access_token'] = 'No access token returned';
+$string['errorwebservice'] = 'Error de webservice de YouTube: {$a}.';
+$string['err_no_access_token'] = 'No se devolvió ningún token de acceso';
 $string['licenses'] = 'Licencias';
 $string['updatestores'] = 'Subir vídeos YouTube';
 $string['notuploading'] = 'No se pudo subir la grabación en el cursoid';

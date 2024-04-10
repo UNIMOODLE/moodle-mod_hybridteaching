@@ -100,7 +100,7 @@ class downloadrecords extends \core\task\scheduled_task {
                         $sessionresult->storagereference = -1;
                         $DB->update_record('hybridteaching_session', $sessionresult);
                         mtrace(get_string('correctgetrecording', 'hybridteachvc_bbb',
-                            ['name' => $session->name, 'course' => $session->course]));
+                            ['name' => $session->name, 'sessionid' => $session->hsid, 'course' => $session->course]));
                     } else {
                         // If there are not recordingid, then the recording is not found or there are no recording.
                         $sessionresult->processedrecording = -2;

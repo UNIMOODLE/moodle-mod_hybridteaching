@@ -56,26 +56,29 @@ class sessions {
     }
 
     public function get_recording($processedrecording, $storagereference, $htid, $sid) {
-        global $DB;
         $config = $this->load_config($storagereference);
-
-        // $object = $DB->get_record('hybridteachstore_pumukit', ['id' => $processedrecording]);
-        $url = "";
-        // Aquí lo necesario para poder visualizar el vídeo de pumukit, devolver una url de visualización.
-        /*if ($object->weburl) {
-            $url = $object->weburl;
-        }*/
-        return $url;
+        $pumukitclient = new pumukit_handler($config);
+        return $pumukitclient->get_urlrecording($processedrecording);
     }
 
     /**
      * Deletes extended session for a specific config ID.
      *
      * @param int $htsession Session ID
-     * @param int $configid Config ID
+     * @param object $config Config
      */
-    public function delete_session_extended($htsession, $configid) {
+    public function delete_session_extended($htsession, $config) {
         global $DB;
+
+        $pumukitconf = $this->load_config($config->id);
+        $pumukitclient = new pumukit_handler($pumukitconf);
+
+        // Get cohorts.
+        $rows = $DB->get_records('hybridteachstore_pumukit', ['sessionid' => $htsession]);
+        foreach ($rows as $row) {
+            $pumukitclient->deletefile($row->id);
+        }
+
         $DB->delete_records('hybridteachstore_pumukit', ['sessionid' => $htsession]);
     }
 }

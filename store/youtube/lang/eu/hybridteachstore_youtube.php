@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/
+// This file is part of Moodle - https://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -12,7 +12,7 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+// along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 // Project implemented by the "Recovery, Transformation and Resilience Plan.
 // Funded by the European Union - Next GenerationEU".
@@ -24,13 +24,25 @@
 
 /**
  * Display information about all the mod_hybridteaching modules in the requested course. *
- * @package    mod_hybridteaching
+ * @package    hybridteachstore_youtube
  * @copyright  2023 Proyecto UNIMOODLE
  * @author     UNIMOODLE Group (Coordinator) <direccion.area.estrategia.digital@uva.es>
  * @author     ISYC <soporte@isyc.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
- // This activity has not particular settings but the inherited from the generic
- // backup_activity_task so here there isn't any class definition, like the ones
- // existing in /backup/moodle2/backup_settingslib.php (activities section).
+$string['pluginname'] = 'YouTube hibridoa';
+$string['pluginconfig'] = 'YouTube dendaren ezarpenak';
+$string['pluginnewconfig'] = 'YouTube dendaren ezarpen berriak';
+$string['youtube'] = 'youtube';
+$string['alias'] = 'YouTube';
+$string['accountid'] = 'YouTube kontuaren IDa';
+$string['clientid'] = 'YouTube Bezero IDa';
+$string['clientsecret'] = 'YouTube bezeroaren gako sekretua';
+$string['emaillicense'] = 'YouTube lizentziaren posta elektronikoa';
+$string['merr_field_missing'] = '{$a} ez da aurkitu';
+$string['errorwebservice'] = 'YouTube-ren web-zerbitzuaren errorea: {$a}.';
+$string['err_no_access_token'] = 'Ez da sarbide-token itzuli';
+$string['licenses'] = 'Lizentziak';
+$string['updatestores'] = 'Igo YouTube bideoak';
+$string['notuploading'] = 'Grabaketa ezin izan da kargatu kurtsoidera';

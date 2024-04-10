@@ -14,22 +14,22 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
-$string['pluginname'] = 'Onedrive híbrido';
-$string['pluginconfig'] = 'Configuración de Onedrive Store';
-$string['pluginnewconfig'] = 'Nueva configuración de Onedrive Store';
+$string['pluginname'] = 'OneDrive híbrido';
+$string['pluginconfig'] = 'Configuración de OneDrive Store';
+$string['pluginnewconfig'] = 'Nueva configuración de OneDrive Store';
 $string['tenantid'] = 'Tenant ID';
 $string['clientid'] = 'Cliente ID';
 $string['clientsecret'] = 'Secreto del cliente';
 $string['useremail'] = 'Email del usuario';
 $string['onedrive'] = 'onedrive';
-$string['alias'] = 'Onedrive';
+$string['alias'] = 'OneDrive';
 $string['err_field_missing'] = '{$a} no encontrado';
-$string['errorwebservice'] = 'Error de webservice de Onedrive: {$a}.';
-$string['err_no_access_token'] = 'No access token returned';
+$string['errorwebservice'] = 'Error de webservice de OneDrive: {$a}.';
+$string['err_no_access_token'] = 'No se devolvió ningún token de acceso';
 $string['licenses'] = 'Licencias';
-$string['updatestores'] = 'Subir vídeos Onedrive';
-$string['subdomain'] = 'Subdominio de Onedrive';
+$string['updatestores'] = 'Subir vídeos OneDrive';
+$string['subdomain'] = 'Dominio de OneDrive';
 $string['hybridteaching'] = 'hybridteaching';
 $string['notuploading'] = 'No se pudo subir la grabación de la sesión \'{$a->name}\' en el cursoid {$a->course}. ';
-$string['incorrectconfig'] = 'Configuración o acceso erróneos a Onedrive para la sesión  del curso {$a->course}. Contacte con el administrador para la configuración Onedrive.';
+$string['incorrectconfig'] = 'Configuración o acceso erróneos a OneDrive para la sesión  del curso {$a->course}. Contacte con el administrador para la configuración OneDrive.';
 $string['correctupload'] = 'Vídeo subido correctamente: {$a->name}';

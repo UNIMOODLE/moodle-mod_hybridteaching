@@ -33,7 +33,7 @@
 
 require(__DIR__.'/../../config.php');
 
-use mod_hybridteaching\output\sessions_render;
+use mod_hybridteaching\local\sessions_table;
 
 // Course module id.
 $id = required_param('id', PARAM_INT);
@@ -55,7 +55,7 @@ if ($slist == SESSION_LIST) {
 $hybridteaching = $DB->get_record('hybridteaching', ['id' => $cm->instance], '*', MUST_EXIST);
 $hybridteaching->context = $context;
 $url = new moodle_url('/mod/hybridteaching/sessions.php', ['id' => $id, 'l' => $slist]);
-$sessionrender = new sessions_render($hybridteaching, $slist);
+$sessiontable = new sessions_table($hybridteaching, $slist);
 
 $PAGE->set_url($url);
 $PAGE->set_title(format_string($hybridteaching->name));
@@ -77,6 +77,6 @@ if ($slist == SESSION_LIST) {
     echo "<a href='programsessions.php?id=".$id."'
         class='btn btn-primary' role='button'>".get_string('addsession', 'hybridteaching')."</a>";
 }
-echo $sessionrender->print_sessions_table();
+echo $sessiontable->print_sessions_table();
 
 echo $OUTPUT->footer();

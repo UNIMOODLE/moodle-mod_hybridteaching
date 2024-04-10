@@ -711,7 +711,6 @@ class webservice {
             'CURLOPT_HTTP_VERSION' => CURL_HTTP_VERSION_1_1,
         ]);
 
-        $timecalled = time();
         $response = $this->make_curl_call($curl, 'post',
             'https://zoom.us/oauth/token?grant_type=account_credentials&account_id=' . $this->accountid, []);
 

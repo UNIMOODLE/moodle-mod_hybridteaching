@@ -40,10 +40,10 @@ require_once($CFG->dirroot . '/mod/hybridteaching/classes/controller/sessions_co
 require_once($CFG->dirroot . '/mod/hybridteaching/classes/helpers/calendar_helpers.php');
 require_once($CFG->dirroot . '/config.php');
 
-use mod_hybridteaching\output\attendance_render;
+use mod_hybridteaching\local\attendance_table;
 use mod_hybridteaching\controller\sessions_controller;
 
-class hybridteaching_attendance_render_test extends \advanced_testcase {
+class hybridteaching_attendance_table_test extends \advanced_testcase {
 
     // Write the tests here as public funcions.
     // Please refer to {@link https://docs.moodle.org/dev/PHPUnit} for more details on PHPUnit tests in Moodle.
@@ -82,7 +82,7 @@ class hybridteaching_attendance_render_test extends \advanced_testcase {
      * @dataProvider dataprovider
      * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
      */
-    public function test_attendance_render($param, $column, $view, $paramstable = null, $nameform = '') {
+    public function test_attendance_table($param, $column, $view, $paramstable = null, $nameform = '') {
         // Reset after execute the test.
         global $DB;
         
@@ -116,17 +116,17 @@ class hybridteaching_attendance_render_test extends \advanced_testcase {
         // Create session.
         $session = $sessioncontroller->create_session($data);
         $sessionexpected = $sessioncontroller->get_session($session->id);
-        $attendancerender = new attendance_render($hybridobject);
+        $attendancetable = new attendance_table($hybridobject);
         // Get column name.
-        $columnname = $attendancerender->get_column_name($column, $view);
+        $columnname = $attendancetable->get_column_name($column, $view);
         $this->assertGreaterThan(0, strlen($columnname));
         // Get table options.
-        $tableoptions = $attendancerender->get_table_options(['visible' => 1], $paramstable, 'url', $session->id);
+        $tableoptions = $attendancetable->get_table_options(['visible' => 1], $paramstable, 'url', $session->id);
         // Get bulk options.
-        $attendancerender->get_bulk_options_select($view);
+        $attendancetable->get_bulk_options_select($view);
         
         $this->assertNotNull($tableoptions);
-        $this->assertNotNull($attendancerender->get_operator());
+        $this->assertNotNull($attendancetable->get_operator());
         switch ($nameform){
             case "bulksetexemptform":
                 $bulksetexemptform = new \mod_hybridteaching\form\bulk_set_exempt_form(null, ['cm' => $cm, 'attendslist' => [], 'sessionid' => $sessionexpected->id

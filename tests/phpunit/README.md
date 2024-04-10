@@ -19,7 +19,7 @@
 - **hybridteaching_set_vc_create_session_test.php** => Crea sessión y meeting [TODO]
 - **hybridteaching_create_config_test.php** => Crea configuración del plugin[DONE]
 - **hybridteaching_configure_subplugin_test.php** => Crea configuracion del subplugin (ej: bbb)[FIX]
-- **hybridteaching_attendance_render_test.php** => Render de las attendance [FIX]
+- **hybridteaching_attendance_table_test.php** => Render de las attendance [FIX]
 - **hybridteaching_session_render_test.php** => Render de las sessiones [FIX]
 - **hybridteaching_event_test.php** => Activa los eventos del plugin [DONE]
 - **hybridteaching_notifys_test.php** => Activa notificaciones del plugin [DONE]

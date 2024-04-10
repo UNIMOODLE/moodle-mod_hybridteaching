@@ -31,7 +31,7 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace mod_hybridteaching\output;
+namespace mod_hybridteaching\local;
 
 use stdClass;
 use mod_hybridteaching\controller\sessions_controller;
@@ -49,9 +49,9 @@ require_once($CFG->libdir . '/tablelib.php');
 require_once($CFG->dirroot . '/user/lib.php');
 
 /**
- * Class sessions_render.
+ * Class sessions_table.
  */
-class sessions_render extends \flexible_table {
+class sessions_table {
     /** @var string Used when there is an empty column */
     const EMPTY = "-";
 

@@ -74,5 +74,14 @@ function xmldb_hybridteachvc_zoom_upgrade($oldversion) {
         }
     }
 
+    if ($oldversion < '2023033100.20') {
+        // Delete old field exitsonzoom on hybridteachvc_zoom.
+        $table = new xmldb_table('hybridteachvc_zoom');
+        $field = new xmldb_field('password');
+        if ($dbman->field_exists($table, $field)) {
+            $dbman->drop_field($table, $field);
+        }
+    }
+
     return true;
 }

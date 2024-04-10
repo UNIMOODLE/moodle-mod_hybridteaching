@@ -32,8 +32,8 @@
  */
 
 $string['pluginname'] = 'Teams híbrido';
-$string['pluginconfig'] = 'Configuración de teams híbrido';
-$string['pluginnewconfig'] = 'Nueva configuración de teams híbrido';
+$string['pluginconfig'] = 'Configuración de Teams híbrido';
+$string['pluginnewconfig'] = 'Nueva configuración de Teams híbrido';
 $string['tenantid'] = 'Tenant ID';
 $string['clientid'] = 'Cliente ID';
 $string['clientsecret'] = 'Secreto del cliente';
@@ -44,12 +44,12 @@ $string['downloadrecordsteams'] = 'Descargar grabaciones Teams';
 $string['accessmethod'] = 'Método de acceso para configuración';
 
 $string['teams:view'] = 'Ver Teams';
-$string['teams:use'] = 'Generar videconferencias Teams';
+$string['teams:use'] = 'Generar videoconferencias Teams';
 $string['teams:record'] = 'Almacenar grabaciones Teams';
 
 $string['recordingnotfound'] = 'No se encontró la grabación en el curso {$a->course}: \'{$a->name}\'  con meetingid: {$a->meetingid}';
 $string['recordingnotdownload'] = 'No se pudo descargar la grabación en el curso {$a->course} : \'{$a->name}\' con meetingid {$a->meetingid}';
-$string['recordingnoexists'] = 'No existe grabación en el curso  {$a->course} : \'{$a->name}\' con meetingid {$a->meetingid}';
+$string['recordingnoexists'] = 'No existe grabación en el curso {$a->course} : \'{$a->name}\' con meetingid {$a->meetingid}';
 $string['emailorganizatornotfound'] = 'El email del organizador no se ha encontrado en la organización de Teams seleccionada.';
 $string['incorrectconfig'] = 'Configuración o acceso erróneos a Teams para la sesión \'{$a->name}\' del curso {$a->course}. Contacte con el administrador para la configuración Teams.';
 $string['correctdownload'] = 'Descarga correcta de la grabación del curso {$a->course} : \'{$a->name}\' con meetingid {$a->meetingid}';

@@ -33,6 +33,8 @@
 
 namespace hybridteachstore_pumukit\task;
 
+use hybridteachstore_pumukit\pumukit_handler;
+
 /**
  * Class updatestores.
  */
@@ -52,13 +54,13 @@ class updatestores extends \core\task\scheduled_task {
      */
     public function execute() {
         global $DB, $CFG;
-        // require_once($CFG->dirroot . '/mod/hybridteaching/store/youtube/classes/youtube_handler.php');
 
         // Sessions to get recordings, with pumukit store method.
-        $sql = "SELECT ht.id AS htid,ht.course, hs.id AS hsid, hs.name,
+        $sql = "SELECT ht.id AS htid,ht.course, hs.id AS hsid, hs.name, mc.shortname,
             hs.userecordvc, hs.processedrecording, hs.storagereference, hc.subpluginconfigid
             FROM {hybridteaching_session} hs
             INNER JOIN {hybridteaching} ht ON ht.id=hs.hybridteachingid
+            INNER JOIN {course} mc ON ht.course=mc.id
             INNER JOIN {hybridteaching_configs} hc ON hs.storagereference=hc.id
             WHERE hs.userecordvc=1 AND hc.type='pumukit' AND hs.processedrecording=0";
 
@@ -70,13 +72,9 @@ class updatestores extends \core\task\scheduled_task {
 
         foreach ($storespumukit as $store) {
 
-            // Aquí hay que leer la instancia de store que corresponda.
-            // De momento leemos la guardada con storeinstance.
-
             $configyt = $DB->get_record('hybridteachstore_pumukit_con', ['id' => $store->subpluginconfigid]);
 
-            // Aqui conectar con la config de pumukit, aún no hecho.
-            // $pumukitclient = new \pumukig_handler($configyt);
+            $pumukitclient = new pumukit_handler($configyt);
 
             // $videoPath es el path que se guardará de moodledata en la subactividad de vc (zoom,bbb)
             // Hay que hacer una estructura donde poder descargar los vídeos antes de subirlos,
@@ -84,39 +82,32 @@ class updatestores extends \core\task\scheduled_task {
             // Comprobar si una sesión tuviera varios archivos de grabación, se añade entonces como -1.mp4, -2.mp4,.....
             // Con zoom se guardan en mp4. Comprobar la extensión de los otros.
             // Sistemas de videoconferencia por si hubiera que hacer comprobaciones.
-            $path = $CFG->dataroot.'/repository/hybridteaching/'.$store->course.'/'.$store->htid.'-'.$store->hsid;
-            $videopath = $path.'-1.mp4';
-            $number = 1;
+            $coursename = $store->shortname;
+            $filename = $store->htid.'-'.$store->hsid;
+            $path = $CFG->dataroot.'/repository/hybridteaching/'.$store->course.'/'.$filename;
+            $videofiles = glob($path."*");
 
-            /*repeat while exists file with records for the session, change number*/
-            // while (file_exists($videopath)) {
-                // Aquí subir a pumukit.
-                // $pumukitcode=$pumukitclient->uploadfile($store,$videopath);
+            foreach ($videofiles as $videofile) {
+                $pumukitcode = $pumukitclient->uploadfile($videofile, $coursename, $filename);
 
-                // Adaptar esto a pumukit.
-                /*
-                if ($pumukitcode!=null){ //si ha habido una subida correcta y tenemos algún id:
-                    $pumukit=new  \stdClass();
-                    $pumukit->sessionid=$store->hsid;
-                    $pumukit->code=$youtubecode;
-                    $pumukit->visible=true;
-                    $pumukit->timecreated=time();
+                if ($pumukitcode != null){ //si ha habido una subida correcta y tenemos algún id:
+                    $pumukit = new \stdClass();
+                    $pumukit->sessionid = $store->hsid;
+                    $pumukit->code = $pumukitcode;
+                    $pumukit->visible = true;
+                    $pumukit->timecreated = time();
 
-
-                    $youtubeid = $DB->insert_record('hybridteachstore_pumikit',$pumukit);
+                    $pumukitid = $DB->insert_record('hybridteachstore_pumukit', $pumukit);
                     // Actualizar _session , con el id de _youtube.
-                    $storesession=$DB->get_record('hybridteaching_session',['id'=>$store->hsid]);
-                    $storesession->processedrecording=$pumukitid;    //1; //no poner 1, podemos poner el id de subactividad youtube
+                    $storesession = $DB->get_record('hybridteaching_session', ['id'=>$store->hsid]);
+                    $storesession->processedrecording = $pumukitid;    //1; //no poner 1, podemos poner el id de subactividad youtube
                     $DB->update_record('hybridteaching_session', $storesession);
 
                     // Delete video from origin download vc moodledata.
-                    unlink ($videopath);
-                */
-            // }
+                    unlink ($videofile);
+                }
+            }
 
-            // Change number for the record for session.
-            $number++;
-            $videopath = $path.'-'.$number.'.mp4';
         }
     }
 }

@@ -65,7 +65,7 @@ class downloadrecords extends \core\task\scheduled_task {
 
         $sessionconfig = new sessions();
 
-        $sql = "SELECT hs.id AS hsid, ht.id AS htid, ht.course, ht.config, meet.joinurl
+        $sql = "SELECT hs.id AS hsid, hs.name, ht.id AS htid, ht.course, ht.config, meet.joinurl
                   FROM {hybridteaching_session} hs
             INNER JOIN {hybridteachvc_meet} meet ON meet.htsession = hs.id
             INNER JOIN {hybridteaching} ht ON ht.id = hs.hybridteachingid
@@ -84,7 +84,7 @@ class downloadrecords extends \core\task\scheduled_task {
             }
             $meethandler = new meet_handler($meetconfig);
 
-            $searchrecordings = $meethandler->search_recordings(basename($session->joinurl));
+            $searchrecordings = $meethandler->search_recordings($session);
             $filenum = 1;
             foreach ($searchrecordings as $files) {
                 foreach ($files as $file) {
@@ -93,7 +93,9 @@ class downloadrecords extends \core\task\scheduled_task {
                     $sess = $DB->get_record('hybridteaching_session', ['id' => $session->hsid]);
                     if (!empty($content)) {
                         $sess->processedrecording = 0;
-                        file_put_contents($folderfile, $content);
+                        if (file_put_contents($folderfile, $content) !== false) {
+                            $meethandler->delete_file($file->id);
+                        }
                     } else {
                         // Save -2 indicates there are not recording.
                         $sess->processedrecording = -2;
@@ -103,14 +105,16 @@ class downloadrecords extends \core\task\scheduled_task {
                 }
             }
 
-            $searchchats = $meethandler->search_chats(basename($session->joinurl));
+            $searchchats = $meethandler->search_chats($session);
             $chatnum = 1;
             foreach ($searchchats as $chats) {
                 foreach ($chats as $chat) {
                     $folderfile = $folder."/".$session->htid."-".$session->hsid.'-'.$chatnum.'-chat.txt';
                     $content = $meethandler->download_file($chat->id);
                     if (!empty($content)) {
-                        file_put_contents($folderfile, $content);
+                        if (file_put_contents($folderfile, $content) !== false) {
+                            $meethandler->delete_file($chat->id);
+                        }
 
                         // Get instance context.
                         $cm = get_coursemodule_from_instance('hybridteaching', $session->htid);

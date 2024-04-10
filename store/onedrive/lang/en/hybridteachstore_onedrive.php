@@ -14,21 +14,21 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
-$string['pluginname'] = 'Hybrid Onedrive';
-$string['pluginconfig'] = 'Onedrive Storeconfig';
-$string['pluginnewconfig'] = 'New Onedrive Store config';
+$string['pluginname'] = 'Hybrid OneDrive';
+$string['pluginconfig'] = 'OneDrive Storeconfig';
+$string['pluginnewconfig'] = 'New OneDrive Store config';
 $string['tenantid'] = 'Tenant ID';
 $string['clientid'] = 'Cliente ID';
 $string['clientsecret'] = 'Client secret';
 $string['useremail'] = 'User email';
 $string['onedrive'] = 'onedrive';
-$string['alias'] = 'Onedrive Store';
+$string['alias'] = 'OneDrive Store';
 $string['err_field_missing'] = '{$a} not found';
-$string['errorwebservice'] = 'Onedrive webservice error: {$a}.';
+$string['errorwebservice'] = 'OneDrive webservice error: {$a}.';
 $string['err_no_access_token'] = 'No access token returned';
 $string['licenses'] = 'Licenses';
 $string['updatestores'] = 'Upload Onedrive videos';
-$string['subdomain'] = 'Onedrive subdomain';
+$string['subdomain'] = 'Onedrive domain';
 $string['hybridteaching'] = 'hybridteaching';
 $string['notuploading'] = 'Cannot uploading recording in courseid';
 $string['notuploading'] = 'Cannot uploading recording for session \'{$a->name}\' from courseid {$a->course}. ';
