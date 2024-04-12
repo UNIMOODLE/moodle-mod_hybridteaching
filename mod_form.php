@@ -444,9 +444,13 @@ class mod_hybridteaching_mod_form extends moodleform_mod {
      */
     private function select_timeunit_session($htid) : string {
         global $DB;
-        $hybridteaching = $DB->get_records('hybridteaching_session', ['hybridteachingid' => $htid]);
-        ($hybridteaching != null && count($hybridteaching) > 0) ? $timeunit = trim(helper::get_hours_format(reset($hybridteaching)->duration))
-        : $timeunit = '';
+        $timeunit = 1;
+        if (!empty($htid)) {
+            $hybridteaching = $DB->get_records('hybridteaching_session', ['hybridteachingid' => $htid]);
+            ($hybridteaching != null && count($hybridteaching) > 0) ? $timeunit = trim(helper::get_hours_format(reset($hybridteaching)->duration))
+                : $timeunit = '';
+        }
+
         return $timeunit;
     }
 }
