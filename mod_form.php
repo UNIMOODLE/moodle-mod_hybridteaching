@@ -172,7 +172,7 @@ class mod_hybridteaching_mod_form extends moodleform_mod {
         $mform->addHelpButton('graceperiod', 'graceperiod', 'hybridteaching');
         $mform->setType('graceperiod', PARAM_INT);
 
-        $mform->addElement('text', 'wellcomemessage', get_string('wellcomemessage','hybridteaching'), ['size' => 80,]);
+        $mform->addElement('text', 'wellcomemessage', get_string('wellcomemessage', 'hybridteaching'), ['size' => 80]);
         $mform->addHelpButton('wellcomemessage', 'wellcomemessage', 'hybridteaching');
         $mform->setType('wellcomemessage', PARAM_TEXT);
 
@@ -270,7 +270,6 @@ class mod_hybridteaching_mod_form extends moodleform_mod {
         $mform->addHelpButton('maxgradeattendancegroup', 'maxgradeattendance', 'hybridteaching');
 
         $mform->hideIf('maxgradeattendancegroup', 'grade[modgrade_type]', 'eq', 'none');
-        // $mform->setDefault('grade', false);
 
         // Add standard elements.
         $this->standard_coursemodule_elements();
@@ -412,7 +411,7 @@ class mod_hybridteaching_mod_form extends moodleform_mod {
      *
      * @return void
      */
-    private function load_admin_settings() : void {
+    private function load_admin_settings(): void {
         $groupconfigs = [
             'closedoorscount',
             'closedoorsunit',
@@ -442,15 +441,15 @@ class mod_hybridteaching_mod_form extends moodleform_mod {
      * @param int $htid
      * @return string time with timeunit of session
      */
-    private function select_timeunit_session($htid) : string {
+    private function select_timeunit_session($htid): string {
         global $DB;
         $timeunit = 1;
         if (!empty($htid)) {
             $hybridteaching = $DB->get_records('hybridteaching_session', ['hybridteachingid' => $htid]);
-            ($hybridteaching != null && count($hybridteaching) > 0) ? $timeunit = trim(helper::get_hours_format(reset($hybridteaching)->duration))
-                : $timeunit = '';
+            ($hybridteaching != null && count($hybridteaching) > 0) ?
+                $timeunit = trim(helper::get_hours_format(reset($hybridteaching)->duration))
+            : $timeunit = '';
         }
-
         return $timeunit;
     }
 }

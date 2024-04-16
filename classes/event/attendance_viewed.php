@@ -46,8 +46,7 @@ class attendance_viewed extends \core\event\base {
      *
      */
     public function get_description() {
-        return 'User with id ' . $this->userid . ' has seen the attendance
-            list of hybridteach instance with id ' . $this->objectid;
+        return 'User with id ' . $this->userid . ' has seen the attendance list of hybridteach instance with id ' . $this->objectid;
     }
 
     /**

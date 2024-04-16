@@ -42,13 +42,10 @@ global $DB;
 
 require_login();
 
-// ESTO VER SI SE PUEDE CAMBIAR POR EL $SESSION GLOBAL DEL MOODLE.
-
 if (!$configid) {
     $configid = $_SESSION['configid'];
 }
 $config = $DB->get_record('hybridteachstore_youtube_con', ['id' => $configid]);
-
 
 /*
  * You can acquire an OAuth 2.0 client ID and client secret from the

@@ -56,7 +56,7 @@ class course_module_viewed extends \core\event\course_module_viewed {
      */
     protected function get_legacy_logdata() {
         return [$this->courseid, 'hybridteaching', 'view hybridteaching', 'view.php?f=' . $this->objectid,
-            $this->objectid, $this->contextinstanceid,];
+            $this->objectid, $this->contextinstanceid, ];
     }
 
     /**

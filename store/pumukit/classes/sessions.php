@@ -55,6 +55,15 @@ class sessions {
         return $config;
     }
 
+    /**
+     * Get the recording URL for a processed recording.
+     *
+     * @param int $processedrecording Processed recording check
+     * @param int $storagereference Storage reference
+     * @param int $htid Hybridteaching ID
+     * @param int $sid Session ID
+     * @return string
+     */
     public function get_recording($processedrecording, $storagereference, $htid, $sid) {
         $config = $this->load_config($storagereference);
         $pumukitclient = new pumukit_handler($config);
@@ -80,5 +89,21 @@ class sessions {
         }
 
         $DB->delete_records('hybridteachstore_pumukit', ['sessionid' => $htsession]);
+    }
+
+    /**
+     * Download a recording from a storage reference.
+     *
+     * @param int $processedrecording Processed recording check
+     * @param int $storagereference Storage reference
+     * @param int $htid Hybridteaching ID
+     * @param int $sid Session ID
+     * @return string
+     */
+    public function download_recording($processedrecording, $storagereference, $htid, $sid) {
+        $config = $this->load_config($storagereference);
+        $pumukitclient = new pumukit_handler($config);
+        $url = $pumukitclient->downloadrecording($processedrecording);
+        return $url;
     }
 }

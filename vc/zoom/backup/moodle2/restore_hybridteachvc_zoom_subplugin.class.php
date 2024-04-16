@@ -24,14 +24,12 @@
 
 /**
  * Display information about all the mod_hybridteaching modules in the requested course. *
- * @package    mod_hybridteaching
+ * @package    hybridteachvc_zoom
  * @copyright  2023 Proyecto UNIMOODLE
  * @author     UNIMOODLE Group (Coordinator) <direccion.area.estrategia.digital@uva.es>
  * @author     ISYC <soporte@isyc.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-
- defined('MOODLE_INTERNAL') || die();
 
 /**
  * Class restore_hybridteaching_activity_task
@@ -43,7 +41,7 @@ class restore_hybridteachvc_zoom_subplugin extends restore_subplugin {
      * @return array
      */
     protected function define_session_subplugin_structure() {
-        $paths = array();
+        $paths = [];
 
         $elename = $this->get_namefor('session');
         $elepath = $this->get_pathfor('/hybridteachvc_zoom');
@@ -51,7 +49,7 @@ class restore_hybridteachvc_zoom_subplugin extends restore_subplugin {
         $paths[] = new restore_path_element($elename, $elepath);
         return $paths;
     }
-    
+
     /**
      * Processes one hybridteachvc_zoom element
      * @param mixed $data

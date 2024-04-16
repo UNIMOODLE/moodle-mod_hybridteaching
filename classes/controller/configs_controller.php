@@ -229,24 +229,6 @@ class configs_controller extends \mod_hybridteaching\controller\common_controlle
             }
         }
 
-        /*
-        // Revisar la ordenación por habilitado/deshabilitado.
-        // Al activar esta ordenación no funcionan las opciones de cambiar de orden, y visible/ocult.
-
-        $sortarray = [];
-
-        foreach ($configsarray as $element) {
-            foreach ($element as $key => $value) {
-                if (!isset($sortarray[$key])) {
-                    $sortarray[$key] = [];
-                }
-                $sortarray[$key][] = $value;
-            }
-        }
-        $orderby = 'configenabled';
-        array_multisort($sortarray[$orderby], SORT_DESC, $configsarray);
-        */
-
         return $configsarray;
     }
 

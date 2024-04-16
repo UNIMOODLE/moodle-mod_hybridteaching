@@ -532,7 +532,7 @@ class roles {
       *
       * @return array $participants
       */
-    public static function uniqueusers ($moderators, $participants) {
+    public static function uniqueusers($moderators, $participants) {
         foreach ($moderators as $moderator) {
             if (array_key_exists ($moderator->id, $participants)) {
                 unset($participants[$moderator->id]);

@@ -58,7 +58,7 @@ class restore_hybridteaching_activity_structure_step extends restore_activity_st
         // Support 2 types of subplugins.
         $this->add_subplugin_structure('hybridteachvc', $session);
         //$this->add_subplugin_structure('hybridteachstore', $session);
-        
+
         // Return the paths wrapped into standard activity structure.
         return $this->prepare_activity_structure($paths);
     }
@@ -139,25 +139,6 @@ class restore_hybridteaching_activity_structure_step extends restore_activity_st
         // No need to save this mapping as far as nothing depend on it
         // (child paths, file areas nor links decoder).
         $this->set_mapping('hybridteaching_attend_log', $oldid, $newitemid, true);
-    }
-
-    /**
-     * Process the hybridteachvc.
-     *
-     * @param mixed $data
-     */
-    protected function process_hybridteaching_hybridteachvc($data) {
-        /*global $DB;
-
-        $data = (object)$data;
-        $oldid = $data->id;
-        $data->attendanceid = $this->get_new_parentid('hybridteaching_attendance');
-
-        $newitemid = $DB->insert_record('hybridteaching_attend_log', $data);
-        // No need to save this mapping as far as nothing depend on it
-        // (child paths, file areas nor links decoder).
-        $this->set_mapping('hybridteaching_attend_log', $oldid, $newitemid, true);
-        */
     }
 
     /**

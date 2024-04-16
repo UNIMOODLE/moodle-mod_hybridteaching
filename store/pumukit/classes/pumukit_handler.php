@@ -24,7 +24,7 @@
 
 /**
  * Display information about all the mod_hybridteaching modules in the requested course. *
- * @package    hybridteachstore_onedrive
+ * @package    hybridteachstore_pumukit
  * @copyright  2023 Proyecto UNIMOODLE
  * @author     UNIMOODLE Group (Coordinator) <direccion.area.estrategia.digital@uva.es>
  * @author     ISYC <soporte@isyc.com>
@@ -33,51 +33,49 @@
 
 namespace hybridteachstore_pumukit;
 
+defined('MOODLE_INTERNAL') || die();
+
 require_once($CFG->libdir .'/filelib.php');
 
 /**
  * Class pumukit_handler.
  */
-class pumukit_handler
-{
-    /** @var stdClass $config A config from the teams object. */
+class pumukit_handler {
+    /** @var stdClass $config A config from the pumukit object. */
     private $config;
+    /** @var stdClass $curl A curl from make connections. */
     private $curl;
-
 
     /**
      * Constructor for initializing the class with the provided configuration.
      *
      * @param object $config The configuration for the class
      */
-    public function __construct($config)
-    {
+    public function __construct($config) {
         $this->config = $config;  // Api with credentials, url...
         $user = $this->config->user;
         $pass = $this->config->secret;
-        
+
         $this->curl = new \curl();
         $this->curl->setopt(
-            array(
+            [
                 'CURLOPT_TIMEOUT' => 120,
                 'CURLOPT_CONNECTTIMEOUT' => 120,
                 'CURLOPT_RETURNTRANSFER' => true,
-                // 'CURLOPT_SSL_VERIFYHOST' => false,
                 'CURLOPT_USERPWD' => "$user:$pass",
-            )
+            ]
         );
     }
 
     /**
-     * Uploads a file to Pumukit using the Graph API.
+     * Uploads a file to Pumukit using the API.
      *
      * @param string $videofile Video path
      * @param string $coursename Video path
      * @param string $filename Video path
      * @return mixed
      */
-    public function uploadfile($videofile, $coursename, $filename)
-    {
+    public function uploadfile($videofile, $coursename, $filename) {
         $result = null;
 
         $url = $this->config->url . "/api/ingest/addMediaPackage";
@@ -102,9 +100,9 @@ class pumukit_handler
 
         $xml = simplexml_load_string($response);
         if ($xml) {
-            $objJsonDocument = json_encode($xml);
-            $arrOutput = json_decode($objJsonDocument, TRUE);
-            $result = $arrOutput["@attributes"]["id"];
+            $objjsondocument = json_encode($xml);
+            $arroutput = json_decode($objjsondocument, true);
+            $result = $arroutput["@attributes"]["id"];
         }
         mtrace($result);
 
@@ -112,14 +110,13 @@ class pumukit_handler
     }
 
     /**
-     * Download a recording from the Pumukit using the Microsoft Graph API.
+     * Download a recording from the Pumukit using the API.
      *
      * @param int $processedrecording The ID of the processed recording.
      * @throws \Throwable
      * @return array|string The download URL of the recording.
      */
-    public function downloadrecording($processedrecording)
-    {
+    public function downloadrecording($processedrecording) {
         global $DB;
 
         $result = null;
@@ -150,8 +147,13 @@ class pumukit_handler
         return $response;
     }
 
-    public function get_urlrecording($processedrecording)
-    {
+    /**
+     * Get the url recording from the Pumukit using the API.
+     *
+     * @param int $processedrecording The ID of the processed recording.
+     * @return array|string The download URL of the recording.
+     */
+    public function get_urlrecording($processedrecording) {
         global $DB;
 
         $result = null;
@@ -178,12 +180,16 @@ class pumukit_handler
             mtrace('Unexpected response HTTP code:' . $info['http_code']);
             return $result;
         }
-        
+
         return $response;
     }
 
-    public function deletefile($processedrecording)
-    {
+    /**
+     * Delete recording file from the Pumukit using the API.
+     *
+     * @param int $videoweburl The weburl.
+     */
+    public function deletefile($processedrecording) {
         global $DB;
 
         $result = null;
@@ -210,7 +216,7 @@ class pumukit_handler
             mtrace('Unexpected response HTTP code:' . $info['http_code']);
             return $result;
         }
-        
+
         return $response;
     }
 }

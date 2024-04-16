@@ -156,10 +156,14 @@ class sessions {
         }
     }
 
+    /**
+     * Update an extended session.
+     *
+     * @param object $data The data object.
+     */
     public function update_session_extended($data) {
-
+        // No requires action.
     }
-
 
     /**
      * Deletes session from the database.
@@ -179,6 +183,7 @@ class sessions {
                     $teamshandler->deletemeeting($teams);
                 } catch (\Exception $e) {
                     // No action for delete.
+                    return null;
                 }
             }
         }
@@ -271,7 +276,7 @@ class sessions {
         $sql = 'SELECT hm.*
                   FROM {hybridteachvc_teams} hm
             INNER JOIN {hybridteaching_session} hs ON hm.htsession = hs.id
-                 WHERE hs.hybridteachingid = :htid AND hs.groupid = :groupid 
+                 WHERE hs.hybridteachingid = :htid AND hs.groupid = :groupid
                    AND hs.typevc = :typevc AND hs.vcreference = :vcreference
                    AND hs.starttime < :starttime
               ORDER BY hm.id DESC
@@ -288,7 +293,7 @@ class sessions {
      * @param object $context The context object.
      * @return string
      */
-    public function get_chat_url ($context) {
+    public function get_chat_url($context) {
         if (!has_capability('hybridteachvc/teams:view', $context)) {
             return '';
         }

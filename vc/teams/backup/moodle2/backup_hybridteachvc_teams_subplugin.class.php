@@ -24,7 +24,7 @@
 
 /**
  * Display information about all the mod_hybridteaching modules in the requested course. *
- * @package    hybridteachvc_zoom
+ * @package    hybridteachvc_teams
  * @copyright  2023 Proyecto UNIMOODLE
  * @author     UNIMOODLE Group (Coordinator) <direccion.area.estrategia.digital@uva.es>
  * @author     ISYC <soporte@isyc.com>
@@ -35,7 +35,7 @@
  * Class backup_hybridteaching_activity_task
  *
  */
-class backup_hybridteachvc_zoom_subplugin extends backup_subplugin {
+class backup_hybridteachvc_teams_subplugin extends backup_subplugin {
 
     /**
      * Create the subplugin structure.
@@ -47,17 +47,16 @@ class backup_hybridteachvc_zoom_subplugin extends backup_subplugin {
         // Create XML elements.
         $subplugin = $this->get_subplugin_element();
         $subpluginwrapper = new backup_nested_element($this->get_recommended_name());
-        $subpluginelement = new backup_nested_element('hybridteachvc_zoom',
+        $subpluginelement = new backup_nested_element('hybridteachvc_teams',
             ['id'],
-            ['htsession', 'meetingid', 'hostemail', 'starturl', 'joinurl', 'hostid', 'optionhostvideo',
-                'optionparticipantsvideo', 'downloadattempts', ]);
+            ['htsession', 'meetingid', 'meetingcode', 'organizer', 'joinurl', 'recordingid', 'chaturl']);
 
         // Connect XML elements into the tree.
         $subplugin->add_child($subpluginwrapper);
         $subpluginwrapper->add_child($subpluginelement);
 
         // Set source to populate the data.
-        $subpluginelement->set_source_table('hybridteachvc_zoom', ['htsession' => backup::VAR_PARENTID]);
+        $subpluginelement->set_source_table('hybridteachvc_teams', ['htsession' => backup::VAR_PARENTID]);
         return $subplugin;
     }
 }

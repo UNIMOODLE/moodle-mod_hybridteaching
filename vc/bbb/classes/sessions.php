@@ -156,6 +156,11 @@ class sessions {
         }
     }
 
+    /**
+     * Update an extended session.
+     *
+     * @param object $data The data object.
+     */
     public function update_session_extended($data) {
         // No requires action.
     }
@@ -324,7 +329,7 @@ class sessions {
      * @param object $session The session object for the meeting.
      * @return string The role of the user in the meeting ('VIEWER' or 'MODERATOR').
      */
-    public static function get_user_meeting_role($session) : String {
+    public static function get_user_meeting_role($session): String {
         global $DB, $USER;
 
         $meetingrole = 'VIEWER';
@@ -391,7 +396,7 @@ class sessions {
      *
      * @param object $context
      */
-    public function get_chat_url ($context) {
+    public function get_chat_url($context) {
         if (!has_capability('hybridteachvc/bbb:view', $context)) {
             return '';
         }

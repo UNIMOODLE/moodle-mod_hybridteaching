@@ -88,21 +88,24 @@ switch ($action) {
         break;
     case 'view':
         $view == 'sessionattendance' ? $urlview->params(['view' => 'extendedsessionatt', 'sessionid' => $sessionid]) : '';
-        $view == 'extendedsessionatt' ? $urlview->params(['view' =>'attendlog', 'userid' => $userid, 'sessionid' => $sessionid, 'attid' => $attid]) : '';
+        $view == 'extendedsessionatt' ? $urlview->params(['view' => 'attendlog', 'userid' => $userid,
+            'sessionid' => $sessionid, 'attid' => $attid, ]) : '';
         if ($view == 'studentattendance') {
             $log ? $rview = 'attendlog' : $rview = 'extendedsessionatt';
             $urlview->params(['view' => $rview, 'userid' => $userid, 'attid' => $attid, 'sessionid' => $sessionid]);
         }
-        $view == 'extendedstudentatt' ? $urlview->params(['sessionid' => 0, 'view' =>'studentattendance', 'userid' => $userid, 'attid' => $attid]) : '';
-        $view == 'studentattsessions' ? $urlview->params(['view' =>'attendlog', 'userid' => $userid, 'attid' => $attid, 'sessionid' => $sessionid]) : '';
+        $view == 'extendedstudentatt' ? $urlview->params(['sessionid' => 0, 'view' => 'studentattendance',
+            'userid' => $userid, 'attid' => $attid, ]) : '';
+        $view == 'studentattsessions' ? $urlview->params(['view' => 'attendlog', 'userid' => $userid, 'attid' => $attid,
+            'sessionid' => $sessionid, ]) : '';
 
         redirect($urlview);
-       
+
         break;
     case 'userinf':
 
-        $urlview->params(['sessionid' => 0, 'view' => 'studentattendance', 'attid' => $attid
-        , 'userid' => $attendancecontroller::hybridteaching_get_attendance_from_id($attid)->userid,]);
+        $urlview->params(['sessionid' => 0, 'view' => 'studentattendance', 'attid' => $attid,
+            'userid' => $attendancecontroller::hybridteaching_get_attendance_from_id($attid)->userid, ]);
         redirect($urlview);
         break;
 
@@ -188,7 +191,7 @@ switch ($action) {
         break;
     case 'bulksetsessionexempt':
         $urlview->params(['view' => $view]);
-        
+
         $attendsid = optional_param_array('session', '', PARAM_SEQUENCE);
         $ids = optional_param('ids', '', PARAM_ALPHANUMEXT);
 
@@ -272,7 +275,7 @@ function print_attendance_action($mform, $attendancetable, $action, $attendsid =
             $attendancetable->print_attendance_bulk_table($sessionsids, 'sessionbulk');
             break;
     }
-    $mform != null && ($action == "bulksetattendance" || $action == "bulksetexempt" || $action == "bulksetsessionexempt") 
-    ? $mform->display() : '';
+    $mform != null && ($action == "bulksetattendance" || $action == "bulksetexempt" || $action == "bulksetsessionexempt")
+        ? $mform->display() : '';
     echo $OUTPUT->footer();
 }

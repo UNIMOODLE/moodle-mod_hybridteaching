@@ -44,7 +44,6 @@ class onedrive_handler {
     /** @var stdClass $config A config from the teams object. */
     protected $config;
 
-
     /**
      * Constructor for initializing the class with the provided configuration.
      *
@@ -331,6 +330,12 @@ class onedrive_handler {
         return '';
     }
 
+    /**
+     * Delete recording file from the OneDrive using the Microsoft Graph API.
+     *
+     * @param int $videoweburl The weburl.
+     * @throws \Throwable
+     */
     public function deletefile($videoweburl) {
         require_once(__DIR__ . '/../vendor/autoload.php');
         $this->refreshtoken();

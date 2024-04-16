@@ -80,14 +80,18 @@ if (has_capability('mod/hybridteaching:sessionsfulltable', $context, $user, $doa
             get_string('sessionsattendance', 'hybridteaching') . "</a>";
         }
     } else {
-        echo "<a href='attendance.php?id=".$id."&view=extendedstudentatt' id='extendedstudentattbtn' class='btn btn-info mr-3' role='button'>" .
+        echo "<a href='attendance.php?id=".$id."&view=extendedstudentatt' id='extendedstudentattbtn'
+            class='btn btn-info mr-3' role='button'>" .
         get_string('studentsattendance', 'hybridteaching') . "</a>";
     }
 }
 $attsessionrecords = \mod_hybridteaching\controller\sessions_controller::get_sessions_in_progress($cm->instance);
-if (count($attsessionrecords) > 0 && ($view == null || $view == 'sessionattendance' || $view == 'extendedsessionatt')) {
-    notify_controller::notify_message(get_string('info:sessioninprogress', 'hybridteaching'));
-    notify_controller::show();
+if (count($attsessionrecords) > 0) {
+    $view = optional_param('view', '', PARAM_TEXT);
+    if (empty($view) || $view == 'sessionattendance' || $view == 'extendedsessionatt') {
+        notify_controller::notify_message(get_string('info:sessioninprogress', 'hybridteaching'));
+        notify_controller::show();
+    }
 }
 echo $attendancetable->print_attendance_table();
 echo $OUTPUT->footer();

@@ -149,8 +149,6 @@ class teams_handler {
         }
     }
 
-//********************************************************************************************* */
-
     /**
      * Create a teams vc
      * Create only meeting, without events calendar.
@@ -258,7 +256,6 @@ class teams_handler {
         $startdatetime .= '.00+00:00';
         $enddatetime .= '.00+00:00';
 
-
         $data = [
             'subject' => $session->name,
             'startDateTime' => $startdatetime,
@@ -284,14 +281,14 @@ class teams_handler {
         if (!empty($participants)) {
             $data['allowedPresenters'] = 'roleIsPresenter';
             $data['participants']['attendees'] = $participantsteams;
-        } 
+        }
 
         if (!empty($organizatorteams)) {
             $data['participants']['organizer'] = $organizator;
         }
 
         // Get the user based on accessmethod: teams id organizer.
-        $organiz = '';     
+        $organiz = '';
         if (isset($organizatorteams['id'])) {
             $organiz = $organizatorteams['id'];
         } else {
@@ -336,7 +333,7 @@ class teams_handler {
      * @param string $teams The team object.
      * @return void
      */
-    public function deletemeeting ($teams) {
+    public function deletemeeting($teams) {
 
         $token = $this->refreshtoken();
         $graph = new Graph();
@@ -364,11 +361,11 @@ class teams_handler {
      * @param string $name The name of the meeting
      * @return string $recordingid The id of the recording downloaded
      */
-    public function get_meeting_recordings ($folderfile, $meetingid, $organizerid, $course, $name) {
+    public function get_meeting_recordings($folderfile, $meetingid, $organizerid, $course, $name) {
         global $DB;
         $token = '';
-        try {         
-            $token = $this->refreshtoken();         
+        try {
+            $token = $this->refreshtoken();
         } catch (\Exception $e) {
             mtrace(get_string('incorrectconfig', 'hybridteachvc_teams',
                 [
@@ -433,14 +430,14 @@ class teams_handler {
                             ->download($pathfile);
                     } catch (\Exception $e) {
                         mtrace(get_string('recordingnotdownload', 'hybridteachvc_teams',
-                            [ 
+                            [
                                 'course' => $course,
                                 'name' => $name,
                                 'meetingid' => $meetingid,
                             ]));
                     }
                     mtrace(get_string('correctdownload', 'hybridteachvc_teams',
-                    [ 
+                    [
                         'course' => $course,
                         'name' => $name,
                         'meetingid' => $meetingid,
@@ -461,7 +458,7 @@ class teams_handler {
      * @param int $organizerid The id  of the organizer to get the chat url meeting.
      * @return string $urlchat The url of the chat meetingo.
      */
-    public function getchatmeetingurl ($meetingid, $organizerid, $course, $name) {
+    public function getchatmeetingurl($meetingid, $organizerid, $course, $name) {
         $token = '';
         try {
             $token = $this->refreshtoken();
@@ -521,7 +518,7 @@ class teams_handler {
      * @param int $organizerid The id  of the organizer to get the chat url meeting.
      * @return mix $infomeeting The url of the chat meetingo.
      */
-    public function getmeetinginfo ($meetingid, $organizerid) {
+    public function getmeetinginfo($meetingid, $organizerid) {
         $token = $this->refreshtoken();
         $graph = new Graph();
         $graph->setAccessToken($token);
@@ -550,7 +547,7 @@ class teams_handler {
      * @throws \Exception
      * @return mixed
      */
-    public function get_meeting_transcripts ($folderfile, $meetingid, $organizerid) {
+    public function get_meeting_transcripts($folderfile, $meetingid, $organizerid) {
         $token = $this->refreshtoken();
         $graph = new Graph();
         $graph->setAccessToken($token);

@@ -146,6 +146,11 @@ class sessions {
         return $meetsession->id;
     }
 
+    /**
+     * Update an extended session.
+     *
+     * @param object $data The data object.
+     */
     public function update_session_extended($data) {
         // No requires action.
     }
@@ -169,6 +174,7 @@ class sessions {
                     $meethandler->deletemeeting($meet->eventid);
                 } catch (\Exception $e) {
                     // No action for delete.
+                    return null;
                 }
             }
         }
@@ -273,7 +279,7 @@ class sessions {
      * @param object $context Context object.
      * @return string
      */
-    public function get_chat_url ($context) {
+    public function get_chat_url($context) {
         if (!has_capability('hybridteachvc/meet:view', $context)) {
             return '';
         }

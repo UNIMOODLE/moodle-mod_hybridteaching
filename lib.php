@@ -373,7 +373,6 @@ function hybridteaching_get_coursemodule_info($coursemodule) {
 
     // Populate the custom completion rules as key => value pairs, but only if the completion mode is 'automatic'.
     if ($coursemodule->completion == COMPLETION_TRACKING_AUTOMATIC) {
-        // ...$result->customdata['customcompletionrules']['completioncalculation'] = $hybridteaching->completioncalculation;
         $result->customdata['customcompletionrules']['completionattendance'] = $hybridteaching->completionattendance;
     }
 
@@ -638,7 +637,7 @@ function hybrid_get_categories_for_modal() {
             "input", "", ["id" => "course-category-select-all", "type" => "checkbox", "class" => "custom-control-input"]
         );
         $outputcategories .= html_writer::tag("label", "", ["class" => "custom-control-label",
-            "for" => "course-category-select-all",]);
+            "for" => "course-category-select-all", ]);
         $outputcategories .= html_writer::end_div(); // ... .custom-checkbox
         $outputcategories .= html_writer::start_div("", ["class" => "col px-0 d-flex"]);
         $outputcategories .= html_writer::start_div("", ["class" => "header-categoryname"]);

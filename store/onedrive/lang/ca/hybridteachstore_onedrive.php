@@ -14,6 +14,15 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
+/**
+ * Display information about all the mod_hybridteaching modules in the requested course. *
+ * @package    hybridteachstore_onedrive
+ * @copyright  2023 Proyecto UNIMOODLE
+ * @author     UNIMOODLE Group (Coordinator) <direccion.area.estrategia.digital@uva.es>
+ * @author     ISYC <soporte@isyc.com>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
 $string['pluginname'] = 'OneDrive híbrid';
 $string['pluginconfig'] = 'Configuració de OneDrive Store';
 $string['pluginnewconfig'] = 'Nova configuració de OneDrive Store';

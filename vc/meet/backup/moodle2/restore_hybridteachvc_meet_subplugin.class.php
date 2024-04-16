@@ -24,7 +24,7 @@
 
 /**
  * Display information about all the mod_hybridteaching modules in the requested course. *
- * @package    hybridteachvc_zoom
+ * @package    hybridteachvc_meet
  * @copyright  2023 Proyecto UNIMOODLE
  * @author     UNIMOODLE Group (Coordinator) <direccion.area.estrategia.digital@uva.es>
  * @author     ISYC <soporte@isyc.com>
@@ -32,32 +32,37 @@
  */
 
 /**
- * Class backup_hybridteaching_activity_task
+ * Class restore_hybridteaching_activity_task
  *
  */
-class backup_hybridteachvc_zoom_subplugin extends backup_subplugin {
-
+class restore_hybridteachvc_meet_subplugin extends restore_subplugin {
     /**
-     * Create the subplugin structure.
-     *
-     * @return subplugin
+     * Returns the paths to be handled by the subplugin
+     * @return array
      */
     protected function define_session_subplugin_structure() {
-        // Session is the name of the element of the structure to get in.
-        // Create XML elements.
-        $subplugin = $this->get_subplugin_element();
-        $subpluginwrapper = new backup_nested_element($this->get_recommended_name());
-        $subpluginelement = new backup_nested_element('hybridteachvc_zoom',
-            ['id'],
-            ['htsession', 'meetingid', 'hostemail', 'starturl', 'joinurl', 'hostid', 'optionhostvideo',
-                'optionparticipantsvideo', 'downloadattempts', ]);
+        $paths = [];
 
-        // Connect XML elements into the tree.
-        $subplugin->add_child($subpluginwrapper);
-        $subpluginwrapper->add_child($subpluginelement);
+        $elename = $this->get_namefor('session');
+        $elepath = $this->get_pathfor('/hybridteachvc_meet');
+        // We used get_recommended_name() so this works.
+        $paths[] = new restore_path_element($elename, $elepath);
+        return $paths;
+    }
 
-        // Set source to populate the data.
-        $subpluginelement->set_source_table('hybridteachvc_zoom', ['htsession' => backup::VAR_PARENTID]);
-        return $subplugin;
+    /**
+     * Processes one hybridteachvc_meet element
+     * @param mixed $data
+     */
+    public function process_hybridteachvc_meet_session($data) {
+        global $DB;
+
+        $data = (object)$data;
+        $data->htsession = $this->get_mappingid('hybridteaching_session', $data->htsession);
+        $oldid = $data->id;
+
+        $newitemid = $DB->insert_record('hybridteachvc_meet', $data);
+        // We map the references of the restored record.
+        $this->set_mapping('hybridteachvc_meet', $oldid, $newitemid);
     }
 }

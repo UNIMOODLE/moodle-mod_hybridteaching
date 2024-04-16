@@ -121,7 +121,7 @@ class hybridteaching_external extends external_api {
      * info about the returned object
      */
     public static function set_attendance_status_returns() {
-        // TODO.
+        return null;
     }
 
     /**
@@ -184,7 +184,7 @@ class hybridteaching_external extends external_api {
      * info about the returned object
      */
     public static function set_session_exempt_returns() {
-        // TODO.
+        return null;
     }
 
     /**
@@ -235,7 +235,7 @@ class hybridteaching_external extends external_api {
      *
      */
     public static function get_display_actions_returns() {
-        // TODO.
+        return null;
     }
 
 
@@ -306,7 +306,7 @@ class hybridteaching_external extends external_api {
      * Info about the returned object
      */
     public static function get_modal_text_returns() {
-        // TODO.
+        return null;
     }
 
     /**
@@ -349,7 +349,7 @@ class hybridteaching_external extends external_api {
      * Info about the returned object
      */
     public static function get_user_has_recording_capability_returns() {
-        // TODO.
+        return null;
     }
 
 
@@ -361,7 +361,7 @@ class hybridteaching_external extends external_api {
     public static function disable_attendance_inprogress_parameters() {
         return new external_function_parameters(
             ["hybridteachingid" => new external_value(PARAM_INT, "hybridteachingid"),
-                "sessionid" => new external_value(PARAM_INT, "sessionid")]
+                "sessionid" => new external_value(PARAM_INT, "sessionid"), ]
         );
     }
 
@@ -369,7 +369,7 @@ class hybridteaching_external extends external_api {
      * Info about the returned object
      */
     public static function disable_attendance_inprogress_returns() {
-        // TODO.
+        return null;
     }
 
     /**
@@ -383,16 +383,16 @@ class hybridteaching_external extends external_api {
         global $DB, $USER;
         list ($course, $cm) = get_course_and_cm_from_cmid($id, 'hybridteaching');
         $params = self::validate_parameters(
-            self::disable_attendance_inprogress_parameters(), ["hybridteachingid" => $cm->instance
-            , "sessionid" => $sessionid]
+            self::disable_attendance_inprogress_parameters(), ["hybridteachingid" => $cm->instance,
+                "sessionid" => $sessionid, ]
         );
         $attstudentsrecords = "";
         if ($sessionid != -1) {
-            $sqlattstudents = 'SELECT hta.id 
+            $sqlattstudents = 'SELECT hta.id
                                  FROM {hybridteaching_attendance} hta
-                                 JOIN {hybridteaching_session} hts 
+                                 JOIN {hybridteaching_session} hts
                                    ON hts.id = hta.sessionid
-                                  AND hts.starttime < :timenow 
+                                  AND hts.starttime < :timenow
                                   AND hts.starttime + hts.duration > :timenow2';
             $attstudentsparam = ['timenow' => time(), 'timenow2' => time()];
             $attstudentsrecords = $DB->get_records_sql($sqlattstudents, $attstudentsparam);

@@ -76,7 +76,7 @@ class updatestores extends \core\task\scheduled_task {
 
             $pumukitclient = new pumukit_handler($configyt);
 
-            // $videoPath es el path que se guardará de moodledata en la subactividad de vc (zoom,bbb)
+            // ... $videoPath es el path que se guardará de moodledata en la subactividad de vc (zoom,bbb)
             // Hay que hacer una estructura donde poder descargar los vídeos antes de subirlos,
 
             // Comprobar si una sesión tuviera varios archivos de grabación, se añade entonces como -1.mp4, -2.mp4,.....
@@ -90,7 +90,8 @@ class updatestores extends \core\task\scheduled_task {
             foreach ($videofiles as $videofile) {
                 $pumukitcode = $pumukitclient->uploadfile($videofile, $coursename, $filename);
 
-                if ($pumukitcode != null){ //si ha habido una subida correcta y tenemos algún id:
+                // If there has been a correct upload and we have some ID.
+                if ($pumukitcode != null) {
                     $pumukit = new \stdClass();
                     $pumukit->sessionid = $store->hsid;
                     $pumukit->code = $pumukitcode;
@@ -99,8 +100,9 @@ class updatestores extends \core\task\scheduled_task {
 
                     $pumukitid = $DB->insert_record('hybridteachstore_pumukit', $pumukit);
                     // Actualizar _session , con el id de _youtube.
-                    $storesession = $DB->get_record('hybridteaching_session', ['id'=>$store->hsid]);
-                    $storesession->processedrecording = $pumukitid;    //1; //no poner 1, podemos poner el id de subactividad youtube
+                    $storesession = $DB->get_record('hybridteaching_session', ['id' => $store->hsid]);
+
+                    $storesession->processedrecording = $pumukitid;
                     $DB->update_record('hybridteaching_session', $storesession);
 
                     // Delete video from origin download vc moodledata.

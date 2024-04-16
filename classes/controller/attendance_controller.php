@@ -517,7 +517,7 @@ class attendance_controller extends \mod_hybridteaching\controller\common_contro
      * @param int $sesstime The session time (default: 0).
      * @return int The calculated needed time.
      */
-    public static function hybridteaching_get_needed_time($timevalue, $timeunit, $sesstime = 0) : int {
+    public static function hybridteaching_get_needed_time($timevalue, $timeunit, $sesstime = 0): int {
         switch ($timeunit) {
             case 3:
                 $neededtime = $sesstime * ($timevalue / 100);
@@ -541,7 +541,7 @@ class attendance_controller extends \mod_hybridteaching\controller\common_contro
      * @param mixed $session The session object.
      * @return string The string containing session information.
      */
-    public static function hybridteaching_print_session_info($session) : String {
+    public static function hybridteaching_print_session_info($session): String {
         if (!$session) {
             return '<h2>' . get_string('allsessions', 'hybridteaching') . '</h2>';
         }
@@ -571,7 +571,7 @@ class attendance_controller extends \mod_hybridteaching\controller\common_contro
      * @param object $user The user object
      * @return String The attendance information for the user
      */
-    public static function hybridteaching_print_attendance_for_user($hid, $user) : String {
+    public static function hybridteaching_print_attendance_for_user($hid, $user): String {
         global $DB, $OUTPUT;
 
         if (!$hid || !$user) {
@@ -734,6 +734,14 @@ class attendance_controller extends \mod_hybridteaching\controller\common_contro
         }
     }
 
+    /**
+     * Get student participation.
+     *
+     * @param string $hid The hybrid teaching ID
+     * @param string $userid The user ID
+     * @throws \Throwable Database exception
+     * @return object The student's participation data
+     */
     public static function get_student_participation($hid = '', $userid = 0) {
         global $DB;
 
@@ -920,7 +928,7 @@ class attendance_controller extends \mod_hybridteaching\controller\common_contro
      * @param int $attid The ID of the attendance record.
      * @return int The total time spent by the user.
      */
-    public static function get_user_timespent($attid) : int {
+    public static function get_user_timespent($attid): int {
         global $DB;
 
         $attlogs = $DB->get_records('hybridteaching_attend_log', ['attendanceid' => $attid], 'id asc', '*');
@@ -946,7 +954,7 @@ class attendance_controller extends \mod_hybridteaching\controller\common_contro
      * @param int $timespent The total time spent by the user.
      * @return int
      */
-    public static function verify_user_attendance($hybridteaching, $session, $attid, $timeneeded = 0, $timespent = 0) : int {
+    public static function verify_user_attendance($hybridteaching, $session, $attid, $timeneeded = 0, $timespent = 0): int {
         global $DB;
         $session && is_int($session) ? $session = $DB->get_record('hybridteaching_session',
             ['id' => $session], '*', IGNORE_MISSING) : '';
@@ -995,7 +1003,7 @@ class attendance_controller extends \mod_hybridteaching\controller\common_contro
      * @param int $attid Attendance ID
      * @return bool
      */
-    public static function user_attendance_in_grace_period($ht, $session, $attid) : bool {
+    public static function user_attendance_in_grace_period($ht, $session, $attid): bool {
         global $DB;
         $intime = true;
         empty($ht) || (!isset($ht->graceperiod) || !isset($ht->graceperiodunit)) ? $gracetime = 0 :
@@ -1026,7 +1034,7 @@ class attendance_controller extends \mod_hybridteaching\controller\common_contro
      * @param object $att The attendance used.
      * @return bool The user did or didn't leavedearly.
      */
-    public static function user_attendance_early_leave($session, $att) : bool {
+    public static function user_attendance_early_leave($session, $att): bool {
         global $DB;
 
         $leavedearly = false;
@@ -1049,7 +1057,7 @@ class attendance_controller extends \mod_hybridteaching\controller\common_contro
      * @param string $view The attendance view.
      * @return bool Hide the table row or not.
      */
-    public static function display_attendance_row($bparams, $filter, $view) : bool {
+    public static function display_attendance_row($bparams, $filter, $view): bool {
         $displayrow = true;
         switch($filter) {
             case 'nofilter':
@@ -1101,7 +1109,7 @@ class attendance_controller extends \mod_hybridteaching\controller\common_contro
      * @param int $sessid The ID of the session.
      * @return bool Whether the user belongs to the session group.
      */
-    public static function user_belongs_in_session_group($userid, $sessid) : bool {
+    public static function user_belongs_in_session_group($userid, $sessid): bool {
         global $DB;
 
         $useringroup = false;
@@ -1121,7 +1129,7 @@ class attendance_controller extends \mod_hybridteaching\controller\common_contro
      * @param array $attendances An array of attendance data.
      * @return int The number of attendances that uses groups.
      */
-    public function attendances_uses_groups($attendances) : int {
+    public function attendances_uses_groups($attendances): int {
         global $DB;
 
         $usesattendance = 0;

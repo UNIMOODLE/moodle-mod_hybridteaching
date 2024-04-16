@@ -851,7 +851,7 @@ class sessions_controller extends \mod_hybridteaching\controller\common_controll
      * @param object $session The session object.
      * @return bool Whether the session configuration exists or not.
      */
-    public static function get_sessionconfig_exists($session) : bool {
+    public static function get_sessionconfig_exists($session): bool {
         global $DB;
 
         $configexists = true;
@@ -868,7 +868,7 @@ class sessions_controller extends \mod_hybridteaching\controller\common_controll
      * @param mixed $session The session object.
      * @return bool Returns true if the session has started, false otherwise.
      */
-    public function session_started($session) : bool {
+    public function session_started($session): bool {
         global $DB;
 
         $sessionvcstarted = false;
@@ -890,7 +890,7 @@ class sessions_controller extends \mod_hybridteaching\controller\common_controll
      * @throws Some_Exception_Class If an error occurs while finishing the sessions.
      * @return void
      */
-    public function finish_unfinished_sessions($hid) : void {
+    public function finish_unfinished_sessions($hid): void {
         global $DB;
 
         $sql = 'SELECT *
@@ -924,7 +924,7 @@ class sessions_controller extends \mod_hybridteaching\controller\common_controll
     public static function get_sessions_performed($id) {
         global $DB;
         $sql = "SELECT count(id)
-                  FROM {hybridteaching_session} 
+                  FROM {hybridteaching_session}
                  WHERE hybridteachingid = :htid
                    AND isfinished = 1
                    AND (starttime  + duration) < :now";
@@ -942,7 +942,7 @@ class sessions_controller extends \mod_hybridteaching\controller\common_controll
      */
     public static function get_sessions_in_progress($id) {
         global $DB;
-        $sql = 'SELECT hts.id 
+        $sql = 'SELECT hts.id
                   FROM {hybridteaching_session} hts
                   JOIN {course_modules} cm
                     ON cm.instance = hts.hybridteachingid

@@ -58,7 +58,7 @@ class meeting {
      * @param object $ht intance
      * @return bbbproxy response
      */
-    public function create_meeting ($session, $ht) {
+    public function create_meeting($session, $ht) {
         $bbbproxy = new bbbproxy($this->bbbinstance);
         $bbbproxy->require_working_server();
         $data = $this->create_meeting_data($session, $ht);
@@ -80,7 +80,7 @@ class meeting {
      * @param object $ht hybridteaching instance
      * @return array|null the representation of the presentations as array
      */
-    public function upload_presentation ($session, $ht) {
+    public function upload_presentation($session, $ht) {
         $fs = get_file_storage();
         $cm = get_coursemodule_from_instance('hybridteaching', $ht->id);
         $context = \context_module::instance($cm->id);
@@ -187,7 +187,7 @@ class meeting {
      * @param object $ht instance
      * @return array
      */
-    protected function create_meeting_metadata ($session, $ht) {
+    protected function create_meeting_metadata($session, $ht) {
         // Create standard metadata.
         $origindata = $this->get_origin_data();
         $metadata = [
