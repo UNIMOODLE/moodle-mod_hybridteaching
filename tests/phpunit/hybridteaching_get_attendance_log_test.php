@@ -44,19 +44,55 @@ use mod_hybridteaching\helpers\password;
 use mod_hybridteaching\controller\sessions_controller;
 use mod_hybridteaching\controller\attendance_controller;
 
+
+/**
+ * Testing get attendance logs
+ *
+ * @group hybridteaching
+ */
 class hybridteaching_get_attendance_log_test extends \advanced_testcase {
 
     // Write the tests here as public funcions.
     // Please refer to {@link https://docs.moodle.org/dev/PHPUnit} for more details on PHPUnit tests in Moodle.
+    /**
+     * @var \stdClass
+     */
     private static $course;
+    /**
+     * @var \stdClass
+     */
     private static $context;
+    /**
+     * @var \stdClass
+     */
     private static $coursecontext;
+    /**
+     * @var \stdClass
+     */
     private static $user;
+    /**
+     * @var \stdClass
+     */
     private static $config;
+    /**
+     * @var int
+     */
     private static $userecordvc;
+    /**
+     * @var int
+     */
     private static $action;
+    /**
+     * @var int
+     */
     private static $usevideoconference;
+    /**
+     * Course start
+     */
     public const COURSE_START = 1704099600;
+    /**
+     * Course end
+     */
     public const COURSE_END = 1706605200;
 
 
@@ -135,11 +171,17 @@ class hybridteaching_get_attendance_log_test extends \advanced_testcase {
         $this->assertNotNull($logsdb);
         // Catch exception.
         $attendancecontroller->hybridteaching_get_attendance_logs('');
-        // Don't insert in DB when $action == 0
+        // Don't insert in DB when $action == 0.
         $this->assertEquals(1, count($logsdb));
         // Exception get last attendance.
         $attendancecontroller->hybridteaching_get_last_attend('', self::$user->id);
     }
+
+    /**
+     * Data provider for execute
+     *
+     * @return array[]
+     */
     public static function dataprovider(): array {
 
         return [

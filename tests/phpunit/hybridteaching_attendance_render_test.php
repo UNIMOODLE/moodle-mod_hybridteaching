@@ -43,17 +43,46 @@ require_once($CFG->dirroot . '/config.php');
 use mod_hybridteaching\local\attendance_table;
 use mod_hybridteaching\controller\sessions_controller;
 
-class hybridteaching_attendance_table_test extends \advanced_testcase {
+/**
+ * Testing attendance render
+ *
+ * @group hybridteaching
+ */
+class hybridteaching_attendance_render_test extends \advanced_testcase {
 
     // Write the tests here as public funcions.
     // Please refer to {@link https://docs.moodle.org/dev/PHPUnit} for more details on PHPUnit tests in Moodle.
+    /**
+     * @var \stdClass
+     */
     private static $course;
+    /**
+     * @var \stdClass
+     */
     private static $context;
+    /**
+     * @var \stdClass
+     */
     private static $coursecontext;
+    /**
+     * @var \stdClass
+     */
     private static $user;
+    /**
+     * @var \stdClass
+     */
     private static $config;
+    /**
+     * @var int
+     */
     private static $userecordvc;
+    /**
+     * Course start.
+     */
     public const COURSE_START = 1704099600;
+    /**
+     * Course end.
+     */
     public const COURSE_END = 1706605200;
 
 
@@ -85,7 +114,7 @@ class hybridteaching_attendance_table_test extends \advanced_testcase {
     public function test_attendance_table($param, $column, $view, $paramstable = null, $nameform = '') {
         // Reset after execute the test.
         global $DB;
-        
+
         // Module instance.
         $moduleinstance = new \stdClass();
         $moduleinstance->course = self::$course->id;
@@ -95,7 +124,7 @@ class hybridteaching_attendance_table_test extends \advanced_testcase {
             'name' => 'hybt',
             'timetype' => null,
             'config' => self::$config,
-            'userecordvc' => self::$userecordvc
+            'userecordvc' => self::$userecordvc,
             ]);
         $cm = get_coursemodule_from_instance('hybridteaching', $hybridobject->id, self::$course->id);
 
@@ -124,101 +153,131 @@ class hybridteaching_attendance_table_test extends \advanced_testcase {
         $tableoptions = $attendancetable->get_table_options(['visible' => 1], $paramstable, 'url', $session->id);
         // Get bulk options.
         $attendancetable->get_bulk_options_select($view);
-        
+
         $this->assertNotNull($tableoptions);
         $this->assertNotNull($attendancetable->get_operator());
         switch ($nameform){
             case "bulksetexemptform":
-                $bulksetexemptform = new \mod_hybridteaching\form\bulk_set_exempt_form(null, ['cm' => $cm, 'attendslist' => [], 'sessionid' => $sessionexpected->id
-                , 'hybridteaching' => $hybridobject, 'view' => 'att', 'userid' => self::$user->id]);
+                $bulksetexemptform = new \mod_hybridteaching\form\bulk_set_exempt_form(null, ['cm' => $cm, 'attendslist' => [],
+                'sessionid' => $sessionexpected->id, 'hybridteaching' => $hybridobject, 'view' => 'att',
+                'userid' => self::$user->id]);
                 break;
             case "sessionsoptionform":
                 // Session option form.
-                $sessionsoptionform = new \mod_hybridteaching\form\session_options_form(null, ['id' => $sessionexpected->id, 'l' => []]);
+                $sessionsoptionform = new \mod_hybridteaching\form\session_options_form(null, ['id' => $sessionexpected->id,
+                'l' => []]);
                 break;
             case "updatestarttimeform1":
                 // Update start time form.
-                $updatestarttimeform = new \mod_hybridteaching\form\bulk_update_starttime_form(null, ['cm' => $cm, 'sesslist' => [], 'hybridteaching' => $hybridobject
-                , 'slist' => []]);
+                $updatestarttimeform = new \mod_hybridteaching\form\bulk_update_starttime_form(null, ['cm' => $cm, 'sesslist' => [],
+                'hybridteaching' => $hybridobject, 'slist' => []]);
                 break;
             case "updatedurationform":
                 // Update duration form.
-                $updatedurationform = new \mod_hybridteaching\form\bulk_update_duration_form(null, ['cm' => $cm, 'sesslist' => [], 'hybridteaching' => $hybridobject
-                , 'slist' => []]);
+                $updatedurationform = new \mod_hybridteaching\form\bulk_update_duration_form(null, ['cm' => $cm, 'sesslist' => [],
+                'hybridteaching' => $hybridobject, 'slist' => []]);
                 break;
             case "attuserfilteroptionsform":
-                $attuserfilteroptionsform = new \mod_hybridteaching\form\attuserfilter_options_form(null, ['id' => $cm->id, 'att' => 1, 'fname' => 'name'
-                , 'lname' => 'lastname', 'hid' => $hybridobject->id, 'view' => $view, 'sessid' => $sessionexpected->id, 'sort' => 'id', 'dir' => 'ASC'
-                ,'perpage' => 1, 'attfilter' => 1, 'groupid' => 1, ]);
+                $attuserfilteroptionsform = new \mod_hybridteaching\form\attuserfilter_options_form(null, ['id' => $cm->id,
+                'att' => 1, 'fname' => 'name', 'lname' => 'lastname', 'hid' => $hybridobject->id, 'view' => $view,
+                'sessid' => $sessionexpected->id, 'sort' => 'id', 'dir' => 'ASC', 'perpage' => 1, 'attfilter' => 1,
+                'groupid' => 1, ]);
                 break;
             default:
                 break;
 
         }
-            
     }
+
+    /**
+     * Data provider for execute
+     *
+     * @return array[]
+     */
     public static function dataprovider(): array {
 
         return [
 
-            ['{"name":"Test de prueba","description": "description of session","context":50,"starttime":1642736531,"durationgroup":
-                {"duration":45000,"timetype":null}}', 'strgroup', 'sessionattendance', ["view" => "sessionattendance"], "updatestarttimeform"],
-            ['{"name":"Test de prueba","description": "description of session","context":50,"starttime":1642736531,"durationgroup":
-                {"duration":45000,"timetype":null}}', 'strtype', 'sessionattendance', ["view" => "sessionattendance"], "updatestarttimeform"],
-            ['{"name":"Test de prueba","description": "description of session","context":50,"starttime":1642736531,"durationgroup":
-                {"duration":45000,"timetype":null}}', 'strtype', 'studentattendance', ["view" => "studentattendance"], "updatestarttimeform"],
-            ['{"name":"Test de prueba","description": "description of session","context":50,"starttime":1642736531,"durationgroup":
-                {"duration":45000,"timetype":null}}', 'strdate', 'sessionattendance', ["view" => "sessionattendance"], "sessionsoptionform"],
-            ['{"name":"Test de prueba","description": "description of session","context":50,"starttime":1642736531,"durationgroup":
-                {"duration":45000,"timetype":null}}', 'strduration', 'sessionattendance', ["view" => "sessionattendance"], "bulksetexemptform"],
-            ['{"name":"Test de prueba","description": "description of session","context":50,"starttime":1642736531,"durationgroup":
-                {"duration":45000,"timetype":null}}', 'strduration', 'extendedsessionatt', ["view" => "extendedsessionatt"], "attuserfilteroptionsform"],
-            ['{"name":"Test de prueba","description": "description of session","context":50,"starttime":1642736531,"durationgroup":
-                {"duration":45000,"timetype":null}}', 'strduration', 'extendedstudentatt', ["view" => "extendedstudentatt"], ""],
-            ['{"name":"Test de prueba","description": "description of session","context":50,"starttime":1642736531,"durationgroup":
-                {"duration":45000,"timetype":null}}', 'strname', 'sessionattendance', ["view" => "sessionattendance"]],
-            ['{"name":"Test de prueba","description": "description of session","context":50,"starttime":1642736531,"durationgroup":
-                {"duration":45000,"timetype":null}}', 'strattendance', 'sessionattendance', ["view" => "sessionattendance"]],
-            ['{"name":"Test de prueba","description": "description of session","context":50,"starttime":1642736531,"durationgroup":
-                {"duration":45000,"timetype":null}}', 'strgrade', 'studentattendance', ["view" => "sessionattendance"]],
+            ['{"name":"Test","description": "description","context":50,"starttime":1642736531,"durationgroup":
+                {"duration":45000,"timetype":null}}', 'strgroup', 'sessionattendance',
+                ["view" => "sessionattendance"], "updatestarttimeform"],
+            ['{"name":"Test","description": "description","context":50,"starttime":1642736531,"durationgroup":
+                {"duration":45000,"timetype":null}}', 'strtype', 'sessionattendance',
+                ["view" => "sessionattendance"], "updatestarttimeform"],
+            ['{"name":"Test","description": "description","context":50,"starttime":1642736531,"durationgroup":
+                {"duration":45000,"timetype":null}}', 'strtype', 'studentattendance',
+                ["view" => "studentattendance"], "updatestarttimeform"],
+            ['{"name":"Test","description": "description","context":50,"starttime":1642736531,"durationgroup":
+                {"duration":45000,"timetype":null}}', 'strdate', 'sessionattendance',
+                ["view" => "sessionattendance"], "sessionsoptionform"],
+            ['{"name":"Test","description": "description","context":50,"starttime":1642736531,"durationgroup":
+                {"duration":45000,"timetype":null}}', 'strduration', 'sessionattendance',
+                ["view" => "sessionattendance"], "bulksetexemptform"],
+            ['{"name":"Test","description": "description","context":50,"starttime":1642736531,"durationgroup":
+                {"duration":45000,"timetype":null}}', 'strduration', 'extendedsessionatt',
+                ["view" => "extendedsessionatt"], "attuserfilteroptionsform"],
+            ['{"name":"Test","description": "description","context":50,"starttime":1642736531,"durationgroup":
+                {"duration":45000,"timetype":null}}', 'strduration', 'extendedstudentatt',
+                ["view" => "extendedstudentatt"], ""],
+            ['{"name":"Test","description": "description","context":50,"starttime":1642736531,"durationgroup":
+                {"duration":45000,"timetype":null}}', 'strname', 'sessionattendance',
+                ["view" => "sessionattendance"]],
+            ['{"name":"Test","description": "description","context":50,"starttime":1642736531,"durationgroup":
+                {"duration":45000,"timetype":null}}', 'strattendance', 'sessionattendance',
+                ["view" => "sessionattendance"]],
+            ['{"name":"Test","description": "description","context":50,"starttime":1642736531,"durationgroup":
+                {"duration":45000,"timetype":null}}', 'strgrade', 'studentattendance',
+                ["view" => "sessionattendance"]],
 
-            ['{"name":"Test de prueba","description": "description of session","context":50,"starttime":1642736531,"durationgroup":
-                {"duration":45000,"timetype":null}}', 'strusername', 'studentattendance', ["view" => "sessionattendance"]],
-            ['{"name":"Test de prueba","description": "description of session","context":50,"starttime":1642736531,"durationgroup":
-                {"duration":45000,"timetype":null}}', 'strusername', 'studentattendance', ["view" => "sessionattendance"]],
-            
-            ['{"name":"Test de prueba","description": "description of session","context":50,"starttime":1642736531,"durationgroup":
-                {"duration":45000,"timetype":null}}', 'strpfp', 'studentattendance', ["view" => "sessionattendance"]],
-            
-            ['{"name":"Test de prueba","description": "description of session","context":50,"starttime":1642736531,"durationgroup":
+            ['{"name":"Test","description": "description","context":50,"starttime":1642736531,"durationgroup":
+                {"duration":45000,"timetype":null}}', 'strusername', 'studentattendance',
+                ["view" => "sessionattendance"]],
+            ['{"name":"Test","description": "description","context":50,"starttime":1642736531,"durationgroup":
+                {"duration":45000,"timetype":null}}', 'strusername', 'studentattendance',
+                ["view" => "sessionattendance"]],
+
+            ['{"name":"Test","description": "description","context":50,"starttime":1642736531,"durationgroup":
+                {"duration":45000,"timetype":null}}', 'strpfp', 'studentattendance',
+                ["view" => "sessionattendance"]],
+
+            ['{"name":"Test","description": "description","context":50,"starttime":1642736531,"durationgroup":
                 {"duration":45000,"timetype":null}}', 'strlastfirstname', 'studentattendance', ["view" => "sessionattendance"]],
-            
-            ['{"name":"Test de prueba","description": "description of session","context":50,"starttime":1642736531,"durationgroup":
-                {"duration":45000,"timetype":null}}', 'strentrytime', 'studentattendance', ["view" => "sessionattendance"]],
-            
-            ['{"name":"Test de prueba","description": "description of session","context":50,"starttime":1642736531,"durationgroup":
-                {"duration":45000,"timetype":null}}', 'strleavetime', 'studentattendance', ['view' => 'sessionattendance', 'userinf' => 1, 'log' => 1]],
 
-            ['{"name":"Test de prueba","description": "description of session","context":50,"starttime":1642736531,"durationgroup":
-                {"duration":45000,"timetype":null}}', 'strpermanence', 'studentattendance', ['view' => 'studentattendance', 'userinf' => 1, 'log' => 1]],
+            ['{"name":"Test","description": "description","context":50,"starttime":1642736531,"durationgroup":
+                {"duration":45000,"timetype":null}}', 'strentrytime', 'studentattendance',
+                ["view" => "sessionattendance"]],
 
-            ['{"name":"Test de prueba","description": "description of session","context":50,"starttime":1642736531,"durationgroup":
-                {"duration":45000,"timetype":null}}', 'strhour', 'studentattendance', ["view" => "sessionattendance"]],
+            ['{"name":"Test","description": "description","context":50,"starttime":1642736531,"durationgroup":
+                {"duration":45000,"timetype":null}}', 'strleavetime', 'studentattendance',
+                ['view' => 'sessionattendance', 'userinf' => 1, 'log' => 1]],
 
-            ['{"name":"Test de prueba","description": "description of session","context":50,"starttime":1642736531,"durationgroup":
-                {"duration":45000,"timetype":null}}', 'strlogaction', 'studentattendance', ["view" => "sessionattendance"]],
+            ['{"name":"Test","description": "description","context":50,"starttime":1642736531,"durationgroup":
+                {"duration":45000,"timetype":null}}', 'strpermanence', 'studentattendance',
+                ['view' => 'studentattendance', 'userinf' => 1, 'log' => 1]],
 
-            ['{"name":"Test de prueba","description": "description of session","context":50,"starttime":1642736531,"durationgroup":
-                {"duration":45000,"timetype":null}}', 'strcombinedatt', 'studentattendance', ["view" => "sessionattendance"]],
+            ['{"name":"Test","description": "description","context":50,"starttime":1642736531,"durationgroup":
+                {"duration":45000,"timetype":null}}', 'strhour', 'studentattendance',
+                ["view" => "sessionattendance"]],
 
-            ['{"name":"Test de prueba","description": "description of session","context":50,"starttime":1642736531,"durationgroup":
-                {"duration":45000,"timetype":null}}', 'strclassroom', 'studentattendance', ["view" => "sessionattendance"]],
+            ['{"name":"Test","description": "description","context":50,"starttime":1642736531,"durationgroup":
+                {"duration":45000,"timetype":null}}', 'strlogaction', 'studentattendance',
+                ["view" => "sessionattendance"]],
 
-            ['{"name":"Test de prueba","description": "description of session","context":50,"starttime":1642736531,"durationgroup":
-                {"duration":45000,"timetype":null}}', 'strvc', 'studentattendance', ["view" => "sessionattendance"]],
+            ['{"name":"Test","description": "description","context":50,"starttime":1642736531,"durationgroup":
+                {"duration":45000,"timetype":null}}', 'strcombinedatt', 'studentattendance',
+                ["view" => "sessionattendance"]],
 
-            ['{"name":"Test de prueba","description": "description of session","context":50,"starttime":1642736531,"durationgroup":
-                {"duration":45000,"timetype":null}}', 'randomvalue', 'studentattendance', ["view" => "sessionattendance"]],
+            ['{"name":"Test","description": "description","context":50,"starttime":1642736531,"durationgroup":
+                {"duration":45000,"timetype":null}}', 'strclassroom', 'studentattendance',
+                ["view" => "sessionattendance"]],
+
+            ['{"name":"Test","description": "description","context":50,"starttime":1642736531,"durationgroup":
+                {"duration":45000,"timetype":null}}', 'strvc', 'studentattendance',
+                ["view" => "sessionattendance"]],
+
+            ['{"name":"Test","description": "description","context":50,"starttime":1642736531,"durationgroup":
+                {"duration":45000,"timetype":null}}', 'randomvalue', 'studentattendance',
+                ["view" => "sessionattendance"]],
 
         ];
     }

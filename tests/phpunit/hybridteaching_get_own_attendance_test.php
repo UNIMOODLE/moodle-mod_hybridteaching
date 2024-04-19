@@ -33,8 +33,8 @@
  */
 
 namespace mod_hybridteaching;
-global $CFG;
 defined('MOODLE_INTERNAL') || die();
+global $CFG;
 require_once($CFG->dirroot . '/mod/hybridteaching/classes/controller/sessions_controller.php');
 require_once($CFG->dirroot . '/mod/hybridteaching/classes/helpers/calendar_helpers.php');
 require_once($CFG->dirroot . '/config.php');
@@ -43,19 +43,50 @@ use mod_hybridteaching\helpers\password;
 use mod_hybridteaching\controller\sessions_controller;
 use mod_hybridteaching\controller\attendance_controller;
 
+/**
+ * Testing get own attendance
+ *
+ * @group hybridteaching
+ */
 class hybridteaching_get_own_attendance_test extends \advanced_testcase {
 
     // Write the tests here as public funcions.
     // Please refer to {@link https://docs.moodle.org/dev/PHPUnit} for more details on PHPUnit tests in Moodle.
+    /**
+     * @var \stdClass
+     */
     private static $course;
+    /**
+     * @var \stdClass
+     */
     private static $context;
+    /**
+     * @var \stdClass
+     */
     private static $coursecontext;
+    /**
+     * @var \stdClass
+     */
     private static $user;
+    /**
+     * @var \stdClass
+     */
     private static $config;
-
+    /**
+     * @var \stdClass
+     */
     private static $group;
+    /**
+     * @var int
+     */
     private static $userecordvc;
+    /**
+     * Course start
+     */
     public const COURSE_START = 1704099600;
+    /**
+     * Course end
+     */
     public const COURSE_END = 1706605200;
 
 
@@ -102,7 +133,7 @@ class hybridteaching_get_own_attendance_test extends \advanced_testcase {
             'timetype' => null,
             'config' => self::$config,
             'userecordvc' => self::$userecordvc,
-            'groupid' => self::$group->id
+            'groupid' => self::$group->id,
             ]);
         $cm = get_coursemodule_from_instance('hybridteaching', $hybridobject->id, self::$course->id);
 
@@ -131,9 +162,6 @@ class hybridteaching_get_own_attendance_test extends \advanced_testcase {
         // Get own attendance information.
         $this->assertNotNull($attendancecontroller->hybridteaching_get_attendance($session->id));
         $studentsparticipation = $attendancecontroller->hybridteaching_get_students_participation('');
-        //$studentsparticipation = $attendancecontroller->hybridteaching_get_students_participation($hybridobject->name);
-        //$studentsparticipation = $attendancecontroller->hybridteaching_get_students_participation($hybridobject->id);
-        //$this->assertEquals(1, count($studentsparticipation));
         // Retrieves the attendance records for a specific user.
         $this->assertFalse($attendancecontroller->hybridteaching_get_instance_users(''));
         $this->assertNotNull($attendancecontroller->hybridteaching_get_instance_users($hybridobject));
@@ -146,6 +174,12 @@ class hybridteaching_get_own_attendance_test extends \advanced_testcase {
         // Delete all atendances.
         $sessioncontroller->delete_all_sessions();
     }
+
+    /**
+     * Data provider for execute
+     *
+     * @return array[]
+     */
     public static function dataprovider(): array {
 
         return [
@@ -153,7 +187,7 @@ class hybridteaching_get_own_attendance_test extends \advanced_testcase {
              "durationgroup":{"duration":45000,"timetype":null}}'
               , 1
               , 2
-              , true
+              , true,
             ],
             ['{"hybridteachingid":2,"name":"Test 2","context":50,"starttime":1642736531,
              "durationgroup":{"duration":45000,"timetype":null}}'

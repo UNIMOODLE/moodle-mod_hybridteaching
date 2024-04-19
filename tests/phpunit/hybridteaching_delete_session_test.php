@@ -44,18 +44,50 @@ require_once($CFG->dirroot . '/config.php');
 use mod_hybridteaching\helpers\password;
 use mod_hybridteaching\controller\sessions_controller;
 
+/**
+ * Testing delete session
+ *
+ * @group hybridteaching
+ */
 class hybridteaching_delete_session_test extends \advanced_testcase {
 
     // Write the tests here as public funcions.
     // Please refer to {@link https://docs.moodle.org/dev/PHPUnit} for more details on PHPUnit tests in Moodle.
+    /**
+     * @var \stdClass
+     */
     private static $course;
+    /**
+     * @var \stdClass
+     */
     private static $context;
+    /**
+     * @var \stdClass
+     */
     private static $coursecontext;
+    /**
+     * @var \stdClass
+     */
     private static $user;
+    /**
+     * @var \stdClass
+     */
     private static $config;
+    /**
+     * @var int
+     */
     private static $userecordvc;
+    /**
+     * @var int
+     */
     private static $page;
+    /**
+     * Course start
+     */
     public const COURSE_START = 1704099600;
+    /**
+     * Course end
+     */
     public const COURSE_END = 1706605200;
 
 
@@ -97,16 +129,15 @@ class hybridteaching_delete_session_test extends \advanced_testcase {
             'name' => 'hybt',
             'timetype' => null,
             'config' => self::$config,
-            'userecordvc' => self::$userecordvc
+            'userecordvc' => self::$userecordvc,
             ]);
         $cm = get_coursemodule_from_instance('hybridteaching', $hybridobject->id, self::$course->id);
 
         $sessioncontroller = new sessions_controller($hybridobject);
-        // Print print_r($sessioncontroller, true).
+
         // Simulate data form.
         $datadecoded = json_decode($param);
         $data = new \StdClass();
-        // $data->hybridteachingid = $hybridobject->id.
         $data->name = $datadecoded->name;
         $data->context = $datadecoded->context;
         $datadecoded->description ? $data->description = $datadecoded->description : "";
@@ -120,24 +151,30 @@ class hybridteaching_delete_session_test extends \advanced_testcase {
         $session = $sessioncontroller->create_session($data);
         // Delete session.
         $this->assertNotNull($session);
-       
+
         $sessioncontroller->delete_session($session->id);
         hybridteaching_grade_item_delete($hybridobject);
-        
+
         $this->assertFalse(hybridteaching_delete_instance(1));
         $this->assertTrue(hybridteaching_delete_instance($hybridobject->id));
 
     }
+
+    /**
+     * Data provider for execute
+     *
+     * @return array[]
+     */
     public static function dataprovider(): array {
 
         return [
 
-            ['{"hybridteachingid":2,"name":"Test de prueba","description": "description","context":50,"starttime":1642736531,"durationgroup":{"duration":45000,
-                "timetype":null}}', "random"],
-            ['{"hybridteachingid":2,"name":"Test de prueba","description": "description","context":50,"starttime":2642736531,"durationgroup":{"duration":45000,
-                "timetype":null}}', 'bbb'],
-            ['{"hybridteachingid":2,"name":"Test de prueba","description": "description","context":50,"starttime":2642736531,"durationgroup":{"duration":45000,
-                "timetype":null}}', 'bbb'],
+            ['{"hybridteachingid":2,"name":"Test de prueba","description": "description","context":50,"starttime":1642736531,
+            "durationgroup":{"duration":45000,"timetype":null}}', "random"],
+            ['{"hybridteachingid":2,"name":"Test de prueba","description": "description","context":50,"starttime":2642736531,
+            "durationgroup":{"duration":45000,"timetype":null}}', 'bbb'],
+            ['{"hybridteachingid":2,"name":"Test de prueba","description": "description","context":50,"starttime":2642736531,
+            "durationgroup":{"duration":45000,"timetype":null}}', 'bbb'],
         ];
     }
 

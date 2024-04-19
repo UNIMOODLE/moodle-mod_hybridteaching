@@ -44,19 +44,54 @@ use mod_hybridteaching\helpers\password;
 use mod_hybridteaching\controller\sessions_controller;
 use mod_hybridteaching\controller\attendance_controller;
 
+/**
+ * Testing load attendance
+ *
+ * @group hybridteaching
+ */
 class hybridteaching_load_attendance_test extends \advanced_testcase {
 
     // Write the tests here as public funcions.
     // Please refer to {@link https://docs.moodle.org/dev/PHPUnit} for more details on PHPUnit tests in Moodle.
+    /**
+     * @var \stdClass
+     */
     private static $course;
+    /**
+     * @var \stdClass
+     */
     private static $context;
+    /**
+     * @var \stdClass
+     */
     private static $coursecontext;
+    /**
+     * @var \stdClass
+     */
     private static $user;
+    /**
+     * @var \stdClass
+     */
     private static $config;
+    /**
+     * @var int
+     */
     private static $userecordvc;
+    /**
+     * @var int
+     */
     private static $action;
+    /**
+     * @var int
+     */
     private static $usevideoconference;
+    /**
+     * Course start
+     */
     public const COURSE_START = 1704099600;
+    /**
+     * Course end
+     */
     public const COURSE_END = 1706605200;
 
 
@@ -100,7 +135,7 @@ class hybridteaching_load_attendance_test extends \advanced_testcase {
             'name' => 'hybt',
             'timetype' => null,
             'config' => self::$config,
-            'userecordvc' => self::$userecordvc
+            'userecordvc' => self::$userecordvc,
             ]);
         $cm = get_coursemodule_from_instance('hybridteaching', $hybridobject->id, self::$course->id);
 
@@ -132,7 +167,7 @@ class hybridteaching_load_attendance_test extends \advanced_testcase {
                            ['hybridteachingid' => $hybridobject->id]);
         // Check that attendance was loaded successfuly.
         $this->assertNotNull($attendancecontroller->load_attendance_assistance(['starttime' => 1642736531
-        , 'userid' => self::$user->id, 'view' => 'studentattendance'],'starttime > 0 '));
+        , 'userid' => self::$user->id, 'view' => 'studentattendance'], 'starttime > 0 '));
         $this->assertNotNull($attendancecontroller->load_attendance(0, 0, ['starttime' => 1642736531, 'view' => $view,
         'groupid' => 1]));
         $attendancecontroller->hybridteaching_get_attendance_users_in_session($sessionexpected->id, $hybridobject->id);
@@ -149,11 +184,15 @@ class hybridteaching_load_attendance_test extends \advanced_testcase {
         // Count attendance of session by parameters.
         $this->assertIsNumeric($attendancecontroller->count_sess_attendance(['sessionid' => $attendanceid, 'status' => 1]));
         // Count user attendance.
-        //$attendancecontroller->count_attendance($USER->firstname, $USER->lastname, '');
         $attendancescount = $DB->get_records('hybridteaching_attendance', ['hybridteachingid' => $hybridobject->id], 'id', 'id');
-        
 
     }
+
+    /**
+     * Data provider for execute
+     *
+     * @return array[]
+     */
     public static function dataprovider(): array {
 
         return [

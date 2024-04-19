@@ -43,18 +43,50 @@ require_once($CFG->dirroot . '/config.php');
 use mod_hybridteaching\helpers\password;
 use mod_hybridteaching\controller\sessions_controller;
 
+/**
+ * Testing set visibility record session
+ *
+ * @group hybridteaching
+ */
 class hybridteaching_set_visibility_record_session_test extends \advanced_testcase {
 
     // Write the tests here as public funcions.
     // Please refer to {@link https://docs.moodle.org/dev/PHPUnit} for more details on PHPUnit tests in Moodle.
+    /**
+     * @var \stdClass
+     */
     private static $course;
+    /**
+     * @var \stdClass
+     */
     private static $context;
+    /**
+     * @var \stdClass
+     */
     private static $coursecontext;
+    /**
+     * @var \stdClass
+     */
     private static $user;
+    /**
+     * @var \stdClass
+     */
     private static $config;
+    /**
+     * @var int
+     */
     private static $userecordvc;
+    /**
+     * @var int
+     */
     private static $isvisible;
+    /**
+     * Course start
+     */
     public const COURSE_START = 1704099600;
+    /**
+     * Course end
+     */
     public const COURSE_END = 1706605200;
 
     public function setUp(): void {
@@ -97,7 +129,7 @@ class hybridteaching_set_visibility_record_session_test extends \advanced_testca
             'name' => 'hybt',
             'timetype' => null,
             'config' => self::$config,
-            'userecordvc' => self::$userecordvc
+            'userecordvc' => self::$userecordvc,
             ]);
         $cm = get_coursemodule_from_instance('hybridteaching', $hybridobject->id, self::$course->id);
 
@@ -116,25 +148,24 @@ class hybridteaching_set_visibility_record_session_test extends \advanced_testca
                 $data->durationgroup['timetype']);
         $visibility == 1 ? $data->visiblerecord = 1 : $data->visiblerecord = 0;
         $visibilitychat == 1 ? $data->visiblechat = 1 : $data->visiblechat = 0;
- 
 
         // Create session.
         $session = $sessioncontroller->create_session($data);
         $sessionexpected = $sessioncontroller->get_session($session->id);
-        // Print print_r($sessionexpected).
+
         $this->assertNotNull($sessionexpected);
         // Check that session records are visible.
         $sessionexpected->visiblerecord == 1 ? self::$isvisible = 1 : self::$isvisible = 0;
         $this->assertEquals(1, $sessionexpected->visiblerecord);
         // Change visibility (if visibility == 1, visibility = 0 and if visibility == 0, visibility = 1).
         $sessioncontroller->set_record_visibility($sessionexpected->id);
-        // Change visibility chat
+        // Change visibility chat.
         $sessioncontroller->set_chat_visibility($sessionexpected->id);
 
         // Change again visibilities.
         // Change visibility records.
         $sessioncontroller->set_record_visibility($sessionexpected->id);
-        // Change visibility chat
+        // Change visibility chat.
         $sessioncontroller->set_chat_visibility($sessionexpected->id);
         $sessionbeforevisibleset = $sessioncontroller->get_session($sessionexpected->id);
         $sessionbeforevisibleset->visiblerecord == 1 ? self::$isvisible = 1 : self::$isvisible = 0;
@@ -142,9 +173,14 @@ class hybridteaching_set_visibility_record_session_test extends \advanced_testca
         $this->assertEquals(0, $sessionbeforevisibleset->visiblerecord);
         // Checks if the session has started.
         $this->assertTrue($sessioncontroller->session_started($sessionexpected));
-        
 
     }
+
+    /**
+     * Data provider for execute
+     *
+     * @return array[]
+     */
     public static function dataprovider(): array {
 
         return [

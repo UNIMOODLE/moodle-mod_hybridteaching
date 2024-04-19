@@ -44,17 +44,46 @@ use mod_hybridteaching\helpers\password;
 use mod_hybridteaching\controller\sessions_controller;
 use mod_hybridteaching\task\update_finished_session;
 
+/**
+ * Testing finish session
+ *
+ * @group hybridteaching
+ */
 class hybridteaching_finish_session_test extends \advanced_testcase {
 
     // Write the tests here as public funcions.
     // Please refer to {@link https://docs.moodle.org/dev/PHPUnit} for more details on PHPUnit tests in Moodle.
-    private static $coursetest;
+    /**
+     * @var \stdClass
+     */
+    private static $course;
+    /**
+     * @var \stdClass
+     */
     private static $context;
+    /**
+     * @var \stdClass
+     */
     private static $coursecontext;
+    /**
+     * @var \stdClass
+     */
     private static $user;
+    /**
+     * @var \stdClass
+     */
     private static $config;
+    /**
+     * @var int
+     */
     private static $userecordvc;
+    /**
+     * Course start
+     */
     public const COURSE_START = 1704099600;
+    /**
+     * Course end
+     */
     public const COURSE_END = 1706605200;
 
 
@@ -63,10 +92,10 @@ class hybridteaching_finish_session_test extends \advanced_testcase {
         parent::setUp();
         $this->resetAfterTest(true);
         self::setAdminUser();
-        self::$coursetest = self::getDataGenerator()->create_course(
+        self::$course = self::getDataGenerator()->create_course(
             ['startdate' => self::COURSE_START, 'enddate' => self::COURSE_END]
         );
-        self::$coursecontext = \context_course::instance(self::$coursetest->id);
+        self::$coursecontext = \context_course::instance(self::$course->id);
         self::$user = $USER;
         self::$userecordvc = 0;
         self::$config = 0;
@@ -88,12 +117,12 @@ class hybridteaching_finish_session_test extends \advanced_testcase {
         global $DB;
         // Module instance.
         $moduleinstance = new \stdClass();
-        $moduleinstance->course = self::$coursetest->id;
+        $moduleinstance->course = self::$course->id;
         // Create hybobj.
         $hybridobject = new \stdClass();
         $hybridobject->id = $DB->insert_record('hybridteaching', $moduleinstance);
         $hybridobject->config = self::$config;
-        $hybridobject->course = self::$coursetest->id;
+        $hybridobject->course = self::$course->id;
         $hybridobject->userecordvc = self::$userecordvc;
 
         $sessioncontroller = new sessions_controller($hybridobject);
@@ -121,11 +150,16 @@ class hybridteaching_finish_session_test extends \advanced_testcase {
         $updatefinishedsession = new update_finished_session();
         $this->assertNotNull($updatefinishedsession->get_name());
         $updatefinishedsession->execute();
-        
+
         $this->assertNotNull($sessioncontroller->get_sessions_performed($hybridobject->id));
 
     }
 
+    /**
+     * Data provider for execute
+     *
+     * @return array[]
+     */
     public static function dataprovider(): array {
 
         return [

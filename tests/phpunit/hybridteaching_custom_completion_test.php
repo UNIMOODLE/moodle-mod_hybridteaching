@@ -43,17 +43,47 @@ require_once($CFG->dirroot . '/config.php');
 
 use mod_hybridteaching\controller\sessions_controller;
 use mod_hybridteaching\completion\custom_completion;
+
+/**
+ * Testing custom completions
+ *
+ * @group hybridteaching
+ */
 class hybridteaching_custom_completion_test extends \advanced_testcase {
 
     // Write the tests here as public funcions.
     // Please refer to {@link https://docs.moodle.org/dev/PHPUnit} for more details on PHPUnit tests in Moodle.
+    /**
+     * @var \stdClass
+     */
     private static $course;
+    /**
+     * @var \stdClass
+     */
     private static $context;
+    /**
+     * @var \stdClass
+     */
     private static $coursecontext;
+    /**
+     * @var \stdClass
+     */
     private static $user;
+    /**
+     * @var \stdClass
+     */
     private static $config;
+    /**
+     * @var int
+     */
     private static $userecordvc;
+    /**
+     * Course start
+     */
     public const COURSE_START = 1704099600;
+    /**
+     * Course end
+     */
     public const COURSE_END = 1706605200;
 
 
@@ -96,7 +126,7 @@ class hybridteaching_custom_completion_test extends \advanced_testcase {
             'config' => self::$config,
             'userecordvc' => self::$userecordvc,
             'starttime' => 0,
-            'completionattendance' => 1
+            'completionattendance' => 1,
             ]);
         $cm = get_coursemodule_from_instance('hybridteaching', $hybridobject->id, self::$course->id);
 
@@ -133,15 +163,21 @@ class hybridteaching_custom_completion_test extends \advanced_testcase {
         hybridteaching_update_grades($hybridobject);
 
     }
+
+    /**
+     * Data provider for execute
+     *
+     * @return array[]
+     */
     public static function dataprovider(): array {
 
         return [
             ['{"hybridteachingid":1,"name":"Test de prueba", "description": "description of session","context":50,
                 "starttime":1642736531,"durationgroup":{"duration":45000,"timetype":null}}', ],
-            ['{"hybridteachingid":2,"name":"Test de prueba","description": "description session", "context":50,"starttime":1642736531,"durationgroup":
-                {"duration":45000,"timetype":null}}', 'completionattendance'],
-            ['{"hybridteachingid":2,"name":"Test de prueba","description": "description of session","context":50,"starttime":1642736531,"durationgroup":
-                {"duration":45000,"timetype":null}}', ],
+            ['{"hybridteachingid":2,"name":"Test de prueba","description": "description session", "context":50,
+                "starttime":1642736531,"durationgroup":{"duration":45000,"timetype":null}}', 'completionattendance'],
+            ['{"hybridteachingid":2,"name":"Test de prueba","description": "description of session","context":50,
+                "starttime":1642736531,"durationgroup":{"duration":45000,"timetype":null}}', ],
         ];
     }
 

@@ -47,20 +47,54 @@ use mod_hybridteaching\plugininfo\hybridteachvc;
 use mod_hybridteaching\helpers\password;
 use mod_hybridteaching\controller\sessions_controller;
 
+/**
+ * Testing plugin info
+ *
+ * @group hybridteaching
+ */
 class hybridteaching_plugin_info_test extends \advanced_testcase {
 
     // Write the tests here as public funcions.
     // Please refer to {@link https://docs.moodle.org/dev/PHPUnit} for more details on PHPUnit tests in Moodle.
+    /**
+     * @var \stdClass
+     */
     private static $course;
+    /**
+     * @var \stdClass
+     */
     private static $context;
+    /**
+     * @var \stdClass
+     */
     private static $coursecontext;
+    /**
+     * @var \stdClass
+     */
     private static $user;
+    /**
+     * @var \stdClass
+     */
     private static $config;
+    /**
+     * @var int
+     */
     private static $userecordvc;
+    /**
+     * @var int
+     */
     private static $isupdated;
-
+    /**
+     * @var int
+     */
     private static $updatecalen;
+    /**
+     * Course start
+     */
     public const COURSE_START = 1704099600;
+    /**
+     * Course end
+     */
     public const COURSE_END = 1706605200;
 
     public function setUp(): void {
@@ -102,7 +136,7 @@ class hybridteaching_plugin_info_test extends \advanced_testcase {
             'timetype' => null,
             'config' => self::$config,
             'userecordvc' => self::$userecordvc,
-          
+
             ]);
         $cm = get_coursemodule_from_instance('hybridteaching', $hybridobject->id, self::$course->id);
 
@@ -122,6 +156,11 @@ class hybridteaching_plugin_info_test extends \advanced_testcase {
 
     }
 
+    /**
+     * Data provider for execute
+     *
+     * @return array[]
+     */
     public static function dataprovider(): array {
 
         return [
@@ -139,7 +178,5 @@ class hybridteaching_plugin_info_test extends \advanced_testcase {
              "Session testing edited 2", "Description of session 2 edited", "meet" ],
         ];
     }
-
-    
 
 }

@@ -69,11 +69,21 @@ class sessions {
         $configyt = $DB->get_record('hybridteachstore_youtube_con', ['id' => $config->subpluginconfigid]);
         $videocode = $DB->get_field('hybridteachstore_youtube', 'code', ['sessionid' => $htsession]);
         if (isset($videocode) && isset($configyt)) {
-            // Delete video in youtube.
-            $youtubeclient = new youtube_handler($configyt);
-            $youtubeclient->deletefile($videocode);
+            // Only delete video from youtube if there are not same video with another session, for example, restored from backup.
+            $sql = "SELECT * 
+                FROM {hybridteachstore_youtube} yt
+                WHERE code LIKE :videocode";
+            $othersession = $DB->get_records_sql($sql, ['videocode' => $videocode]);
 
+            if (count($othersession) > 1) {
+                // No delete if there are other restores.
+            } else {
+                // Delete video in youtube.
+                $youtubeclient = new youtube_handler($configyt);
+                $youtubeclient->deletefile($videocode);
+            }
         }
+
         $DB->delete_records('hybridteachstore_youtube', ['sessionid' => $htsession]);
     }
 }

@@ -49,22 +49,59 @@ use mod_hybridteaching\filters\session_filter_duration;
 use mod_hybridteaching\filters\session_filter_type;
 use mod_hybridteaching\filters\session_filter_text;
 use mod_hybridteaching\form\sessions_form;
+
+/**
+ * Testing session filter
+ *
+ * @group hybridteaching
+ */
 class hybridteaching_session_filter_test extends \advanced_testcase {
 
     // Write the tests here as public funcions.
     // Please refer to {@link https://docs.moodle.org/dev/PHPUnit} for more details on PHPUnit tests in Moodle.
+    /**
+     * @var \stdClass
+     */
     private static $course;
+    /**
+     * @var \stdClass
+     */
     private static $context;
+    /**
+     * @var \stdClass
+     */
     private static $coursecontext;
+    /**
+     * @var \stdClass
+     */
     private static $user;
+    /**
+     * @var \stdClass
+     */
     private static $config;
+    /**
+     * @var \stdClass
+     */
     private static $userecordvc;
+    /**
+     * @var int
+     */
     private static $page;
-
+    /**
+     * @var int
+     */
     private static $value;
+    /**
+     * Course start
+     */
     public const COURSE_START = 1704099600;
+    /**
+     * Course end
+     */
     public const COURSE_END = 1706605200;
-
+    /**
+     * @var string
+     */
     private static $namesession;
 
     public function setUp(): void {
@@ -81,7 +118,6 @@ class hybridteaching_session_filter_test extends \advanced_testcase {
         self::$config = 0;
         self::$value = 1;
     }
-    
 
     /**
      * Session filter management
@@ -101,7 +137,8 @@ class hybridteaching_session_filter_test extends \advanced_testcase {
      * @dataProvider dataprovider
      * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
      */
-    public function test_session_filter($name = null, $label = null, $advanced = null, $field = null, $options = 0, $operator, $value = '', $unittime = 1) {
+    public function test_session_filter($name = null, $label = null, $advanced = null,
+    $field = null, $options = 0, $operator, $value = '', $unittime = 1) {
         // Reset after execute the test.
         global $DB;
         // Session filter select.
@@ -110,7 +147,6 @@ class hybridteaching_session_filter_test extends \advanced_testcase {
         $formdata = ['name' => $name, 'value' => $value, 'name_sdt' => $name, 'name_edt' => $name];
         $formdata2 = ['novalue' => $name, 'value' => '', 'name_sdt' => '', 'name_edt' => ''];
 
-        //$sessionfilterselect->session_filter_simpleselect($name, $label, $advanced, $field, $options);
         $sessionfilterselect->check_data((object)$formdata);
         $sessionfilterselect->check_data((object)$formdata2);
         $sessionfilterselect->get_sql_filter($formdata2);
@@ -118,13 +154,12 @@ class hybridteaching_session_filter_test extends \advanced_testcase {
 
         // Session filter date.
         $sessionfilterdate = new session_filter_date($name, $label, $advanced, $field, $options);
-        //$sessionfilterdate->session_filter_date($name, $label, $advanced, $field, $options);
+
         $sessionfilterdate->check_data((object)$formdata);
         $sessionfilterdate->check_data((object)$formdata2);
 
         $datasqlfilter = ['after' => time(), 'before' => time()];
         $datasqlfilter2 = ['after' => null, 'before' => null];
-
 
         $sessionfilterdate->get_sql_filter($datasqlfilter);
         $datasqlfilter['before'] = null;
@@ -139,30 +174,33 @@ class hybridteaching_session_filter_test extends \advanced_testcase {
         $this->assertNotNull($sessionfilterduration->get_operators());
         $this->assertNotNull($sessionfilterduration->get_unit_time());
 
-        $dataduration = ['operator' => 4, 'value' => '', 'unittime' => $unittime, 'name'=> $name, 'description' => 'description', 'time' => time()];
+        $dataduration = ['operator' => 4, 'value' => '', 'unittime' => $unittime, 'name' => $name,
+        'description' => 'description', 'time' => time()];
         $sessionfilterduration->get_sql_filter($dataduration);
         $dataduration['operator'] = $operator;
         $dataduration['value'] = $value;
         $sessionfilterduration->get_sql_filter($dataduration);
-        
 
         // Session filter type.
         $sessionfiltertype = new session_filter_type($name, $label, $advanced);
         $sessionfiltertype->session_filter_type($name, $label, $advanced);
-        //$sessionfiltertype->get_sql_filter($dataduration);
-        //$sessionfiltertype->check_data($dataduration);
 
         // Session filter text.
         $sessionfiltertext = new session_filter_text($name, $label, $advanced, $field);
         $sessionfiltertext->session_filter_text($name, $label, $advanced, $field);
         $this->assertNotNull($sessionfiltertext->get_operators());
         $sessionfiltertext->get_sql_filter(['operator' => $operator, 'value' => $value]);
-        $laberfiterduration = $sessionfilterduration->get_label(['operator' => $operator,'value'=> $value, 'unittime' => $unittime]);
-        
-        
-        
+        $laberfiterduration = $sessionfilterduration->get_label(['operator' => $operator, 'value' => $value,
+        'unittime' => $unittime]);
+
         $this->assertTrue(true);
     }
+
+    /**
+     * Data provider for execute
+     *
+     * @return array[]
+     */
     public static function dataprovider(): array {
 
         return [

@@ -46,19 +46,55 @@ use mod_hybridteaching\helpers\password;
 use mod_hybridteaching\controller\sessions_controller;
 use mod_hybridteaching\controller\attendance_controller;
 use mod_hybridteaching\helpers\grades;
+
+/**
+ * Testing set attendance
+ *
+ * @group hybridteaching
+ */
 class hybridteaching_set_attendance_test extends \advanced_testcase {
 
     // Write the tests here as public funcions.
     // Please refer to {@link https://docs.moodle.org/dev/PHPUnit} for more details on PHPUnit tests in Moodle.
+    /**
+     * @var \stdClass
+     */
     private static $course;
+    /**
+     * @var \stdClass
+     */
     private static $context;
+    /**
+     * @var \stdClass
+     */
     private static $coursecontext;
+    /**
+     * @var \stdClass
+     */
     private static $user;
+    /**
+     * @var \stdClass
+     */
     private static $config;
+    /**
+     * @var int
+     */
     private static $userecordvc;
+    /**
+     * @var int
+     */
     private static $action;
+    /**
+     * @var int
+     */
     private static $usevideoconference;
+    /**
+     * Course start
+     */
     public const COURSE_START = 1704099600;
+    /**
+     * Course end
+     */
     public const COURSE_END = 1706605200;
 
 
@@ -104,7 +140,7 @@ class hybridteaching_set_attendance_test extends \advanced_testcase {
             'timetype' => null,
             'config' => self::$config,
             'userecordvc' => self::$userecordvc,
-            'usevideoconference' => self::$usevideoconference
+            'usevideoconference' => self::$usevideoconference,
             ]);
         $cm = get_coursemodule_from_instance('hybridteaching', $hybridobject->id, self::$course->id);
 
@@ -122,7 +158,7 @@ class hybridteaching_set_attendance_test extends \advanced_testcase {
         $data->durationgroup['timetype'] = $sessioncontroller::MINUTE_TIMETYPE;
         $data->duration = $sessioncontroller::calculate_duration($data->durationgroup['duration'],
                 $data->durationgroup['timetype']);
-                
+
         // Create session.
         $session = $sessioncontroller->create_session($data);
         $sessionexpected = $sessioncontroller->get_session($session->id);
@@ -131,14 +167,13 @@ class hybridteaching_set_attendance_test extends \advanced_testcase {
         // Set attendance.
         $attendanceid = $attendancecontroller->hybridteaching_set_attendance(0, $sessionexpected);
         $attendanceid = $attendancecontroller->hybridteaching_set_attendance($hybridobject, $sessionexpected);
-        //$attendanceid = $attendancecontroller->hybridteaching_set_attendance($hybridobject->id, $sessionexpected);
         $attendancesrecords = $DB->get_records('hybridteaching_attendance', ['hybridteachingid' => $session->id]);
         $this->assertNotNull($attendancesrecords);
         // Get attendance created by session_id and/or user_id.
         $this->assertNotNull($attendancecontroller->hybridteaching_get_attendance($sessionexpected, self::$user->id));
- 
+
         $this->assertNotNull($attendancecontroller->hybridteaching_get_attendance_from_id($attendanceid));
-        
+
         $external = new \hybridteaching_external();
         $modaltext = $external->get_modal_text($sessionexpected->id);
         $external->get_modal_text_parameters();
@@ -159,11 +194,18 @@ class hybridteaching_set_attendance_test extends \advanced_testcase {
         // Update session/attendance visivility.
         $attendancecontroller->update_session_visibility($sessionexpected->id, 1);
 
-        $attendancecontroller->user_attendance_early_leave($sessionexpected, $attendancecontroller->hybridteaching_get_attendance($attendanceid));
+        $attendancecontroller->user_attendance_early_leave($sessionexpected,
+        $attendancecontroller->hybridteaching_get_attendance($attendanceid));
         $attendancecontroller->user_attendance_early_leave($sessionexpected, $attendanceid);
         $this->assertFalse($attendancecontroller->user_attendance_early_leave($sessionexpected, ''));
 
     }
+
+    /**
+     * Data provider for execute
+     *
+     * @return array[]
+     */
     public static function dataprovider(): array {
 
         return [

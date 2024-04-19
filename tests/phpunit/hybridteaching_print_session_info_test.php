@@ -46,20 +46,58 @@ use mod_hybridteaching\helpers\password;
 use mod_hybridteaching\controller\sessions_controller;
 use mod_hybridteaching\controller\attendance_controller;
 
+/**
+ * Testing print session info
+ *
+ * @group hybridteaching
+ */
 class hybridteaching_print_session_info_test extends \advanced_testcase {
 
     // Write the tests here as public funcions.
     // Please refer to {@link https://docs.moodle.org/dev/PHPUnit} for more details on PHPUnit tests in Moodle.
+    /**
+     * @var \stdClass
+     */
     private static $course;
+    /**
+     * @var \stdClass
+     */
     private static $context;
+    /**
+     * @var \stdClass
+     */
     private static $coursecontext;
+    /**
+     * @var \stdClass
+     */
     private static $user;
+    /**
+     * @var \stdClass
+     */
     private static $config;
+    /**
+     * @var int
+     */
     private static $userecordvc;
+    /**
+     * @var int
+     */
     private static $action;
+    /**
+     * @var \stdClass
+     */
     private static $group;
+    /**
+     * @var int
+     */
     private static $usevideoconference;
+    /**
+     * Course start
+     */
     public const COURSE_START = 1704099600;
+    /**
+     * Course end
+     */
     public const COURSE_END = 1706605200;
 
 
@@ -108,11 +146,11 @@ class hybridteaching_print_session_info_test extends \advanced_testcase {
             'groupid' => self::$group->id,
             'userecordvc' => self::$userecordvc,
             'grade' => $grade,
-            'maxgradeattendanceunit' => $gradesattsession
+            'maxgradeattendanceunit' => $gradesattsession,
             ]);
-        
+
         $cm = get_coursemodule_from_instance('hybridteaching', $hybridobject->id, self::$course->id);
-      
+
         $sessioncontroller = new sessions_controller($hybridobject);
         // Simulate data form.
         $datadecoded = json_decode($param);
@@ -133,30 +171,31 @@ class hybridteaching_print_session_info_test extends \advanced_testcase {
         $sessionexpected = $sessioncontroller->get_session($session->id);
         $this->assertNotNull($sessionexpected);
         $attendancecontroller = new attendance_controller();
-        //Get session info string.
+        // Get session info string.
         $this->assertNotNull($attendancecontroller->hybridteaching_print_session_info(''));
         $this->assertNotNull($attendancecontroller->hybridteaching_print_session_info($sessionexpected));
         $sessioninfo = $attendancecontroller->hybridteaching_print_session_info($sessionexpected);
         $this->assertGreaterThan(0, strlen($sessioninfo));
-        // Cambiar a attendance
+        // Change to attendance.
         $allhyboj = $DB->get_record('hybridteaching', ['id' => $hybridobject->id]);
         $this->assertNotNull($attendancecontroller->hybridteaching_print_attendance_for_user($hybridobject->id, self::$user));
         // No string noattendance in lang/en.
-        //$this->assertNotNull($attendancecontroller->hybridteaching_print_attendance_for_user('', self::$user));
-        //$this->assertNotNull($attendancecontroller->hybridteaching_print_attendance_for_user(0, self::$user));
-
         $dataexport = new stdClass();
         $dataexport->context = self::$coursecontext;
         $dataexport->hybridteaching = $hybridobject;
-        // or other.
+        // Or other.
         $dataexport->includeallsessions = 1;
-        // or other.
+        // Or other.
         $dataexport->group = 0;
         $dataexport->coursename = 'coursename';
         $exporter = new \mod_hybridteaching\helpers\export($dataexport);
-
-
     }
+
+    /**
+     * Data provider for execute
+     *
+     * @return array[]
+     */
     public static function dataprovider(): array {
 
         return [
@@ -171,11 +210,11 @@ class hybridteaching_print_session_info_test extends \advanced_testcase {
             ['{"hybridteachingid":1,"name":"Test de prueba", "description": "description of session","context":50,
              "starttime":1642736531,"durationgroup":{"duration":45031,"timetype":1}}'
              , 1, '3', 100],
-             
+
             ['{"hybridteachingid":2,"name":"Test de prueba","context":50,"starttime":1642736531,
              "durationgroup":{"duration":45000,"timetype":null}}'
              , 0, '1', null],
-            
+
              ['{"hybridteachingid":2,"name":"Test de prueba","context":50,"starttime":1642736531,
                 "durationgroup":{"duration":0,"timetype":1}}'
                 , 0, '1', 100, self::$group->id],

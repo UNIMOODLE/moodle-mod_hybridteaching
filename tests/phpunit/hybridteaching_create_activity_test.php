@@ -40,17 +40,46 @@ require_once($CFG->dirroot . '/mod/hybridteaching/classes/controller/sessions_co
 require_once($CFG->dirroot . '/mod/hybridteaching/classes/helpers/calendar_helpers.php');
 require_once($CFG->dirroot . '/config.php');
 
+/**
+ * Testing create activity
+ *
+ * @group hybridteaching
+ */
 class hybridteaching_create_activity_test extends \advanced_testcase {
 
     // Write the tests here as public funcions.
     // Please refer to {@link https://docs.moodle.org/dev/PHPUnit} for more details on PHPUnit tests in Moodle.
+    /**
+     * @var \stdClass
+     */
     private static $course;
+    /**
+     * @var \stdClass
+     */
     private static $context;
+    /**
+     * @var \stdClass
+     */
     private static $coursecontext;
+    /**
+     * @var \stdClass
+     */
     private static $user;
+    /**
+     * @var \stdClass
+     */
     private static $config;
+    /**
+     * @var int
+     */
     private static $userecordvc;
+    /**
+     * Course start
+     */
     public const COURSE_START = 1704099600;
+    /**
+     * Course end
+     */
     public const COURSE_END = 1706605200;
 
 
@@ -87,7 +116,7 @@ class hybridteaching_create_activity_test extends \advanced_testcase {
             'name' => 'hybt',
             'timetype' => null,
             'config' => self::$config,
-            'userecordvc' => self::$userecordvc
+            'userecordvc' => self::$userecordvc,
             ]);
         $cm = get_coursemodule_from_instance('hybridteaching', $hybridobject->id, self::$course->id);
         $this->assertNotNull($cm);

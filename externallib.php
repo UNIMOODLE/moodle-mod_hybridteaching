@@ -81,7 +81,7 @@ class hybridteaching_external extends external_api {
                 ["attid" => $attid, 'status' => $status, 'id' => $id]
         );
 
-        $attendance = $DB->get_record('hybridteaching_attendance', ['id' => $attid]);
+        $attendance = $DB->get_record('hybridteaching_attendance', ['id' => $attid], 'id, hybridteachingid, sessionid, userid');
         $timemodified = (new \DateTime('now', \core_date::get_server_timezone_object()))->getTimestamp();
         if ($attendance) {
             $attendance->status = $status;
@@ -114,14 +114,25 @@ class hybridteaching_external extends external_api {
                     $completion->update_state($cm, COMPLETION_INCOMPLETE, $attendance->userid);
             }
         }
-        return json_encode($attendance);
+        return $attendance;
     }
 
     /**
      * info about the returned object
      */
     public static function set_attendance_status_returns() {
-        return null;
+        return new external_single_structure(
+            [
+                'id' => new external_value(PARAM_INT, 'Attendance id'),
+                'hybridteachingid' => new external_value(PARAM_INT, 'Hybridteaching id'),
+                'sessionid' => new external_value(PARAM_INT, 'Session id'),
+                'userid' => new external_value(PARAM_INT, 'User id'),
+                'status' => new external_value(PARAM_INT, 'Attendance status'),
+                'usermodified' => new external_value(PARAM_INT, 'User that modified the attendance'),
+                'timemodified' => new external_value(PARAM_INT, 'When the attendance was modified'),
+                'connectiontime' => new external_value(PARAM_INT, 'The user connectiontime'),
+            ]
+        );
     }
 
     /**
@@ -152,7 +163,7 @@ class hybridteaching_external extends external_api {
                 ["sessid" => $sessid, 'attexempt' => $attexempt]
         );
 
-        $session = $DB->get_record('hybridteaching_session', ['id' => $sessid]);
+        $session = $DB->get_record('hybridteaching_session', ['id' => $sessid], 'id, hybridteachingid');
         $timemodified = (new \DateTime('now', \core_date::get_server_timezone_object()))->getTimestamp();
         if ($session) {
             $session->attexempt = $attexempt;
@@ -177,14 +188,22 @@ class hybridteaching_external extends external_api {
             }
 
         }
-        return json_encode($session);
+        return $session;
     }
 
     /**
      * info about the returned object
      */
     public static function set_session_exempt_returns() {
-        return null;
+        return new external_single_structure(
+            [
+                'id' => new external_value(PARAM_INT, 'Session id'),
+                'hybridteachingid' => new external_value(PARAM_INT, 'Hybridteaching id'),
+                'attexempt' => new external_value(PARAM_INT, 'Attendance exempt for session'),
+                'modifiedby' => new external_value(PARAM_INT, 'User that modified the attendance'),
+                'timemodified' => new external_value(PARAM_INT, 'When the attendance was modified'),
+            ]
+        );
     }
 
     /**
@@ -235,7 +254,7 @@ class hybridteaching_external extends external_api {
      *
      */
     public static function get_display_actions_returns() {
-        return null;
+        return new external_value(PARAM_RAW, 'json describing the available actions for the user');
     }
 
 
@@ -306,7 +325,7 @@ class hybridteaching_external extends external_api {
      * Info about the returned object
      */
     public static function get_modal_text_returns() {
-        return null;
+        return new external_value(PARAM_RAW, 'json with the modal info diplayed for the user');
     }
 
     /**
@@ -349,7 +368,7 @@ class hybridteaching_external extends external_api {
      * Info about the returned object
      */
     public static function get_user_has_recording_capability_returns() {
-        return null;
+        return new external_value(PARAM_RAW, 'true, or a string indicating the user recording capabilities.');
     }
 
 
@@ -369,7 +388,7 @@ class hybridteaching_external extends external_api {
      * Info about the returned object
      */
     public static function disable_attendance_inprogress_returns() {
-        return null;
+        return new external_value(PARAM_RAW, 'returns mixed array with attendance and sessions data');
     }
 
     /**

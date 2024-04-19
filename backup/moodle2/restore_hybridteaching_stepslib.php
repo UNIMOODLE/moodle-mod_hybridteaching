@@ -57,7 +57,7 @@ class restore_hybridteaching_activity_structure_step extends restore_activity_st
 
         // Support 2 types of subplugins.
         $this->add_subplugin_structure('hybridteachvc', $session);
-        //$this->add_subplugin_structure('hybridteachstore', $session);
+        $this->add_subplugin_structure('hybridteachstore', $session);
 
         // Return the paths wrapped into standard activity structure.
         return $this->prepare_activity_structure($paths);
@@ -100,7 +100,6 @@ class restore_hybridteaching_activity_structure_step extends restore_activity_st
         $data = (object)$data;
         $oldid = $data->id;
         $data->hybridteachingid = $this->get_new_parentid('hybridteaching');
-        $data->storagereference = null;
 
         $newitemid = $DB->insert_record('hybridteaching_session', $data);
         $this->set_mapping('hybridteaching_session', $oldid, $newitemid);

@@ -150,8 +150,8 @@ class teams_handler {
     }
 
     /**
-     * Create a teams vc
-     * Create only meeting, without events calendar.
+     * Create a teams vc.
+     * Create meeting with events calendar.
      *
      * @param object $session The session object.
      * @param object $ht The hybridteaching object.
@@ -189,6 +189,7 @@ class teams_handler {
         $participants = roles::getparticipants($ht, $session->groupid, roles::ROLE_VIEWER);
 
         $participantsteams = [];
+        $participantscalendar = [];
         foreach ($participants as $participant) {
             $userteams = '';
             try {
@@ -215,13 +216,23 @@ class teams_handler {
                     'role' => 'attendee',
                 ];
                 $participantsteams[] = $user;
+
+                $usercalendar = [
+                    'emailAddress' => [
+                        'address' => $email,
+                        'name' => $userteams['displayName'],
+                    ],
+                    'type' => 'required',
+                ];
+                $participantscalendar[] = $usercalendar;
+
             }
         }
 
         $found = false;
         $moderatorsteams = [];
+        $moderatorscalendar = [];
         $organizatorteams = [];
-        $organizator = null;
         foreach ($moderators as $moderator) {
             $userteams = '';
             try {
@@ -249,17 +260,79 @@ class teams_handler {
                 ];
                 $moderatorsteams[] = $user;
                 $organizatorteams = $userteams;
-                $organizator = $user;
+
+                $usercalendar = [
+                    'emailAddress' => [
+                        'address' => $email,
+                        'name' => $userteams['displayName'],
+                    ],
+                    'type' => 'required',
+                ];
+                $moderatorscalendar[] = $usercalendar;
             }
         }
 
-        $startdatetime .= '.00+00:00';
-        $enddatetime .= '.00+00:00';
+        $attendees = array_merge ($moderatorsteams, $participantsteams);
+        $attendeescalendar = array_merge ($moderatorscalendar, $participantscalendar);
 
         $data = [
             'subject' => $session->name,
-            'startDateTime' => $startdatetime,
-            'endDateTime' => $enddatetime,
+            'start' => [
+                'dateTime' => $startdatetime,
+                'timeZone' => "Europe/Paris",
+            ],
+            'end' => [
+                'dateTime' => $enddatetime,
+                'timeZone' => "Europe/Paris",
+            ],
+
+            'location' => [
+                'displayName' => $session->name,
+            ],
+
+            'allowNewTimeProposals' => false,
+            'isOnlineMeeting' => true,
+            'onlineMeetingProvider' => 'teamsForBusiness',
+            'attendees' => $attendeescalendar,
+        ];
+
+        // Get the user based on accessmethod: teams id organizer.
+        $organiz = '';
+        if (isset($organizatorteams['id'])) {
+            $organiz = $organizatorteams['id'];
+        } else {
+            throw new \moodle_exception (get_string('emailorganizatornotfound', 'hybridteachvc_teams'), 'Teams');
+        }
+        $urlrequest = $this->geturlrequest($organiz);
+
+        // Create event in calendar.
+        try {
+            $graphresponse = $graph
+                ->createRequest("POST", $urlrequest."/events")
+                ->attachBody($data)
+                ->setReturnType(Model\OnlineMeeting::class)
+                ->execute();
+
+        } catch (\Exception $e) {
+            throw new \moodle_exception ($e->getMessage(), 'Teams');
+        }
+
+        $result = json_decode(json_encode($graphresponse), true);
+        $joinurl = $result['onlineMeeting']['joinUrl'];
+
+        // Get the event meeting.
+        $graphresponse = $graph
+            ->createRequest("GET", $urlrequest.'/onlineMeetings?$filter'."=JoinWebUrl%20eq%20'".$joinurl."'")
+            ->attachBody($data)
+            ->setReturnType(Model\OnlineMeeting::class)
+            ->execute();
+
+        $result = json_decode(json_encode($graphresponse), true);
+
+        $meetingid = $result[0]['id'];
+
+        // Change info meeting with options from hybridteaching form.
+        $data = [
             'allowAttendeeToEnableCamera' => $allowattendeetoenablecamera,
             'allowAttendeeToEnableMic' => $allowattendeetoenablemic,
             'allowMeetingChat' => $allowmeetingchat,
@@ -268,7 +341,6 @@ class teams_handler {
                 'scope' => 'invited',
                 'isDialInBypassEnabled' => false,
             ],
-            'allowedPresenters' => 'roleIsPresenter',
         ];
 
         $allowrecording = false;
@@ -280,25 +352,14 @@ class teams_handler {
 
         if (!empty($participants)) {
             $data['allowedPresenters'] = 'roleIsPresenter';
-            $data['participants']['attendees'] = $participantsteams;
+            $data['participants'] = [
+                    'attendees' => $attendees,
+            ];
         }
-
-        if (!empty($organizatorteams)) {
-            $data['participants']['organizer'] = $organizator;
-        }
-
-        // Get the user based on accessmethod: teams id organizer.
-        $organiz = '';
-        if (isset($organizatorteams['id'])) {
-            $organiz = $organizatorteams['id'];
-        } else {
-            throw new \moodle_exception (get_string('emailorganizatornotfound', 'hybridteachvc_teams'), 'Teams');
-        }
-        $urlrequest = $this->geturlrequest($organiz);
 
         try {
             $graphresponse = $graph
-                ->createRequest("POST", $urlrequest."/onlineMeetings")
+                ->createRequest("PATCH", $urlrequest."/onlineMeetings/$meetingid")
                 ->attachBody($data)
                 ->setReturnType(Model\OnlineMeeting::class)
                 ->execute();
@@ -364,8 +425,8 @@ class teams_handler {
     public function get_meeting_recordings($folderfile, $meetingid, $organizerid, $course, $name) {
         global $DB;
         $token = '';
-        try {
-            $token = $this->refreshtoken();
+        try {         
+            $token = $this->refreshtoken();         
         } catch (\Exception $e) {
             mtrace(get_string('incorrectconfig', 'hybridteachvc_teams',
                 [
@@ -430,14 +491,14 @@ class teams_handler {
                             ->download($pathfile);
                     } catch (\Exception $e) {
                         mtrace(get_string('recordingnotdownload', 'hybridteachvc_teams',
-                            [
+                            [ 
                                 'course' => $course,
                                 'name' => $name,
                                 'meetingid' => $meetingid,
                             ]));
                     }
                     mtrace(get_string('correctdownload', 'hybridteachvc_teams',
-                    [
+                    [ 
                         'course' => $course,
                         'name' => $name,
                         'meetingid' => $meetingid,

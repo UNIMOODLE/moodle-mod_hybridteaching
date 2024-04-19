@@ -44,19 +44,54 @@ require_once($CFG->dirroot . '/config.php');
 use mod_hybridteaching\controller\configs_controller;
 use hybridteachvc_bbb\configs;
 
+/**
+ * Testing create config
+ *
+ * @group hybridteaching
+ */
 class hybridteaching_create_config_test extends \advanced_testcase {
 
     // Write the tests here as public funcions.
     // Please refer to {@link https://docs.moodle.org/dev/PHPUnit} for more details on PHPUnit tests in Moodle.
+    /**
+     * @var \stdClass
+     */
     private static $course;
+    /**
+     * @var \stdClass
+     */
     private static $context;
+    /**
+     * @var \stdClass
+     */
     private static $coursecontext;
+    /**
+     * @var \stdClass
+     */
     private static $user;
+    /**
+     * @var \stdClass
+     */
     private static $config;
+    /**
+     * @var int
+     */
     private static $userecordvc;
+    /**
+     * @var int
+     */
     private static $subplugintype;
+    /**
+     * @var string
+     */
     private static $type;
+    /**
+     * Course start
+     */
     public const COURSE_START = 1704099600;
+    /**
+     * Course end
+     */
     public const COURSE_END = 1706605200;
 
 
@@ -91,7 +126,6 @@ class hybridteaching_create_config_test extends \advanced_testcase {
         // Reset after execute the test.
         global $DB;
 
-        
         // Create hybobj.
         $generator = self::getDataGenerator()->get_plugin_generator('mod_hybridteaching');
         $hybridobject = $generator->create_instance(['course' => self::$course->id,
@@ -104,7 +138,7 @@ class hybridteaching_create_config_test extends \advanced_testcase {
         $cm = get_coursemodule_from_instance('hybridteaching', $hybridobject->id, self::$course->id);
 
         $fileareas = hybridteaching_get_file_areas(self::$course, $cm, self::$coursecontext);
-        $fileinfo =  hybridteaching_get_file_info('browser', 'areas', self::$course, $cm, self::$coursecontext
+        $fileinfo = hybridteaching_get_file_info('browser', 'areas', self::$course, $cm, self::$coursecontext
         , 'filearea', 1, 'filepath', 'filename');
         // Create subplugin config.
         $databbbid = $this->subplugininfo();
@@ -120,7 +154,7 @@ class hybridteaching_create_config_test extends \advanced_testcase {
         $this->assertNotNull($configscontroller->get_categories_conditions(['category' => 0]));
         // Update config.
         $configinitial = $DB->get_records('hybridteaching_configs');
-        //print print_r(array_keys($configinitial)[0]);
+
         $config = $configscontroller->hybridteaching_load_config(array_keys($configinitial)[0]);
         $config->configname = 'random';
         $configscontroller->hybridteaching_update_config($config);
@@ -129,6 +163,12 @@ class hybridteaching_create_config_test extends \advanced_testcase {
         $configscontroller->hybridteaching_delete_config(999);
 
     }
+
+    /**
+     * Data provider for execute
+     *
+     * @return array[]
+     */
     public static function dataprovider(): array {
 
         return [
@@ -142,10 +182,10 @@ class hybridteaching_create_config_test extends \advanced_testcase {
     }
     /**
      * Create subplugin config
-     * 
+     *
      * @return int $databbbid
      */
-    public function subplugininfo(){
+    public function subplugininfo() {
         // Create subplugin config.
         $databbb = new \stdClass();
         $databbb->serverurl = "serverurl";
@@ -157,20 +197,20 @@ class hybridteaching_create_config_test extends \advanced_testcase {
 
     /**
      * Create config.
-     * 
+     *
      * @param configs_controller $configscontroller
      * @param \StdClass $hybridobject
      * @param \StdClass $configdata
      * @param int $bbbid
-     * 
+     *
      */
-    public function createconfig($configscontroller, $hybridobject, $configdata, $bbbid){
+    public function createconfig($configscontroller, $hybridobject, $configdata, $bbbid) {
 
         // Create config data.
         $config = new \StdClass();
         $configdatadecoded = json_decode($configdata);
         $config->configname = $configdatadecoded->configname;
-        isset($configdatadecoded->category) ? $config->category = $configdatadecoded->category : $config->category = null; 
+        isset($configdatadecoded->category) ? $config->category = $configdatadecoded->category : $config->category = null;
         $config->id = $configdatadecoded->subpluginconfigid;
         $config->subplugintype = $bbbid;
         // Create config / Da error con un include de la funcion.
