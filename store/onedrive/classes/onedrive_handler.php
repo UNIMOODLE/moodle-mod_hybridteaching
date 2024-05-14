@@ -344,7 +344,7 @@ class onedrive_handler {
         $graph->setAccessToken($this->config->accesstoken);
 
         try {
-            $path = "/me/drive/root:/".get_string('hybridteaching', 'hybridteachstore_onedrive')."/ee".$videoweburl;
+            $path = "/me/drive/root:/".get_string('hybridteaching', 'hybridteachstore_onedrive')."/".$videoweburl;
             $graphresponse = $graph->createRequest("DELETE", $path)
                 ->setReturnType(Model\DriveItem::class)
                 ->execute();
