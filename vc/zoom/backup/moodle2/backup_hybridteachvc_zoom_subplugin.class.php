@@ -24,37 +24,40 @@
 
 /**
  * Display information about all the mod_hybridteaching modules in the requested course. *
- * @package    mod_hybridteaching
+ * @package    hybridteachvc_zoom
  * @copyright  2023 Proyecto UNIMOODLE
  * @author     UNIMOODLE Group (Coordinator) <direccion.area.estrategia.digital@uva.es>
  * @author     ISYC <soporte@isyc.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
- defined('MOODLE_INTERNAL') || die();
-
 /**
  * Class backup_hybridteaching_activity_task
  *
  */
 class backup_hybridteachvc_zoom_subplugin extends backup_subplugin {
-    // Session is the name of the element of the structure to get in.
-    protected function define_session_subplugin_structure() {
 
+    /**
+     * Create the subplugin structure.
+     *
+     * @return subplugin
+     */
+    protected function define_session_subplugin_structure() {
+        // Session is the name of the element of the structure to get in.
         // Create XML elements.
         $subplugin = $this->get_subplugin_element();
         $subpluginwrapper = new backup_nested_element($this->get_recommended_name());
         $subpluginelement = new backup_nested_element('hybridteachvc_zoom',
             ['id'],
-            array('htsession', 'meetingid', 'hostemail', 'starturl', 'joinurl', 'hostid', 'optionhostvideo',
-                'optionparticipantsvideo', 'downloadattempts'));
+            ['htsession', 'meetingid', 'hostemail', 'starturl', 'joinurl', 'hostid', 'optionhostvideo',
+                'optionparticipantsvideo', 'downloadattempts', ]);
 
         // Connect XML elements into the tree.
         $subplugin->add_child($subpluginwrapper);
         $subpluginwrapper->add_child($subpluginelement);
 
         // Set source to populate the data.
-        $subpluginelement->set_source_table('hybridteachvc_zoom', array('htsession' => backup::VAR_PARENTID));
+        $subpluginelement->set_source_table('hybridteachvc_zoom', ['htsession' => backup::VAR_PARENTID]);
         return $subplugin;
     }
 }

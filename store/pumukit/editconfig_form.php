@@ -74,17 +74,17 @@ class htpumukit_config_edit_form extends moodleform {
 
         $mform->addElement('header', 'subplugin', get_string('pluginname', 'hybridteachstore_pumukit'));
         $mform->addElement('text', 'url', get_string('url', 'hybridteachstore_pumukit'), ['size' => 40]);
-        $mform->addElement('text', 'user', get_string('user', 'hybridteachstore_pumukit'), ['size' => 40]);
+        $mform->addElement('text', 'userpumukit', get_string('user', 'hybridteachstore_pumukit'), ['size' => 40]);
         $mform->addElement('passwordunmask', 'secret', get_string('secret', 'hybridteachstore_pumukit'), ['size' => 40]);
 
         $mform->setType('url', PARAM_TEXT);
-        $mform->setType('user', PARAM_TEXT);
+        $mform->setType('userpumukit', PARAM_TEXT);
         $mform->setType('secret', PARAM_TEXT);
 
         $mform->addRule('url', null, 'required', null, 'client');
         $mform->addRule('url', null, 'maxlength', 700, 'client');
-        $mform->addRule('user', null, 'required', null, 'client');
-        $mform->addRule('user', null, 'maxlength', 255, 'client');
+        $mform->addRule('userpumukit', null, 'required', null, 'client');
+        $mform->addRule('userpumukit', null, 'maxlength', 255, 'client');
         $mform->addRule('secret', null, 'required', null, 'client');
         $mform->addRule('secret', null, 'maxlength', 255, 'client');
 

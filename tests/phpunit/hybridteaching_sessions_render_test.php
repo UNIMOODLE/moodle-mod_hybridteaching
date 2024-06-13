@@ -47,20 +47,58 @@ use mod_hybridteaching\local\sessions_table;
 
 use mod_hybridteaching\output\renderer;
 
-class hybridteaching_sessions_table_test extends \advanced_testcase {
+/**
+ * Testing sessions render
+ *
+ * @group hybridteaching
+ */
+class hybridteaching_sessions_render_test extends \advanced_testcase {
 
     // Write the tests here as public funcions.
     // Please refer to {@link https://docs.moodle.org/dev/PHPUnit} for more details on PHPUnit tests in Moodle.
+    /**
+     * @var \stdClass
+     */
     private static $course;
+    /**
+     * @var \stdClass
+     */
     private static $context;
+    /**
+     * @var \stdClass
+     */
     private static $coursecontext;
+    /**
+     * @var \stdClass
+     */
     private static $user;
+    /**
+     * @var \stdClass
+     */
     private static $config;
+    /**
+     * @var int
+     */
     private static $userecordvc;
+    /**
+     * @var \stdClass
+     */
     private static $category;
+    /**
+     * @var \stdClass
+     */
     private static $subcategory;
+    /**
+     * @var int
+     */
     private static $page;
+    /**
+     * Course start
+     */
     public const COURSE_START = 1704099600;
+    /**
+     * Course end
+     */
     public const COURSE_END = 1706605200;
 
 
@@ -69,12 +107,11 @@ class hybridteaching_sessions_table_test extends \advanced_testcase {
         parent::setUp();
         $this->resetAfterTest(true);
         self::setAdminUser();
-        self::$category = self::getDataGenerator()->create_category(['name'=>'Category1']);
-        self::$subcategory = self::getDataGenerator()->create_category(['name'=>'Subcategory1', 'parent'=>self::$category->id]);
+        self::$category = self::getDataGenerator()->create_category(['name' => 'Category1']);
+        self::$subcategory = self::getDataGenerator()->create_category(['name' => 'Subcategory1', 'parent' => self::$category->id]);
         self::$course = self::getDataGenerator()->create_course(
             ['startdate' => self::COURSE_START, 'enddate' => self::COURSE_END]
         );
-        
         self::$coursecontext = \context_course::instance(self::$course->id);
         self::$user = $USER;
         self::$userecordvc = 0;
@@ -107,7 +144,7 @@ class hybridteaching_sessions_table_test extends \advanced_testcase {
             'name' => 'hybt',
             'timetype' => null,
             'config' => self::$config,
-            'userecordvc' => self::$userecordvc
+            'userecordvc' => self::$userecordvc,
             ]);
         $cm = get_coursemodule_from_instance('hybridteaching', $hybridobject->id, self::$course->id);
 
@@ -117,7 +154,8 @@ class hybridteaching_sessions_table_test extends \advanced_testcase {
         $data = new \StdClass();
         $data->hybridteachingid = $hybridobject->id;
         $data->name = $datadecoded->name;
-        isset($datadecoded->description) ? $data->description = $datadecoded->description: $data->description = null;
+        isset($datadecoded->description) ? $data->description = $datadecoded->description :
+        $data->description = null;
         $data->context = $datadecoded->context;
         $data->starttime = time();
         $data->durationgroup['duration'] = $datadecoded->durationgroup->duration;
@@ -136,23 +174,30 @@ class hybridteaching_sessions_table_test extends \advanced_testcase {
 
         $renderer = self::$page->get_renderer('mod_hybridteaching');
         $renderer->zone_access('');
-        
+
         $COURSE = self::$course;
         $USER = self::$user;
         $sessionsrender = new sessions_table($hybridobject, 1);
         $sessionsrender->check_session_filters();
         $categories = ['cat1' => self::$category];
         // Build output categories.
-        hybrid_build_output_categories([['id' => self::$category->id, 'name' => self::$category->name, 'categories' => [['id' => self::$category->id, 'name' => self::$category->name]]]], 1);    
-        hybrid_get_categories_for_modal();  
-        hybrid_build_category_array(self::$category);   
+        hybrid_build_output_categories([['id' => self::$category->id, 'name' => self::$category->name,
+        'categories' => [['id' => self::$category->id, 'name' => self::$category->name]]]], 1);
+        hybrid_get_categories_for_modal();
+        hybrid_build_category_array(self::$category);
     }
+
+    /**
+     * Data provider for execute
+     *
+     * @return array[]
+     */
     public static function dataprovider(): array {
 
         return [
             ['{"hybridteachingid":1,"name":"Test de prueba", "description": "description of session","context":50,
                 "starttime":1642736531,"durationgroup":{"duration":45000,"timetype":null}}', 1, 'strgroup'],
-           ['{"hybridteachingid":1,"name":"Test de prueba", "description": "description of session","context":50,
+            ['{"hybridteachingid":1,"name":"Test de prueba", "description": "description of session","context":50,
                 "starttime":1642736531,"durationgroup":{"duration":45000,"timetype":null}}', 2, 'strtype'],
             ['{"hybridteachingid":1,"name":"Test de prueba", "description": "description of session","context":50,
                 "starttime":1642736531,"durationgroup":{"duration":45000,"timetype":null}}', 2, 'strdate'],
@@ -162,7 +207,6 @@ class hybridteaching_sessions_table_test extends \advanced_testcase {
                 "starttime":1642736531,"durationgroup":{"duration":45000,"timetype":null}}', 2, 'strname'],
             ['{"hybridteachingid":1,"name":"Test de prueba", "description": "description of session","context":50,
                 "starttime":1642736531,"durationgroup":{"duration":45000,"timetype":null}}', 2, 'stranother'],
-            
 
         ];
     }

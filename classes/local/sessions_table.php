@@ -731,8 +731,9 @@ class sessions_table {
                                 if (method_exists($sessionrecording, 'get_recording')) {
                                     $urlrecording = $sessionrecording->get_recording($this->context);
                                     if (isset($urlrecording['recording']) && $urlrecording['recording'] != '') {
-                                        $recordingbutton = html_writer::link($urlrecording['recording'], get_string('watchrecording',
-                                            'mod_hybridteaching'), ['target' => '_blank', 'class' => 'btn btn-secondary']);
+                                        $recordingbutton = html_writer::link($urlrecording['recording'],
+                                            get_string('watchrecording', 'mod_hybridteaching'),
+                                            ['target' => '_blank', 'class' => 'btn btn-secondary']);
                                     }
                                     if (isset($urlrecording['materials']) && $urlrecording['materials'] != '') {
                                         $fileurls .= html_writer::tag('a', get_string('notesurlmeeting', 'hybridteaching'),

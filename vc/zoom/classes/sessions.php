@@ -183,6 +183,7 @@ class sessions {
                     $service->deletemeeting($zoom->meetingid, 0);
                 } catch (\Exception $e) {
                     // No action for delete.
+                    return null;
                 }
             }
         }
@@ -336,7 +337,7 @@ class sessions {
      * @param object $context The context for which to retrieve the chat URL.
      * @return string The chat URL for the given context.
      */
-    public function get_chat_url ($context) {
+    public function get_chat_url($context) {
         if (!has_capability('hybridteachvc/zoom:view', $context)) {
             return '';
         }

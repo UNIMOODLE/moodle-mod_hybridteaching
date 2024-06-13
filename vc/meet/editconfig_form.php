@@ -46,7 +46,6 @@ class htmeet_config_edit_form extends moodleform {
      * Defines the form for configuring the googlemeet plugin.
      */
     public function definition() {
-        // $config = get_config('googlemeet');
         $mform = $this->_form;
         list($config, $type) = $this->_customdata;
 

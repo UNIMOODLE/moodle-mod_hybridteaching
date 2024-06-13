@@ -125,6 +125,7 @@ class bbbproxy extends proxy_base {
             self::assert_returned_xml($xml, ['meetingid' => $meetingid]);
         } catch (\Exception $e) {
             // No action for endmeeting.
+            return null;
         }
     }
 
@@ -226,7 +227,7 @@ class bbbproxy extends proxy_base {
      *
      * @param meetingid $meetingid
      */
-    public function get_meeting_recording ($meetingid) {
+    public function get_meeting_recording($meetingid) {
         $data = [
             'meetingID' => $meetingid,
             'state' => 'published, unpublished, processed, processing, deleted',

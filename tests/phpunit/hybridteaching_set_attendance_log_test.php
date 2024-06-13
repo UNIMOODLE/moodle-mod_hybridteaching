@@ -45,22 +45,62 @@ use mod_hybridteaching\helpers\password;
 use mod_hybridteaching\controller\sessions_controller;
 use mod_hybridteaching\controller\attendance_controller;
 
+/**
+ * Testing set attendance log
+ *
+ * @group hybridteaching
+ */
 class hybridteaching_set_attendance_log_test extends \advanced_testcase {
 
     // Write the tests here as public funcions.
     // Please refer to {@link https://docs.moodle.org/dev/PHPUnit} for more details on PHPUnit tests in Moodle.
+    /**
+     * @var \stdClass
+     */
     private static $course;
+    /**
+     * @var \stdClass
+     */
     private static $context;
+    /**
+     * @var \stdClass
+     */
     private static $coursecontext;
+    /**
+     * @var \stdClass
+     */
     private static $user;
+    /**
+     * @var \stdClass
+     */
     private static $config;
+    /**
+     * @var int
+     */
     private static $userecordvc;
+    /**
+     * @var int
+     */
     private static $action;
+    /**
+     * @var int
+     */
     private static $usevideoconference;
-
+    /**
+     * @var \stdClass
+     */
     private static $group;
+    /**
+     * @var int
+     */
     private static $validateattendance;
+    /**
+     * Course start
+     */
     public const COURSE_START = 1704099600;
+    /**
+     * Course end
+     */
     public const COURSE_END = 1706605200;
 
 
@@ -71,7 +111,7 @@ class hybridteaching_set_attendance_log_test extends \advanced_testcase {
         $user3 = self::getDataGenerator()->create_user();
         $user4 = self::getDataGenerator()->create_user();
         $user5 = self::getDataGenerator()->create_user();
-        
+
         parent::setUp();
         $this->resetAfterTest(true);
         self::setAdminUser();
@@ -122,7 +162,7 @@ class hybridteaching_set_attendance_log_test extends \advanced_testcase {
             'usevideoconference' => self::$usevideoconference,
             'validateattendance' => self::$validateattendance,
             'attendanceunit' => $attendanceunit,
-            'usercreator' => self::$user->id
+            'usercreator' => self::$user->id,
             ]);
         $cm = get_coursemodule_from_instance('hybridteaching', $hybridobject->id, self::$course->id);
 
@@ -146,7 +186,7 @@ class hybridteaching_set_attendance_log_test extends \advanced_testcase {
         $sessionexpected = $sessioncontroller->get_session($session->id);
         $this->assertNotNull($sessionexpected);
         $attendancecontroller = new attendance_controller($hybridobject);
-        
+
         $log = $attendancecontroller->hybridteaching_set_attendance_log($hybridobject, $sessionexpected, $action, self::$user->id);
         // Another log.
         $attendancecontroller->hybridteaching_set_attendance_log($hybridobject, $sessionexpected, $action, self::$user->id);
@@ -161,16 +201,23 @@ class hybridteaching_set_attendance_log_test extends \advanced_testcase {
 
         $this->assertArrayHasKey('gstring', $log);
         $this->assertArrayHasKey('ntype', $log);
-        // Display actions
+        // Display actions.
         $external = new \hybridteaching_external();
         $external->get_display_actions($sessionexpected->id, self::$user->id);
         $external->get_display_actions_returns();
 
         $hybridobject->coursecontext = self::$coursecontext;
-        $sessatt = \mod_hybridteaching\helpers\attendance::calculate_session_att($hybridobject, $sessionexpected->id, self::$group->id);
+        $sessatt = \mod_hybridteaching\helpers\attendance::calculate_session_att($hybridobject, $sessionexpected->id,
+        self::$group->id);
         $this->assertNotNull($sessatt);
-        
+
     }
+
+    /**
+     * Data provider for execute
+     *
+     * @return array[]
+     */
     public static function dataprovider(): array {
 
         return [

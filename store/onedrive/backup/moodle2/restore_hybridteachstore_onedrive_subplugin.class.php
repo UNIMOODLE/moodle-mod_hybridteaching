@@ -24,14 +24,45 @@
 
 /**
  * Display information about all the mod_hybridteaching modules in the requested course. *
- * @package    hybridteachstore_pumukit
+ * @package    hybridteachstore_onedrive
  * @copyright  2023 Proyecto UNIMOODLE
  * @author     UNIMOODLE Group (Coordinator) <direccion.area.estrategia.digital@uva.es>
  * @author     ISYC <soporte@isyc.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-defined('MOODLE_INTERNAL') || die();
+/**
+ * Class restore_hybridteaching_activity_task
+ *
+ */
+class restore_hybridteachstore_onedrive_subplugin extends restore_subplugin {
+    /**
+     * Returns the paths to be handled by the subplugin
+     * @return array
+     */
+    protected function define_session_subplugin_structure() {
+        $paths = [];
 
-require_once('../../../../config.php');
-require_login();
+        $elename = $this->get_namefor('session');
+        $elepath = $this->get_pathfor('/hybridteachstore_onedrive');
+        // We used get_recommended_name() so this works.
+        $paths[] = new restore_path_element($elename, $elepath);
+        return $paths;
+    }
+
+    /**
+     * Processes one hybridteachstore_onedrive element
+     * @param mixed $data
+     */
+    public function process_hybridteachstore_onedrive_session($data) {
+        global $DB;
+
+        $data = (object)$data;
+        $data->sessionid = $this->get_mappingid('hybridteaching_session', $data->sessionid);
+        $oldid = $data->id;
+
+        $newitemid = $DB->insert_record('hybridteachstore_onedrive', $data);
+        // We map the references of the restored record.
+        $this->set_mapping('hybridteachstore_onedrive', $oldid, $newitemid);
+    }
+}

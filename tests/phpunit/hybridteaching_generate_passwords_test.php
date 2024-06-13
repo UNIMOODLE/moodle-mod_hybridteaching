@@ -43,17 +43,46 @@ require_once($CFG->dirroot . '/config.php');
 use mod_hybridteaching\helpers\password;
 use mod_hybridteaching\controller\sessions_controller;
 
+/**
+ * Testing generate passwords
+ *
+ * @group hybridteaching
+ */
 class hybridteaching_generate_passwords_test extends \advanced_testcase {
 
     // Write the tests here as public funcions.
     // Please refer to {@link https://docs.moodle.org/dev/PHPUnit} for more details on PHPUnit tests in Moodle.
+    /**
+     * @var \stdClass
+     */
     private static $course;
+    /**
+     * @var \stdClass
+     */
     private static $context;
+    /**
+     * @var \stdClass
+     */
     private static $coursecontext;
+    /**
+     * @var \stdClass
+     */
     private static $user;
+    /**
+     * @var \stdClass
+     */
     private static $config;
+    /**
+     * @var int
+     */
     private static $userecordvc;
+    /**
+     * Course start
+     */
     public const COURSE_START = 1704099600;
+    /**
+     * Course end
+     */
     public const COURSE_END = 1706605200;
 
 
@@ -95,7 +124,7 @@ class hybridteaching_generate_passwords_test extends \advanced_testcase {
             'timetype' => null,
             'config' => self::$config,
             'userecordvc' => self::$userecordvc,
-            'studentpassword' => $studentpassword
+            'studentpassword' => $studentpassword,
             ]);
         $cm = get_coursemodule_from_instance('hybridteaching', $hybridobject->id, self::$course->id);
 
@@ -129,6 +158,12 @@ class hybridteaching_generate_passwords_test extends \advanced_testcase {
         password::hybridteaching_renderqrcoderotate($hybridobject);
 
     }
+
+    /**
+     * Data provider for execute
+     *
+     * @return array[]
+     */
     public static function dataprovider(): array {
 
         return [

@@ -22,7 +22,7 @@
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="11" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="url" TYPE="char" LENGTH="700" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Pumukit URL Server"/>
-        <FIELD NAME="user" TYPE="char" LENGTH="255" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="User Pumukit"/>
+        <FIELD NAME="userpumukit" TYPE="char" LENGTH="255" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="User Pumukit"/>
         <FIELD NAME="secret" TYPE="char" LENGTH="255" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Secret Pumukit"/>
       </FIELDS>
       <KEYS>

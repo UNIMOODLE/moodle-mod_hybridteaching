@@ -194,7 +194,7 @@ class youtube_handler {
      *
      * @param object $configyt Config object
      */
-    public function savetoken ($configyt) {
+    public function savetoken($configyt) {
         global $DB;
 
         $configyt->token = json_encode($this->client->getAccessToken());;
@@ -213,7 +213,7 @@ class youtube_handler {
             $youtube->videos->delete($code);
         } catch (\Exception $e) {
             // No action for delete.
-            // ...mtrace($e->getMessage());
+            return null;
         }
     }
 

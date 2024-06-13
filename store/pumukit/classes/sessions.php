@@ -55,6 +55,15 @@ class sessions {
         return $config;
     }
 
+    /**
+     * Get the recording URL for a processed recording.
+     *
+     * @param int $processedrecording Processed recording check
+     * @param int $storagereference Storage reference
+     * @param int $htid Hybridteaching ID
+     * @param int $sid Session ID
+     * @return string
+     */
     public function get_recording($processedrecording, $storagereference, $htid, $sid) {
         $config = $this->load_config($storagereference);
         $pumukitclient = new pumukit_handler($config);
@@ -71,14 +80,43 @@ class sessions {
         global $DB;
 
         $pumukitconf = $this->load_config($config->id);
-        $pumukitclient = new pumukit_handler($pumukitconf);
+        $code = $DB->get_field('hybridteachstore_pumukit', 'code', ['sessionid' => $htsession]);
+        
+        if (isset($pumukitconf) && isset($code)) {
+            // Only delete video from pumukit if there are not same video with another session, for example, restored from backup.
+            $sql = "SELECT * 
+                FROM {hybridteachstore_pumukit} pk
+                WHERE pumukit LIKE :code";
+            $othersession = $DB->get_records_sql($sql, ['code' => $code]);
 
-        // Get cohorts.
-        $rows = $DB->get_records('hybridteachstore_pumukit', ['sessionid' => $htsession]);
-        foreach ($rows as $row) {
-            $pumukitclient->deletefile($row->id);
+            if (count($othersession) > 1) {
+                 // No delete if there are other restores.
+            } else {
+                // Delete video in pumukit
+                $rows = $DB->get_records('hybridteachstore_pumukit', ['sessionid' => $htsession]);
+                $pumukitclient = new pumukit_handler($pumukitconf);
+                foreach ($rows as $row) {
+                    $pumukitclient->deletefile($row->id);
+                }
+            }
         }
 
         $DB->delete_records('hybridteachstore_pumukit', ['sessionid' => $htsession]);
+    }
+
+    /**
+     * Download a recording from a storage reference.
+     *
+     * @param int $processedrecording Processed recording check
+     * @param int $storagereference Storage reference
+     * @param int $htid Hybridteaching ID
+     * @param int $sid Session ID
+     * @return string
+     */
+    public function download_recording($processedrecording, $storagereference, $htid, $sid) {
+        $config = $this->load_config($storagereference);
+        $pumukitclient = new pumukit_handler($config);
+        $url = $pumukitclient->downloadrecording($processedrecording);
+        return $url;
     }
 }

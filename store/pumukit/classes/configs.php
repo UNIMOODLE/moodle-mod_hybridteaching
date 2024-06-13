@@ -61,7 +61,7 @@ class configs extends \mod_hybridteaching\controller\configs_controller {
         global $DB, $USER;
         $records = new stdClass();
         $records->url = $data->url;
-        $records->user = $data->user;
+        $records->userpumukit = $data->userpumukit;
         $records->secret = $data->secret;
         $records->timecreated = time();
         $records->createdby = $USER->id;
@@ -80,7 +80,7 @@ class configs extends \mod_hybridteaching\controller\configs_controller {
         $records = new stdClass();
         $records->id = $data->subpluginconfigid;
         $records->url = $data->url;
-        $records->user = $data->user;
+        $records->userpumukit = $data->userpumukit;
         $records->secret = $data->secret;
         $records->timemodified = time();
         $records->modifiedby = $USER->id;

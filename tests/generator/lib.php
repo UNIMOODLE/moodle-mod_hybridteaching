@@ -36,8 +36,7 @@ class mod_hybridteaching_generator extends testing_module_generator {
     public function create_instance($record = null, array $options = null) {
         $record = (object)(array)$record;
 
-        $defaultquizsettings = array(
-            
+        $defaultquizsettings = [
             'introformat' => 1,
             'useattendance' => 1,
             'usevideoconference' => 1,
@@ -52,7 +51,8 @@ class mod_hybridteaching_generator extends testing_module_generator {
             'grade' => 100,
             'maxgradeattendance' => 0,
             'maxgradeattendanceunit' => 1,
-            'participants' => "[{'selectiontype':'all','selectionid':'all','role':'viewer'},{'selectiontype':'user','selectionid':'2','role':'moderator'}]",
+            'participants' => "[{'selectiontype':'all','selectionid':'all','role':'viewer'},
+                {'selectiontype':'user','selectionid':'2','role':'moderator'}]",
             'waitmoderator' => 1,
             'advanceentrycount' => 0,
             'advanceentryunit' => 1,
@@ -70,7 +70,7 @@ class mod_hybridteaching_generator extends testing_module_generator {
             'hideuserlist' => 0,
             'blockroomdesign' => 0,
             'ignorelocksettings' => 0,
-            'initialrecord' => 0, 
+            'initialrecord' => 0,
             'hiderecordbutton' => 0,
             'showpreviewrecord' => 0,
             'downloadrecords' => 0,
@@ -82,12 +82,12 @@ class mod_hybridteaching_generator extends testing_module_generator {
             'rotateqrsecret' => null,
             'studentpassword' => "text",
             'usercreator' => null,
-            'timecreated' => time(), 
+            'timecreated' => time(),
             'timemodified' => null,
 
             // To config help
-            'type' => null
-        );
+            'type' => null,
+        ];
 
         foreach ($defaultquizsettings as $name => $value) {
             if (!isset($record->{$name})) {

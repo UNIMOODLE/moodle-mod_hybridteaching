@@ -50,7 +50,7 @@ class configs extends \mod_hybridteaching\controller\configs_controller {
         $data = $DB->get_record('hybridteachstore_youtube_con', ['id' => $configid]);
         return $data;
     }
-    
+
     /**
      * Create a new configuration record.
      *

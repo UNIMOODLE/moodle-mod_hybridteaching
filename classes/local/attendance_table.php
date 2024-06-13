@@ -200,7 +200,8 @@ class attendance_table {
                     'perpage' => $perpage, 'attfilter' => $selectedfilter, 'groupid' => $group, ]);
         }
         $view == 'sessionattendance' ? $sortexclusions = ['stroptions', 'strclassroom', 'strvc'] : '';
-        $view == 'extendedstudentatt' ? $sortexclusions = ['stroptions', 'strgrade', 'strvc', 'strclassroom', 'strcombinedatt', 'strpfp'] : '';
+        $view == 'extendedstudentatt' ? $sortexclusions = ['stroptions', 'strgrade', 'strvc', 'strclassroom',
+            'strcombinedatt', 'strpfp', ] : '';
         $view == 'studentattendance' ? $sortexclusions = ['strtype', 'strattendance', 'strgrade', 'stroptions'] : '';
         !isset($sortexclusions) ? $sortexclusions = ['stroptions', 'strlogmark', 'strentrytime', 'strleavetime'] : '';
         foreach ($columns as $key => $column) {

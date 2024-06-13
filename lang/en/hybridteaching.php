@@ -457,6 +457,7 @@ $string['noinitialstateconfig'] = 'This meeting has no initial status to be conf
 $string['cantfinishunstarted'] = 'Can not finish a session before the real start time';
 
 $string['error_unable_join'] = 'Cannot connect. The meeting could not be found or has been deleted. Contact your teacher or administrator.';
+$string['creatingmeeting'] = 'The meeting is being created. Try again in a few moments';
 $string['sessionscheduling_help'] = 'If group mode is forced on course, the sessions are forced to use scheduling.
 
 If it isn\'t forced, not using sesions schedulling, forces groups to be disabled for the module.';

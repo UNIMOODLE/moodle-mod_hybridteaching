@@ -44,20 +44,54 @@ require_once($CFG->dirroot . '/config.php');
 use mod_hybridteaching\helpers\password;
 use mod_hybridteaching\controller\sessions_controller;
 
+/**
+ * Testing update session
+ *
+ * @group hybridteaching
+ */
 class hybridteaching_update_session_test extends \advanced_testcase {
 
     // Write the tests here as public funcions.
     // Please refer to {@link https://docs.moodle.org/dev/PHPUnit} for more details on PHPUnit tests in Moodle.
+    /**
+     * @var \stdClass
+     */
     private static $course;
+    /**
+     * @var \stdClass
+     */
     private static $context;
+    /**
+     * @var \stdClass
+     */
     private static $coursecontext;
+    /**
+     * @var \stdClass
+     */
     private static $user;
+    /**
+     * @var \stdClass
+     */
     private static $config;
+    /**
+     * @var int
+     */
     private static $userecordvc;
+    /**
+     * @var int
+     */
     private static $isupdated;
-
+    /**
+     * @var int
+     */
     private static $updatecalen;
+    /**
+     * Course start
+     */
     public const COURSE_START = 1704099600;
+    /**
+     * Course end
+     */
     public const COURSE_END = 1706605200;
 
     public function setUp(): void {
@@ -99,7 +133,6 @@ class hybridteaching_update_session_test extends \advanced_testcase {
             'timetype' => null,
             'config' => self::$config,
             'userecordvc' => self::$userecordvc,
-          
             ]);
         $cm = get_coursemodule_from_instance('hybridteaching', $hybridobject->id, self::$course->id);
 
@@ -121,7 +154,7 @@ class hybridteaching_update_session_test extends \advanced_testcase {
 
         // Create session.
         $session = $sessioncontroller->create_session($data);
-        
+
         $sessionexpected = $sessioncontroller->get_session($session->id);
         $this->assertNotNull($sessioncontroller->get_session($session->id));
         // Update session.
@@ -147,10 +180,16 @@ class hybridteaching_update_session_test extends \advanced_testcase {
 
         $this->assertGreaterThan(0, $sessioncontroller->get_session($sessionedited->id)->timemodified);
         // Try insert subplugin extension.
-        $DB->insert_record('hybridteachvc_bbb', ['htsession' => $sessionexpected->id, 'meetingid' => 1, 'recordingid' => 1, 'createtime' => 1]);
+        $DB->insert_record('hybridteachvc_bbb', ['htsession' => $sessionexpected->id, 'meetingid' => 1, 'recordingid' => 1,
+        'createtime' => 1]);
         $this->assertIsBool($sessioncontroller->session_started($sessionexpected));
     }
 
+    /**
+     * Data provider for execute
+     *
+     * @return array[]
+     */
     public static function dataprovider(): array {
 
         return [
@@ -169,6 +208,6 @@ class hybridteaching_update_session_test extends \advanced_testcase {
         ];
     }
 
-    
+
 
 }

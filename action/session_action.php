@@ -295,6 +295,14 @@ if (empty($mform)) {
     redirect($return);
 }
 
+/**
+ * Trigger session updated event
+ *
+ * @param string $id The object ID.
+ * @param string $context The context ID.
+ * @param string $sessid The session ID.
+ * @param string $action The action.
+ */
 function trigger_session_updated_event($id, $context, $sessid, $action) {
     $event = \mod_hybridteaching\event\session_updated::create([
         'objectid' => $id,

@@ -58,13 +58,14 @@ class backup_hybridteaching_activity_structure_step extends backup_activity_stru
             'disablepublicchat', 'disablenote', 'hideuserslist', 'blockroomdesign',
             'ignorelocksettings', 'initialrecord', 'hiderecordbutton', 'showpreviewrecord',
             'downloadrecord', 'validateattendance', 'attendanceunit', 'completionattendance',
-            'useqr', 'rotateqr', 'studentpassword', 'usercreator', 'timecreated', 'timemodified', ]);
+            'useqr', 'rotateqr', 'studentpassword', 'usercreator', 'timecreated', 'timemodified', 'wellcomemessage' ]);
 
         $sessions = new backup_nested_element('sessions');
         $session = new backup_nested_element('session', ['id'], [
             'hybridteachingid', 'name', 'description', 'descriptionformat', 'groupid', 'starttime', 'duration',
-            'sessionfile', 'typevc', 'userecordvc', 'vcreference', 'processedrecording', 'storagereference',
-            'isfinished', 'attexempt', 'visible', 'timecreated', 'timemodified', 'createdby', 'modifiedby', ]);
+            'sessionfiles', 'typevc', 'userecordvc', 'vcreference', 'processedrecording', 'storagereference',
+            'visiblerecord', 'isfinished', 'attexempt', 'caleventid', 'visible', 'timecreated', 'timemodified',
+            'createdby', 'modifiedby', 'visiblechat', 'visibleatt']);
 
         $attendances = new backup_nested_element('attendances');
         $attendance = new backup_nested_element('attendance', ['id'], [

@@ -283,7 +283,7 @@ class meet_handler {
                 } while ($pagetoken != null);
             }
             return $recordings;
-        } catch(\Exception $e) {
+        } catch (\Exception $e) {
             echo "Error Message: ".$e;
         }
     }
@@ -329,7 +329,7 @@ class meet_handler {
             }
 
             return $chats;
-        } catch(\Exception $e) {
+        } catch (\Exception $e) {
             echo "Error Message: ".$e;
         }
     }
@@ -349,7 +349,7 @@ class meet_handler {
                 'alt' => 'media', ]);
             $content = $response->getBody()->getContents();
             return $content;
-        } catch(\Exception $e) {
+        } catch (\Exception $e) {
             echo "Error Message: ".$e;
         }
     }
@@ -383,12 +383,18 @@ class meet_handler {
         ]);
     }
 
+    /**
+     * Delete recording file from the Meet using the API.
+     *
+     * @param int $fileid The file ID.
+     * @throws \Throwable
+     */
     public function delete_file($fileid) {
         require_once(__DIR__.'/../vendor/autoload.php');
         try {
             $driveservice = new \Google_Service_Drive($this->client);
             $driveservice->files->delete($fileid);
-        } catch(\Exception $e) {
+        } catch (\Exception $e) {
             echo "Error Message: ".$e;
         }
     }

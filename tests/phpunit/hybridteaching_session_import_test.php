@@ -46,19 +46,54 @@ use mod_hybridteaching\import\sessions_import;
 use mod_hybridteaching\controller\sessions_controller;
 use mod_hybridteaching\controller\attendance_controller;
 
+/**
+ * Testing import
+ *
+ * @group hybridteaching
+ */
 class hybridteaching_session_import_test extends \advanced_testcase {
 
     // Write the tests here as public funcions.
     // Please refer to {@link https://docs.moodle.org/dev/PHPUnit} for more details on PHPUnit tests in Moodle.
+    /**
+     * @var \stdClass
+     */
     private static $course;
+    /**
+     * @var \stdClass
+     */
     private static $context;
+    /**
+     * @var \stdClass
+     */
     private static $coursecontext;
+    /**
+     * @var \stdClass
+     */
     private static $user;
+    /**
+     * @var \stdClass
+     */
     private static $config;
+    /**
+     * @var int
+     */
     private static $userecordvc;
+    /**
+     * @var int
+     */
     private static $action;
+    /**
+     * @var int
+     */
     private static $usevideoconference;
+    /**
+     * Course start
+     */
     public const COURSE_START = 1704099600;
+    /**
+     * Course end
+     */
     public const COURSE_END = 1706605200;
 
 
@@ -105,7 +140,7 @@ class hybridteaching_session_import_test extends \advanced_testcase {
             'timetype' => null,
             'config' => self::$config,
             'userecordvc' => self::$userecordvc,
-            'usevideoconference' => self::$usevideoconference
+            'usevideoconference' => self::$usevideoconference,
             ]);
         $cm = get_coursemodule_from_instance('hybridteaching', $hybridobject->id, self::$course->id);
         $hybridobject->usevideoconference = self::$usevideoconference;
@@ -142,19 +177,24 @@ class hybridteaching_session_import_test extends \advanced_testcase {
         $foundheaders = $sessionsimport->list_found_headers();
         // Read mapping data.
         $sesimport = new sessions_import();
-        $reflectionMethod = new \ReflectionMethod(sessions_import::class, 'read_mapping_data');
-        $reflectionMethod->setAccessible(true);
-        $readmap = $reflectionMethod->invoke($sesimport, $mappingdata);
+        $reflectionmethod = new \ReflectionMethod(sessions_import::class, 'read_mapping_data');
+        $reflectionmethod->setAccessible(true);
+        $readmap = $reflectionmethod->invoke($sesimport, $mappingdata);
         $this->assertIsArray($readmap);
 
         $this->assertNotNull($sesimport->list_required_headers());
 
-        $reflectionMethod = new \ReflectionMethod(sessions_import::class, 'get_column_data');
-        $reflectionMethod->setAccessible(true);
-        $readmap = $reflectionMethod->invoke($sesimport, $row, $index);
+        $reflectionmethod = new \ReflectionMethod(sessions_import::class, 'get_column_data');
+        $reflectionmethod->setAccessible(true);
+        $readmap = $reflectionmethod->invoke($sesimport, $row, $index);
         $this->assertNotNull($readmap);
-        
     }
+
+    /**
+     * Data provider for execute
+     *
+     * @return array[]
+     */
     public static function dataprovider(): array {
 
         return [

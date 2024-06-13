@@ -40,24 +40,52 @@ require_once($CFG->dirroot . '/mod/hybridteaching/classes/controller/sessions_co
 require_once($CFG->dirroot . '/mod/hybridteaching/classes/helpers/calendar_helpers.php');
 require_once($CFG->dirroot . '/mod/hybridteaching/externallib.php');
 require_once($CFG->dirroot . '/config.php');
-//
+
 use mod_hybridteaching\helpers\password;
 use mod_hybridteaching\controller\sessions_controller;
 use hybridteachvc_bbb\sessions;
 
+/**
+ * Testing vc create session
+ *
+ * @group hybridteaching
+ */
 class hybridteaching_vc_create_session_test extends \advanced_testcase {
 
     // Write the tests here as public funcions.
     // Please refer to {@link https://docs.moodle.org/dev/PHPUnit} for more details on PHPUnit tests in Moodle.
+    /**
+     * @var \stdClass
+     */
     private static $course;
+    /**
+     * @var \stdClass
+     */
     private static $context;
+    /**
+     * @var \stdClass
+     */
     private static $coursecontext;
+    /**
+     * @var \stdClass
+     */
     private static $user;
+    /**
+     * @var \stdClass
+     */
     private static $config;
+    /**
+     * @var int
+     */
     private static $userecordvc;
+    /**
+     * Course start
+     */
     public const COURSE_START = 1704099600;
+    /**
+     * Course end
+     */
     public const COURSE_END = 1706605200;
-
 
     public function setUp(): void {
         global $USER;
@@ -98,7 +126,7 @@ class hybridteaching_vc_create_session_test extends \advanced_testcase {
             'name' => 'hybt',
             'timetype' => null,
             'config' => self::$config,
-            'userecordvc' => self::$userecordvc
+            'userecordvc' => self::$userecordvc,
             ]);
         $cm = get_coursemodule_from_instance('hybridteaching', $hybridobject->id, self::$course->id);
 
@@ -107,7 +135,7 @@ class hybridteaching_vc_create_session_test extends \advanced_testcase {
         $bbbconfigstd->serverurl = "url";
         $bbbconfigstd->sharedsecret = "sharedsecret";
         $configid = $bbbconfig->create_config($bbbconfigstd);
-        
+
         // Create hybobj.
 
         $sessioncontroller = new sessions_controller($hybridobject);
@@ -115,7 +143,7 @@ class hybridteaching_vc_create_session_test extends \advanced_testcase {
         $sessioncontroller->require_subplugin_session("bbb");
         $sessioncontroller->get_subpluginstore_class("youtube");
         $sessioncontroller->require_subplugin_store("youtube");
-        
+
         // Simulate data form.
         $datadecoded = json_decode($param);
         $data = new \StdClass();
@@ -138,16 +166,21 @@ class hybridteaching_vc_create_session_test extends \advanced_testcase {
         $sessionexpected = $sessioncontroller->get_session($session->id);
 
         $bbb = new sessions();
-        //Create session for bbb vc.
+        // Create session for bbb vc.
         $sessioncreated = $bbb->create_unique_session_extended($sessionexpected, $hybridobject);
-        $displayactions = $external->get_display_actions($session->id, self::$user->id); 
-        
+        $displayactions = $external->get_display_actions($session->id, self::$user->id);
+
         $this->assertNotNull($displayactions);
         $this->assertNotNull($sessioncontroller->get_last_undated_session());
         $this->assertIsBool($sessioncreated);
-        
 
     }
+
+    /**
+     * Data provider for execute
+     *
+     * @return array[]
+     */
     public static function dataprovider(): array {
 
         return [
@@ -160,12 +193,12 @@ class hybridteaching_vc_create_session_test extends \advanced_testcase {
 
     /**
      * Create subplugin config
-     * 
+     *
      * @return int $bbbconfigid
      */
     public static function createbbbconfig() {
-        
-        $bbbconfig = new \hybridteachvc_bbb\configs(NULL, "bbb");
+
+        $bbbconfig = new \hybridteachvc_bbb\configs(null, "bbb");
         $bbbconfigstd = new \StdClass();
         $bbbconfigstd->serverurl = "url";
         $bbbconfigstd->sharedsecret = "sharedsecret";
@@ -175,7 +208,7 @@ class hybridteaching_vc_create_session_test extends \advanced_testcase {
 
     /**
      * Create config
-     * 
+     *
      * @param int $bbbconfigid
      * @return int $configid
      */
@@ -186,13 +219,13 @@ class hybridteaching_vc_create_session_test extends \advanced_testcase {
         $config->category = 1;
         $config->version = 1;
         $config->visible = 1;
-        $config->type="bbb";
+        $config->type = "bbb";
         $config->timecreated = time();
         $config->id = $bbbconfigid;
-        $configid = $DB->get_record_sql('SELECT id 
-                                           FROM {hybridteaching_configs} 
-                                          WHERE id = 
-                                        (SELECT max(id) 
+        $configid = $DB->get_record_sql('SELECT id
+                                           FROM {hybridteaching_configs}
+                                          WHERE id =
+                                        (SELECT max(id)
                                            FROM {hybridteaching_configs})');
         return $configid;
     }

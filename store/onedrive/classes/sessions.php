@@ -113,9 +113,19 @@ class sessions {
         $configod = $DB->get_record('hybridteachstore_onedrive_co', ['id' => $config->subpluginconfigid]);
         $videoweburl = $DB->get_field('hybridteachstore_onedrive', 'weburl', ['sessionid' => $htsession]);
         if (isset($videoweburl) && $videoweburl != '' && isset($configod)) {
-            // Delete video in onedrive.
-            $onedriveclient = new onedrive_handler($configod);
-            $onedriveclient->deletefile($videoweburl);
+            // Only delete video from onedrive if there are not same video with another session, for example, restored from backup.
+            $sql = "SELECT *
+                FROM {hybridteachstore_onedrive} od
+                WHERE od.weburl LIKE :videoweburl";
+    
+            $othersession = $DB->get_records_sql ($sql, ['videoweburl' => $videoweburl]);
+            if (count($othersession) > 1) {
+                // No delete if there are other restores.            
+            } else {
+                // Delete video in onedrive.
+                $onedriveclient = new onedrive_handler($configod);             
+                $onedriveclient->deletefile($videoweburl);
+            }
         }
 
         $DB->delete_records('hybridteachstore_onedrive', ['sessionid' => $htsession]);

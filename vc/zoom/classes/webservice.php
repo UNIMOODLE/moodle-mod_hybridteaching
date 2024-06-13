@@ -151,7 +151,7 @@ class webservice {
      * @return stdClass The call's result in JSON format.
      * @throws \moodle_exception Moodle exception is thrown for curl errors.
      */
-    protected function _make_call($path, $data = array(), $method = 'get') {
+    protected function _make_call($path, $data = [], $method = 'get') {
         $url = $this->apiurl . $path;
         $method = strtolower($method);
         $curl = new \curl();
@@ -237,7 +237,7 @@ class webservice {
      * @see _make_call()
      * @link https://zoom.github.io/api/#list-users
      */
-    protected function _make_paginated_call($url, $data = array(), $datatoget = null) {
+    protected function _make_paginated_call($url, $data = [], $datatoget = null) {
         $aggregatedata = [];
         $data['page_size'] = HTZOOM_MAX_RECORDS_PER_CALL;
         $reportcheck = explode('/', $url);
@@ -457,6 +457,7 @@ class webservice {
             $this->_make_call($url, null, 'delete');
         } catch (\Exception $e) {
             // No action for delete.
+            return null;
         }
 
     }

@@ -43,17 +43,46 @@ require_once($CFG->dirroot . '/config.php');
 use mod_hybridteaching\helpers\password;
 use mod_hybridteaching\controller\sessions_controller;
 
+/**
+ * Testing create multiple sessions
+ *
+ * @group hybridteaching
+ */
 class hybridteaching_create_multiple_sessions_test extends \advanced_testcase {
 
     // Write the tests here as public funcions.
     // Please refer to {@link https://docs.moodle.org/dev/PHPUnit} for more details on PHPUnit tests in Moodle.
+    /**
+     * @var \stdClass
+     */
     private static $course;
+    /**
+     * @var \stdClass
+     */
     private static $context;
+    /**
+     * @var \stdClass
+     */
     private static $coursecontext;
+    /**
+     * @var \stdClass
+     */
     private static $user;
+    /**
+     * @var \stdClass
+     */
     private static $config;
+    /**
+     * @var int
+     */
     private static $userecordvc;
+    /**
+     * Course start
+     */
     public const COURSE_START = 1704099600;
+    /**
+     * Course end
+     */
     public const COURSE_END = 1706605200;
 
 
@@ -119,15 +148,21 @@ class hybridteaching_create_multiple_sessions_test extends \advanced_testcase {
         $this->assertNotNull($allsessions);
 
     }
+
+    /**
+     * Data provider for execute
+     *
+     * @return array[]
+     */
     public static function dataprovider(): array {
 
         return [
             ['{"hybridteachingid":1,"name":"Test de prueba", "description": "description of session","context":50,"addmultiply":2,
                 "sessionenddate":1796409837, "starttime":1642736531,"durationgroup":{"duration":45000,"timetype":null}}', 4, ],
-            ['{"hybridteachingid":2,"name":"Test de prueba","context":50,"sessionenddate":1796409837,"addmultiply":2,"starttime":1642736531,"durationgroup":
-                {"duration":45000,"timetype":null}}', 2, ],
-            ['{"hybridteachingid":2,"name":"Test de prueba","context":50,"sessionenddate":1296409837,"addmultiply":2,"starttime":1642736531,"durationgroup":
-                {"duration":45000,"timetype":null}}', 2, ],
+            ['{"hybridteachingid":2,"name":"Test de prueba","context":50,"sessionenddate":1796409837,"addmultiply":2,
+                "starttime":1642736531,"durationgroup":{"duration":45000,"timetype":null}}', 2, ],
+            ['{"hybridteachingid":2,"name":"Test de prueba","context":50,"sessionenddate":1296409837,"addmultiply":2,
+                "starttime":1642736531,"durationgroup":{"duration":45000,"timetype":null}}', 2, ],
         ];
     }
 

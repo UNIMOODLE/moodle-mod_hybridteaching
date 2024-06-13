@@ -37,6 +37,8 @@ use mod_hybridteaching\controller\sessions_controller;
 use mod_hybridteaching\controller\notify_controller;
 use mod_hybridteaching\helper;
 
+global $CFG;
+
 require_once(dirname(dirname(dirname(__FILE__))).'/config.php');
 
 $id = required_param('id', PARAM_INT);
@@ -107,7 +109,11 @@ if (!empty($sid)) {
         // If not, check if has to create, and create the meeting vc.
         if (!empty($sessionvc->get_session())) {
             $resultsaccess = $sessionvc->get_zone_access($userismoderator);
-            if ($resultsaccess == null ||
+            if (isset($resultsaccess['url']) && $resultsaccess['url']==''){
+                notify_controller::notify_problem(get_string('creatingmeeting', 'isycteams'));
+                $url = $CFG->wwwroot . '/mod/isycteams/view.php?id='.$id;
+                $url=base64_encode($url);
+            } else if ($resultsaccess == null ||    
                 (isset($resultsaccess['returncode']) && $resultsaccess['returncode'] == 'FAILED') ) {
                     $message = isset($resultsaccess['message']) ? $resultsaccess['message']
                         : get_string('error_unable_join', 'hybridteaching');
@@ -135,8 +141,12 @@ if (!empty($sid)) {
                 } catch (\moodle_exception $e) {
                     notify_controller::notify_problem($e->getMessage());
                 }
-                $resultsaccess = $sessionvc->get_zone_access($userismoderator);
-                if ($resultsaccess == null ||
+                $resultsaccess = $sessionvc->get_zone_access($userismoderator);            
+                if (isset($resultsaccess['url']) && $resultsaccess['url']==''){
+                    notify_controller::notify_problem(get_string('creatingmeeting', 'isycteams'));
+                    $url = $CFG->wwwroot . '/mod/isycteams/view.php?id='.$id;
+                    $url=base64_encode($url);
+                } else if ($resultsaccess == null ||
                     (isset($resultsaccess['returncode']) && $resultsaccess['returncode'] == 'FAILED') ) {
                         $message = isset($resultsaccess['message']) ? $resultsaccess['message']
                             : get_string('error_unable_join', 'hybridteaching');

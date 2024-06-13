@@ -45,17 +45,47 @@ use mod_hybridteaching\controller\sessions_controller;
 use mod_hybridteaching\controller\common_controller;
 use hybridteachvc_bbb\configs;
 use mod_hybridteaching\controller\configs_controller;
+
+/**
+ * Testing create unique session
+ *
+ * @group hybridteaching
+ */
 class hybridteaching_create_session_test extends \advanced_testcase {
 
     // Write the tests here as public funcions.
     // Please refer to {@link https://docs.moodle.org/dev/PHPUnit} for more details on PHPUnit tests in Moodle.
+    /**
+     * @var \stdClass
+     */
     private static $course;
+    /**
+     * @var \stdClass
+     */
     private static $context;
+    /**
+     * @var \stdClass
+     */
     private static $coursecontext;
+    /**
+     * @var \stdClass
+     */
     private static $user;
+    /**
+     * @var \stdClass
+     */
     private static $config;
+    /**
+     * @var int
+     */
     private static $userecordvc;
+    /**
+     * Course start
+     */
     public const COURSE_START = 1704099600;
+    /**
+     * Course end
+     */
     public const COURSE_END = 1706605200;
 
 
@@ -97,7 +127,7 @@ class hybridteaching_create_session_test extends \advanced_testcase {
             'name' => 'hybt',
             'timetype' => null,
             'config' => self::$config,
-            'userecordvc' => self::$userecordvc
+            'userecordvc' => self::$userecordvc,
             ]);
         $cm = get_coursemodule_from_instance('hybridteaching', $hybridobject->id, self::$course->id);
 
@@ -133,9 +163,9 @@ class hybridteaching_create_session_test extends \advanced_testcase {
         $sessionexpected = $sessioncontroller->get_session($session->id);
 
         $this->assertNotNull($sessionexpected);
-        // Check conf of this session doesnt exist
+        // Check conf of this session doesnt exist.
         $this->assertFalse($sessioncontroller->get_sessionconfig_exists($sessionexpected));
-        // Check this session is started
+        // Check this session is started.
         $this->assertFalse($sessioncontroller->session_started($sessionexpected));
         // Get the last session created.
         $this->assertNotNull($sessioncontroller->get_last_session());
@@ -148,46 +178,46 @@ class hybridteaching_create_session_test extends \advanced_testcase {
         $commoncontroller->get_enabled_data('hybridteaching_session');
 
     }
+
+    /**
+     * Data provider for execute
+     *
+     * @return array[]
+     */
     public static function dataprovider(): array {
 
         return [
             ['{"name":"Test 1", "description": "description ","context":50,"starttime":1642736531,
-                "durationgroup":{"duration":45000,"timetype":null}}'
-                 ,'{"configname":"Testing config data", "category":1, "version":2024010901, "visible":1,"subpluginconfigid":1, "id":99}'
-                 , 'bbb'
+            "durationgroup":{"duration":45000,"timetype":null}}'
+            , '{"configname":"Testing", "category":1, "version":2024010901, "visible":1,"subpluginconfigid":1,
+            "id":99}', 'bbb',
             ],
+            ['{"name":"Name","description": "description session", "context":50,"starttime":1642736531,"durationgroup":
+            {"duration":45000,"timetype":null}}',
+            '{"configname":"Testing", "categories":"1", "version":2024010901, "visible":1,"subpluginconfigid":1, "id":99}',
+            'bbb'],
+            ['{"name":"Name","context":50,"description": "description session","starttime":1642736531,"durationgroup":
+            {"duration":45000,"timetype":null}}',
+            '{"configname":"Testing", "categories":"cat1,cat2,cat3,", "version":2024010901, "visible":1,"subpluginconfigid":1,
+            "id":99}', 'meet'],
+            ['{"name":"Name","context":50,"description": "description session","starttime":1642736531,"noduration":true,
+            "durationgroup":{"duration":45000,"timetype":null}}',
+            '{"configname":"Testing", "categories":"1", "version":2024010901, "visible":1,"subpluginconfigid":1, "id":99}',
+            'bbb'],
+            ['{"name":"Name","context":50,"description": "description session","starttime":1642736531,"noduration":true,
+            "durationgroup":{"duration":45000,"timetype":null}}',
+            '{"configname":"Testing", "categories":"1", "version":2024010901, "visible":1,"subpluginconfigid":1, "id":99}',
+            'bbb'],
 
-      /*      ['{"name":"Test 1", description["text" => "description of session", "itemid" => "2", "format" => "1"],"context":50,"starttime":1642736531,
-                "durationgroup":{"duration":45000,"timetype":null}}'
-                 , 'bbb'],
-        */
-            ['{"name":"Test de prueba","description": "description session", "context":50,"starttime":1642736531,"durationgroup":
-                {"duration":45000,"timetype":null}}',
-                '{"configname":"Testing config data", "categories":"1", "version":2024010901, "visible":1,"subpluginconfigid":1, "id":99}',
-                 'bbb'],
-            ['{"name":"Test de prueba","context":50,"description": "description session","starttime":1642736531,"durationgroup":
-                {"duration":45000,"timetype":null}}',
-                '{"configname":"Testing config data", "categories":"cat1,cat2,cat3,", "version":2024010901, "visible":1,"subpluginconfigid":1, "id":99}',
-                 'meet'],
-            ['{"name":"Test de prueba","context":50,"description": "description session","starttime":1642736531,"noduration":true,"durationgroup":
-                {"duration":45000,"timetype":null}}',
-                '{"configname":"Testing config data", "categories":"1", "version":2024010901, "visible":1,"subpluginconfigid":1, "id":99}',
-                 'bbb'],
-            ['{"name":"Test de prueba","context":50,"description": "description session","starttime":1642736531,"noduration":true,"durationgroup":
-                {"duration":45000,"timetype":null}}',
-                '{"configname":"Testing config data", "categories":"1", "version":2024010901, "visible":1,"subpluginconfigid":1, "id":99}',
-                 'bbb'],
-         
         ];
     }
 
     /**
      * Create sub plugin config
-     * 
+     *
      * @return int $subpluginid
      */
-
-    public function subplugininfo(){
+    public function subplugininfo() {
         // Create subplugin config.
         $databbb = new \stdClass();
         $databbb->serverurl = "serverurl";
@@ -198,21 +228,21 @@ class hybridteaching_create_session_test extends \advanced_testcase {
 
     /**
      * Create config
-     * 
+     *
      * @param configs_controller $configscontroller
      * @param \stdClass $hybridobject
      * @param \stdClass $configdata
      * @param int $bbbid
      * @return void create_config
      */
-    public function createconfig($configscontroller, $hybridobject, $configdata, $bbbid){
+    public function createconfig($configscontroller, $hybridobject, $configdata, $bbbid) {
 
         // Create config data.
         $config = new \StdClass();
         $configdatadecoded = json_decode($configdata);
         $config->id = $bbbid;
         $config->configname = $configdatadecoded->configname;
-        isset($configdatadecoded->category) ? $config->category = $configdatadecoded->category : $config->category = null; 
+        isset($configdatadecoded->category) ? $config->category = $configdatadecoded->category : $config->category = null;
         $config->id = $configdatadecoded->subpluginconfigid;
         $config->subplugintype = $bbbid;
         // Create config / Da error con un include de la funcion.

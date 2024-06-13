@@ -172,7 +172,7 @@ class grades {
         $usergrade = 0;
         $maxgradeper = $ht->maxgradeattendance / 100;
         $attendancetomaxgrade = round($DB->count_records('hybridteaching_session',
-            ['hybridteachingid' => $ht->id, 'attexempt' => HYBRIDTEACHING_NOT_EXEMPT,]) * $maxgradeper);
+            ['hybridteachingid' => $ht->id, 'attexempt' => HYBRIDTEACHING_NOT_EXEMPT]) * $maxgradeper);
         $userattendance = self::count_user_att($ht, $userid);
 
         if ($userattendance->totalattended >= $attendancetomaxgrade) {

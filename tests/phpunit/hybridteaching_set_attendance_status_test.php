@@ -45,19 +45,54 @@ use mod_hybridteaching\helpers\password;
 use mod_hybridteaching\controller\sessions_controller;
 use mod_hybridteaching\controller\attendance_controller;
 
+/**
+ * Testing set attendance status
+ *
+ * @group hybridteaching
+ */
 class hybridteaching_set_attendance_status_test extends \advanced_testcase {
 
     // Write the tests here as public funcions.
     // Please refer to {@link https://docs.moodle.org/dev/PHPUnit} for more details on PHPUnit tests in Moodle.
+    /**
+     * @var \stdClass
+     */
     private static $course;
+    /**
+     * @var \stdClass
+     */
     private static $context;
+    /**
+     * @var \stdClass
+     */
     private static $coursecontext;
+    /**
+     * @var \stdClass
+     */
     private static $user;
+    /**
+     * @var \stdClass
+     */
     private static $config;
+    /**
+     * @var int
+     */
     private static $userecordvc;
+    /**
+     * @var int
+     */
     private static $action;
+    /**
+     * @var int
+     */
     private static $usevideoconference;
+    /**
+     * Course start
+     */
     public const COURSE_START = 1704099600;
+    /**
+     * Course end
+     */
     public const COURSE_END = 1706605200;
 
 
@@ -93,7 +128,7 @@ class hybridteaching_set_attendance_status_test extends \advanced_testcase {
      * @dataProvider dataprovider
      * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
      */
-    public function test_set_attendance_status($param, $status, $attexempt, $timeunit = 1, $grademodule, $grade) {
+    public function test_set_attendance_status($param, $status, $attexempt, $timeunit = 1, $grademodule = 100, $grade = 100) {
         // Reset after execute the test.
         global $DB;
         // Module instance.
@@ -108,7 +143,7 @@ class hybridteaching_set_attendance_status_test extends \advanced_testcase {
             'userecordvc' => self::$userecordvc,
             'usevideoconference' => self::$usevideoconference,
             'grade' => $grademodule,
-            'completionattendance' => 1
+            'completionattendance' => 1,
             ]);
         $cm = get_coursemodule_from_instance('hybridteaching', $hybridobject->id, self::$course->id);
         $hybridobject->usevideoconference = self::$usevideoconference;
@@ -136,7 +171,7 @@ class hybridteaching_set_attendance_status_test extends \advanced_testcase {
         $external = new \hybridteaching_external();
         $this->assertNotNull($external->set_session_exempt($session->id, $attexempt));
         $external->set_session_exempt_returns();
-        
+
         $attendancejson = $external->set_attendance_status($attendanceid, $status, $hybridobject->id);
         $external->set_attendance_status_returns();
         $this->assertNotNull($attendancejson);
@@ -151,12 +186,18 @@ class hybridteaching_set_attendance_status_test extends \advanced_testcase {
             'other' => [
                 'modulename' => "1",
                 'instanceid' => 1,
-                'name' => 'eventupdate'
+                'name' => 'eventupdate',
             ],
         ]);
         \mod_hybridteaching_observer::course_module_updated($event);
 
     }
+
+    /**
+     * Data provider for execute
+     *
+     * @return array[]
+     */
     public static function dataprovider(): array {
 
         return [

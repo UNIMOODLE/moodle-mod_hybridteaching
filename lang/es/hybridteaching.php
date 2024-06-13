@@ -457,6 +457,7 @@ $string['noinitialstateconfig'] = 'Este tipo de videoconferencia no tiene config
 $string['cantfinishunstarted'] = 'No puedes finalizar una sesión antes del inicio establecido';
 
 $string['error_unable_join'] = 'No ha sido posible conectar. La reunión no ha podido encontrarse o ha sido eliminada. Contacte con su profesor o administrador.';
+$string['creatingmeeting'] = 'Se está creando la reunión. Pruebe de nuevo en unos instantes';
 $string['sessionscheduling_help'] = 'Si se fuerza el uso de grupos en el curso, la sesión tendra que programarse obligatoriamente.
 
 Si no se fuerza, al usar sesiones sin programación, se desactiva el uso de grupos en la sesión.';
