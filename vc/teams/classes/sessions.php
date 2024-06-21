@@ -96,7 +96,7 @@ class sessions {
         global $DB;
         
         // Check if the vc is already created, so as not to create it again.
-        $teamscreated = $DB->get_record('isycteamsvc_teams', ['htsession' => $session->id]);      
+        $teamscreated = $DB->get_record('hybridteachvc_teams', ['htsession' => $session->id]);      
         // If exists record completed.
 
         if (!empty($teamscreated)) {
@@ -108,7 +108,7 @@ class sessions {
             $teamsnew->meetingcode = null;
             $teamsnew->organizer = null;
             $teamsnew->joinurl = null;
-            $teamsnew->id = $DB->insert_record('isycteamsvc_teams', $teamsnew);           
+            $teamsnew->id = $DB->insert_record('hybridteachvc_teams', $teamsnew);           
             $this->teamssession = $teamsnew;
             return false;
         }
@@ -140,9 +140,9 @@ class sessions {
         if (!get_config('hybridteaching', 'reusesession') && $ht->reusesession == 0) {
             if ($this->checkmeetingiscreating($session)) {
                 // The meeting is being created
-                $url = new moodle_url('/mod/isycteams/view.php?id='.$cm->id);          
-                $message = 'Se está creando la reunión. Inténtelo de nuevo en unos instantes.';
-                \mod_isycteams\controller\notify_controller::notify_problem($message);
+                $url = new moodle_url('/mod/hybridteaching/view.php?id='.$cm->id);          
+                $message = get_string('meetingcreating', 'hybridteachvc_teams');
+                \mod_hybridteaching\controller\notify_controller::notify_problem($message);
                 redirect($url);
             }
 
@@ -169,9 +169,9 @@ class sessions {
                 if ($this->checkmeetingiscreating($session)) {
     
                     // Is created already so prevent the meeting from being created
-                    $url = new moodle_url('/mod/isycteams/view.php', ['id' => $cm->id]);                
-                    $message = 'Se está creando la reunión. Inténtelo de nuevo en unos segundos.';
-                    \mod_isycteams\controller\notify_controller::notify_problem($message);
+                    $url = new moodle_url('/mod/hybridteaching/view.php', ['id' => $cm->id]);                
+                    $message = get_string('meetingcreating', 'hybridteachvc_teams');
+                    \mod_hybridteaching\controller\notify_controller::notify_problem($message);
                     redirect($url);
                 }
                 try {
@@ -184,13 +184,13 @@ class sessions {
 
         if (isset($response['joinUrl']) && isset($response['meetingCode'])
             && isset($response['participants']['organizer']['identity']['user']['id']) && isset($response['id'])) {
-            $teamsexists = $DB->get_record('isycteamsvc_teams', ['htsession' => $session->id]);
+            $teamsexists = $DB->get_record('hybridteachvc_teams', ['htsession' => $session->id]);
             if ($teamsexists) {
                 $teamsexists->meetingid = $response['id'];
                 $teamsexists->meetingcode = $response['meetingCode'];
                 $teamsexists->organizer = $response['participants']['organizer']['identity']['user']['id'];
                 $teamsexists->joinurl = $response['joinUrl'];
-                $DB->update_record('isycteamsvc_teams', $teamsexists);
+                $DB->update_record('hybridteachvc_teams', $teamsexists);
             }
             $this->teamssession = $teamsexists;
         }

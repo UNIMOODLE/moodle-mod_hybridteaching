@@ -53,3 +53,4 @@ $string['recordingnoexists'] = 'No hi ha gravació al curs  {$a->course} : \'{$a
 $string['emailorganizatornotfound'] = 'El correu electrònic de l\'organitzador no s\'ha trobat a l\'organització de Teams seleccionada.';
 $string['incorrectconfig'] = 'Configuració o accés erronis a Teams per a la sessió \'{$a->name}\' del curs {$a->course}. Contacteu amb l\'administrador per a la configuració Teams.';
 $string['correctdownload'] = 'Descàrrega correcta de l\'enregistrament del curs {$a->course} : \'{$a->name}\' amb meetingid {$a->meetingid}';
+$string['meetingcreating'] = 'S\'està creant la reunió. Torna-ho a provar d\'aquí a uns segons.';

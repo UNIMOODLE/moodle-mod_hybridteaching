@@ -110,8 +110,8 @@ if (!empty($sid)) {
         if (!empty($sessionvc->get_session())) {
             $resultsaccess = $sessionvc->get_zone_access($userismoderator);
             if (isset($resultsaccess['url']) && $resultsaccess['url']==''){
-                notify_controller::notify_problem(get_string('creatingmeeting', 'isycteams'));
-                $url = $CFG->wwwroot . '/mod/isycteams/view.php?id='.$id;
+                notify_controller::notify_problem(get_string('creatingmeeting', 'hybridteaching'));
+                $url = $CFG->wwwroot . '/mod/hybridteaching/view.php?id='.$id;
                 $url=base64_encode($url);
             } else if ($resultsaccess == null ||    
                 (isset($resultsaccess['returncode']) && $resultsaccess['returncode'] == 'FAILED') ) {
@@ -143,8 +143,8 @@ if (!empty($sid)) {
                 }
                 $resultsaccess = $sessionvc->get_zone_access($userismoderator);            
                 if (isset($resultsaccess['url']) && $resultsaccess['url']==''){
-                    notify_controller::notify_problem(get_string('creatingmeeting', 'isycteams'));
-                    $url = $CFG->wwwroot . '/mod/isycteams/view.php?id='.$id;
+                    notify_controller::notify_problem(get_string('creatingmeeting', 'hybridteaching'));
+                    $url = $CFG->wwwroot . '/mod/hybridteaching/view.php?id='.$id;
                     $url=base64_encode($url);
                 } else if ($resultsaccess == null ||
                     (isset($resultsaccess['returncode']) && $resultsaccess['returncode'] == 'FAILED') ) {

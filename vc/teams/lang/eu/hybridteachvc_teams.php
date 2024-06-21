@@ -53,3 +53,4 @@ $string['recordingnoexists'] = 'Ikastaroan ez dago grabaketarik {$a->course} : \
 $string['emailorganizatornotfound'] = 'Antolatzailearen helbide elektronikoa ez da aurkitu hautatutako Teams erakundean.';
 $string['incorrectconfig'] = 'Taldeen konfigurazioa edo saiorako sarbidea okerra \'{$a->name}\' ikastaroaren {$a->course}. Jarri harremanetan administratzailearekin Teams ezarpenetarako.';
 $string['correctdownload'] = 'Ikastaroaren grabazioa deskargatu da {$a->course} : \'{$a->name}\' meetingid-arekin {$a->meetingid}';
+$string['meetingcreating'] = 'Bilera sortzen ari da. Saiatu berriro segundo gutxi barru.';
