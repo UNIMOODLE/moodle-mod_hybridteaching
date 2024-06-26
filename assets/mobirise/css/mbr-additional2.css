@@ -2036,6 +2036,20 @@ section.lazy-placeholder:after {
   transition: 0.2s background ease-in-out;
   background: linear-gradient(to left, #554346, #45505b) !important;
 }
+.cid-ugNP13wryx {
+  background: #149dcc;
+  padding-top: 60px;
+  padding-bottom: 60px;
+  background: linear-gradient(0deg, #149dcc, #ffffff);
+}
+.cid-ugNP13wryx .video-block {
+  margin: auto;
+}
+@media (max-width: 768px) {
+  .cid-ugNP13wryx .video-block {
+    width: 100% !important;
+  }
+}
 .cid-ua5Xds9PYL {
   padding-top: 60px;
   padding-bottom: 0px;
