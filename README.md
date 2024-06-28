@@ -6,6 +6,11 @@
 
 ## Overview
 The **Hybrid Teaching** plugin is designed to enhance the management of hybrid teaching sessions within the Moodle platform. It provides features for handling both in-person and remote classes, recording attendance, and facilitating access to session materials.
+Developed by the [UNIMOODLE consortium](https://unimoodle.gihub.io) of 16 Spanish universities (Valladolid, Complutense de Madrid, País Vasco/EHU, León, Salamanca, Illes Balears, Valencia, Rey Juan Carlos, La Laguna, Zaragoza, Málaga, Córdoba, Extremadura, Vigo, Las Palmas y Burgos).
+
+[<img src="https://unimoodle.github.io/assets/images/unimoodle-primarylogo-rgb-1200x353.png" height="70px"/>](https://unimoodle.github.io)
+
+[Project's web page](https://unimoodle.github.io/moodle-local_hybridteaching/)
 
 ## Features
 1. **Session Management**:
