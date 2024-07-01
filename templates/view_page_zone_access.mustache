@@ -282,7 +282,6 @@
 											</form>
 										{{/useqr}}
 									{{/usepassword}}
-									</div>
 								{{/userjoinsession}}
 								{{^userjoinsession}}
 									<div class="d-flex">
@@ -297,9 +296,10 @@
 							{{/ useattendance}}
 						{{/isfinished}}
 					{{/hassessionactionscapability}}
+				</div>
+			</div>
 				{{#hassessionactionscapability}}
 					{{^isfinished}}
-						</div>
 						<div class="d-flex">
 						<form action="./loadmeeting.php" id="finishsession" onsubmit="{{onsubmit}}">
 							<input type="hidden" name="id" value="{{id}}">
@@ -311,8 +311,6 @@
 						</div>
 					{{/isfinished}}
 				{{/hassessionactionscapability}}
-			</div>
 		{{/isundatedsession}}
 	{{/canentry}}
-</div>
 
