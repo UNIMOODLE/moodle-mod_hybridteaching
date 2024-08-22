@@ -395,16 +395,20 @@ class attendance_controller extends \mod_hybridteaching\controller\common_contro
      * Set attendance log for hybrid teaching.
      *
      * @param object $hybridteaching Hybridteaching object
-     * @param object $session Session object
+     * @param object|int $session Session object
      * @param int $action Action type
      * @param int $userid User ID
      * @param bool $event Event flag
      * @return mixed
      */
-    public static function hybridteaching_set_attendance_log($hybridteaching, \stdClass $session, $action, $userid = 0, $event = false) {
+    public static function hybridteaching_set_attendance_log($hybridteaching, $session, $action, $userid = 0, $event = false) {
         global $DB, $USER;
         !$userid ? $userid = $USER->id : '';
-        
+        if (is_integer($session)) {
+            $sessionid = $session;
+        } else {
+            $sessionid = $session->id;
+        }
         $att = self::hybridteaching_get_attendance($session, $userid);
         $notify = '';
         if (!$att) {
@@ -416,7 +420,7 @@ class attendance_controller extends \mod_hybridteaching\controller\common_contro
         }
         $timenow = (new \DateTime('now', \core_date::get_server_timezone_object()))->getTimestamp();
         if ($event) {
-            $sessiontime = $DB->get_record('hybridteaching_session', ['id' => $session->id], 'starttime, duration');
+            $sessiontime = $DB->get_record('hybridteaching_session', ['id' => $sessionid], 'starttime, duration');
             $timenow = $sessiontime->starttime + $sessiontime->duration;
         }
 
@@ -552,7 +556,7 @@ class attendance_controller extends \mod_hybridteaching\controller\common_contro
                 $neededtime = $timevalue * 3600;
                 break;
         }
-        return $neededtime;
+        return (int) $neededtime;
     }
 
     /**
