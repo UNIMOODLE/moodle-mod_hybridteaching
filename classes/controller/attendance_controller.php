@@ -96,9 +96,23 @@ class attendance_controller extends \mod_hybridteaching\controller\common_contro
             $where .= ' AND starttime + duration '.$operator.' :starttime';
         }
         if (isset($params['view'])) {
-            $params['view'] == 'extendedstudentatt' ? $altergroupby .= '  ha.userid ' : $groupby = ' ha.sessionid ';
-            $params['view'] == 'extendedsessionatt' ? $groupby = ' ha.id    ' : '';
-            $params['view'] == 'studentattendance' && !$params['editing'] ? $where .= ' AND visible = 1' : '';
+            switch ($params['view']) {
+                case 'extendedstudentatt':
+                    $altergroupby .= '  ha.userid ';
+                    break;
+                case 'extendedsessionatt':
+                    $groupby = ' ha.id    ';
+                    break;
+                case 'studentattendance':
+                    $groupby = ' ha.sessionid ';
+                    !$params['editing'] ? $where .= ' AND visible = 1' : '';
+                    break;
+                default:
+                    throw new \Exception('Invalid view type');
+            }
+            // $params['view'] == 'extendedstudentatt' ? $altergroupby .= '  ha.userid ' : $groupby = ' ha.sessionid ';
+            // $params['view'] == 'extendedsessionatt' ? $groupby = ' ha.id    ' : '';
+            // $params['view'] == 'studentattendance' && !$params['editing'] ? $where .= ' AND visible = 1' : '';
         } else {
             $groupby = ' ha.id ';
         }
