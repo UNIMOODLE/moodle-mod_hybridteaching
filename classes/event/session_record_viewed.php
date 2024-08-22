@@ -59,15 +59,7 @@ class session_record_viewed extends \core\event\base {
         return get_string('eventsessionrecordviewed', 'hybridteaching');
     }
 
-    /**
-     * Replace add_to_log() statement.
-     *
-     * @return array of parameters to be passed to legacy add_to_log() function.
-     */
-    protected function get_legacy_logdata() {
-        return false;
-    }
-
+   
     /**
      * Get objectid mapping
      *
