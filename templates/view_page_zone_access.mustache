@@ -27,7 +27,9 @@
 	{{^isstart}}
 		{{#sessionexist}}
 			{{#isfinished}}
+			<a href="attendance.php?id={{id}}&view=extendedsessionatt&sessionid={{activesessionid}}">
 				{{#str}} finished, mod_hybridteaching {{/str}} {{finished}}
+			</a>
 				<br>
 			{{/isfinished}}
 		{{/sessionexist}}
@@ -65,7 +67,7 @@
 	{{/isprogress}}
 	<br>
 	{{#sessperformed}}
-			{{#str}} sessionperformed, mod_hybridteaching,  {{sessperformed}} {{/str}}
+			<a href="sessions.php?id={{id}}&l=1">{{#str}} sessionperformed, mod_hybridteaching,  {{sessperformed}} {{/str}}</a>
 	{{/sessperformed}}
 </div>
 	{{#alert}}
