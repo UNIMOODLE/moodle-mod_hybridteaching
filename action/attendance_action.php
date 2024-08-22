@@ -69,12 +69,12 @@ $returnparams = [
     'view' => $view,
 ];
 
-$return = new moodle_url($CFG->wwwroot . '/mod/hybridteaching/attendance.php', $returnparams);
+$return = new moodle_url('/mod/hybridteaching/attendance.php', $returnparams);
 $hybridteaching = $DB->get_record('hybridteaching', ['id' => $hybridteachingid], '*', MUST_EXIST);
 $attendancecontroller = new attendance_controller($hybridteaching, 'hybridteaching_attendance');
 $mform = null;
 
-$urlview = new moodle_url($CFG->wwwroot . '/mod/hybridteaching/attendance.php',
+$urlview = new moodle_url('/mod/hybridteaching/attendance.php',
     ['id' => $moduleid]);
 
 switch ($action) {

@@ -263,7 +263,7 @@ class attendance_table {
         $table->attributes['class'] = 'attendancetable generaltable';
         $table->data = [];
 
-        $url = new \moodle_url($CFG->wwwroot . '/mod/hybridteaching/action/attendance_action.php',
+        $url = new \moodle_url('/mod/hybridteaching/action/attendance_action.php',
              ['sesskey' => sesskey(), 'view' => $view, 'sessionid' => $sessionid]);
 
         $operator = $this->get_operator();
@@ -541,7 +541,7 @@ class attendance_table {
         $attendancetable .= html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'id', 'value' => $id]);
         $paramsurl = ['view' => $view, 'sessionid' => $sessionid, 'sesskey' => sesskey()];
         $return .= html_writer::tag('form', $attendancetable, ['method' => 'post',
-            'action' => new \moodle_url($CFG->wwwroot . '/mod/hybridteaching/action/attendance_action.php', $paramsurl), ]);
+            'action' => new \moodle_url('/mod/hybridteaching/action/attendance_action.php', $paramsurl), ]);
         $return .= $OUTPUT->paging_bar($attendancecount, $page, $perpage, $baseurl);
         $return .= $OUTPUT->box_end();
         return $return;
@@ -1292,7 +1292,7 @@ class attendance_table {
         $attendancetable .= html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'id', 'value' => $id]);
         $paramsurl = ['view' => $view, 'sessionid' => $sessionid, 'sesskey' => sesskey()];
         $return .= html_writer::tag('form', $attendancetable, ['method' => 'post',
-            'action' => new \moodle_url($CFG->wwwroot . '/mod/hybridteaching/action/attendance_action.php', $paramsurl), ]);
+            'action' => new \moodle_url('/mod/hybridteaching/action/attendance_action.php', $paramsurl), ]);
         $baseurl = new \moodle_url('/mod/hybridteaching/attendance.php?view=' . $view, ['id' => $id,
             'sort' => $sort, 'dir' => $dir, 'perpage' => $perpage, 'sessionid' => $sessionid, ]);
         $return .= $OUTPUT->paging_bar($attendancecount, $page, $perpage, $baseurl);
@@ -1416,7 +1416,7 @@ class attendance_table {
         $attendancetable .= html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'id', 'value' => $id]);
         $paramsurl = ['view' => $view, 'sessionid' => $sessionid, 'sesskey' => sesskey()];
         $return .= html_writer::tag('form', $attendancetable, ['method' => 'post',
-            'action' => new \moodle_url($CFG->wwwroot . '/mod/hybridteaching/action/attendance_action.php', $paramsurl), ]);
+            'action' => new \moodle_url('/mod/hybridteaching/action/attendance_action.php', $paramsurl), ]);
         $return .= $OUTPUT->paging_bar($attendancecount, $page, $perpage, $baseurl);
         $return .= $OUTPUT->box_end();
         return $return;
