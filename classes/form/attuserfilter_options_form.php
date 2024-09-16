@@ -62,15 +62,15 @@ class attuserfilter_options_form extends \moodleform {
         $selectedsession = $this->_customdata['sessid'];
         $attfilter = $this->_customdata['attfilter'];
 
-        $url = new \moodle_url($CFG->wwwroot . '/mod/hybridteaching/attendance.php?view=' .
+        $url = new \moodle_url('/mod/hybridteaching/attendance.php?view=' .
             $view . '&sessionid=' . $selectedsession . '&sort=' . $sort . '&dir=' . $dir .
             '&perpage=' . $perpage . '&attfilter=' . $attfilter . '&groupid=' . $groupid,
             ['id' => $id, 'att' => $attid, 'fname' => $fname, 'lname' => $lname]);
 
         $mform->addElement('header', 'userfilter', get_string('user'));
         $mform->addElement('static', 'fnameselect', get_string('firstname'), $OUTPUT->initials_bar($fname, 'firstinitial',
-            '', 'fname', new \moodle_url($url)));
+            '', 'fname', $url));
         $mform->addElement('static', 'lnameselect', get_string('lastname'), $OUTPUT->initials_bar($lname, 'lastinitial',
-            '', 'lname', new \moodle_url($url)));
+            '', 'lname', $url));
     }
 }

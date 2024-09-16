@@ -95,7 +95,7 @@ if (!isset($_GET["code"]) && !isset($_GET["error"])) {
 
         unset($_SESSION['configid']);
 
-        $return = new moodle_url($CFG->wwwroot. '/admin/settings.php?section=hybridteaching_configvcsettings');
+        $return = new moodle_url('/admin/settings.php?section=hybridteaching_configvcsettings');
         redirect($return);
     } if (isset($token->error) && isset($token->error_description)) {
         echo "Error activated:\n";

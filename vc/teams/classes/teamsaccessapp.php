@@ -77,7 +77,7 @@ if (!isset($_GET['admin_consent'])) {
         $config->accesstoken = $result['access_token'];
         $DB->update_record('hybridteachvc_teams_config', $config);
         unset($_SESSION['configid']);
-        $return = new moodle_url($CFG->wwwroot. '/admin/settings.php?section=hybridteaching_configvcsettings');
+        $return = new moodle_url('/admin/settings.php?section=hybridteaching_configvcsettings');
         redirect($return);
     }  if (isset($token->error) && isset($token->error_description)) {
         echo "Error activated:\n";

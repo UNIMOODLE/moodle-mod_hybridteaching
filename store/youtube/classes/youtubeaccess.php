@@ -81,7 +81,7 @@ if (isset($_SESSION['token'])) {
         $DB->update_record('hybridteachstore_youtube_con', $config);
         unset($_SESSION['token']);
         unset($_SESSION['configid']);
-        $return = new \moodle_url($CFG->wwwroot. '/admin/settings.php?section=hybridteaching_configstoresettings');
+        $return = new \moodle_url('/admin/settings.php?section=hybridteaching_configstoresettings');
         redirect($return);
     }
 }

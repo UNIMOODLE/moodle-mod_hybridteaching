@@ -256,7 +256,7 @@ if (!$activesession) {
             $canentry = false;
             $status = get_string('status_undated_wait', 'hybridteaching');
         }
-
+        $result['activesessionid'] = $activesession->id;
         $result['id'] = $id;
         $result['s'] = !$isfinished ? $activesession->id : 0;
         $result['hassessionactionscapability'] = has_capability('mod/hybridteaching:sessionsactions', $modulecontext);

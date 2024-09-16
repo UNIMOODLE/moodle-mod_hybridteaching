@@ -96,9 +96,26 @@ class attendance_controller extends \mod_hybridteaching\controller\common_contro
             $where .= ' AND starttime + duration '.$operator.' :starttime';
         }
         if (isset($params['view'])) {
-            $params['view'] == 'extendedstudentatt' ? $altergroupby .= '  ha.userid ' : $groupby = ' ha.sessionid ';
-            $params['view'] == 'extendedsessionatt' ? $groupby = ' ha.id    ' : '';
-            $params['view'] == 'studentattendance' && !$params['editing'] ? $where .= ' AND visible = 1' : '';
+            switch ($params['view']) {
+                case 'extendedstudentatt':
+                    $altergroupby .= '  ha.userid ';
+                    break;
+                case 'extendedsessionatt':
+                    $groupby = ' ha.id    ';
+                    break;
+                case 'studentattendance':
+                    $groupby = ' ha.sessionid ';
+                    !$params['editing'] ? $where .= ' AND visible = 1' : '';
+                    break;
+                case 'sessionattendance':
+                    $groupby = ' ha.id ';
+                    break;
+                default:
+                    throw new \Exception('Invalid view type');
+            }
+            // $params['view'] == 'extendedstudentatt' ? $altergroupby .= '  ha.userid ' : $groupby = ' ha.sessionid ';
+            // $params['view'] == 'extendedsessionatt' ? $groupby = ' ha.id    ' : '';
+            // $params['view'] == 'studentattendance' && !$params['editing'] ? $where .= ' AND visible = 1' : '';
         } else {
             $groupby = ' ha.id ';
         }
@@ -115,7 +132,6 @@ class attendance_controller extends \mod_hybridteaching\controller\common_contro
             $where .= " AND $extraselect";
         }
 
-        $sessionid != 0 ? $where .= ' AND sessionid = ' . $sessionid . '' : false;
 
         !empty($fname) ? $fname = " AND UPPER(u.firstname) like '" . $fname . "%' " : '';
         !empty($lname) ? $lname = " AND UPPER(u.lastname) like '" . $lname . "%' " : '';
@@ -132,16 +148,19 @@ class attendance_controller extends \mod_hybridteaching\controller\common_contro
             $dir = '';
         }
         if ($params['view'] == 'sessionattendance') {
+            $sessionid != 0 ? $where .= ' AND id = ' . $sessionid . '' : false;
             $sql = 'SELECT hs.id, hs.name, hs.starttime, hs.duration, hs.typevc
                       FROM {hybridteaching_session} hs
                      WHERE hs.hybridteachingid = :hybridteachingid ' . $where . ' ' . '
                   ORDER BY ' . $sort . ' ' . $dir . ', visible desc';
         } else if ($params['view'] == 'studentattendance') {
+            $sessionid != 0 ? $where .= ' AND id = ' . $sessionid . '' : false;
             $sql = 'SELECT *
                       FROM {hybridteaching_session}
                      WHERE hybridteachingid = :hybridteachingid ' . $where . '
                   ORDER BY ' . $sort . ' ' . $dir;
         } else {
+            $sessionid != 0 ? $where .= ' AND sessionid = ' . $sessionid . '' : false;
             $sql = 'SELECT ha.id, ha.sessionid, hs.name, hs.starttime, hs.duration, hs.typevc, ha.visible, ha.grade,
                             ha.userid, CASE WHEN ha.connectiontime = 0 THEN -1 ELSE ha.type END as type, ha.status,
                             ha.connectiontime, (hs.starttime + hs.duration) endtime, ha.exempt, u.lastname, u.username
@@ -544,7 +563,7 @@ class attendance_controller extends \mod_hybridteaching\controller\common_contro
                 $neededtime = $timevalue * 3600;
                 break;
         }
-        return $neededtime;
+        return (int) $neededtime;
     }
 
     /**

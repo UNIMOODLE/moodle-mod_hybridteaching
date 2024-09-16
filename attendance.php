@@ -38,6 +38,15 @@ use mod_hybridteaching\controller\notify_controller;
 global $USER;
 // Course module id.
 $id = required_param('id', PARAM_INT);
+$view = optional_param('view', '', PARAM_TEXT);
+// Check proper view value.
+if ($view && !in_array($view, ['sessionattendance',
+                                'attendlog',
+                                'extendedstudentatt',
+                                'studentattendance',
+                                'extendedsessionatt'])) {
+    throw new \moodle_exception('invalidview', 'hybridteaching');
+}
 list ($course, $cm) = get_course_and_cm_from_cmid($id, 'hybridteaching');
 require_login($course, true, $cm);
 
@@ -64,7 +73,6 @@ echo $OUTPUT->heading(get_string('attendance', 'hybridteaching'));
 
 if (has_capability('mod/hybridteaching:sessionsfulltable', $context, $user, $doanything = true)) {
     if (!empty(optional_param('view', '', PARAM_TEXT))) {
-        $view = optional_param('view', '', PARAM_TEXT);
         if ($view == 'extendedstudentatt') {
             echo "<a href='attendance.php?id=".$id."&view=sessionattendance' class='btn btn-info' role='button'>" .
             get_string('sessionsattendance', 'hybridteaching') . "</a>";

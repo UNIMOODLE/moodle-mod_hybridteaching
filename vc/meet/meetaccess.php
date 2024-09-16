@@ -42,7 +42,7 @@ if (!$configid) {
     $configid = $SESSION->configid;
 }
 
-$return = new moodle_url($CFG->wwwroot. '/admin/settings.php?section=hybridteaching_configvcsettings');
+$return = new moodle_url('/admin/settings.php?section=hybridteaching_configvcsettings');
 $subpluginconfigid = $DB->get_field('hybridteaching_configs', 'subpluginconfigid', ['id' => $configid]);
 $meetconfig = $DB->get_record('hybridteachvc_meet_config', ['id' => $subpluginconfigid]);
 

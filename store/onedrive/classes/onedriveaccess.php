@@ -86,7 +86,7 @@ if (!isset($_GET["code"]) && !isset($_GET["error"]) ) {
 
         unset($_SESSION['configid']);
 
-        $return = new moodle_url($CFG->wwwroot. '/admin/settings.php?section=hybridteaching_configstoresettings');
+        $return = new moodle_url('/admin/settings.php?section=hybridteaching_configstoresettings');
         redirect($return);
     } else {
         echo "Error";
