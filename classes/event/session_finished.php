@@ -58,22 +58,4 @@ class session_finished extends \core\event\base {
     public static function get_name() {
         return get_string('eventsessionfinished', 'hybridteaching');
     }
-
-    /**
-     * Replace add_to_log() statement.
-     *
-     * @return array of parameters to be passed to legacy add_to_log() function.
-     */
-    protected function get_legacy_logdata() {
-        return false;
-    }
-
-    /**
-     * Get objectid mapping
-     *
-     * @return array of parameters for object mapping.
-     */
-    public static function get_objectid_mapping() {
-        return false;
-    }
 }

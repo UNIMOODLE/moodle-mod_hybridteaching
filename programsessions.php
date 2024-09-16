@@ -48,6 +48,12 @@ require_login($course, true, $cm);
 $context = context_module::instance($cm->id);
 require_capability('mod/hybridteaching:programschedule', $context);
 
+if ($slist > PROGRAM_SESSION_LIST) {
+    $slist = PROGRAM_SESSION_LIST;
+    redirect(new \moodle_url('/mod/hybridteaching/programsessions.php',
+        ['id' => $id, 'l' => $slist,]));
+}
+
 $url = new moodle_url('/mod/hybridteaching/programsessions.php', ['id' => $id]);
 
 $hybridteaching = $DB->get_record('hybridteaching', ['id' => $cm->instance], '*', MUST_EXIST);

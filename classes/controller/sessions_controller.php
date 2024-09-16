@@ -935,17 +935,15 @@ class sessions_controller extends \mod_hybridteaching\controller\common_controll
 
 
     /**
-     * Get the sessions currently in progress for a given hybrid teaching ID.
+     * Get the sessions id currently in progress for a given hybrid teaching ID.
      *
      * @param int $id the hybrid teaching id
-     * @return array the number of sessions in progress
+     * @return array id number of sessions in progress
      */
     public static function get_sessions_in_progress($id) {
         global $DB;
         $sql = 'SELECT hts.id
                   FROM {hybridteaching_session} hts
-                  JOIN {course_modules} cm
-                    ON cm.instance = hts.hybridteachingid
                  WHERE hts.hybridteachingid = ?
                    AND hts.starttime < ?
                    AND hts.starttime + hts.duration > ?';

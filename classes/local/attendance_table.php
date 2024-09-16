@@ -1556,7 +1556,7 @@ class attendance_table {
                     'firstlastname' => $sessionsuser->lastname . ' / ' . $sessionsuser->firstname,
                     'attendance' => $attexempt ? '<b>' . get_string('exempt', 'hybridteaching') . '<b>' :
                         get_string('noatt', 'hybridteaching'),
-                    'type' => isset($atttype) ? get_string('eventsessionfinished', 'hybridteaching') :
+                    'type' => $session['isfinished'] ? get_string('eventsessionfinished', 'hybridteaching') :
                         get_string('sessiontobecreated', 'hybridteaching'),
                     'grade' => round($attendgrade ?? 0, 2) . ' / ' .
                         round($usertotalgrade->items[0]->grades[$selecteduser]->grade ?? 0, 2) .

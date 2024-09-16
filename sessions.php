@@ -44,6 +44,12 @@ require_login($course, true, $cm);
 
 $context = context_module::instance($cm->id);
 
+if ($slist > PROGRAM_SESSION_LIST) {
+    $slist = SESSION_LIST;
+    redirect(new \moodle_url('/mod/hybridteaching/sessions.php',
+        ['id' => $id, 'l' => $slist,]));
+}
+
 if ($slist == SESSION_LIST) {
     require_capability('mod/hybridteaching:sessions', $context);
     $PAGE->navbar->add(get_string('sessionsuc', 'hybridteaching'));

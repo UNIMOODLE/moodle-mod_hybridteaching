@@ -259,56 +259,56 @@ class hybridteaching_events_test extends \advanced_testcase {
                     ],
                 ]);
                 $this->assertNotNull($event->get_description());
-                $method = new \ReflectionMethod(\mod_hybridteaching\event\session_added::class, 'get_legacy_logdata');
+                $method = new \ReflectionMethod(\mod_hybridteaching\event\session_added::class, 'get_name');
                 break;
             case "course_module_viewed":
                 $this->assertNotNull($event->get_url());
-                $method = new \ReflectionMethod(\mod_hybridteaching\event\course_module_viewed::class, 'get_legacy_logdata');
+                $method = new \ReflectionMethod(\mod_hybridteaching\event\course_module_viewed::class, 'get_name');
                 break;
             case "session_viewed":
-                $method = new \ReflectionMethod(\mod_hybridteaching\event\session_viewed::class, 'get_legacy_logdata');
+                $method = new \ReflectionMethod(\mod_hybridteaching\event\session_viewed::class, 'get_name');
                 break;
             case "session_joined":
-                $method = new \ReflectionMethod(\mod_hybridteaching\event\session_joined::class, 'get_legacy_logdata');
+                $method = new \ReflectionMethod(\mod_hybridteaching\event\session_joined::class, 'get_name');
                 $observer = new \mod_hybridteaching_observer();
                 $observer->session_joined($event);
                 break;
             case "session_manage_viewed":
-                $method = new \ReflectionMethod(\mod_hybridteaching\event\session_manage_viewed::class, 'get_legacy_logdata');
+                $method = new \ReflectionMethod(\mod_hybridteaching\event\session_manage_viewed::class, 'get_name');
                 break;
             case "attendance_manage_viewed":
-                $method = new \ReflectionMethod(\mod_hybridteaching\event\attendance_manage_viewed::class, 'get_legacy_logdata');
+                $method = new \ReflectionMethod(\mod_hybridteaching\event\attendance_manage_viewed::class, 'get_name');
                 break;
             case "attendance_viewed":
-                $method = new \ReflectionMethod(\mod_hybridteaching\event\attendance_viewed::class, 'get_legacy_logdata');
+                $method = new \ReflectionMethod(\mod_hybridteaching\event\attendance_viewed::class, 'get_name');
                 break;
             case "session_record_downloaded":
-                $method = new \ReflectionMethod(\mod_hybridteaching\event\session_record_downloaded::class, 'get_legacy_logdata');
+                $method = new \ReflectionMethod(\mod_hybridteaching\event\session_record_downloaded::class, 'get_name');
                 break;
             case "session_record_viewed":
-                $method = new \ReflectionMethod(\mod_hybridteaching\event\session_record_viewed::class, 'get_legacy_logdata');
+                $method = new \ReflectionMethod(\mod_hybridteaching\event\session_record_viewed::class, 'get_name');
                 break;
             case 'attendance_updated':
-                $method = new \ReflectionMethod(\mod_hybridteaching\event\attendance_updated::class, 'get_legacy_logdata');
+                $method = new \ReflectionMethod(\mod_hybridteaching\event\attendance_updated::class, 'get_name');
                 break;
             case 'session_added':
-                $method = new \ReflectionMethod(\mod_hybridteaching\event\session_added::class, 'get_legacy_logdata');
+                $method = new \ReflectionMethod(\mod_hybridteaching\event\session_added::class, 'get_name');
                 break;
             case 'session_deleted':
                 $method = new \ReflectionMethod(\mod_hybridteaching\event\session_deleted::class,
-                'get_legacy_logdata');
+                'get_name');
                 break;
             case 'session_finished':
                 $method = new \ReflectionMethod(\mod_hybridteaching\event\session_finished::class,
-                'get_legacy_logdata');
+                'get_name');
                 break;
             case 'session_info_viewed':
                 $method = new \ReflectionMethod(\mod_hybridteaching\event\session_info_viewed::class,
-                'get_legacy_logdata');
+                'get_name');
                 break;
             case 'session_updated':
                 $method = new \ReflectionMethod(\mod_hybridteaching\event\session_updated::class,
-                'get_legacy_logdata');
+                'get_name');
                 break;
             default:
                 break;

@@ -1,8 +1,42 @@
-# Hybrid teaching #
+# Moodle Hybrid Teaching Plugin
 
-TODO Describe the plugin shortly here.
+![Moodle Plugin](https://img.shields.io/badge/Moodle-Plugin-blue)
+![License](https://img.shields.io/badge/License-GPLv3-blue.svg)
 
-TODO Provide more detailed description here.
+
+## Overview
+The **Hybrid Teaching** plugin is designed to enhance the management of hybrid teaching sessions within the Moodle platform. It provides features for handling both in-person and remote classes, recording attendance, and facilitating access to session materials.
+Developed by the [UNIMOODLE consortium](https://unimoodle.gihub.io) of 16 Spanish universities (Valladolid, Complutense de Madrid, País Vasco/EHU, León, Salamanca, Illes Balears, Valencia, Rey Juan Carlos, La Laguna, Zaragoza, Málaga, Córdoba, Extremadura, Vigo, Las Palmas y Burgos).
+
+[<img src="https://unimoodle.github.io/assets/images/unimoodle-primarylogo-rgb-1200x353.png" height="70px"/>](https://unimoodle.github.io)
+
+[Project's web page](https://unimoodle.github.io/moodle-local_hybridteaching/)
+
+## Features
+1. **Session Management**:
+   - Easily manage physical and virtual classes from Moodle.
+   - Record attendance for each session.
+   - Provide access to session recordings and materials.
+
+2. **System Independence**:
+   - Compatible with many video conferencing system or video storage solution.
+   - No additional configurations required.
+
+3. **Grading**:
+   - Assign grades based on attendance.
+   - Configure customizable calculation methods.
+   - Handle exceptions as needed.
+
+4. **Open Source**:
+   - Developed by the UNIMOODLE University Consortium.
+   - Free and customizable.
+
+
+## Usage
+1. Create a new course or access an existing one.
+2. Enable the **Hybrid Teaching** plugin.
+3. Set up your sessions, manage attendance, and utilize grading functions.
+
 
 ## Installing via uploaded ZIP file ##
 
@@ -27,9 +61,23 @@ Alternatively, you can run
 
 to complete the installation from the command line.
 
+# Credits and funding
+
+HybridTeaching was designed by [UNIMOODLE Universities Group](https://unimoodle.github.io/) 
+
+<img src="https://unimoodle.github.io/assets/images/allunimoodle-2383x376.png" height="120px" />
+
+HybridTeaching was implemented by Moodle's Partner [ISYC](https://isyc.com/)
+
+<img src="https://unimoodle.github.io/moodle-mod_hybridteaching/assets/images/logo-isyc-oncustomer-black-es-534x149.png" height="70px" />
+
+This project was funded by the European Union Next Generation Program.
+
+<img src="https://unimoodle.github.io/moodle-mod_hybridteaching/assets/images/unidigital-footer2024-1466x187.png" height="70px" />
+
 ## License ##
 
-2023 isyc <isyc@example.com>
+2023 UNIMOODLE University group https://unimoodle.github.io
 
 This program is free software: you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software

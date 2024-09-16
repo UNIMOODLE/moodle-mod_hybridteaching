@@ -269,7 +269,7 @@ if (!$finishsession && !has_capability('mod/hybridteaching:sessionsfulltable', $
     isset($activesession) ? $sessiontype = $activesession : $sessiontype = $session;
     $attaction = optional_param('attaction', 1, PARAM_INT);
     if ($hybridteaching->useattendance) {
-        $notify = attendance_controller::hybridteaching_set_attendance_log($hybridteaching, $sessiontype, 1);
+        $notify = attendance_controller::hybridteaching_set_attendance_log($hybridteaching, (int) $sessiontype->id, 1);
         if ($notify['ntype'] == 'success') {
             attendance_controller::hybridteaching_set_attendance($hybridteaching, $sessiontype, 1, $attaction);
         }

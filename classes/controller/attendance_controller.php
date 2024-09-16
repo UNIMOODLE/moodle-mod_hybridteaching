@@ -303,6 +303,18 @@ class attendance_controller extends \mod_hybridteaching\controller\common_contro
         $att->connectiontime = $timespent;
         try {
             $DB->update_record('hybridteaching_attendance', $att);
+            list($course, $cm) = get_course_and_cm_from_instance($att->hybridteachingid, 'hybridteaching');
+            $event = \mod_hybridteaching\event\attendance_updated::create([
+                'objectid' => $att->hybridteachingid,
+                'context' => \context_module::instance($cm->id),
+                'relateduserid' => $att->userid,
+                'other' => [
+                    'sessid' => $att->sessionid,
+                    'attid' => $att->id,
+                ],
+            ]);
+
+            $event->trigger();
             return true;
         } catch (\Throwable $dbexception) {
             throw $dbexception;
@@ -376,27 +388,27 @@ class attendance_controller extends \mod_hybridteaching\controller\common_contro
      * Set attendance log for hybrid teaching.
      *
      * @param object $hybridteaching Hybridteaching object
-     * @param object $session Session object
+     * @param int $session Session object
      * @param int $action Action type
      * @param int $userid User ID
      * @param bool $event Event flag
      * @return mixed
      */
-    public static function hybridteaching_set_attendance_log($hybridteaching, $session, $action, $userid = 0, $event = false) {
+    public static function hybridteaching_set_attendance_log($hybridteaching, $sessionid, $action, $userid = 0, $event = false) {
         global $DB, $USER;
         !$userid ? $userid = $USER->id : '';
-        $att = self::hybridteaching_get_attendance($session, $userid);
+        $att = self::hybridteaching_get_attendance($sessionid, $userid);
         $notify = '';
         if (!$att) {
             $att = new \StdClass();
             // Creates an empty attendance, for registering the log, if log isn't valid, delete the attendance.
             $id = $DB->get_field('hybridteaching_attendance', 'id',
-                ['id' => self::hybridteaching_set_attendance($hybridteaching, $session, 1, -1)], MUST_EXIST);
+                ['id' => self::hybridteaching_set_attendance($hybridteaching, $sessionid, 1, -1)], MUST_EXIST);
             $att->id = $id;
         }
         $timenow = (new \DateTime('now', \core_date::get_server_timezone_object()))->getTimestamp();
         if ($event) {
-            $sessiontime = $DB->get_record('hybridteaching_session', ['id' => $session], 'starttime, duration');
+            $sessiontime = $DB->get_record('hybridteaching_session', ['id' => $sessionid], 'starttime, duration');
             $timenow = $sessiontime->starttime + $sessiontime->duration;
         }
 

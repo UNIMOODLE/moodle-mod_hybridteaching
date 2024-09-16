@@ -257,6 +257,7 @@ class mod_hybridteaching_mod_form extends moodleform_mod {
         $maxgradeattendance[] = &$mform->createElement('text', 'maxgradeattendance',
             get_string('maxgradeattendance', 'hybridteaching'));
         $mform->setType('maxgradeattendance', PARAM_INT);
+        $mform->setDefault('maxgradeattendance', 80);
 
         $options = [
             HYBRIDTEACHING_GRADEMODE_NUMSESS => get_string('numsess', 'hybridteaching'),
@@ -265,6 +266,7 @@ class mod_hybridteaching_mod_form extends moodleform_mod {
         ];
         $maxgradeattendance[] = &$mform->createElement('select', 'maxgradeattendancemode', '', $options);
         $mform->setType('maxgradeattendancemode', PARAM_INT);
+        $mform->setDefault('maxgradeattendancemode', HYBRIDTEACHING_GRADEMODE_PERCENTSESS);
         $mform->addGroup($maxgradeattendance, 'maxgradeattendancegroup',
             get_string('maxgradeattendance', 'hybridteaching'), [' '], false);
         $mform->addHelpButton('maxgradeattendancegroup', 'maxgradeattendance', 'hybridteaching');
@@ -377,7 +379,7 @@ class mod_hybridteaching_mod_form extends moodleform_mod {
      * @return void
      */
     private function hybridteaching_mform_insert_roles_access_mapping(MoodleQuickForm &$mform, array $participantlist): void {
-        global $OUTPUT;
+        global $OUTPUT, $CFG;
         $participantselection = roles::get_participant_selection_data();
         $mform->addElement('header', 'sectionaudience', get_string('sectionaudience', 'hybridteaching'));
         $mform->addElement('hidden', 'participants', json_encode($participantlist));
@@ -390,10 +392,12 @@ class mod_hybridteaching_mod_form extends moodleform_mod {
             'hybridteaching_participant_selection',
             $participantselection['options'],
             $participantselection['selected']);
+            
         $action = new single_button(new moodle_url(qualified_me()),
             get_string('mod_form_field_participant_list_action_add', 'hybridteaching'),
             'post',
-            false,
+            // This is a fix because it's a deprecated attribute in 4.3.
+            get_config('moodle', 'version') > '2022112810' ? single_button::BUTTON_PRIMARY : false,
             ['name' => 'hybridteaching_participant_selection_add']
         );
         $pformcontext = [
