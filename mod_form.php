@@ -397,7 +397,7 @@ class mod_hybridteaching_mod_form extends moodleform_mod {
             get_string('mod_form_field_participant_list_action_add', 'hybridteaching'),
             'post',
             // This is a fix because it's a deprecated attribute in 4.3.
-            get_config('moodle', 'version') > '2022112810' ? single_button::BUTTON_PRIMARY : false,
+            get_config('moodle', 'version') < '2023100905' ? false : single_button::BUTTON_PRIMARY,
             ['name' => 'hybridteaching_participant_selection_add']
         );
         $pformcontext = [
