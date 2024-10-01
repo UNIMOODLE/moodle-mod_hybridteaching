@@ -40,8 +40,8 @@ class rotateQR {
     qrCodeSetUp() {
         this.qrCodeInstance = new QRCode(this.qrCodeHTMLElement, {
             text: '',
-            width: 280,
-            height: 280,
+            width: 492,
+            height: 492,
             colorDark : "#000000",
             colorLight : "#ffffff",
             correctLevel : QRCode.CorrectLevel.H

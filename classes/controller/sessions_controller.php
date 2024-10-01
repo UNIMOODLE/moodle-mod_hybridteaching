@@ -942,7 +942,7 @@ class sessions_controller extends \mod_hybridteaching\controller\common_controll
      */
     public static function get_sessions_in_progress($id) {
         global $DB;
-        $sql = 'SELECT hts.*
+        $sql = 'SELECT hts.id
                   FROM {hybridteaching_session} hts
                  WHERE hts.hybridteachingid = ?
                    AND hts.starttime < ?

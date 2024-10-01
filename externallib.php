@@ -82,6 +82,12 @@ class hybridteaching_external extends external_api {
         );
 
         $attendance = $DB->get_record('hybridteaching_attendance', ['id' => $attid], 'id, hybridteachingid, sessionid, userid');
+
+        // Check permissions.
+        $coursemodule = get_coursemodule_from_instance('hybridteaching', $attendance->hybridteachingid);
+        $context = context_module::instance($coursemodule->id);
+        require_capability('mod/hybridteaching:manageactivity', $context);
+
         $timemodified = (new \DateTime('now', \core_date::get_server_timezone_object()))->getTimestamp();
         if ($attendance) {
             $attendance->status = $status;
@@ -164,6 +170,12 @@ class hybridteaching_external extends external_api {
         );
 
         $session = $DB->get_record('hybridteaching_session', ['id' => $sessid], 'id, hybridteachingid');
+
+        // Check permissions.
+        $coursemodule = get_coursemodule_from_instance('hybridteaching', $session->hybridteachingid);
+        $context = context_module::instance($coursemodule->id);
+        require_capability('mod/hybridteaching:sessionsfulltable', $context);
+
         $timemodified = (new \DateTime('now', \core_date::get_server_timezone_object()))->getTimestamp();
         if ($session) {
             $session->attexempt = $attexempt;
@@ -285,6 +297,11 @@ class hybridteaching_external extends external_api {
         $sesspass = $DB->get_field('hybridteaching', 'studentpassword', ['id' => $session->hybridteachingid]);
         $joinurl = null;
 
+        // Check permissions.
+        $coursemodule = get_coursemodule_from_instance('hybridteaching', $session->hybridteachingid);
+        $context = context_module::instance($coursemodule->id);
+        require_capability('mod/hybridteaching:sessionsfulltable', $context);
+
         if (!empty($session->typevc)) {
             if (helper::subplugin_config_exists($session->vcreference, 'vc')) {
                 if ($session->typevc == 'bbb') {
@@ -401,6 +418,11 @@ class hybridteaching_external extends external_api {
     public static function disable_attendance_inprogress($id, $sessionid = -1) {
         global $DB, $USER;
         list ($course, $cm) = get_course_and_cm_from_cmid($id, 'hybridteaching');
+
+        // Check permissions.
+        $context = context_module::instance($id);
+        require_capability('mod/hybridteaching:sessionsfulltable', $context);
+
         $params = self::validate_parameters(
             self::disable_attendance_inprogress_parameters(), ["hybridteachingid" => $cm->instance,
                 "sessionid" => $sessionid, ]

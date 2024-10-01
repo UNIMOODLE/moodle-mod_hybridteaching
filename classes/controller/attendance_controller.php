@@ -216,8 +216,8 @@ class attendance_controller extends \mod_hybridteaching\controller\common_contro
             }
         }
         $sql = 'SELECT sessionid,
-                        sum(CASE WHEN type <> 0 THEN 0 ELSE 1 END) AS classroom,
-                        sum(CASE WHEN type <> 0 THEN 1 ELSE 0 END) AS vc
+                        sum(CASE WHEN ha.type <> 0 THEN 0 ELSE 1 END) AS classroom,
+                        sum(CASE WHEN ha.type <> 0 THEN 1 ELSE 0 END) AS vc
                   FROM {hybridteaching_session} hs
                   JOIN {hybridteaching_attendance} ha ON ha.sessionid = hs.id
                  WHERE ha.hybridteachingid = :hybridteachingid
@@ -296,7 +296,6 @@ class attendance_controller extends \mod_hybridteaching\controller\common_contro
             $att->sessionid = $session->id;
             $att->userid = $userid;
             $att->status = $status;
-            $att->type = $type;
             $att->usermodified = $USER->id;
             $att->exempt = HYBRIDTEACHING_NOT_EXEMPT;
             $att->connectiontime = 0;
@@ -718,7 +717,7 @@ class attendance_controller extends \mod_hybridteaching\controller\common_contro
         }
         list($course, $cm) = get_course_and_cm_from_instance($hid, 'hybridteaching');
         return get_enrolled_users(\context_module::instance($cm->id), 'mod/hybridteaching:attendanceregister',
-            0,  $userfields = 'u.*',  $orderby = '', 0, 0);
+            0,  $userfields = 'u.id, u.firstname, u.lastname',  $orderby = '', 0, 0);
     }
 
 
@@ -750,14 +749,12 @@ class attendance_controller extends \mod_hybridteaching\controller\common_contro
         foreach ($inparams as $key => $values) {
             $params[$key] = $values->id;
         }
-        $sql = "SELECT userid, u.lastname
+        $sql = "SELECT u.id AS userid, u.lastname
                   FROM {user} u
              LEFT JOIN {hybridteaching_attendance} ha ON  u.id = ha.userid
-                  JOIN {hybridteaching_session} s ON (ha.sessionid = s.id)
-                 WHERE u.id " . $insql . " " . $fname . $lname . "
-              GROUP BY ha.userid, u.lastname, u.id
+                 WHERE u.id " . $insql . " " . $fname . $lname .
+              " GROUP BY ha.userid, u.lastname, u.id
               ORDER BY " . $prefix . $sort . " " . $dir;
-              $params['hid'] = $hid;
         try {
             return $DB->get_records_sql($sql, $params);
         } catch (\Throwable $dbexception) {

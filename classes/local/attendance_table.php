@@ -1183,6 +1183,7 @@ class attendance_table {
 
         $attendancecontroller = new attendance_controller($this->hybridteaching);
         $sessionscontroller = new sessions_controller($this->hybridteaching);
+        // Get all participants from course with attendance, for list in view extendedstudentatt.
         $participationrecords = $attendancecontroller->hybridteaching_get_students_participation($hybridteachingid,
             $sort, $dir, $fname, $lname);
         $baseurl = new \moodle_url('/mod/hybridteaching/attendance.php?view=' . $view, ['id' => $id,
