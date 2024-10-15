@@ -35,6 +35,7 @@ defined('MOODLE_INTERNAL') || die();
 
 $plugin->component = 'mod_hybridteaching';
 $plugin->release = '0.1.1';
-$plugin->version = 20241015;
+$plugin->version = 2024101500;
 $plugin->requires = 2022041900;
+$plugin->maturity = MATURITY_BETA;
 $plugin->maturity = MATURITY_BETA;
