@@ -99,8 +99,8 @@ class sessions_table {
         $page = optional_param('page', 0, PARAM_INT);
         $perpage = optional_param('perpage', get_config('hybridteaching', 'resultsperpage'), PARAM_INT);
         $sort = optional_param('sort', 'starttime', PARAM_ALPHANUMEXT);
-        $dir = optional_param('dir', 'DESC', PARAM_ALPHA);
         $slist = optional_param('l', 1, PARAM_INT);
+        $dir = optional_param('dir', $slist == PROGRAM_SESSION_LIST ? 'ASC' : 'DESC', PARAM_ALPHA);
         $PAGE->requires->js_call_amd('mod_hybridteaching/sessions', 'init');
 
         $columns = [
@@ -151,6 +151,9 @@ class sessions_table {
         list($extrasql, $params) = $sfiltering->get_sql_filter();
         if ($this->hybridteaching->sessionscheduling) {
             $params = $params + ['starttime' => time()];
+            if ($slist == PROGRAM_SESSION_LIST) {
+                $params = $params + ['addinprogress' => ' (starttime+duration) '];
+            }
         }
 
         if (!has_capability('mod/hybridteaching:viewhiddenitems', $this->context)) {

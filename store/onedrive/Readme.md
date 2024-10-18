@@ -4,12 +4,12 @@ CONFIGURACIÓN PREVIA EN MICROSOFT AZURE:
 Necesitará una suscripción a Microsoft Azure. Si no tiene una, peude crear una visitando:
     https://azure.microsoft.com/en-us/free/
 
-Debe configurar Microsoft Azure para administrar su Microsoft 365 Azure Active Directory. Una gúí está disponible aquí:
+Debe configurar Microsoft Azure para administrar su Microsoft 365 Azure Active Directory. Una guía está disponible aquí:
    https://learn.microsoft.com/en-us/entra/identity-platform/quickstart-create-new-tenant 
 
 
 Registrar una nueva aplicación en la plataforma Microsoft Azure, o bien si se utiliza el subplugin Teams de Hybridteaching se puede reutilizar la misma aplicación creada para ello.
-El registro de la aplicación establece una relación de confianza entre la aplicació y la plataforma de identidad de Microsoft: la confianza es unidreccional: la aplicación confía en la plataforma de identidad de Microsoft y no al revés. 
+El registro de la aplicación establece una relación de confianza entre la aplicación y la plataforma de identidad de Microsoft: la confianza es unidreccional: la aplicación confía en la plataforma de identidad de Microsoft y no al revés. 
 Puede seguir los pasos desde esta guía:
     https://learn.microsoft.com/es-es/entra/identity-platform/quickstart-register-app?tabs=certificate
 

@@ -80,10 +80,10 @@ class sessions_form extends \moodleform {
         $mform->setType('typevc', PARAM_ALPHA);
 
         $groupmode = groups_get_activity_groupmode($cm);
-        $selectgroups = [];
         $selectgroups[0] = get_string('allgroups', 'hybridteaching');
         if ($groupmode == SEPARATEGROUPS || $groupmode == VISIBLEGROUPS) {
-            if ($groupmode == SEPARATEGROUPS && !has_capability('moodle/site:accessallgroups', $modcontext)) {
+            if ($groupmode == SEPARATEGROUPS && !has_capability('mod/hybridteaching:viewallsessions', $modcontext)) {
+                $selectgroups = [];
                 $groups = groups_get_all_groups($course->id, $USER->id, $cm->groupingid);
             } else {
                 $groups = groups_get_all_groups($course->id, 0, $cm->groupingid);

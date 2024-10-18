@@ -493,46 +493,58 @@ function hybridteaching_extend_settings_navigation(settings_navigation $settings
 
     $context = $settingsnav->get_page()->cm->context;
     $cm = $settingsnav->get_page()->cm;
-    $nodes = [];
 
     $hassessionsscheduling = $DB->get_field('hybridteaching', 'sessionscheduling', ['id' => $cm->instance]);
-    if (has_capability('mod/hybridteaching:sessions', $context)) {
-        $nodes[] = ['url' => new moodle_url('/mod/hybridteaching/sessions.php', ['id' => $cm->id, 'l' => SESSION_LIST]),
-                    'title' => get_string('sessions', 'hybridteaching'), ];
-    }
-
-    if (has_capability('mod/hybridteaching:attendance', $context)) {
-        $nodes[] = ['url' => new moodle_url('/mod/hybridteaching/attendance.php', ['id' => $cm->id]),
-                    'title' => get_string('attendance', 'hybridteaching'), ];
-    }
-
     if (has_capability('mod/hybridteaching:programschedule', $context)) {
         // Show only programschedule if have marked 'Use sessions scheduling' check.
         $hassessionsscheduling = $DB->get_field('hybridteaching', 'sessionscheduling', ['id' => $cm->instance]);
         if ($hassessionsscheduling) {
-            $nodes[] = ['url' => new moodle_url('/mod/hybridteaching/sessions.php', ['id' => $cm->id, 'l' => PROGRAM_SESSION_LIST]),
-                        'title' => get_string('programschedule', 'hybridteaching'), ];
+            $programschedulenode = navigation_node::create(get_string('programschedule', 'hybridteaching'),
+                new moodle_url('/mod/hybridteaching/sessions.php', ['id' => $cm->id, 'l' => PROGRAM_SESSION_LIST]),
+                navigation_node::TYPE_SETTING,
+                null,
+                'htprogramschedule');
+            $hybridteachingnode->add_node($programschedulenode, 'modedit');
         }
     }
 
+    if (has_capability('mod/hybridteaching:attendance', $context)) {
+        $attendancenode = navigation_node::create(get_string('attendance', 'hybridteaching'),
+            new moodle_url('/mod/hybridteaching/attendance.php', ['id' => $cm->id]),
+            navigation_node::TYPE_SETTING,
+            null,
+            'htattendance');
+        $hybridteachingnode->add_node($attendancenode, 'htprogramschedule');
+    }
+
+    if (has_capability('mod/hybridteaching:sessions', $context)) {
+        $sessionsnode = navigation_node::create(get_string('sessions', 'hybridteaching'),
+            new moodle_url('/mod/hybridteaching/sessions.php', ['id' => $cm->id, 'l' => SESSION_LIST]),
+            navigation_node::TYPE_SETTING,
+            null,
+            'htsessions');
+        $hybridteachingnode->add_node($sessionsnode, 'htattendance');
+    }
+
+
     if (has_capability('mod/hybridteaching:import', $context)) {
-        $nodes[] = ['url' => new moodle_url('/mod/hybridteaching/import.php', ['id' => $cm->id, 'sesskey' => sesskey()]),
-                    'title' => get_string('import', 'hybridteaching'), ];
+        $importnode = navigation_node::create(get_string('import', 'hybridteaching'),
+            new moodle_url('/mod/hybridteaching/import.php', ['id' => $cm->id, 'sesskey' => sesskey()]),
+            navigation_node::TYPE_SETTING,
+            null,
+            'htimport');
+        $hybridteachingnode->add_node($importnode);
+        $importnode->set_force_into_more_menu(true);
     }
 
     if (has_capability('mod/hybridteaching:export', $context)) {
-        $nodes[] = ['url' => new moodle_url('/mod/hybridteaching/export.php', ['id' => $cm->id, 'sesskey' => sesskey()]),
-                    'title' => get_string('export', 'hybridteaching'), ];
-    }
-
-    foreach ($nodes as $node) {
-        $settingsnode = navigation_node::create($node['title'], $node['url'], navigation_node::TYPE_SETTING);
-        if (isset($settingsnode)) {
-            if (!empty($node->more)) {
-                $settingsnode->set_force_into_more_menu(true);
-            }
-            $hybridteachingnode->add_node($settingsnode);
-        }
+        $exportnode = navigation_node::create(get_string('export', 'hybridteaching'),
+            new moodle_url('/mod/hybridteaching/export.php', ['id' => $cm->id, 'sesskey' => sesskey()]),
+            navigation_node::TYPE_SETTING,
+            null,
+            'htexport');
+        $hybridteachingnode->add_node($exportnode);
+        $exportnode->set_force_into_more_menu(true);
     }
 }
 

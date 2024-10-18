@@ -103,7 +103,7 @@ class sessions {
      * Delete a recording from a storage reference.
      *
      * @param int $htsession Session ID
-     * @param int $configid Hybridteaching config ID
+     * @param object $config Hybridteaching config
      * @return void
      */
     public function delete_session_extended($htsession, $config) {

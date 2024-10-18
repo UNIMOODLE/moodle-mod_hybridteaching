@@ -276,7 +276,7 @@ class bbbproxy extends proxy_base {
             if (isset($xml->recordings->recording->playback->format)) {
                 if (isset($xml->recordings->recording->playback->format[0])) {
                     foreach ($xml->recordings->recording->playback->format as $object) {
-                        if (isset($object->type) && $object->type == 'video') {
+                        if (isset($object->type) && ($object->type == 'presentation' || $object->type == 'video') ) {
                             $recordingurl = $object->url;
                         }
                         if (isset($object->type) && $object->type == 'notes') {

@@ -411,7 +411,7 @@ class hybridteaching_external extends external_api {
     /**
      * Get sessions in progress by cmid.
      *
-     * @param int $cmid coursemodule id
+     * @param int $id coursemodule id
      * @param int $sessionid session id
      * @return string json-encoded information of session attendance in progress
      */

@@ -1,5 +1,15 @@
 <div id="zonemessage" class="mb-3">
 	{{#isstart}}
+		<p class="mb-0">
+			{{#str}} session, mod_hybridteaching {{/str}}:
+			<span class="font-weight-bold">{{name}}</span> <br>
+		</p>
+		{{#description}}
+			<p class="mb-0">
+				{{#str}} description, core {{/str}}:
+				<span class="font-weight-bold">{{description}}</span> <br>
+			</p>
+		{{/description}}
 		{{#starttime}}
 			<p class="mb-0">
 				{{#str}} sessionstart, mod_hybridteaching {{/str}}
@@ -36,6 +46,16 @@
 	{{/isstart}}
 
 	{{#isprogress}}
+		<p class="mb-0">
+			{{#str}} session, mod_hybridteaching {{/str}}:
+			<span class="font-weight-bold">{{name}}</span> <br>
+		</p>
+		{{#description}}
+			<p class="mb-0">
+				{{#str}} description, core {{/str}}:
+				<span class="font-weight-bold">{{description}}</span> <br>
+			</p>
+		{{/description}}
 		{{#waitmoderator}}
 			<p class="mb-0">
 				{{#str}} waitmoderator, mod_hybridteaching {{/str}} <br>
@@ -61,7 +81,12 @@
 				{{#str}} closedoorsnext2, mod_hybridteaching {{/str}}
 			{{/canentry}}
 			{{^canentry}}
+				{{#isundatedsession}}
+					{{#str}} closedoors, mod_hybridteaching {{/str}}  {{closedoors}}
+				{{/isundatedsession}}
+				{{^isundatedsession}}
 				{{#str}} closedoorsprev, mod_hybridteaching {{/str}} {{closedoorstime}} {{#str}} closedoorsafter, mod_hybridteaching {{/str}}
+				{{/isundatedsession}}
 			{{/canentry}}
 		{{/isclosedoors}}
 	{{/isprogress}}

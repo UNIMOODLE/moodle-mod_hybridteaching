@@ -86,11 +86,11 @@ echo $OUTPUT->header();
 require_once($CFG->dirroot.'/mod/hybridteaching/classes/controller/sessions_controller.php');
 
 $session = new sessions_controller($hybridteaching);
-$activesession = $session->get_next_session();
+$activesession = $session->get_next_session($cm);
 $result = [];
 $hasvc = !empty($hybridteaching->typevc) ? true : false;
 if (!$activesession) {
-    $activesession = $session->get_last_session();
+    $activesession = $session->get_last_session($cm);
 }
 if (has_capability('mod/hybridteaching:sessionsactions', $modulecontext)) {
     $session->finish_unfinished_sessions($hybridteaching->id);
@@ -148,41 +148,35 @@ if (!$activesession) {
         switch (true) {
             // Undatted session.
             case !$hybridteaching->sessionscheduling:
-                $isundatedsession = true;
+                $isundatedsession = $hybridteaching->starttime == 0 ? true : false;          
                 $isfinished = $activesession->isfinished;
                 if ($isfinished) {
                     if (has_capability('mod/hybridteaching:sessionsactions', $modulecontext)) {
                         $status = get_string('status_undated', 'hybridteaching');
+                        // Is undattedsession if not scheduling, and is finished the last session. To enable the creation of another session.
+                        $isundatedsession = true;
                     } else {
                         $status = get_string('status_undated_wait', 'hybridteaching');
                     }
+                    $alert = 'alert-info';
                 } else {
-                    $status = get_string('status_start', 'hybridteaching');
                     if (($activesession->starttime < time() && $activesession->isfinished == 0)) {
                         $isprogress = true;
                         $isclosedoors ? $status = get_string('status_progress', 'hybridteaching') :
                             $status = get_string('status_ready', 'hybridteaching');
+                        $alert = 'alert-warning';
                     } else if ($activesession->starttime > time()) {
                         $duration = $activesession->duration;
-                        $activesession = $session->get_last_undated_session();
-                        if (!empty($activesession)) {
-                            $isprogress = true;
-                            $timeinit = $activesession->starttime;
-                            $isclosedoors ? $status = get_string('status_progress', 'hybridteaching') :
-                                $status = get_string('status_ready', 'hybridteaching');
-                        } else {
-                            $isstart = true;
-                            $isfinished = true;
-                            $nextsessduration = $duration;
-                        }
+                        $isstart = true;
+                        $status = get_string('status_start', 'hybridteaching');
+                        $alert = 'alert-info';
                     } else {
                         $isprogress = true;
-                            $timeinit = $activesession->starttime;
-                            $isclosedoors ? $status = get_string('status_progress', 'hybridteaching') :
-                                $status = get_string('status_ready', 'hybridteaching');
+                        $timeinit = $activesession->starttime;
+                        $isclosedoors ? $status = get_string('status_progress', 'hybridteaching') :
+                            $status = get_string('status_ready', 'hybridteaching');
                     }
                 }
-                $isclosedoors ? $alert = 'alert-warning' : $alert = 'alert-info';
                 break;
             // In progress.
             case $timeinit < time() && $timeend > time():
@@ -257,13 +251,15 @@ if (!$activesession) {
             $status = get_string('status_undated_wait', 'hybridteaching');
         }
         $result['activesessionid'] = $activesession->id;
+        $result['name'] = $activesession->name;
+        $result['description'] = format_string($activesession->description) ?? '';
         $result['id'] = $id;
         $result['s'] = !$isfinished ? $activesession->id : 0;
         $result['hassessionactionscapability'] = has_capability('mod/hybridteaching:sessionsactions', $modulecontext);
 
         // In sessions undatted (no sessioncheduling and no starttime):.
         // Only can create sessions users with permision sessionsactions (example: teachers).
-        if (!$hybridteaching->sessionscheduling) {
+        if (!$hybridteaching->sessionscheduling && $isundatedsession) {
             $result['hascreatecapability'] = has_capability('mod/hybridteaching:sessionsactions', $modulecontext);
         } else {
             $result['hascreatecapability'] = has_capability('mod/hybridteaching:createsessions', $modulecontext);
@@ -283,11 +279,7 @@ if (!$activesession) {
         if (!empty($activesession->duration)) {
             $result['duration'] = helper::get_hours_format($activesession->duration);
         } else {
-            if (!empty($nextsessduration)) {
-                $result['duration'] = helper::get_hours_format($nextsessduration);
-            } else {
-                $result['duration'] = get_string('unknown', 'hybridteaching');
-            }
+            $result['duration'] = get_string('unknown', 'hybridteaching');
         }
         $result['status'] = $status;
         $result['isadvanceentry'] = $isadvanceentry;

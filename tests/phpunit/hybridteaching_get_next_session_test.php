@@ -139,8 +139,9 @@ class hybridteaching_get_next_session_test extends \advanced_testcase {
 
         // Create session.
         $session = $sessioncontroller->create_session($data);
+        $cm = get_coursemodule_from_instance('hybridteaching', $hybridobject->id, $hybridobject->course);
         // Get next session. If it's null there's not next session.
-        $nextsession = $sessioncontroller->get_next_session();
+        $nextsession = $sessioncontroller->get_next_session($cm);
         $this->assertNotNull($nextsession);
 
     }

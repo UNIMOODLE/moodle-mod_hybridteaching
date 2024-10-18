@@ -133,6 +133,7 @@ class password {
      * Return QR code passwords.
      *
      * @param stdClass $session
+     * @param string $password
      */
     public static function hybridteaching_set_password($session, $password) {
         global $DB;

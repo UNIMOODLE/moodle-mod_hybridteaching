@@ -98,7 +98,11 @@ class sessions_controller extends \mod_hybridteaching\controller\common_controll
         $params = $params + ['hybridteachingid' => $this->hybridobject->id];
 
         if (!empty($params['starttime'])) {
-            $where .= ' AND starttime '.$operator.' :starttime';
+            if (!empty($params['addinprogress'])) {
+                $where .= ' AND (starttime+duration) '.$operator.' :starttime';
+            } else {
+                $where .= ' AND starttime '.$operator.' :starttime';
+            }
         }
 
         if (!empty($extraselect)) {
@@ -465,24 +469,32 @@ class sessions_controller extends \mod_hybridteaching\controller\common_controll
     /**
      * Retrieves the next session for a hybrid teaching object.
      *
+     * @param object $cm The course module object.
      * @return mixed The next session record or null if no session is found.
      */
-    public function get_next_session() {
+    public function get_next_session($cm) {
         global $DB;
         $time = time();
 
         $datefilter = "";
         $datefilter  = " AND (hs.starttime + hs.duration >= :time OR hs.starttime IS NULL)";
+        $groupfilters = self::get_groups_filter($cm);
+        $extrasql = $groupfilters['extrasql'];
+        $params = $groupfilters['params'];
 
         $sql = "SELECT *
                   FROM {hybridteaching_session} AS hs
                  WHERE hs.hybridteachingid = :id
                        $datefilter
                    AND (hs.isfinished = 0 OR hs.isfinished IS NULL)
+                       $extrasql
               ORDER BY ABS(:time2 - hs.starttime) ASC
                  LIMIT 1";
 
-        $nextsession = $DB->get_record_sql($sql, ['id' => $this->hybridobject->id, 'time' => $time, 'time2' => $time]);
+        $params['id'] = $this->hybridobject->id;
+        $params['time'] = $time;
+        $params['time2'] = $time;
+        $nextsession = $DB->get_record_sql($sql, $params);
 
         return $nextsession;
     }
@@ -493,16 +505,24 @@ class sessions_controller extends \mod_hybridteaching\controller\common_controll
      *
      * @return mixed The last session record or null if not found.
      */
-    public function get_last_session() {
+    public function get_last_session($cm) {
         global $DB;
         $time = time();
+
+        $groupfilters = self::get_groups_filter($cm);
+        $extrasql = $groupfilters['extrasql'];
+        $params = $groupfilters['params'];
 
         $sql = "SELECT *
                   FROM {hybridteaching_session} hs
                  WHERE hs.hybridteachingid = :id
                    AND hs.starttime < :time
+                   $extrasql
               ORDER BY hs.starttime DESC LIMIT 1";
-        $lastsession = $DB->get_record_sql($sql, ['id' => $this->hybridobject->id, 'time' => $time]);
+
+        $params['id'] = $this->hybridobject->id;
+        $params['time'] = $time;
+        $lastsession = $DB->get_record_sql($sql, $params);
 
         return $lastsession;
     }
@@ -923,13 +943,22 @@ class sessions_controller extends \mod_hybridteaching\controller\common_controll
      */
     public static function get_sessions_performed($id) {
         global $DB;
+
+        list($course, $cm) = get_course_and_cm_from_instance($id, 'hybridteaching');
+        $groupfilters = self::get_groups_filter($cm);
+        $extrasql = $groupfilters['extrasql'];
+        $params = $groupfilters['params'];
+
         $sql = "SELECT count(id)
-                  FROM {hybridteaching_session}
+                  FROM {hybridteaching_session} hs
                  WHERE hybridteachingid = :htid
                    AND isfinished = 1
-                   AND (starttime  + duration) < :now";
+                   AND (starttime  + duration) < :now
+                   $extrasql";
 
-        $sessionperformed = $DB->count_records_sql($sql, ['htid' => $id, 'now' => time()]);
+        $params['htid'] = $id;
+        $params['now'] = time();
+        $sessionperformed = $DB->count_records_sql($sql, $params);
         return $sessionperformed;
     }
 
@@ -950,6 +979,23 @@ class sessions_controller extends \mod_hybridteaching\controller\common_controll
         $sessionprogressparam = [$id, time(), time()];
         $sessionsinprogress = $DB->get_records_sql($sql, $sessionprogressparam);
         return $sessionsinprogress;
+    }
+
+    public static function get_groups_filter($cm) {
+        global $DB, $USER, $COURSE;
+        $extrasql = "";
+        $params = [];
+        
+        $usergroups = groups_get_user_groups($COURSE->id, $USER->id);
+        $groupmode = groups_get_activity_groupmode($cm);
+        $context = \context_module::instance($cm->id);
+        if (!empty(array_filter($usergroups)) && $groupmode == SEPARATEGROUPS 
+              && !has_capability('mod/hybridteaching:viewallsessions', $context)) {
+            [$insql, $params] = $DB->get_in_or_equal($usergroups[0], SQL_PARAMS_NAMED, 'groupid');
+            $extrasql = ' AND (hs.groupid ' . $insql . ' OR hs.groupid = 0)';
+        }
+
+        return ['extrasql' => $extrasql, 'params' => $params];
     }
 }
 

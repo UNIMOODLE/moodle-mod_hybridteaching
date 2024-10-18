@@ -406,7 +406,7 @@ class attendance_controller extends \mod_hybridteaching\controller\common_contro
      * Set attendance log for hybrid teaching.
      *
      * @param object $hybridteaching Hybridteaching object
-     * @param int $session Session object
+     * @param int $sessionid Session id
      * @param int $action Action type
      * @param int $userid User ID
      * @param bool $event Event flag
@@ -1196,12 +1196,14 @@ class attendance_controller extends \mod_hybridteaching\controller\common_contro
     public static function can_user_join($sessionid, $userid) {
         global $DB;
 
-        $shouldjoin = false;
+        $shouldjoin = true;
         $attid = $DB->get_field('hybridteaching_attendance', 'id', ['sessionid' => $sessionid, 'userid' => $userid]);
         if ($attid) {
             $logaction = self::hybridteaching_get_last_attend($attid, $userid);
             if (is_object($logaction) && $logaction->action == 0) {
                 $shouldjoin = true;
+            }else if (is_object($logaction) && $logaction->action == 1) {
+                $shouldjoin = false;
             } else if (is_number($logaction) && $logaction == 0) {
                 // No logs, can join.
                 $shouldjoin = true;

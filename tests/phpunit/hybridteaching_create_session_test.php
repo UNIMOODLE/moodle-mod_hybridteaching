@@ -168,7 +168,7 @@ class hybridteaching_create_session_test extends \advanced_testcase {
         // Check this session is started.
         $this->assertFalse($sessioncontroller->session_started($sessionexpected));
         // Get the last session created.
-        $this->assertNotNull($sessioncontroller->get_last_session());
+        $this->assertNotNull($sessioncontroller->get_last_session($cm));
         // Enable data.
         $commoncontroller = new common_controller();
         $this->assertTrue($commoncontroller->hybridteaching_exist($hybridobject->id));

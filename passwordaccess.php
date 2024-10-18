@@ -43,11 +43,11 @@ $hybridteaching = $DB->get_record('hybridteaching', ['id' => $id], '*', MUST_EXI
 $cm = get_coursemodule_from_instance('hybridteaching', $hybridteaching->id, 0, false, MUST_EXIST);
 $session = new sessions_controller($hybridteaching);
 $attendancecontroller = new attendance_controller($hybridteaching);
-$sessionshow = $session->get_next_session($hybridteaching->id);
+$sessionshow = $session->get_next_session($cm);
 
 $url = new moodle_url('/mod/hybridteaching/view.php', ['id' => $cm->id]);
 if (!$sessionshow) {
-    $sessionshow = $session->get_last_session($hybridteaching->id);
+    $sessionshow = $session->get_last_session($cm);
 }
 // If not use of attendance return to main view.
 if (!$hybridteaching->useattendance) {

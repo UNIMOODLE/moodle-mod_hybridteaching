@@ -74,6 +74,7 @@ class YouTube extends \Google\Service
   public $liveStreams;
   public $members;
   public $membershipsLevels;
+  public $playlistImages;
   public $playlistItems;
   public $playlists;
   public $search;
@@ -87,6 +88,8 @@ class YouTube extends \Google\Service
   public $videos;
   public $watermarks;
   public $youtube_v3;
+  public $youtube_v3_liveChat_messages;
+  public $rootUrlTemplate;
 
   /**
    * Constructs the internal representation of the YouTube service.
@@ -99,6 +102,7 @@ class YouTube extends \Google\Service
   {
     parent::__construct($clientOrConfig);
     $this->rootUrl = $rootUrl ?: 'https://youtube.googleapis.com/';
+    $this->rootUrlTemplate = $rootUrl ?: 'https://youtube.UNIVERSE_DOMAIN/';
     $this->servicePath = '';
     $this->batchPath = 'batch';
     $this->version = 'v3';
@@ -441,6 +445,10 @@ class YouTube extends \Google\Service
                   'required' => true,
                 ],
                 'categoryId' => [
+                  'location' => 'query',
+                  'type' => 'string',
+                ],
+                'forHandle' => [
                   'location' => 'query',
                   'type' => 'string',
                 ],
@@ -1231,6 +1239,91 @@ class YouTube extends \Google\Service
           ]
         ]
     );
+    $this->playlistImages = new YouTube\Resource\PlaylistImages(
+        $this,
+        $this->serviceName,
+        'playlistImages',
+        [
+          'methods' => [
+            'delete' => [
+              'path' => 'youtube/v3/playlistImages',
+              'httpMethod' => 'DELETE',
+              'parameters' => [
+                'id' => [
+                  'location' => 'query',
+                  'type' => 'string',
+                ],
+                'onBehalfOfContentOwner' => [
+                  'location' => 'query',
+                  'type' => 'string',
+                ],
+              ],
+            ],'insert' => [
+              'path' => 'youtube/v3/playlistImages',
+              'httpMethod' => 'POST',
+              'parameters' => [
+                'onBehalfOfContentOwner' => [
+                  'location' => 'query',
+                  'type' => 'string',
+                ],
+                'onBehalfOfContentOwnerChannel' => [
+                  'location' => 'query',
+                  'type' => 'string',
+                ],
+                'part' => [
+                  'location' => 'query',
+                  'type' => 'string',
+                  'repeated' => true,
+                ],
+              ],
+            ],'list' => [
+              'path' => 'youtube/v3/playlistImages',
+              'httpMethod' => 'GET',
+              'parameters' => [
+                'maxResults' => [
+                  'location' => 'query',
+                  'type' => 'integer',
+                ],
+                'onBehalfOfContentOwner' => [
+                  'location' => 'query',
+                  'type' => 'string',
+                ],
+                'onBehalfOfContentOwnerChannel' => [
+                  'location' => 'query',
+                  'type' => 'string',
+                ],
+                'pageToken' => [
+                  'location' => 'query',
+                  'type' => 'string',
+                ],
+                'parent' => [
+                  'location' => 'query',
+                  'type' => 'string',
+                ],
+                'part' => [
+                  'location' => 'query',
+                  'type' => 'string',
+                  'repeated' => true,
+                ],
+              ],
+            ],'update' => [
+              'path' => 'youtube/v3/playlistImages',
+              'httpMethod' => 'PUT',
+              'parameters' => [
+                'onBehalfOfContentOwner' => [
+                  'location' => 'query',
+                  'type' => 'string',
+                ],
+                'part' => [
+                  'location' => 'query',
+                  'type' => 'string',
+                  'repeated' => true,
+                ],
+              ],
+            ],
+          ]
+        ]
+    );
     $this->playlistItems = new YouTube\Resource\PlaylistItems(
         $this,
         $this->serviceName,
@@ -1503,10 +1596,6 @@ class YouTube extends \Google\Service
                   'location' => 'query',
                   'type' => 'string',
                 ],
-                'relatedToVideoId' => [
-                  'location' => 'query',
-                  'type' => 'string',
-                ],
                 'relevanceLanguage' => [
                   'location' => 'query',
                   'type' => 'string',
@@ -1549,6 +1638,10 @@ class YouTube extends \Google\Service
                   'type' => 'string',
                 ],
                 'videoLicense' => [
+                  'location' => 'query',
+                  'type' => 'string',
+                ],
+                'videoPaidProductPlacement' => [
                   'location' => 'query',
                   'type' => 'string',
                 ],
@@ -2101,6 +2194,29 @@ class YouTube extends \Google\Service
                   'location' => 'query',
                   'type' => 'string',
                   'repeated' => true,
+                ],
+              ],
+            ],
+          ]
+        ]
+    );
+    $this->youtube_v3_liveChat_messages = new YouTube\Resource\YoutubeV3LiveChatMessages(
+        $this,
+        $this->serviceName,
+        'messages',
+        [
+          'methods' => [
+            'transition' => [
+              'path' => 'youtube/v3/liveChat/messages/transition',
+              'httpMethod' => 'POST',
+              'parameters' => [
+                'id' => [
+                  'location' => 'query',
+                  'type' => 'string',
+                ],
+                'status' => [
+                  'location' => 'query',
+                  'type' => 'string',
                 ],
               ],
             ],

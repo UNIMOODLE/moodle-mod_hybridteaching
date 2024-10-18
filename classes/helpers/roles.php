@@ -376,7 +376,7 @@ class roles {
      *
      * @return bool
      */
-    public static function is_moderator(context $context, array $participantlist, ?int $userid = null): bool {
+    public static function is_moderator($context, array $participantlist, ?int $userid = null): bool {
         global $USER;
         // If an admin, then also a moderator.
         if (has_capability('moodle/site:config', $context)) {
