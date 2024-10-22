@@ -493,6 +493,7 @@ function hybridteaching_extend_settings_navigation(settings_navigation $settings
 
     $context = $settingsnav->get_page()->cm->context;
     $cm = $settingsnav->get_page()->cm;
+    $programschedule = false;
 
     $hassessionsscheduling = $DB->get_field('hybridteaching', 'sessionscheduling', ['id' => $cm->instance]);
     if (has_capability('mod/hybridteaching:programschedule', $context)) {
@@ -505,6 +506,7 @@ function hybridteaching_extend_settings_navigation(settings_navigation $settings
                 null,
                 'htprogramschedule');
             $hybridteachingnode->add_node($programschedulenode, 'modedit');
+            $programschedule = true;
         }
     }
 
@@ -514,7 +516,12 @@ function hybridteaching_extend_settings_navigation(settings_navigation $settings
             navigation_node::TYPE_SETTING,
             null,
             'htattendance');
-        $hybridteachingnode->add_node($attendancenode, 'htprogramschedule');
+
+        if ($programschedule) {
+            $hybridteachingnode->add_node($attendancenode, 'htprogramschedule');
+        } else {
+            $hybridteachingnode->add_node($attendancenode);
+        }
     }
 
     if (has_capability('mod/hybridteaching:sessions', $context)) {
