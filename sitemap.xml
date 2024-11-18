@@ -5,4 +5,13 @@
 	<url>
 		<loc>https://juacas.github.io/moodle-mod_treasurehunt/index.html</loc>
 	</url>
+	<url>
+		<loc>https://juacas.github.io/moodle-mod_treasurehunt/adminsettings.html</loc>
+	</url>
+	<url>
+		<loc>https://juacas.github.io/moodle-mod_treasurehunt/configuración-plugin.html</loc>
+	</url>
+	<url>
+		<loc>https://juacas.github.io/moodle-mod_treasurehunt/configuracion-actividad.html</loc>
+	</url>
 </urlset>
