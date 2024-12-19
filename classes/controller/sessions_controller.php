@@ -981,15 +981,21 @@ class sessions_controller extends \mod_hybridteaching\controller\common_controll
         return $sessionsinprogress;
     }
 
+    /**
+     * Get params for filter.
+     *
+     * @param int $cm the cm of the activity
+     * @return array the values for filter
+     */
     public static function get_groups_filter($cm) {
         global $DB, $USER, $COURSE;
         $extrasql = "";
         $params = [];
-        
+
         $usergroups = groups_get_user_groups($COURSE->id, $USER->id);
         $groupmode = groups_get_activity_groupmode($cm);
         $context = \context_module::instance($cm->id);
-        if (!empty(array_filter($usergroups)) && $groupmode == SEPARATEGROUPS 
+        if (!empty(array_filter($usergroups)) && $groupmode == SEPARATEGROUPS
               && !has_capability('mod/hybridteaching:viewallsessions', $context)) {
             [$insql, $params] = $DB->get_in_or_equal($usergroups[0], SQL_PARAMS_NAMED, 'groupid');
             $extrasql = ' AND (hs.groupid ' . $insql . ' OR hs.groupid = 0)';

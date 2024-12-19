@@ -113,9 +113,6 @@ class attendance_controller extends \mod_hybridteaching\controller\common_contro
                 default:
                     throw new \Exception('Invalid view type');
             }
-            // $params['view'] == 'extendedstudentatt' ? $altergroupby .= '  ha.userid ' : $groupby = ' ha.sessionid ';
-            // $params['view'] == 'extendedsessionatt' ? $groupby = ' ha.id    ' : '';
-            // $params['view'] == 'studentattendance' && !$params['editing'] ? $where .= ' AND visible = 1' : '';
         } else {
             $groupby = ' ha.id ';
         }
@@ -131,7 +128,6 @@ class attendance_controller extends \mod_hybridteaching\controller\common_contro
         if (!empty($extraselect)) {
             $where .= " AND $extraselect";
         }
-
 
         !empty($fname) ? $fname = " AND UPPER(u.firstname) like '" . $fname . "%' " : '';
         !empty($lname) ? $lname = " AND UPPER(u.lastname) like '" . $lname . "%' " : '';
@@ -1202,7 +1198,7 @@ class attendance_controller extends \mod_hybridteaching\controller\common_contro
             $logaction = self::hybridteaching_get_last_attend($attid, $userid);
             if (is_object($logaction) && $logaction->action == 0) {
                 $shouldjoin = true;
-            }else if (is_object($logaction) && $logaction->action == 1) {
+            } else if (is_object($logaction) && $logaction->action == 1) {
                 $shouldjoin = false;
             } else if (is_number($logaction) && $logaction == 0) {
                 // No logs, can join.

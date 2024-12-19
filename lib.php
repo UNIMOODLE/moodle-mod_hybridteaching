@@ -533,7 +533,6 @@ function hybridteaching_extend_settings_navigation(settings_navigation $settings
         $hybridteachingnode->add_node($sessionsnode, 'htattendance');
     }
 
-
     if (has_capability('mod/hybridteaching:import', $context)) {
         $importnode = navigation_node::create(get_string('import', 'hybridteaching'),
             new moodle_url('/mod/hybridteaching/import.php', ['id' => $cm->id, 'sesskey' => sesskey()]),

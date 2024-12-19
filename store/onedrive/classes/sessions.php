@@ -117,13 +117,12 @@ class sessions {
             $sql = "SELECT *
                 FROM {hybridteachstore_onedrive} od
                 WHERE od.weburl LIKE :videoweburl";
-    
+
             $othersession = $DB->get_records_sql ($sql, ['videoweburl' => $videoweburl]);
-            if (count($othersession) > 1) {
-                // No delete if there are other restores.            
-            } else {
+            if (count($othersession) <= 1) {
                 // Delete video in onedrive.
-                $onedriveclient = new onedrive_handler($configod);             
+                // No delete if there are other restores.
+                $onedriveclient = new onedrive_handler($configod);
                 $onedriveclient->deletefile($videoweburl);
             }
         }

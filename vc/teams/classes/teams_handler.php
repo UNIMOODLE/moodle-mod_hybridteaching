@@ -425,8 +425,8 @@ class teams_handler {
     public function get_meeting_recordings($folderfile, $meetingid, $organizerid, $course, $name) {
         global $DB;
         $token = '';
-        try {         
-            $token = $this->refreshtoken();         
+        try {
+            $token = $this->refreshtoken();
         } catch (\Exception $e) {
             mtrace(get_string('incorrectconfig', 'hybridteachvc_teams',
                 [
@@ -491,14 +491,14 @@ class teams_handler {
                             ->download($pathfile);
                     } catch (\Exception $e) {
                         mtrace(get_string('recordingnotdownload', 'hybridteachvc_teams',
-                            [ 
+                            [
                                 'course' => $course,
                                 'name' => $name,
                                 'meetingid' => $meetingid,
                             ]));
                     }
                     mtrace(get_string('correctdownload', 'hybridteachvc_teams',
-                    [ 
+                    [
                         'course' => $course,
                         'name' => $name,
                         'meetingid' => $meetingid,

@@ -151,7 +151,7 @@ class webservice {
      * @return stdClass The call's result in JSON format.
      * @throws \moodle_exception Moodle exception is thrown for curl errors.
      */
-    protected function _make_call($path, $data = [], $method = 'get') {
+    protected function make_call($path, $data = [], $method = 'get') {
         $url = $this->apiurl . $path;
         $method = strtolower($method);
         $curl = new \curl();
@@ -200,7 +200,7 @@ class webservice {
      * @throws \moodle_exception If an error occurs during the web service call
      * @return mixed The raw response from the server
      */
-    public function _make_call_download($path, $data = array(), $method = 'get') {
+    public function make_call_download($path, $data = [], $method = 'get') {
 
         $url = $path;
         $method = strtolower($method);
@@ -228,16 +228,16 @@ class webservice {
 
     /**
      * Makes a paginated REST call.
-     * Makes a call like _make_call() but specifically for GETs with paginated results.
+     * Makes a call like make_call() but specifically for GETs with paginated results.
      *
      * @param string $url The URL to append to the API URL
      * @param array|string $data The data to attach to the call.
      * @param string $datatoget The name of the array of the data to get.
      * @return array The retrieved data.
-     * @see _make_call()
+     * @see make_call()
      * @link https://zoom.github.io/api/#list-users
      */
-    protected function _make_paginated_call($url, $data = [], $datatoget = null) {
+    protected function make_paginated_call($url, $data = [], $datatoget = null) {
         $aggregatedata = [];
         $data['page_size'] = HTZOOM_MAX_RECORDS_PER_CALL;
         $reportcheck = explode('/', $url);
@@ -246,7 +246,7 @@ class webservice {
         for ($currentpage = $numpages = 1; $currentpage <= $numpages; $currentpage++) {
             $data['page_number'] = $currentpage;
 
-            $callresult = $this->_make_call($url, $data);
+            $callresult = $this->make_call($url, $data);
 
             if ($callresult) {
                 $aggregatedata = array_merge($aggregatedata, $callresult->$datatoget);
@@ -266,7 +266,7 @@ class webservice {
      */
     public function list_users() {
         if (empty(self::$userslist)) {
-            self::$userslist = $this->_make_paginated_call('users', null, 'users');
+            self::$userslist = $this->make_paginated_call('users', null, 'users');
         }
         return self::$userslist;
     }
@@ -278,8 +278,8 @@ class webservice {
      * @return stdClass The call's result in JSON format.
      * @link https://zoom.github.io/api/#retrieve-a-users-settings
      */
-    public function _get_user_settings($userid) {
-        return $this->_make_call('users/' . $userid . '/settings');
+    public function get_user_settings($userid) {
+        return $this->make_call('users/' . $userid . '/settings');
     }
 
     /**
@@ -295,7 +295,7 @@ class webservice {
         $url = 'users/' . $identifier;
 
         try {
-            $founduser = $this->_make_call($url);
+            $founduser = $this->make_call($url);
         } catch (\moodle_exception $error) {
             if (htzoom_is_user_not_found_error($error->getMessage())) {
                 return false;
@@ -318,7 +318,7 @@ class webservice {
         $url = 'roles/';
 
         try {
-            $foundroles = $this->_make_call($url);
+            $foundroles = $this->make_call($url);
         } catch (\moodle_exception $error) {
             if (htzoom_is_roles_not_found_error($error->getMessage())) {
                 return false;
@@ -340,7 +340,7 @@ class webservice {
         $url = 'users/';
 
         try {
-            $foundusers = $this->_make_call($url);
+            $foundusers = $this->make_call($url);
         } catch (\moodle_exception $error) {
             if (htzoom_is_users_not_found_error($error->getMessage())) {
                 return false;
@@ -361,7 +361,7 @@ class webservice {
      * @param object $ht The zoom meeting to format.
      * @return array The formatted meetings for the meeting.
      */
-    protected function _database_to_api($zoom, $ht) {
+    protected function database_to_api($zoom, $ht) {
         global $CFG;
 
         $data = [
@@ -427,7 +427,7 @@ class webservice {
     public function create_meeting($zoom, $ht) {
         $zoom->undatedsession = $ht->sessionscheduling ? 0 : 1;
         $url = 'users/'.$this->emaillicense.'/meetings';
-        $response = $this->_make_call($url, $this->_database_to_api($zoom, $ht), 'post');
+        $response = $this->make_call($url, $this->database_to_api($zoom, $ht), 'post');
         return $response;
     }
 
@@ -441,7 +441,7 @@ class webservice {
     public function update_meeting($zoom, $ht) {
         $zoom->undatedsession = $ht->sessionscheduling ? 0 : 1;
         $url = 'meetings/' . $zoom->meetingid;
-        $this->_make_call($url, $this->_database_to_api($zoom, $ht), 'patch');
+        $this->make_call($url, $this->database_to_api($zoom, $ht), 'patch');
     }
 
     /**
@@ -454,7 +454,7 @@ class webservice {
     public function deletemeeting($id, $webinar) {
         $url = ($webinar ? 'webinars/' : 'meetings/') . $id;
         try {
-            $this->_make_call($url, null, 'delete');
+            $this->make_call($url, null, 'delete');
         } catch (\Exception $e) {
             // No action for delete.
             return null;
@@ -473,7 +473,7 @@ class webservice {
         $url = ($webinar ? 'webinars/' : 'meetings/') . $id;
         $response = null;
         try {
-            $response = $this->_make_call($url);
+            $response = $this->make_call($url);
         } catch (\moodle_exception $error) {
             throw $error;
         }
@@ -492,7 +492,7 @@ class webservice {
 
         $response = null;
         try {
-            $response = $this->_make_call($url);
+            $response = $this->make_call($url);
         } catch (\moodle_exception $error) {
             throw $error;
         }
@@ -510,7 +510,7 @@ class webservice {
         $url = 'meetings/' . $id . '/recordings/settings';
         $response = null;
         try {
-            $response = $this->_make_call($url);
+            $response = $this->make_call($url);
         } catch (\moodle_exception $error) {
             throw $error;
         }
@@ -529,7 +529,7 @@ class webservice {
         $url = '/past_meetings/'.$id.'/instances';
         $response = null;
         try {
-            $response = $this->_make_call($url);
+            $response = $this->make_call($url);
         } catch (\moodle_exception $error) {
             throw $error;
         }
@@ -552,7 +552,7 @@ class webservice {
             'to' => $to,
             'page_size' => HTZOOM_MAX_RECORDS_PER_CALL,
         ];
-        return $this->_make_paginated_call($url, $data, 'meetings');
+        return $this->make_paginated_call($url, $data, 'meetings');
     }
 
     /**
@@ -566,7 +566,7 @@ class webservice {
      */
     public function list_meetings($userid, $webinar) {
         $url = 'users/' . $userid . ($webinar ? '/webinars' : '/meetings');
-        $configs = $this->_make_paginated_call($url, null, ($webinar ? 'webinars' : 'meetings'));
+        $configs = $this->make_paginated_call($url, null, ($webinar ? 'webinars' : 'meetings'));
         return $configs;
     }
 
@@ -579,7 +579,7 @@ class webservice {
      */
     public function list_webinar_attendees($uuid) {
         $url = 'webinars/' . $uuid . '/registrants';
-        return $this->_make_paginated_call($url, null, 'registrants');
+        return $this->make_paginated_call($url, null, 'registrants');
     }
 
     /**
@@ -590,7 +590,7 @@ class webservice {
      * @link https://zoom.github.io/api/#retrieve-a-webinar
      */
     public function get_metrics_webinar_detail($uuid) {
-        return $this->_make_call('webinars/' . $uuid);
+        return $this->make_call('webinars/' . $uuid);
     }
 
     /**
@@ -600,7 +600,7 @@ class webservice {
      * @return stdClass The meeting report.
      */
     public function get_meeting_participants($meetinguuid, $webinar) {
-        return $this->_make_paginated_call('report/' . ($webinar ? 'webinars' : 'meetings') . '/'
+        return $this->make_paginated_call('report/' . ($webinar ? 'webinars' : 'meetings') . '/'
                                            . $meetinguuid . '/participants', null, 'participants');
     }
 
@@ -610,7 +610,7 @@ class webservice {
      * @param string|int $identifier The webinar ID or webinar UUID. If given webinar ID, Zoom will take the last webinar config.
      */
     public function get_webinar_details_report($identifier) {
-        return $this->_make_call('report/webinars/' . $identifier);
+        return $this->make_call('report/webinars/' . $identifier);
     }
 
     /**
@@ -621,7 +621,7 @@ class webservice {
      * @return array An array of UUIDs.
      */
     public function get_active_hosts_uuids($from, $to) {
-        $users = $this->_make_paginated_call('report/users', ['type' => 'active', 'from' => $from, 'to' => $to], 'users');
+        $users = $this->make_paginated_call('report/users', ['type' => 'active', 'from' => $from, 'to' => $to], 'users');
         $uuids = [];
         foreach ($users as $user) {
             $uuids[] = $user->id;
@@ -657,7 +657,7 @@ class webservice {
 
         if ($zoom->host_id != false) {
             $url = "users/$zoom->host_id/" . (isset($zoom->webinar) && $zoom->webinar ? 'webinars' : 'meetings');
-            return $this->_make_call($url, $this->_database_to_api($zoom, $ht), 'post');
+            return $this->make_call($url, $this->database_to_api($zoom, $ht), 'post');
         }
     }
 
@@ -668,7 +668,7 @@ class webservice {
      * @link https://zoom.github.io/api/groups
      */
     public function get_groups() {
-        $grupos = $this->_make_call('groups');
+        $grupos = $this->make_call('groups');
         return $grupos;
     }
 
@@ -681,7 +681,7 @@ class webservice {
      */
     public function get_group_members() {
         $idgroup = get_config('isyczoomav', 'idgroup');
-        $groupmembers = $this->_make_paginated_call('groups/'.$idgroup."/members", null, 'members');
+        $groupmembers = $this->make_paginated_call('groups/'.$idgroup."/members", null, 'members');
         return $groupmembers;
     }
 

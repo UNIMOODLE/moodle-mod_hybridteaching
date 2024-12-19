@@ -47,7 +47,7 @@ $context = context_module::instance($cm->id);
 if ($slist > PROGRAM_SESSION_LIST) {
     $slist = SESSION_LIST;
     redirect(new \moodle_url('/mod/hybridteaching/sessions.php',
-        ['id' => $id, 'l' => $slist,]));
+        ['id' => $id, 'l' => $slist]));
 }
 
 if ($slist == SESSION_LIST) {

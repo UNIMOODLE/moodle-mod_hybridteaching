@@ -183,7 +183,7 @@ class downloadrecords extends \core\task\scheduled_task {
                 if ((!file_exists($folderfilerecording)) || (file_exists($folderfilerecording) &&
                     ($file->file_size != $filesize))) {
                     try {
-                        $responsefile = $service->_make_call_download($file->download_url);
+                        $responsefile = $service->make_call_download($file->download_url);
                     } catch (\Exception $e) {
                         mtrace($e->getMessage());
                     }
@@ -204,7 +204,7 @@ class downloadrecords extends \core\task\scheduled_task {
                 }
             }
             if (strtolower($file->file_type) == "chat") {
-                $responsechat = $service->_make_call_download($file->download_url);
+                $responsechat = $service->make_call_download($file->download_url);
                 $suffix = '-chat.txt';
                 $folderfilechat = $folderfile.$suffix;
                 $filechat = fopen($folderfilechat, "w+");

@@ -81,18 +81,16 @@ class sessions {
 
         $pumukitconf = $this->load_config($config->id);
         $code = $DB->get_field('hybridteachstore_pumukit', 'code', ['sessionid' => $htsession]);
-        
+
         if (isset($pumukitconf) && isset($code)) {
             // Only delete video from pumukit if there are not same video with another session, for example, restored from backup.
-            $sql = "SELECT * 
+            $sql = "SELECT *
                 FROM {hybridteachstore_pumukit} pk
                 WHERE pumukit LIKE :code";
             $othersession = $DB->get_records_sql($sql, ['code' => $code]);
-
-            if (count($othersession) > 1) {
-                 // No delete if there are other restores.
-            } else {
-                // Delete video in pumukit
+            if (count($othersession) <= 1) {
+                // Delete video in pumukit.
+                // No delete if there are other restores.
                 $rows = $DB->get_records('hybridteachstore_pumukit', ['sessionid' => $htsession]);
                 $pumukitclient = new pumukit_handler($pumukitconf);
                 foreach ($rows as $row) {

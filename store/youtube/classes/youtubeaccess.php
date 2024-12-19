@@ -30,6 +30,7 @@
  * @author     ISYC <soporte@isyc.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+
 namespace hybridteachstore_youtube;
 require_once('../../../../../config.php');
 
@@ -111,6 +112,17 @@ END;
     <title>Youtube</title>
 </head>
 <body>
-<?php echo $htmlbody?>
+<?php
+/**
+ * Display information about all the mod_hybridteaching modules in the requested course.
+ * @package    hybridteachstore_youtube
+ * @copyright  2023 Proyecto UNIMOODLE
+ * @author     UNIMOODLE Group (Coordinator) <direccion.area.estrategia.digital@uva.es>
+ * @author     ISYC <soporte@isyc.com>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
+ echo $htmlbody;
+?>
 </body>
 </html>

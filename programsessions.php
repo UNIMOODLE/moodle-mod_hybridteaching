@@ -51,7 +51,7 @@ require_capability('mod/hybridteaching:programschedule', $context);
 if ($slist > PROGRAM_SESSION_LIST) {
     $slist = PROGRAM_SESSION_LIST;
     redirect(new \moodle_url('/mod/hybridteaching/programsessions.php',
-        ['id' => $id, 'l' => $slist,]));
+        ['id' => $id, 'l' => $slist]));
 }
 
 $url = new moodle_url('/mod/hybridteaching/programsessions.php', ['id' => $id]);

@@ -72,7 +72,7 @@ echo $OUTPUT->header();
 echo $OUTPUT->heading(get_string('attendance', 'hybridteaching'));
 
 if (has_capability('mod/hybridteaching:sessionsfulltable', $context, $user, $doanything = true)) {
-    if (!empty(optional_param('view', '', PARAM_TEXT))) {
+    if (!empty($view)) {
         if ($view == 'extendedstudentatt') {
             echo "<a href='attendance.php?id=".$id."&view=sessionattendance' class='btn btn-info' role='button'>" .
             get_string('sessionsattendance', 'hybridteaching') . "</a>";
@@ -95,7 +95,6 @@ if (has_capability('mod/hybridteaching:sessionsfulltable', $context, $user, $doa
 }
 $attsessionrecords = \mod_hybridteaching\controller\sessions_controller::get_sessions_in_progress($cm->instance);
 if (count($attsessionrecords) > 0) {
-    $view = optional_param('view', '', PARAM_TEXT);
     if (empty($view) || $view == 'sessionattendance' || $view == 'extendedsessionatt') {
         notify_controller::notify_message(get_string('info:sessioninprogress', 'hybridteaching'));
         notify_controller::show();

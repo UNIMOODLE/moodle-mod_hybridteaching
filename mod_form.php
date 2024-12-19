@@ -392,7 +392,7 @@ class mod_hybridteaching_mod_form extends moodleform_mod {
             'hybridteaching_participant_selection',
             $participantselection['options'],
             $participantselection['selected']);
-            
+
         $action = new single_button(new moodle_url(qualified_me()),
             get_string('mod_form_field_participant_list_action_add', 'hybridteaching'),
             'post',

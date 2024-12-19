@@ -148,12 +148,13 @@ if (!$activesession) {
         switch (true) {
             // Undatted session.
             case !$hybridteaching->sessionscheduling:
-                $isundatedsession = $hybridteaching->starttime == 0 ? true : false;          
+                $isundatedsession = $hybridteaching->starttime == 0 ? true : false;
                 $isfinished = $activesession->isfinished;
                 if ($isfinished) {
                     if (has_capability('mod/hybridteaching:sessionsactions', $modulecontext)) {
                         $status = get_string('status_undated', 'hybridteaching');
-                        // Is undattedsession if not scheduling, and is finished the last session. To enable the creation of another session.
+                        // Is undattedsession if not scheduling, and is finished the last session.
+                        // To enable the creation of another session.
                         $isundatedsession = true;
                     } else {
                         $status = get_string('status_undated_wait', 'hybridteaching');

@@ -218,9 +218,9 @@ class sessions_table {
                     $sessatt = $att;
                 }
                 // Add a shortcut to attendance details.
-                // .../mod/hybridteaching/attendance.php?id=607&view=extendedsessionatt&sessionid=33
+                // .../mod/hybridteaching/attendance.php?id=607&view=extendedsessionatt&sessionid=33.
                 $sessatt['sessatt_string'] = html_writer::link(
-                    new \moodle_url('/mod/hybridteaching/attendance.php', 
+                    new \moodle_url('/mod/hybridteaching/attendance.php',
                         ['id' => $id, 'view' => 'extendedsessionatt', 'sessionid' => $sessionid]),
                     $sessatt['sessatt_string']
                 );

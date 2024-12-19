@@ -89,14 +89,14 @@ class sessions {
 
     /**
      * Checks if a meeting is being created to prevent multiple users to create the same meeting.
-     * 
+     *
      * @param object $session session data.
      */
-    public function checkmeetingiscreating ($session) {
+    public function checkmeetingiscreating($session) {
         global $DB;
-        
+
         // Check if the vc is already created, so as not to create it again.
-        $teamscreated = $DB->get_record('hybridteachvc_teams', ['htsession' => $session->id]);      
+        $teamscreated = $DB->get_record('hybridteachvc_teams', ['htsession' => $session->id]);
         // If exists record completed.
 
         if (!empty($teamscreated)) {
@@ -108,7 +108,7 @@ class sessions {
             $teamsnew->meetingcode = null;
             $teamsnew->organizer = null;
             $teamsnew->joinurl = null;
-            $teamsnew->id = $DB->insert_record('hybridteachvc_teams', $teamsnew);           
+            $teamsnew->id = $DB->insert_record('hybridteachvc_teams', $teamsnew);
             $this->teamssession = $teamsnew;
             return false;
         }
@@ -139,8 +139,8 @@ class sessions {
         $teams = new teams_handler($teamsconfig);
         if (!get_config('hybridteaching', 'reusesession') && $ht->reusesession == 0) {
             if ($this->checkmeetingiscreating($session)) {
-                // The meeting is being created
-                $url = new moodle_url('/mod/hybridteaching/view.php?id='.$cm->id);          
+                // The meeting is being created.
+                $url = new moodle_url('/mod/hybridteaching/view.php?id='.$cm->id);
                 $message = get_string('meetingcreating', 'hybridteachvc_teams');
                 \mod_hybridteaching\controller\notify_controller::notify_problem($message);
                 redirect($url);
@@ -165,11 +165,11 @@ class sessions {
                 $response['participants']['organizer']['identity']['user']['id'] = $lastteams->organizer;
                 $response['joinUrl'] = $lastteams->joinurl;
             } else {
-                // Check that the meeting is not being created by other user
+                // Check that the meeting is not being created by other user.
                 if ($this->checkmeetingiscreating($session)) {
-    
-                    // Is created already so prevent the meeting from being created
-                    $url = new moodle_url('/mod/hybridteaching/view.php', ['id' => $cm->id]);                
+
+                    // Is created already so prevent the meeting from being created.
+                    $url = new moodle_url('/mod/hybridteaching/view.php', ['id' => $cm->id]);
                     $message = get_string('meetingcreating', 'hybridteachvc_teams');
                     \mod_hybridteaching\controller\notify_controller::notify_problem($message);
                     redirect($url);
