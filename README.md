@@ -65,7 +65,7 @@ to complete the installation from the command line.
 
 HybridTeaching was designed by [UNIMOODLE Universities Group](https://unimoodle.github.io/) 
 
-<img src="https://unimoodle.github.io/assets/images/allunimoodle-2383x376.png" height="120px" />
+<img src="https://unimoodle.github.io/assets/images/unis-todas-3034x508.png" height="120px" />
 
 HybridTeaching was implemented by Moodle's Partner [ISYC](https://isyc.com/)
 
