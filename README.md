@@ -10,7 +10,7 @@ Developed by the [UNIMOODLE consortium](https://unimoodle.gihub.io) of 16 Spanis
 
 [<img src="https://unimoodle.github.io/assets/images/unimoodle-primarylogo-rgb-1200x353.png" height="70px"/>](https://unimoodle.github.io)
 
-[Project's web page](https://unimoodle.github.io/moodle-local_hybridteaching/)
+[Project's web page](https://unimoodle.github.io/moodle-mod_hybridteaching/)
 
 ## Features
 1. **Session Management**:
