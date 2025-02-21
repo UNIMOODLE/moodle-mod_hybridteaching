@@ -33,8 +33,7 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->component = 'mod_hybridteaching';
-$plugin->release = '0.1.0';
-$plugin->version = 2023031700.53;
+$plugin->release = '0.1.1';
+$plugin->version = 2024101500;
 $plugin->requires = 2022041900;
-$plugin->maturity = MATURITY_ALPHA;
+$plugin->maturity = MATURITY_BETA;
