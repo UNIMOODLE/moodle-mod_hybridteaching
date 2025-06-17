@@ -59,3 +59,5 @@ $string['alreadydownloaded'] = 'Recording already downloaded from courseid \'{$a
 $string['zoom:view'] = 'Access Zoom';
 $string['zoom:use'] = 'Generate Zoom meetings';
 $string['zoom:record'] = 'Store Zoom recordings';
+
+$string['cachedef_oauth'] = 'Oauth cache';

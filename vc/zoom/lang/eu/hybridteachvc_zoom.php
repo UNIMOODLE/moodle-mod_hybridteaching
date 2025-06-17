@@ -59,3 +59,4 @@ $string['alreadydownloaded'] = 'Aurretik deskargatutako ikastaroaren IDaren grab
 $string['zoom:view'] = 'Ikusi Zooma';
 $string['zoom:use'] = 'Sortu Zoom bideokonferentziak';
 $string['zoom:record'] = 'Gorde Zoom grabazioak';
+$string['cachedef_oauth'] = 'Oauth cachea';

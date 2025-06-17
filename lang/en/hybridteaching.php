@@ -558,3 +558,4 @@ $string['updatefinished'] = 'Finish sessions that have finished by time';
 
 $string['error:importnosessionschedule'] = 'Session scheduling is disabled. Change it to import.';
 $string['info:sessioninprogress'] = 'Some sessions are currently in progress. Any actions are limited.';
+$string['cachedef_sessatt'] = 'Session attendance data';

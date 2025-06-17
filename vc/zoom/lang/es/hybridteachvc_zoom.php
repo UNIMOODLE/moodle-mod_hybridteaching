@@ -59,3 +59,5 @@ $string['alreadydownloaded'] = 'Grabación ya descargada previamente del id de c
 $string['zoom:view'] = 'Ver Zoom';
 $string['zoom:use'] = 'Generar videconferencias Zoom';
 $string['zoom:record'] = 'Almacenar grabaciones Zoom';
+
+$string['cachedef_oauth'] = 'Oauth cache';

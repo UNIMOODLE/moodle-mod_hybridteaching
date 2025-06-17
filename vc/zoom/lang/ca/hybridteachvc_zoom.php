@@ -59,3 +59,4 @@ $string['alreadydownloaded'] = 'Heu descarregat prèviament l\'identificador del
 $string['zoom:view'] = 'Veure Zoom';
 $string['zoom:use'] = 'Generar videoconferències Zoom';
 $string['zoom:record'] = 'Almacenar gravacions Zoom';
+$string['cachedef_oauth'] = 'Oauth cache';

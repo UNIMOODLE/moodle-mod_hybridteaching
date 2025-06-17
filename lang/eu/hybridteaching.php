@@ -516,3 +516,4 @@ $string['bulkhidideattsuccess'] = 'Laguntzak ongi ezkutatu dira';
 $string['hideatt'] = 'Saio honetarako asistentzia ezkutatu';
 $string['visibleatt'] = 'Erakutsi saio honetarako asistentzia';
 $string['updatefinished'] = 'Denbora dela eta amaitu diren saioak amaitu';
+$string['cachedef_sessatt'] = 'Saioaren asistentzia datuak';

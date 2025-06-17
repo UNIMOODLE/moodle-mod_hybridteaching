@@ -552,3 +552,4 @@ $string['bulkhideattsuccess'] = 'Asistencias ocultadas con éxito';
 $string['hideatt'] = 'Ocultar asistencia a esta sesión';
 $string['visibleatt'] = 'Mostrar asistencia a esta sesión';
 $string['updatefinished'] = 'Finaliza sesiones que hayan finalizado por tiempo';
+$string['cachedef_sessatt'] = 'Datos de asistencia de la sesión';
