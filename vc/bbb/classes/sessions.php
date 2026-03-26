@@ -274,7 +274,8 @@ class sessions {
 
             $url = $bbbproxy->get_join_url(
                 $this->bbbsession->meetingid,
-                $USER->username,
+                //$USER->username, // changed ecastro ULPGC
+                fullname($USER),
                 $role,
                 null, // A token.
                 $USER->id,
@@ -359,7 +360,8 @@ class sessions {
 
         $bbbsess = $DB->get_record('hybridteachvc_bbb', ['htsession' => $session->id]);
         $role = self::get_user_meeting_role($bbbsess);
-        $joinurl = $bbbproxy->get_join_url($bbbsess->meetingid, $USER->username, $role);
+        //$joinurl = $bbbproxy->get_join_url($bbbsess->meetingid, $USER->username, $role); // ecastro ULPGC
+        $joinurl = $bbbproxy->get_join_url($bbbsess->meetingid, fullname($USER), $role);
 
         return $joinurl;
     }
