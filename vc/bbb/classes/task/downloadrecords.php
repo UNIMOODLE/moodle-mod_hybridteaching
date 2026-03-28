@@ -62,7 +62,8 @@ class downloadrecords extends \core\task\scheduled_task {
 
         $sessionconfig = new sessions();
 
-        $sql = "SELECT hs.id AS hsid, ht.id AS htid, ht.course, ht.config, hs.name, bbb.meetingid
+        // ecastro ULPGC, added bbb.createtime, hs.duration
+        $sql = "SELECT hs.id AS hsid, ht.id AS htid, ht.course, ht.config, hs.name, bbb.meetingid, bbb.createtime, hs.duration
                   FROM {hybridteaching_session} hs
             INNER JOIN {hybridteachvc_bbb} bbb ON bbb.htsession = hs.id
             INNER JOIN {hybridteaching} ht ON ht.id = hs.hybridteachingid
@@ -103,9 +104,13 @@ class downloadrecords extends \core\task\scheduled_task {
                             ['name' => $session->name, 'sessionid' => $session->hsid, 'course' => $session->course]));
                     } else {
                         // If there are not recordingid, then the recording is not found or there are no recording.
-                        $sessionresult->processedrecording = -2;
-                        $sessionresult->storagereference = -1;
-                        $DB->update_record('hybridteaching_session', $sessionresult);
+                        // ecastro ULPGC set a timelimit to find recordings, set not existing after limit
+                        $delay = $session->createtime + max($session->duration, 3600) * 3;
+                        if(time() > $delay) {
+                            $sessionresult->processedrecording = -2;
+                            $sessionresult->storagereference = -1;
+                            $DB->update_record('hybridteaching_session', $sessionresult);
+                        }
                         mtrace(get_string('recordingnotfound', 'hybridteachvc_bbb',
                             ['course' => $session->course, 'name' => $session->name]));
                     }
