@@ -222,7 +222,7 @@ class teams_handler {
                         'address' => $email,
                         'name' => $userteams['displayName'],
                     ],
-                    'type' => 'required',
+                    'type' => 'optional',   //ecastro ULPGC not required
                 ];
                 $participantscalendar[] = $usercalendar;
 
@@ -266,7 +266,7 @@ class teams_handler {
                         'address' => $email,
                         'name' => $userteams['displayName'],
                     ],
-                    'type' => 'required',
+                    'type' => 'optional',  //ecastro ULPGC not required
                 ];
                 $moderatorscalendar[] = $usercalendar;
             }
