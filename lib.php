@@ -132,9 +132,9 @@ function hybridteaching_add_instance($moduleinstance, $mform = null) {
         if ($moduleinstance->starttime == 0) {
             $moduleinstance->starttime = time();
         }
-        $sessioncontroller = new sessions_controller($moduleinstance);
-        $moduleinstance->groupid = 0;
-        $session = (object) $sessioncontroller->create_session($moduleinstance);
+        //$sessioncontroller = new sessions_controller($moduleinstance);
+        //$moduleinstance->groupid = 0;
+        //$session = (object) $sessioncontroller->create_session($moduleinstance);
     }
 
     hybridteaching_grade_item_update($moduleinstance);

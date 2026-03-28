@@ -195,9 +195,9 @@ if (!empty($sid)) {
         $sessioncontroller = new sessions_controller($hybridteaching);
         $session = new stdClass();
         $session->name = get_string('recurringses', 'hybridteaching') . ' ' . $hybridteaching->name;
-        $session->groupid = 0;
+        $session->groupid = optional_param('group', 0, PARAM_INT);  // ecastro ULPGC
         $session->starttime = time();
-        $session->durationgroup['duration'] = 0;
+        $session->durationgroup['duration'] = $hybridteaching->duration; // ecastro ULPGC
         $session->durationgroup['timetype'] = 0;
         $session->typevc = $hybridteaching->typevc;
         $session->vcreference = $hybridteaching->config;

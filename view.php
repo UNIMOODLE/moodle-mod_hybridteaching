@@ -44,6 +44,7 @@ use mod_hybridteaching\helper;
 $id = optional_param('id', 0, PARAM_INT);
 $h = optional_param('h', 0, PARAM_INT);
 $err = optional_param('err', 0, PARAM_INT);
+$groupid = optional_param('group', 0, PARAM_INT); // ecastro ULPGC
 
 if ($id) {
     list ($course, $cm) = get_course_and_cm_from_cmid($id, 'hybridteaching');
@@ -70,6 +71,11 @@ $completion->set_module_viewed($cm);
 $urlparams = ['id' => $cm->id, 'h' => $hybridteaching->id];
 $url = new moodle_url('/mod/hybridteaching/view.php', $urlparams);
 
+// ecastro ULPGC
+/// Check to see if groups are being used in this choice
+$groupmode = groups_get_activity_groupmode($cm);
+// ecastro ULPGC
+
 $PAGE->set_url($url);
 $PAGE->set_title(format_string($hybridteaching->name));
 $PAGE->set_heading(format_string($course->fullname));
@@ -92,6 +98,13 @@ $hasvc = !empty($hybridteaching->typevc) ? true : false;
 if (!$activesession) {
     $activesession = $session->get_last_session($cm);
 }
+
+if ($groupmode) { // If group mode is enabled, display the groups selector.
+    groups_get_activity_group($cm, true);
+    $groupsactivitymenu = groups_print_activity_menu($cm, $url, true);
+    echo html_writer::div($groupsactivitymenu, 'mt-3 mb-1');
+}
+
 if (has_capability('mod/hybridteaching:sessionsactions', $modulecontext)) {
     $session->finish_unfinished_sessions($hybridteaching->id);
 }
@@ -310,6 +323,10 @@ if (!$activesession) {
 // Calculate number of sessions performed.
 $sessionperformed = sessions_controller::get_sessions_performed($hybridteaching->id);
 $result['sessperformed'] = $sessionperformed > 0 ? $sessionperformed : '';
+//ecastro
+if($groupid) {
+    $result['groupid'] = $groupid; 
+}
 
 if ($err == 1) {
     // Code 1: error_unable_join: The meeting does not exist in the vc system, has been deleted, or has not been found.

@@ -110,6 +110,9 @@
 							<input type="hidden" name="id" value="{{id}}">
 							<input type="hidden" name="s" value="{{s}}">
 							<input type="hidden" name="url" value="{{url}}">
+							{{#groupid}}
+							<input type="hidden" name="group" value="{{groupid}}">
+							{{/groupid}}
 							<button type="submit" class="btn btn-success">{{#str}} createsession, mod_hybridteaching {{/str}}</button>
 						</form>
 					{{/isfinished}}

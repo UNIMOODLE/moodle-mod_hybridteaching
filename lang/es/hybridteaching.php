@@ -163,7 +163,7 @@ $string['start'] = 'Inicio';
 $string['sessionfor'] = 'Sesión para el grupo';
 $string['sessiondate'] = 'Fecha de la sesión';
 $string['addsession'] = 'Añadir sesión';
-$string['allgroups'] = 'Todos los grupos';
+$string['allgroups'] = 'Todos los participantes';
 $string['sessiontypehelp'] = 'Puedes añadir sesiones para todos los alumnos o para un grupo de alumnos.
 La posibilidad de añadir diferentes tipos depende del modo de grupo de la actividad.
   * En el modo de grupo "Sin grupos" sólo puede añadir sesiones para todos los estudiantes.
@@ -317,7 +317,7 @@ $string['incorrect_password'] = 'Contraseña incorrecta introducida.';
 $string['attendance_registered'] = 'Asistencia registrada correctamente';
 $string['qr_expired'] = 'El codigo QR ha expirado, asegurese de leer el codigo correcto';
 $string['grade'] = 'Calificaciones';
-$string['commonattendance'] = 'Todos los grupos';
+$string['commonattendance'] = 'Todos los participantes';
 $string['videoconference'] = 'Vconf';
 $string['classroom'] = 'Aula';
 
